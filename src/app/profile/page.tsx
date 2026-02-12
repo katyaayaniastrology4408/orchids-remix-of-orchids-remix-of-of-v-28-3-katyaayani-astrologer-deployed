@@ -1,0 +1,593 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  User, Phone, Calendar, Shield, LogOut, Loader2, UserCircle, 
+  Sparkles, MapPin, Globe, Clock, CalendarDays, CheckCircle2, 
+  XCircle, Edit3, Mail, Lock, ShieldCheck, Zap, CreditCard, AlertCircle
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useTranslation } from "@/components/GoogleTranslateWidget";
+import { supabase } from "@/lib/supabase";
+import Navbar from "@/components/homepage/Navbar";
+import Footer from "@/components/homepage/Footer";
+import { toast } from "sonner";
+import Script from "next/script";
+
+export default function ProfilePage() {
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [userBookings, setUserBookings] = useState<any[]>([]);
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [expandedPaymentId, setExpandedPaymentId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    dob: "",
+    tob: "",
+    pob: "",
+    phone: "",
+    gender: ""
+  });
+  const router = useRouter();
+  const { theme } = useTheme();
+  const { t, language } = useTranslation();
+
+  const fetchUserBookings = async (email: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("email", email)
+        .order("created_at", { ascending: false });
+      
+      if (!error) setUserBookings(data || []);
+    } catch (err) {
+      console.error("Error fetching bookings:", err);
+    }
+  };
+
+  const fetchUserAlerts = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch("/api/user-alerts", {
+        headers: { 
+          "Authorization": `Bearer ${session?.access_token}`
+        }
+      });
+      const result = await response.json();
+      if (result.success) {
+        setAlerts(result.data || []);
+      }
+    } catch (err) {
+      console.error("Error fetching alerts:", err);
+    }
+  };
+
+  const handleMarkAlertAsRead = async (alertId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch("/api/user-alerts", {
+        method: "PATCH",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token}`
+        },
+        body: JSON.stringify({ alertId }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        setAlerts(alerts.map(a => a.id === alertId ? { ...a, is_read: true } : a));
+      }
+    } catch (err) {
+      console.error("Error marking alert as read:", err);
+    }
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await fetch("/api/profile/update", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token}`
+        },
+        body: JSON.stringify(editForm),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.error || "Failed to update profile");
+      
+      setProfile({ ...profile, ...editForm });
+      setIsEditing(false);
+      toast.success(t("Profile updated successfully!"));
+    } catch (err: any) {
+      console.error("Update error:", err);
+      toast.error(err.message || t("Failed to update profile"));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getZodiacSign = (dob: string) => {
+    if (!dob) return null;
+    const date = new Date(dob);
+    if (isNaN(date.getTime())) return null;
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+
+    if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return "aries";
+    if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return "taurus";
+    if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return "gemini";
+    if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return "cancer";
+    if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return "leo";
+    if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return "virgo";
+    if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return "libra";
+    if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return "scorpio";
+    if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return "sagittarius";
+    if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return "capricorn";
+    if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return "aquarius";
+    if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return "pisces";
+    return null;
+  };
+
+  useEffect(() => {
+    async function getProfile() {
+      try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
+          router.push("/signin");
+          return;
+        }
+        setUser(user);
+        if (user.email) {
+          fetchUserBookings(user.email);
+          fetchUserAlerts();
+        }
+
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (profileError) {
+          console.error("Error fetching profile:", profileError);
+        }
+
+        if (profileData) {
+          setProfile(profileData);
+          setEditForm({
+            name: profileData.name || user.user_metadata?.full_name || "",
+            dob: profileData.dob || user.user_metadata?.dob || "",
+            tob: profileData.tob || user.user_metadata?.tob || "",
+            pob: profileData.pob || user.user_metadata?.pob || "",
+            phone: profileData.phone || user.user_metadata?.phone_number || "",
+            gender: profileData.gender || user.user_metadata?.gender || ""
+          });
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    getProfile();
+  }, [router]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  };
+
+  if (isLoading) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-[#0a0a0f]' : 'bg-background'}`}>
+        <div className="text-center space-y-4">
+          <Loader2 className="w-12 h-12 animate-spin text-[#ff6b35] mx-auto" />
+          <p className="font-[family-name:var(--font-cinzel)] text-[#ff6b35] animate-pulse">{t("Connecting to the Stars")}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const profileName = profile?.name || user?.user_metadata?.full_name || user?.user_metadata?.name || "Seeker";
+  const profilePhone = profile?.phone || user?.user_metadata?.phone_number || "Not linked";
+  const profileGender = profile?.gender || user?.user_metadata?.gender || "Not specified";
+  
+    const defaultBoyPic = "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/08a15695-f57b-4aed-b5f6-2cbce14746cf/image-1770399458068.png?width=8000&height=8000&resize=contain";
+  const defaultGirlPic = "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Screenshot-2025-12-25-000158-1766601772966.png?width=8000&height=8000&resize=contain";
+  const defaultCoverPic = "https://images.unsplash.com/photo-1436891620584-47fd0e565afb?q=80&w=2000";
+  
+  const profilePic = profile?.profile_pic || user?.user_metadata?.profile_pic || user?.user_metadata?.avatar_url || user?.user_metadata?.picture || 
+    (profileGender?.toLowerCase() === 'female' ? defaultGirlPic : defaultBoyPic);
+
+  const birthDate = profile?.dob || user?.user_metadata?.dob || "Not specified";
+  const birthTime = profile?.tob || user?.user_metadata?.tob || "Not specified";
+  const zodiacSign = getZodiacSign(birthDate);
+
+  return (
+    <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-[#0a0a0f] text-[#f5f0e8]' : 'bg-[#fdfbf7] text-[#4a3f35]'}`}>
+        <Script src="https://cdn.uropay.me/uropay-embed.min.js" strategy="lazyOnload" />
+        <Navbar />
+      
+        <main className="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-12 md:py-20">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative mb-32 sm:mb-24"
+          >
+            <div className="h-36 sm:h-48 md:h-72 rounded-2xl sm:rounded-[3rem] overflow-hidden relative shadow-2xl">
+              <img src={defaultCoverPic} alt="Cover" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            </div>
+
+            <div className="absolute -bottom-24 sm:-bottom-16 left-3 right-3 sm:left-8 sm:right-8 flex flex-col items-center md:flex-row md:items-end gap-4 sm:gap-6">
+              <div className="relative group">
+                <div className={`w-24 h-24 sm:w-32 sm:h-32 md:w-48 md:h-48 rounded-2xl sm:rounded-[2.5rem] border-4 sm:border-[8px] ${theme === 'dark' ? 'border-[#0a0a0f]' : 'border-white'} overflow-hidden shadow-2xl transition-transform duration-500 group-hover:scale-105`}>
+                  <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
+                </div>
+              </div>
+
+              <div className="flex-1 text-center md:text-left mb-2 sm:mb-4 w-full">
+                <div className="flex flex-col items-center md:flex-row md:items-end gap-2 sm:gap-4">
+                  <h1 className="text-2xl sm:text-4xl md:text-6xl font-[family-name:var(--font-cinzel)] font-bold drop-shadow-lg break-words max-w-full">
+                    {profileName}
+                  </h1>
+                  <Badge className="bg-[#ff6b35] text-white px-3 sm:px-4 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest">
+                    {t("Verified Seeker")}
+                  </Badge>
+                </div>
+                <div className="flex flex-col sm:flex-row flex-wrap justify-center md:justify-start gap-2 sm:gap-3 mt-3 sm:mt-4">
+                  <span className="flex items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm font-medium opacity-70 break-all">
+                    <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-[#ff6b35] flex-shrink-0" /> <span className="truncate max-w-[200px] sm:max-w-none">{user?.email}</span>
+                  </span>
+                  <span className="flex items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm font-medium opacity-70">
+                    <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-[#ff6b35] flex-shrink-0" /> {profilePhone}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-2 sm:gap-3 mb-2 sm:mb-4">
+                <Button 
+                  onClick={() => setIsEditing(!isEditing)}
+                  className="bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-xl sm:rounded-2xl h-10 sm:h-12 px-4 sm:px-6 text-sm sm:text-base font-bold shadow-lg shadow-[#ff6b35]/20"
+                >
+                  {isEditing ? t("Cancel") : <><Edit3 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> {t("Edit")}</>}
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={handleSignOut}
+                  className="border-red-500/20 text-red-500 hover:bg-red-500/5 rounded-xl sm:rounded-2xl h-10 sm:h-12 px-4 sm:px-6 font-bold"
+                >
+                  <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 mt-28 sm:mt-24">
+            <div className="space-y-4 sm:space-y-8 order-2 lg:order-1">
+              {alerts.length > 0 && (
+                <Card className={`overflow-hidden rounded-2xl sm:rounded-[2.5rem] border-none shadow-xl ${theme === 'dark' ? 'bg-[#12121a]' : 'bg-white'}`}>
+                  <CardContent className="p-4 sm:p-8">
+                    <h3 className="text-xs sm:text-sm font-black text-[#ff6b35] uppercase mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3 tracking-[0.2em]">
+                      <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" /> {t("Cosmic Alerts")}
+                    </h3>
+                    <div className="space-y-3 sm:space-y-4">
+                      {alerts.map((alert) => (
+                        <div 
+                          key={alert.id} 
+                          className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all ${alert.is_read ? 'opacity-60 grayscale' : 'border-[#ff6b35]/30 bg-[#ff6b35]/5'} ${theme === 'dark' ? 'bg-white/5' : 'bg-[#ff6b35]/5'}`}
+                          onClick={() => !alert.is_read && handleMarkAlertAsRead(alert.id)}
+                        >
+                          <div className="flex justify-between items-start gap-3 sm:gap-4">
+                            <div className="min-w-0 flex-1">
+                              <h4 className="font-bold text-xs sm:text-sm">{alert.title}</h4>
+                              <p className="text-[10px] sm:text-xs mt-1 opacity-80 break-words">{alert.message}</p>
+                              <p className="text-[9px] sm:text-[10px] mt-2 opacity-40">{new Date(alert.created_at).toLocaleString()}</p>
+                            </div>
+                            {!alert.is_read && <Badge className="bg-[#ff6b35] text-white text-[7px] sm:text-[8px] uppercase flex-shrink-0">{t("New")}</Badge>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Card className={`overflow-hidden rounded-2xl sm:rounded-[2.5rem] border-none shadow-xl ${theme === 'dark' ? 'bg-[#12121a]' : 'bg-white'}`}>
+                <CardContent className="p-4 sm:p-8">
+                  <h3 className="text-xs sm:text-sm font-black text-indigo-400 uppercase mb-4 sm:mb-8 flex items-center gap-2 sm:gap-3 tracking-[0.2em]">
+                    <Zap className="w-4 h-4 sm:w-5 sm:h-5" /> {t("Soul Analytics")}
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-[#ff6b35]/5 border border-[#ff6b35]/10 text-center col-span-2">
+                      <p className="text-2xl sm:text-3xl font-black text-[#ff6b35]">{userBookings.length}</p>
+                      <p className="text-[9px] sm:text-[10px] uppercase font-bold opacity-40 mt-1">{t("Total Consultations")}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="lg:col-span-2 space-y-4 sm:space-y-8 order-1 lg:order-2">
+            {isEditing ? (
+              <Card className={`overflow-hidden rounded-2xl sm:rounded-[3rem] border-none shadow-2xl ${theme === 'dark' ? 'bg-[#12121a]' : 'bg-white'}`}>
+                <CardHeader className="p-4 sm:p-10 pb-0">
+                  <CardTitle className="font-[family-name:var(--font-cinzel)] text-xl sm:text-3xl text-[#ff6b35]">{t("Update Identity")}</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">{t("Align your earthly details with the cosmic flow")}</CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 sm:p-10">
+                  <form onSubmit={handleUpdateProfile} className="space-y-4 sm:space-y-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
+                      <div className="space-y-2 sm:space-y-3">
+                        <Label className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-60 ml-2">{t("Full Name")}</Label>
+                        <Input 
+                          className="h-12 sm:h-14 rounded-xl sm:rounded-2xl border-2 focus:border-[#ff6b35] bg-opacity-50"
+                          value={editForm.name}
+                          onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2 sm:space-y-3">
+                        <Label className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-60 ml-2">{t("Gender")}</Label>
+                        <select 
+                          className={`w-full h-12 sm:h-14 rounded-xl sm:rounded-2xl border-2 px-4 text-sm sm:text-base ${theme === 'dark' ? 'bg-[#1a1a2e]' : 'bg-gray-50'} focus:border-[#ff6b35] outline-none`}
+                          value={editForm.gender}
+                          onChange={(e) => setEditForm({...editForm, gender: e.target.value})}
+                        >
+                          <option value="male">{t("male")}</option>
+                          <option value="female">{t("female")}</option>
+                          <option value="other">{t("other")}</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2 sm:space-y-3">
+                        <Label className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-60 ml-2">{t("Phone")}</Label>
+                        <Input 
+                          className="h-12 sm:h-14 rounded-xl sm:rounded-2xl border-2 focus:border-[#ff6b35]"
+                          value={editForm.phone}
+                          onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2 sm:space-y-3">
+                        <Label className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-60 ml-2">{t("Birth Date")}</Label>
+                        <Input 
+                          type="date"
+                          className="h-12 sm:h-14 rounded-xl sm:rounded-2xl border-2 focus:border-[#ff6b35]"
+                          value={editForm.dob}
+                          onChange={(e) => setEditForm({...editForm, dob: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <Button type="submit" className="w-full bg-[#ff6b35] hover:bg-[#ff8c5e] h-12 sm:h-16 rounded-xl sm:rounded-2xl text-white text-sm sm:text-base font-black uppercase tracking-widest shadow-xl shadow-[#ff6b35]/30">
+                      {t("Save Cosmic Identity")}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
+                <Card className={`rounded-2xl sm:rounded-[2.5rem] border shadow-xl ${theme === 'dark' ? 'bg-[#12121a] border-[#ff6b35]/20' : 'bg-white border-[#ff6b35]/10'}`}>
+                  <div className="h-1.5 sm:h-2 bg-gradient-to-r from-[#ff6b35] to-[#ffa07a]" />
+                  <CardHeader className="p-4 sm:p-6">
+                    <CardTitle className="font-[family-name:var(--font-cinzel)] text-lg sm:text-2xl flex items-center gap-2 sm:gap-3 text-[#ff6b35]">
+                      <UserCircle className="w-5 h-5 sm:w-6 sm:h-6" /> {t("Cosmic Identity")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4 sm:p-6 pt-0 space-y-3 sm:space-y-4">
+                    <div className="flex justify-between items-center py-2 sm:py-3 border-b border-[#ff6b35]/5">
+                      <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Gender")}</span>
+                      <span className="font-bold text-sm sm:text-base capitalize">{profileGender}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 sm:py-3 border-b border-[#ff6b35]/5">
+                      <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Status")}</span>
+                      <span className="text-[10px] sm:text-xs font-black text-[#ff6b35] uppercase">{t("Active Seeker")}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 sm:py-3">
+                      <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Joined")}</span>
+                      <span className="font-bold text-sm sm:text-base">{new Date(user?.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className={`rounded-2xl sm:rounded-[2.5rem] border shadow-xl ${theme === 'dark' ? 'bg-[#12121a] border-purple-500/20' : 'bg-white border-purple-500/10'}`}>
+                  <div className="h-1.5 sm:h-2 bg-gradient-to-r from-purple-500 to-indigo-500" />
+                  <CardHeader className="p-4 sm:p-6">
+                    <CardTitle className="font-[family-name:var(--font-cinzel)] text-lg sm:text-2xl flex items-center gap-2 sm:gap-3 text-purple-500">
+                      <Globe className="w-5 h-5 sm:w-6 sm:h-6" /> {t("Planetary Alignment")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4 sm:p-6 pt-0 space-y-3 sm:space-y-4">
+                    <div className="flex justify-between items-center py-2 sm:py-3 border-b border-purple-500/5">
+                      <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Date")}</span>
+                      <span className="font-bold text-sm sm:text-base">{birthDate}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 sm:py-3 border-b border-purple-500/5">
+                      <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Time")}</span>
+                      <span className="font-bold text-sm sm:text-base">{birthTime || "Not specified"}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 sm:py-3">
+                      <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Sign")}</span>
+                      <Badge className="bg-indigo-500 text-white capitalize text-xs sm:text-sm">{t(zodiacSign || "Unknown")}</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            <div className="space-y-4 sm:space-y-6">
+              <div className="flex justify-between items-center px-1 sm:px-2">
+                <h3 className="text-lg sm:text-2xl font-[family-name:var(--font-cinzel)] font-bold text-[#ff6b35] flex items-center gap-2 sm:gap-3">
+                  <CalendarDays className="w-5 h-5 sm:w-7 sm:h-7" /> {t("Updates")}
+                </h3>
+              </div>
+              
+              {userBookings.length === 0 ? (
+                <Card className={`rounded-2xl sm:rounded-[3rem] border-none shadow-xl p-8 sm:p-16 text-center ${theme === 'dark' ? 'bg-[#12121a]' : 'bg-white'}`}>
+                  <Calendar className="w-12 h-12 sm:w-16 sm:h-16 text-[#ff6b35]/20 mx-auto mb-4 sm:mb-6" />
+                  <p className="opacity-40 font-medium text-sm sm:text-lg">{t("The stars are waiting for your first step.")}</p>
+                  <Button 
+                    onClick={() => router.push('/booking')}
+                    className="mt-6 sm:mt-8 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-xl sm:rounded-2xl px-6 sm:px-8 h-12 sm:h-14 text-sm sm:text-base font-black uppercase tracking-widest shadow-xl shadow-[#ff6b35]/20"
+                  >
+                    {t("Book Your Session")}
+                  </Button>
+                </Card>
+              ) : (
+              <div className="grid gap-4 sm:gap-6">
+                    {userBookings.map((booking) => (
+                      <motion.div key={booking.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+                        <Card className={`overflow-hidden rounded-xl sm:rounded-[2.5rem] border shadow-xl ${theme === 'dark' ? 'bg-[#12121a] border-[#ff6b35]/20' : 'bg-white border-[#ff6b35]/10'}`}>
+                          <CardContent className="p-4 sm:p-8">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
+                              <div className="flex items-start sm:items-center gap-3 sm:gap-6 w-full sm:w-auto">
+                                <div className={`p-3 sm:p-4 rounded-xl sm:rounded-[1.5rem] flex-shrink-0 ${booking.status === 'confirmed' ? 'bg-green-500/10 text-green-500' : booking.status === 'cancelled' ? 'bg-red-500/10 text-red-500' : 'bg-[#ff6b35]/10 text-[#ff6b35]'}`}>
+                                  {booking.status === 'confirmed' ? <CheckCircle2 className="w-5 h-5 sm:w-7 sm:h-7" /> : booking.status === 'cancelled' ? <XCircle className="w-5 h-5 sm:w-7 sm:h-7" /> : <Clock className="w-5 h-5 sm:w-7 sm:h-7" />}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <h4 className="font-black text-base sm:text-xl capitalize tracking-tight break-words">{booking.service_type} {t("Consultation")}</h4>
+                                  <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm opacity-50 mt-1 font-bold">
+                                    <span>{booking.booking_date}</span>
+                                    <span className="hidden sm:inline">•</span>
+                                    <span>{booking.booking_time}</span>
+                                  </div>
+                                  {booking.invoice_number && (
+                                    <p className="text-[10px] sm:text-xs font-mono font-bold text-[#ff6b35] mt-2">{t("Invoice")}: {booking.invoice_number}</p>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 w-full sm:w-auto">
+                                <div className="text-left sm:text-right">
+                                  <Badge className={`capitalize ${booking.status === 'confirmed' ? 'bg-green-500' : booking.status === 'cancelled' ? 'bg-red-500' : 'bg-[#ff6b35]'} text-white px-3 sm:px-4 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase`}>
+                                    {t(booking.status)}
+                                  </Badge>
+                                  <p className="text-xs font-black opacity-40 mt-1 sm:mt-2">₹{booking.amount}</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Complete Payment Section for pending/failed payments */}
+                            {(booking.payment_status === 'pending' || booking.payment_status === 'failed') && booking.status !== 'cancelled' && (
+                              <div className="mt-4 sm:mt-6">
+                                {expandedPaymentId === booking.id ? (
+                                  <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: "auto" }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-dashed ${theme === 'dark' ? 'bg-[#0a0a0f] border-[#ff6b35]/30' : 'bg-[#fff7ed] border-[#ff6b35]/30'}`}
+                                  >
+                                    <div className="flex items-center justify-between mb-4">
+                                      <div className="flex items-center gap-2">
+                                        <CreditCard className="w-5 h-5 text-[#ff6b35]" />
+                                        <span className="font-bold text-sm sm:text-base">
+                                          {language === 'gu' ? 'ચુકવણી પૂર્ણ કરો' : language === 'hi' ? 'भुगतान पूर्ण करें' : 'Complete Payment'}
+                                        </span>
+                                      </div>
+                                      <span className="text-xl sm:text-2xl font-black text-[#ff6b35]">₹{booking.amount}</span>
+                                    </div>
+
+                                    <div className="flex justify-center">
+                                      <div className="w-full">
+                                        {booking.service_type === 'online' ? (
+                                          <a 
+                                            href="#" 
+                                            className="uropay-btn w-full inline-flex items-center justify-center bg-[#ff6b35] hover:bg-[#ff8c5e] text-white h-14 rounded-xl text-lg font-bold shadow-xl shadow-[#ff6b35]/30 transition-all active:scale-95" 
+                                            data-uropay-api-key="8F7R1DGSMX1EYI5LEVLFL8NLZQM8EKAE" 
+                                            data-uropay-button-id="XRAY456627" 
+                                            data-uropay-environment="LIVE" 
+                                            data-uropay-amount="851"
+                                          >
+                                            {language === 'gu' ? '₹851 ચૂકવો' : language === 'hi' ? '₹851 भुगतान करें' : 'Pay ₹851'}
+                                          </a>
+                                        ) : booking.service_type === 'home' && booking.amount <= 1101 ? (
+                                          <a 
+                                            href="#" 
+                                            className="uropay-btn w-full inline-flex items-center justify-center bg-[#ff6b35] hover:bg-[#ff8c5e] text-white h-14 rounded-xl text-lg font-bold shadow-xl shadow-[#ff6b35]/30 transition-all active:scale-95" 
+                                            data-uropay-api-key="8F7R1DGSMX1EYI5LEVLFL8NLZQM8EKAE" 
+                                            data-uropay-button-id="ALPHA279545" 
+                                            data-uropay-environment="LIVE" 
+                                            data-uropay-amount="1101"
+                                          >
+                                            {language === 'gu' ? '₹1101 ચૂકવો' : language === 'hi' ? '₹1101 भुगतान करें' : 'Pay ₹1101'}
+                                          </a>
+                                        ) : booking.service_type === 'home' && booking.amount > 1101 ? (
+                                          <a 
+                                            href="#" 
+                                            className="uropay-btn w-full inline-flex items-center justify-center bg-[#ff6b35] hover:bg-[#ff8c5e] text-white h-14 rounded-xl text-lg font-bold shadow-xl shadow-[#ff6b35]/30 transition-all active:scale-95" 
+                                            data-uropay-api-key="8F7R1DGSMX1EYI5LEVLFL8NLZQM8EKAE" 
+                                            data-uropay-button-id="ALPHA413457" 
+                                            data-uropay-environment="LIVE" 
+                                            data-uropay-amount="2101"
+                                          >
+                                            {language === 'gu' ? '₹2101 ચૂકવો' : language === 'hi' ? '₹2101 भुगतान करें' : 'Pay ₹2101'}
+                                          </a>
+                                        ) : (
+                                          <Button 
+                                            onClick={() => router.push(`/booking?booking_id=${booking.id}`)}
+                                            className="w-full bg-[#ff6b35] hover:bg-[#ff8c5e] text-white h-14 rounded-xl text-lg font-bold shadow-xl shadow-[#ff6b35]/30 flex items-center justify-center gap-3 transition-all active:scale-95"
+                                          >
+                                            <CreditCard className="w-5 h-5" />
+                                            {language === 'gu' ? `₹${booking.amount} ચૂકવો` : language === 'hi' ? `₹${booking.amount} भुगतान करें` : `Pay ₹${booking.amount}`}
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <p className={`mt-4 text-xs font-medium text-center ${theme === 'dark' ? 'text-amber-500' : 'text-amber-700'}`}>
+                                      <AlertCircle className="w-3 h-3 inline mr-1" />
+                                      {language === 'gu' 
+                                        ? 'ચુકવણી પછી રિસીપ્ટનો સ્ક્રીનશોટ રાખો.' 
+                                        : language === 'hi' 
+                                        ? 'भुगतान के बाद रसीद का स्क्रीनशॉट रखें।' 
+                                        : 'Keep a screenshot of the receipt after payment.'}
+                                    </p>
+
+                                    <Button 
+                                      variant="ghost" 
+                                      onClick={() => setExpandedPaymentId(null)} 
+                                      className="w-full mt-3 text-xs opacity-60"
+                                    >
+                                      {language === 'gu' ? 'બંધ કરો' : language === 'hi' ? 'बंद करें' : 'Close'}
+                                    </Button>
+                                  </motion.div>
+                                ) : (
+                                  <Button 
+                                    onClick={() => setExpandedPaymentId(booking.id)}
+                                    className="w-full bg-[#ff6b35] hover:bg-[#ff8c5e] text-white h-12 sm:h-14 rounded-xl sm:rounded-2xl text-sm sm:text-base font-bold shadow-lg shadow-[#ff6b35]/20 flex items-center justify-center gap-2 transition-all active:scale-95"
+                                  >
+                                    <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
+                                    {language === 'gu' ? 'ચુકવણી પૂર્ણ કરો' : language === 'hi' ? 'भुगतान पूर्ण करें' : 'Complete Payment'}
+                                  </Button>
+                                )}
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}

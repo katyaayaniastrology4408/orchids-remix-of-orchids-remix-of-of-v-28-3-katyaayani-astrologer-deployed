@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Katyaayani Astrologer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff6b35;
+            --primary-hover: #ff8c5e;
+            --gold: #c9a227;
+            --gold-light: #e8d48b;
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-alt: #1a1a2e;
+            --text-primary: #f5f0e8;
+            --text-secondary: #a0998c;
+            --border: rgba(201, 162, 39, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .font-cinzel {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Navbar */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            backdrop-filter: blur(12px);
+            background: rgba(10, 10, 15, 0.95);
+            border-bottom: 1px solid rgba(255, 107, 53, 0.2);
+        }
+
+        .nav-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 28px;
+            height: 28px;
+            color: var(--primary);
+        }
+
+        .brand-name {
+            font-size: 20px;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--gold), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--primary);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            padding: 64px 24px;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            color: var(--gold);
+            margin: 0 auto 16px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        /* Story Section */
+        .story-section {
+            padding: 64px 24px;
+            background: var(--bg-card);
+        }
+
+        .story-content {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 36px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 48px;
+            background: linear-gradient(135deg, var(--gold), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .story-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .story-image {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .story-text p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        /* Astrologers Section */
+        .astrologers-section {
+            padding: 64px 24px;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .astrologers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            justify-content: center;
+        }
+
+        .astrologer-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            text-align: center;
+            padding: 48px;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .astrologer-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--gold);
+            box-shadow: 0 20px 40px rgba(201, 162, 39, 0.1);
+        }
+
+        .astrologer-icon-wrapper {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(201, 162, 39, 0.05);
+            border: 2px dashed var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 32px;
+            position: relative;
+        }
+
+        .astrologer-icon {
+            width: 60px;
+            height: 60px;
+            color: var(--gold);
+        }
+
+        .astrologer-name {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .astrologer-title {
+            color: var(--gold);
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .astrologer-experience {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(201, 162, 39, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--gold);
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .astrologer-bio {
+            color: var(--text-secondary);
+            font-size: 16px;
+            font-style: italic;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* Footer */
+        footer {
+            padding: 48px 24px;
+            background: var(--bg-dark);
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        footer p {
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .story-grid {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-content">
+            <a href="index.html" class="brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+                <span class="brand-name font-cinzel">Katyaayani Astrologer</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="about.html" class="nav-link active">About</a>
+            </div>
+        </div>
+    </nav>
+
+    <main style="padding-top: 96px;">
+        <section class="hero-section" style="padding: 80px 24px; text-align: center;">
+            <h1 class="font-cinzel">About Us</h1>
+            <p class="hero-description">For over 15 years, we have been guiding people through the ancient wisdom of astrology. We help you find the right direction in your life.</p>
+        </section>
+
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value font-cinzel">2,000+</div>
+                    <div class="stat-label">Satisfied Clients</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value font-cinzel">18+</div>
+                    <div class="stat-label">Years of Experience</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value font-cinzel">98%</div>
+                    <div class="stat-label">Satisfaction Rate</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="story-section">
+            <div class="story-content">
+                <h2 class="section-title font-cinzel">Our Story</h2>
+                <div class="story-grid">
+                    <div>
+                        <img src="https://images.unsplash.com/photo-1532968961962-8a0cb3a2d4f5?w=600&h=600&fit=crop" alt="Celestial sky" class="story-image">
+                    </div>
+                    <div class="story-text">
+                        <p>Katyaayani Astrologer was founded in 2007 with a simple yet profound purpose: to bring the ancient wisdom of astrology to all those seeking guidance in their lives.</p>
+                        <p>What started as a small practice has now grown into a trusted destination for thousands of seekers worldwide. Our experienced team of astrologers combines time-honored astrological knowledge with modern understanding.</p>
+                        <p>We believe that the planets provide a map—not a predetermined destiny, but a guide to understanding our strengths, challenges, and life’s greatest opportunities.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="astrologers-section">
+            <h2 class="section-title font-cinzel">Our Astrologers</h2>
+            <div class="astrologers-grid">
+                <div class="astrologer-card">
+                    <div class="astrologer-icon-wrapper">
+                        <svg class="astrologer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <div class="astrologer-content">
+                        <h3 class="astrologer-name font-cinzel">Rudram Joshi</h3>
+                        <p class="astrologer-title">Chief Astrologer</p>
+                        <div class="astrologer-experience">18+ Years Experience</div>
+                        <p class="astrologer-bio">"Rudram Joshi has dedicated his life to understanding planetary movements. His accurate predictions have transformed thousands of lives."</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2024 Katyaayani Astrologer. All rights reserved.</p>
+    </footer>
+</body>
+</html>

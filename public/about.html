@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>हमारे बारे में | Katyaayani Astrologer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=64&height=64&resize=contain" type="image/png">
+</head>
+<body class="dark">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loader"></div>
+        <p class="loading-text">लोड हो रहा है...</p>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=112&height=112&resize=contain" alt="Katyaayani Astrologer" class="logo-img">
+                <span class="logo-text">KATYAAYANI<br>ASTROLOGER</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">मुखपृष्ठ</a>
+                <a href="services.html">सेवाएं</a>
+                <a href="booking.html">बुक करें</a>
+                <a href="feedback.html">प्रतिक्रिया</a>
+                <a href="about.html" class="active">हमारे बारे में</a>
+            </div>
+            <div class="nav-actions">
+                <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme">
+                    <svg class="icon sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="icon moon-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+                <a href="booking.html" class="cta-btn">बुक करें</a>
+            </div>
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="mobile-menu hidden" id="mobile-menu">
+            <a href="index.html">मुखपृष्ठ</a>
+            <a href="services.html">सेवाएं</a>
+            <a href="booking.html">बुक करें</a>
+            <a href="feedback.html">प्रतिक्रिया</a>
+            <a href="about.html" class="active">हमारे बारे में</a>
+        </div>
+    </nav>
+
+    <main style="padding-top: 6rem;">
+        <!-- Hero -->
+        <section style="padding: 4rem 1.5rem; background: linear-gradient(to bottom, rgba(30, 27, 75, 0.3), var(--bg-dark));">
+            <div class="container" style="max-width: 48rem; margin: 0 auto; text-align: center;">
+                <div class="hero-icons" style="gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <svg style="width:32px;height:32px;stroke:var(--primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    <svg style="width:32px;height:32px;stroke:var(--primary-light);" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg style="width:32px;height:32px;stroke:var(--primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </div>
+                <h1 class="hero-title">अपनी नियति को अनलॉक करें</h1>
+                <p style="color: var(--muted-dark); font-size: 1.25rem; line-height: 1.6;">ज्योतिष का वैदिक ज्ञान आपके जीवन पथ को रोशन करने की प्रतीक्षा कर रहा है।</p>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Stats -->
+        <section style="padding: 4rem 1.5rem;">
+            <div class="container">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+                    <div class="stat-card">
+                        <svg style="width:40px;height:40px;stroke:var(--primary);margin:0 auto 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        <p class="stat-value">2,000+</p>
+                        <p class="stat-label">संतुष्ट ग्राहक</p>
+                    </div>
+                    <div class="stat-card">
+                        <svg style="width:40px;height:40px;stroke:var(--primary);margin:0 auto 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        <p class="stat-value">18+</p>
+                        <p class="stat-label">वर्षों का अनुभव</p>
+                    </div>
+                    <div class="stat-card">
+                        <svg style="width:40px;height:40px;stroke:var(--primary);margin:0 auto 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        <p class="stat-value">98%</p>
+                        <p class="stat-label">संतुष्टि दर</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Our Story -->
+        <section style="padding: 4rem 1.5rem; background: #12121a;">
+            <div class="container">
+                <div class="section-header" style="margin-bottom: 3rem;">
+                    <h2 class="section-title">हमारी कहानी</h2>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
+                    <div style="position: relative;">
+                        <div style="aspect-ratio: 1; border-radius: 0.5rem; overflow: hidden;">
+                            <img src="https://images.unsplash.com/photo-1532968961962-8a0cb3a2d4f5?w=600&h=600&fit=crop" alt="Celestial sky" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div style="position: absolute; bottom: -1.5rem; right: -1.5rem; width: 8rem; height: 8rem; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; background: rgba(255, 107, 53, 0.2);">
+                            <span style="font-family: 'Cinzel', serif; font-size: 2.5rem; color: var(--primary);">&#10023;</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <p style="color: var(--muted-dark); font-size: 1.25rem; line-height: 1.6;">कात्यायनी एस्ट्रोलॉजर की स्थापना 2007 में एक सरल लेकिन गहन उद्देश्य के साथ की गई थी: प्राचीन ज्योतिष के ज्ञान को उन सभी लोगों तक पहुंचाना जो अपने जीवन में मार्गदर्शन की तलाश में हैं।</p>
+                        <p style="color: var(--muted-dark); font-size: 1.25rem; line-height: 1.6;">जो एक छोटे से अभ्यास के रूप में शुरू हुआ था, वह अब दुनिया भर में हजारों खोजियों के लिए एक विश्वसनीय गंतव्य बन गया है। हमारी अनुभवी ज्योतिषियों की टीम समय-सम्मानित ज्योतिषीय ज्ञान को आधुनिक समझ के साथ जोड़ती है।</p>
+                        <p style="color: var(--muted-dark); font-size: 1.25rem; line-height: 1.6;">हम मानते हैं कि ग्रह एक मानचित्र प्रदान करते हैं—पूर्व निर्धारित नियति नहीं, बल्कि हमारी ताकत, चुनौतियों और जीवन के महानतम अवसरों को समझने के लिए एक मार्गदर्शिका।</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Our Astrologers -->
+        <section style="padding: 4rem 1.5rem;">
+            <div class="container">
+                <div class="section-header" style="margin-bottom: 3rem;">
+                    <h2 class="section-title">हमारे ज्योतिषी</h2>
+                    <p class="section-subtitle">आपकी आध्यात्मिक यात्रा का मार्गदर्शन करने वाले समर्पित विशेषज्ञ</p>
+                </div>
+                <div style="max-width: 42rem; margin: 0 auto;">
+                    <div class="astrologer-card">
+                        <div style="text-align: center; padding: 3rem; position: relative; z-index: 10;">
+                            <div style="width: 9rem; height: 9rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; background: linear-gradient(to bottom right, rgba(255, 107, 53, 0.2), transparent); border: 2px solid rgba(255, 107, 53, 0.3);">
+                                <div style="width: 7rem; height: 7rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px dashed rgba(255, 107, 53, 0.4);">
+                                    <svg style="width: 3.5rem; height: 3.5rem; stroke: var(--primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                </div>
+                            </div>
+                            <h3 style="font-family: 'Cinzel', serif; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; color: var(--fg-dark);">रुद्रम जोशी</h3>
+                            <p style="font-size: 1.25rem; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2rem;">मुख्य ज्योतिषाचार्य</p>
+                            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-bottom: 2.5rem;">
+                                <span class="badge-pill">
+                                    <svg style="width:20px;height:20px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                    18+ वर्ष
+                                </span>
+                                <span class="badge-pill-outline">
+                                    <svg style="width:20px;height:20px;stroke:currentColor;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                                    ज्योतिष एवं कुंडली विशेषज्ञ
+                                </span>
+                            </div>
+                            <div style="position: relative; padding-top: 1.5rem;">
+                                <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 6rem; height: 2px; background: linear-gradient(to right, transparent, rgba(255, 107, 53, 0.4), transparent);"></div>
+                                <p style="font-size: 1.25rem; line-height: 1.6; font-style: italic; color: var(--muted-dark); max-width: 32rem; margin: 0 auto; padding: 0 1rem;">
+                                    "रुद्रम जोशी जी ने अपना जीवन ग्रहों की गति को समझने में समर्पित किया है। उनके सटीक भविष्यवाणी से हजारों लोगों का जीवन बदल गया है।"
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Our Values -->
+        <section style="padding: 4rem 1.5rem; background: #12121a;">
+            <div class="container">
+                <div class="section-header" style="margin-bottom: 3rem;">
+                    <h2 class="section-title">हमारे मूल्य</h2>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                    <div class="value-card">
+                        <svg style="width:32px;height:32px;stroke:var(--primary);margin:0 auto 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        <h3 style="font-family: 'Cinzel', serif; font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--fg-dark);">वैदिक ज्ञान</h3>
+                        <p style="color: var(--muted-dark); font-size: 1.25rem;">हम सदियों से चली आ रही ज्योतिष परंपरा का सम्मान करते हैं।</p>
+                    </div>
+                    <div class="value-card">
+                        <svg style="width:32px;height:32px;stroke:var(--primary);margin:0 auto 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        <h3 style="font-family: 'Cinzel', serif; font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--fg-dark);">व्यक्तिगत विकास</h3>
+                        <p style="color: var(--muted-dark); font-size: 1.25rem;">हमारे परामर्श आपकी आत्म-खोज की यात्रा को सशक्त बनाने के लिए डिज़ाइन किए गए हैं।</p>
+                    </div>
+                    <div class="value-card">
+                        <svg style="width:32px;height:32px;stroke:var(--primary);margin:0 auto 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        <h3 style="font-family: 'Cinzel', serif; font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--fg-dark);">नैतिक अभ्यास</h3>
+                        <p style="color: var(--muted-dark); font-size: 1.25rem;">हम सत्यनिष्ठा और गोपनीयता के उच्चतम मानकों को बनाए रखते हैं।</p>
+                    </div>
+                    <div class="value-card">
+                        <svg style="width:32px;height:32px;stroke:var(--primary);margin:0 auto 1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        <h3 style="font-family: 'Cinzel', serif; font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--fg-dark);">ग्रह संबंध</h3>
+                        <p style="color: var(--muted-dark); font-size: 1.25rem;">हम खगोलीय पिंडों और मानव जीवन के बीच गहरे संबंध में विश्वास करते हैं।</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Contact Us (Enquiry) -->
+        <section style="padding: 4rem 1.5rem;">
+            <div class="container" style="max-width: 56rem; margin: 0 auto;">
+                <div class="section-header" style="margin-bottom: 2rem;">
+                    <h2 class="section-title">हमसे संपर्क करें</h2>
+                    <p class="section-subtitle">कोई प्रश्न है? हमें अपनी जानकारी भेजें और हम आपसे संपर्क करेंगे।</p>
+                </div>
+                <div class="about-content">
+                    <form id="enquiry-form">
+                        <div class="form-group">
+                            <label class="form-label" for="enquiry-name">पूरा नाम *</label>
+                            <input type="text" id="enquiry-name" name="name" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="enquiry-email">ईमेल *</label>
+                            <input type="email" id="enquiry-email" name="email" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="enquiry-phone">फ़ोन नंबर *</label>
+                            <input type="tel" id="enquiry-phone" name="phone" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="enquiry-message">संदेश *</label>
+                            <textarea id="enquiry-message" name="message" class="form-textarea" placeholder="अपना प्रश्न या संदेश लिखें..." required></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn">भेजें</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section style="padding: 4rem 1.5rem;">
+            <div class="container" style="max-width: 56rem; margin: 0 auto; text-align: center;">
+                <div class="cta-card">
+                    <svg style="width:48px;height:48px;stroke:var(--primary);margin: 0 auto 1.5rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path></svg>
+                    <h2 class="cta-title">हमारे साथ अपनी यात्रा शुरू करें</h2>
+                    <p class="cta-description">हमारे अनुभवी ज्योतिषी से आपकी कुंडली के रहस्यों को समझने में मार्गदर्शन प्राप्त करें।</p>
+                    <div class="cta-actions">
+                        <a href="booking.html" class="btn-primary" style="font-size: 1.25rem; padding: 0.75rem 2rem;">
+                            <svg style="width:20px;height:20px;stroke:currentColor;margin-right:0.5rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path></svg>
+                            परामर्श बुक करें
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col footer-col-wide">
+                    <div class="footer-logo">
+                        <img src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=80&height=80&resize=contain" alt="Logo" class="footer-logo-img">
+                        <span>कात्यायनी ज्योतिष</span>
+                    </div>
+                    <p class="footer-text">2007 से ज्योतिष ज्ञान के माध्यम से आत्माओं का मार्गदर्शन कर रहे हैं। हमारे साथ अपनी यात्रा शुरू करें</p>
+                    <div class="newsletter-section">
+                        <h5 class="newsletter-title">न्यूज़लेटर</h5>
+                        <p class="newsletter-desc">ज्योतिष अपडेट्स और विशेष ऑफर प्राप्त करें</p>
+                        <form class="newsletter-form" id="newsletter-form">
+                            <input type="email" placeholder="आपका ईमेल" required class="newsletter-input">
+                            <button type="submit" class="newsletter-btn">सदस्यता लें</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-title">त्वरित लिंक</h4>
+                    <div class="footer-links">
+                        <a href="services.html">सेवाएं</a>
+                        <a href="booking.html">बुक करें</a>
+                        <a href="feedback.html">प्रतिक्रिया</a>
+                        <a href="about.html">हमारे बारे में</a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-title">नीतियां</h4>
+                    <div class="footer-links">
+                        <a href="/terms">शर्तें</a>
+                        <a href="/privacy">गोपनीयता</a>
+                        <a href="/refund-policy">वापसी नीति</a>
+                        <a href="/disclaimer">अस्वीकरण</a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-title">संपर्क</h4>
+                    <div class="footer-contact">
+                        <div class="contact-item">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                            <a href="https://wa.me/919824929588" target="_blank" style="color: inherit; text-decoration: none;">+91 98249 29588</a>
+                        </div>
+                        <div class="contact-item">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                            <span>katyaayaniastrologer01@gmail.com</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-title">समय</h4>
+                    <div class="footer-hours">
+                        <p>रविवार: सुबह 10 - शाम 7</p>
+                        <p>सोमवार - शुक्रवार: सुबह 11 - शाम 7</p>
+                        <p>शनिवार: सुबह 11 - शाम 5</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 कात्यायनी ज्योतिष। सर्वाधिकार सुरक्षित। ॐ शान्ति शान्ति शान्तिः।</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
