@@ -3325,24 +3325,53 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
   setSuccess: (v: string) => void,
   setError: (v: string) => void
 }) {
+  const [rashifalMode, setRashifalMode] = useState<'daily' | 'weekly'>('daily');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedRashi, setSelectedRashi] = useState('aries');
-    const [rashifalForm, setRashifalForm] = useState({
-      content_english: '',
-      content_gujarati: '',
-      content_hindi: '',
-      lucky_number: '',
-    });
+  const [rashifalForm, setRashifalForm] = useState({
+    content_english: '',
+    content_gujarati: '',
+    content_hindi: '',
+    lucky_number: '',
+  });
   const [existingData, setExistingData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [sendNotification, setSendNotification] = useState(false);
 
-  useEffect(() => {
-    fetchExistingRashifal();
-  }, [selectedDate]);
+  // Weekly state
+  const getMonday = (d: Date) => {
+    const date = new Date(d);
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    date.setDate(diff);
+    return date.toISOString().split('T')[0];
+  };
+  const getSunday = (mondayStr: string) => {
+    const d = new Date(mondayStr + 'T00:00:00');
+    d.setDate(d.getDate() + 6);
+    return d.toISOString().split('T')[0];
+  };
+  const [weekStart, setWeekStart] = useState(getMonday(new Date()));
+  const weekEnd = getSunday(weekStart);
+  const [weeklyExistingData, setWeeklyExistingData] = useState<any[]>([]);
+  const [weeklyForm, setWeeklyForm] = useState({
+    content_english: '',
+    content_gujarati: '',
+    content_hindi: '',
+    lucky_number: '',
+  });
 
   useEffect(() => {
-    const existing = existingData.find(r => r.rashi === selectedRashi);
+    if (rashifalMode === 'daily') {
+      fetchExistingRashifal();
+    } else {
+      fetchWeeklyRashifal();
+    }
+  }, [selectedDate, weekStart, rashifalMode]);
+
+  useEffect(() => {
+    if (rashifalMode === 'daily') {
+      const existing = existingData.find(r => r.rashi === selectedRashi);
       if (existing) {
         setRashifalForm({
           content_english: existing.content_english || '',
@@ -3351,28 +3380,41 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
           lucky_number: existing.lucky_number || '',
         });
       } else {
-        setRashifalForm({
-          content_english: '',
-          content_gujarati: '',
-          content_hindi: '',
-          lucky_number: '',
-        });
+        setRashifalForm({ content_english: '', content_gujarati: '', content_hindi: '', lucky_number: '' });
       }
-  }, [selectedRashi, existingData]);
+    } else {
+      const existing = weeklyExistingData.find(r => r.rashi === selectedRashi);
+      if (existing) {
+        setWeeklyForm({
+          content_english: existing.content_english || '',
+          content_gujarati: existing.content_gujarati || '',
+          content_hindi: existing.content_hindi || '',
+          lucky_number: existing.lucky_number || '',
+        });
+      } else {
+        setWeeklyForm({ content_english: '', content_gujarati: '', content_hindi: '', lucky_number: '' });
+      }
+    }
+  }, [selectedRashi, existingData, weeklyExistingData, rashifalMode]);
 
   const fetchExistingRashifal = async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/rashifal?date=${selectedDate}`);
       const data = await res.json();
-      if (data.success) {
-        setExistingData(data.data || []);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+      if (data.success) setExistingData(data.data || []);
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
+  };
+
+  const fetchWeeklyRashifal = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/weekly-rashifal?week_start=${weekStart}`);
+      const data = await res.json();
+      if (data.success) setWeeklyExistingData(data.data || []);
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
   };
 
   const handleSaveRashifal = async (e: React.FormEvent) => {
@@ -3386,41 +3428,88 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
       const res = await fetch('/api/rashifal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+        body: JSON.stringify({
           date: selectedDate,
-          rashifals: [{
-            rashi: selectedRashi,
-            ...rashifalForm,
-          }],
+          rashifals: [{ rashi: selectedRashi, ...rashifalForm }],
           sendNotification,
         }),
       });
-        const data = await res.json();
-        if (data.success) {
-          let msg = t("Rashifal saved successfully!");
-          if (data.emailResult?.sent) {
-            msg += ` ${t("Email notification sent to")} ${data.emailResult.totalUsers} ${t("users")}${data.emailResult.auto ? ` (${t("auto: every 4th day")})` : ''}`;
-          }
-          setSuccess(msg);
-          fetchExistingRashifal();
+      const data = await res.json();
+      if (data.success) {
+        let msg = t("Rashifal saved successfully!");
+        if (data.emailResult?.sent) {
+          msg += ` ${t("Email notification sent to")} ${data.emailResult.totalUsers} ${t("users")}`;
+        }
+        setSuccess(msg);
+        fetchExistingRashifal();
       } else {
         setError(data.error || t("Failed to save rashifal"));
       }
-    } catch (err) {
-      setError(t("An error occurred"));
-    } finally {
-      setIsActionLoading(false);
-    }
+    } catch (err) { setError(t("An error occurred")); }
+    finally { setIsActionLoading(false); }
   };
 
+  const handleSaveWeeklyRashifal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!weeklyForm.content_gujarati && !weeklyForm.content_english) {
+      setError(t("Please enter content in at least one language"));
+      return;
+    }
+    setIsActionLoading(true);
+    try {
+      const res = await fetch('/api/weekly-rashifal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          week_start: weekStart,
+          week_end: weekEnd,
+          rashifals: [{ rashi: selectedRashi, ...weeklyForm }],
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        let msg = t("Weekly Rashifal saved successfully!");
+        if (data.emailResult?.sent) {
+          msg += ` ${t("Email notification sent to")} ${data.emailResult.totalUsers} ${t("users")}`;
+        } else if (data.emailResult?.skipped) {
+          msg += ` (${t("Email already sent for this week")})`;
+        }
+        setSuccess(msg);
+        fetchWeeklyRashifal();
+      } else {
+        setError(data.error || t("Failed to save weekly rashifal"));
+      }
+    } catch (err) { setError(t("An error occurred")); }
+    finally { setIsActionLoading(false); }
+  };
+
+  const currentData = rashifalMode === 'daily' ? existingData : weeklyExistingData;
+  const currentForm = rashifalMode === 'daily' ? rashifalForm : weeklyForm;
+  const setCurrentForm = rashifalMode === 'daily' ? setRashifalForm : setWeeklyForm;
   const rashiInfo = RASHI_LIST.find(r => r.english === selectedRashi);
-  const hasExisting = existingData.find(r => r.rashi === selectedRashi);
+  const hasExisting = currentData.find(r => r.rashi === selectedRashi);
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-2xl font-bold font-[family-name:var(--font-cinzel)] text-[#ff6b35]">{t("Daily Rashifal Manager")}</h2>
-        <p className="text-muted-foreground">{t("Add or edit daily horoscope predictions for all 12 rashis")}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-2xl font-bold font-[family-name:var(--font-cinzel)] text-[#ff6b35]">{t("Rashifal Manager")}</h2>
+          <p className="text-muted-foreground">{t("Add or edit horoscope predictions for all 12 rashis")}</p>
+        </div>
+        <div className={`flex p-1 rounded-xl border ${isDark ? 'bg-white/5 border-[#ff6b35]/20' : 'bg-[#ff6b35]/5 border-[#ff6b35]/20'}`}>
+          <button
+            onClick={() => setRashifalMode('daily')}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${rashifalMode === 'daily' ? 'bg-[#ff6b35] text-white shadow-lg' : 'text-[#ff6b35] hover:bg-[#ff6b35]/10'}`}
+          >
+            {t("Daily")}
+          </button>
+          <button
+            onClick={() => setRashifalMode('weekly')}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${rashifalMode === 'weekly' ? 'bg-[#ff6b35] text-white shadow-lg' : 'text-[#ff6b35] hover:bg-[#ff6b35]/10'}`}
+          >
+            {t("Weekly")}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -3428,24 +3517,37 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
         <Card className={`lg:col-span-1 ${isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}`}>
           <CardHeader>
             <CardTitle className="text-[#ff6b35] flex items-center gap-2 text-base">
-              <Calendar className="w-5 h-5" /> {t("Select Date & Rashi")}
+              <Calendar className="w-5 h-5" /> {rashifalMode === 'daily' ? t("Select Date & Rashi") : t("Select Week & Rashi")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>{t("Date")}</Label>
-              <Input 
-                type="date" 
-                value={selectedDate} 
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}
-              />
-            </div>
+            {rashifalMode === 'daily' ? (
+              <div className="space-y-2">
+                <Label>{t("Date")}</Label>
+                <Input 
+                  type="date" 
+                  value={selectedDate} 
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}
+                />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label>{t("Week Start (Monday)")}</Label>
+                <Input 
+                  type="date" 
+                  value={weekStart} 
+                  onChange={(e) => setWeekStart(e.target.value)}
+                  className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}
+                />
+                <p className="text-[10px] text-muted-foreground">{t("Week")}: {weekStart} {t("to")} {weekEnd}</p>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>{t("Rashi")}</Label>
               <div className="grid grid-cols-3 gap-2">
                 {RASHI_LIST.map((rashi) => {
-                  const hasData = existingData.find(r => r.rashi === rashi.english);
+                  const hasData = currentData.find(r => r.rashi === rashi.english);
                   return (
                     <button
                       key={rashi.english}
@@ -3483,14 +3585,17 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
                     {rashiInfo?.gujarati} / {rashiInfo?.hindi} / {selectedRashi.charAt(0).toUpperCase() + selectedRashi.slice(1)}
                   </CardTitle>
                   <CardDescription>
-                    {selectedDate} {hasExisting && <span className="text-green-500 font-bold ml-2">({t("Existing")})</span>}
+                    {rashifalMode === 'daily' ? selectedDate : `${weekStart} to ${weekEnd}`} {hasExisting && <span className="text-green-500 font-bold ml-2">({t("Existing")})</span>}
                   </CardDescription>
                 </div>
               </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-bold ${rashifalMode === 'daily' ? 'bg-blue-500/10 text-blue-500' : 'bg-purple-500/10 text-purple-500'}`}>
+                {rashifalMode === 'daily' ? t("Daily") : t("Weekly")}
+              </span>
             </div>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSaveRashifal} className="space-y-6">
+            <form onSubmit={rashifalMode === 'daily' ? handleSaveRashifal : handleSaveWeeklyRashifal} className="space-y-6">
               {/* Content Fields */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className="space-y-2">
@@ -3500,8 +3605,8 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
                   <textarea
                     className={`w-full min-h-[150px] p-3 rounded-md border text-sm ${isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10 text-white' : 'bg-white border-[#ff6b35]/20 text-black'}`}
                     placeholder="ગુજરાતીમાં રાશિફળ લખો..."
-                    value={rashifalForm.content_gujarati}
-                    onChange={(e) => setRashifalForm({...rashifalForm, content_gujarati: e.target.value})}
+                    value={currentForm.content_gujarati}
+                    onChange={(e) => setCurrentForm({...currentForm, content_gujarati: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
@@ -3511,8 +3616,8 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
                   <textarea
                     className={`w-full min-h-[150px] p-3 rounded-md border text-sm ${isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10 text-white' : 'bg-white border-[#ff6b35]/20 text-black'}`}
                     placeholder="हिंदी में राशिफल लिखें..."
-                    value={rashifalForm.content_hindi}
-                    onChange={(e) => setRashifalForm({...rashifalForm, content_hindi: e.target.value})}
+                    value={currentForm.content_hindi}
+                    onChange={(e) => setCurrentForm({...currentForm, content_hindi: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
@@ -3522,8 +3627,8 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
                   <textarea
                     className={`w-full min-h-[150px] p-3 rounded-md border text-sm ${isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10 text-white' : 'bg-white border-[#ff6b35]/20 text-black'}`}
                     placeholder="Write horoscope in English..."
-                    value={rashifalForm.content_english}
-                    onChange={(e) => setRashifalForm({...rashifalForm, content_english: e.target.value})}
+                    value={currentForm.content_english}
+                    onChange={(e) => setCurrentForm({...currentForm, content_english: e.target.value})}
                   />
                 </div>
               </div>
@@ -3534,8 +3639,8 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
                     <Label>{t("Lucky Number")}</Label>
                     <Input 
                       placeholder="7, 9"
-                      value={rashifalForm.lucky_number}
-                      onChange={(e) => setRashifalForm({...rashifalForm, lucky_number: e.target.value})}
+                      value={currentForm.lucky_number}
+                      onChange={(e) => setCurrentForm({...currentForm, lucky_number: e.target.value})}
                       className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}
                     />
                   </div>

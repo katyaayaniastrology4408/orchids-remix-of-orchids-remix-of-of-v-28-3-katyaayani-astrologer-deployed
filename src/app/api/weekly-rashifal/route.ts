@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '@/lib/email.config';
-export const dynamic = 'force-dynamic' ; 
+export const dynamic = 'force-dynamic';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,64 +25,76 @@ const RASHI_DATA = [
   { english: 'pisces', gujarati: 'મીન', hindi: 'मीन' },
 ];
 
-// GET daily rashifal
+// GET weekly rashifal
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const rashi = searchParams.get('rashi');
-  const dateStr = searchParams.get('date') || new Date().toISOString().split('T')[0];
-  
+  const weekStart = searchParams.get('week_start');
+
   try {
-    if (rashi) {
-      // Get specific rashi
+    if (rashi && weekStart) {
       const { data, error } = await supabase
-        .from('daily_rashifal')
+        .from('weekly_rashifal')
         .select('*')
-        .eq('date', dateStr)
+        .eq('week_start', weekStart)
         .eq('rashi', rashi.toLowerCase())
         .single();
-      
+
       if (error && error.code !== 'PGRST116') throw error;
-      
       return NextResponse.json({ success: true, data });
-    } else {
-      // Get all rashis for the date
+    } else if (weekStart) {
       const { data, error } = await supabase
-        .from('daily_rashifal')
+        .from('weekly_rashifal')
         .select('*')
-        .eq('date', dateStr)
+        .eq('week_start', weekStart)
         .order('rashi');
-      
+
       if (error) throw error;
-      
       return NextResponse.json({ success: true, data, rashiList: RASHI_DATA });
+    } else {
+      // Get current week's data (Monday of current week)
+      const now = new Date();
+      const day = now.getDay();
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(now.setDate(diff));
+      const currentWeekStart = monday.toISOString().split('T')[0];
+
+      const { data, error } = await supabase
+        .from('weekly_rashifal')
+        .select('*')
+        .eq('week_start', currentWeekStart)
+        .order('rashi');
+
+      if (error) throw error;
+      return NextResponse.json({ success: true, data, rashiList: RASHI_DATA, currentWeekStart });
     }
   } catch (error) {
-    console.error('Error fetching rashifal:', error);
+    console.error('Error fetching weekly rashifal:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch rashifal' },
+      { error: 'Failed to fetch weekly rashifal' },
       { status: 500 }
     );
   }
 }
 
-// POST create/update daily rashifal (admin only)
+// POST create/update weekly rashifal (admin only)
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { date, rashifals } = body;
-    
-    if (!date || !rashifals || !Array.isArray(rashifals)) {
+    const { week_start, week_end, rashifals } = body;
+
+    if (!week_start || !week_end || !rashifals || !Array.isArray(rashifals)) {
       return NextResponse.json(
-        { error: 'Date and rashifals array required' },
+        { error: 'week_start, week_end, and rashifals array required' },
         { status: 400 }
       );
     }
-    
-    // Upsert all rashifals for the date
+
     const upsertData = rashifals.map((r: any) => {
       const rashiInfo = RASHI_DATA.find(rd => rd.english === r.rashi.toLowerCase());
       return {
-        date,
+        week_start,
+        week_end,
         rashi: r.rashi.toLowerCase(),
         rashi_gujarati: rashiInfo?.gujarati || '',
         rashi_hindi: rashiInfo?.hindi || '',
@@ -99,100 +111,99 @@ export async function POST(request: NextRequest) {
         health_rating: r.health_rating || 3,
       };
     });
-    
-      const { data, error } = await supabase
-        .from('daily_rashifal')
-        .upsert(upsertData, { onConflict: 'date,rashi' })
-        .select();
-      
-      if (error) throw error;
 
-            // Send rashifal email to ALL users
-            let emailResult = null;
+    const { data, error } = await supabase
+      .from('weekly_rashifal')
+      .upsert(upsertData, { onConflict: 'week_start,rashi' })
+      .select();
 
-            // Check if notification already sent for this date
-            const { data: existingNotif } = await supabase
-              .from('rashifal_notifications')
-              .select('id')
-              .eq('date', date)
-              .maybeSingle();
+    if (error) throw error;
 
-            if (!existingNotif) {
-              try {
-                const { data: allUsers } = await supabase
-                  .from('profiles')
-                  .select('email, name')
-                  .not('email', 'is', null);
+    // Send email to ALL users
+    let emailResult = null;
+    const { data: existingNotif } = await supabase
+      .from('weekly_rashifal_notifications')
+      .select('id')
+      .eq('week_start', week_start)
+      .maybeSingle();
 
-                const validUsers = (allUsers || []).filter(u => u.email && u.email.includes('@'));
-                
-                if (validUsers.length > 0) {
-                  const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('en-IN', {
-                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-                  });
+    if (!existingNotif) {
+      try {
+        const { data: allUsers } = await supabase
+          .from('profiles')
+          .select('email, name')
+          .not('email', 'is', null);
 
-                  let sentCount = 0;
-                  for (const user of validUsers) {
-                    try {
-                      const userName = user.name || 'Valued Seeker';
-                      await sendEmail({
-                        to: user.email,
-                        subject: `Today's Rashifal Has Been Updated! - ${formattedDate}`,
-                        html: getRashifalEmailHtml(userName, formattedDate, upsertData),
-                      });
-                      sentCount++;
-                    } catch (err) {
-                      console.error(`Failed to send to ${user.email}:`, err);
-                    }
-                  }
+        const validUsers = (allUsers || []).filter(u => u.email && u.email.includes('@'));
 
-                // Record notification
-                await supabase.from('rashifal_notifications').insert({
-                  date,
-                  total_users: sentCount,
-                  status: 'sent'
-                });
+        if (validUsers.length > 0) {
+          const formattedStart = new Date(week_start + 'T00:00:00').toLocaleDateString('en-IN', {
+            day: 'numeric', month: 'long', year: 'numeric'
+          });
+          const formattedEnd = new Date(week_end + 'T00:00:00').toLocaleDateString('en-IN', {
+            day: 'numeric', month: 'long', year: 'numeric'
+          });
 
-                  emailResult = { sent: true, totalUsers: sentCount };
-              } else {
-                emailResult = { sent: false, reason: 'No users to notify' };
-              }
+          let sentCount = 0;
+          for (const user of validUsers) {
+            try {
+              const userName = user.name || 'Valued Seeker';
+              await sendEmail({
+                to: user.email,
+                subject: `Weekly Rashifal Updated! (${formattedStart} - ${formattedEnd})`,
+                html: getWeeklyRashifalEmailHtml(userName, formattedStart, formattedEnd, upsertData),
+              });
+              sentCount++;
             } catch (err) {
-              console.error('Error sending rashifal notifications:', err);
-              emailResult = { sent: false, reason: 'Email sending failed' };
+              console.error(`Failed to send to ${user.email}:`, err);
             }
-          } else {
-            emailResult = { skipped: true, reason: 'Notification already sent for this date' };
           }
-    
+
+          await supabase.from('weekly_rashifal_notifications').insert({
+            week_start,
+            total_users: sentCount,
+            status: 'sent'
+          });
+
+          emailResult = { sent: true, totalUsers: sentCount };
+        } else {
+          emailResult = { sent: false, reason: 'No users to notify' };
+        }
+      } catch (err) {
+        console.error('Error sending weekly rashifal notifications:', err);
+        emailResult = { sent: false, reason: 'Email sending failed' };
+      }
+    } else {
+      emailResult = { skipped: true, reason: 'Notification already sent for this week' };
+    }
+
     return NextResponse.json({ success: true, data, emailResult });
   } catch (error) {
-    console.error('Error saving rashifal:', error);
+    console.error('Error saving weekly rashifal:', error);
     return NextResponse.json(
-      { error: 'Failed to save rashifal' },
+      { error: 'Failed to save weekly rashifal' },
       { status: 500 }
     );
   }
 }
 
-function getRashifalEmailHtml(userName: string, formattedDate: string, rashifals: any[] = []) {
-    const RASHI_EMOJI: Record<string, string> = {
-      aries: '\u2648', taurus: '\u2649', gemini: '\u264A', cancer: '\u264B',
-      leo: '\u264C', virgo: '\u264D', libra: '\u264E', scorpio: '\u264F',
-      sagittarius: '\u2650', capricorn: '\u2651', aquarius: '\u2652', pisces: '\u2653',
-    };
+function getWeeklyRashifalEmailHtml(userName: string, startDate: string, endDate: string, rashifals: any[] = []) {
+  const RASHI_EMOJI: Record<string, string> = {
+    aries: '\u2648', taurus: '\u2649', gemini: '\u264A', cancer: '\u264B',
+    leo: '\u264C', virgo: '\u264D', libra: '\u264E', scorpio: '\u264F',
+    sagittarius: '\u2650', capricorn: '\u2651', aquarius: '\u2652', pisces: '\u2653',
+  };
 
-    const rashiPreviewRows = rashifals.map(r => {
-        const emoji = RASHI_EMOJI[r.rashi] || '';
-        const name = r.rashi_gujarati ? `${r.rashi.charAt(0).toUpperCase() + r.rashi.slice(1)} (${r.rashi_gujarati})` : r.rashi.charAt(0).toUpperCase() + r.rashi.slice(1);
-        const rawContent = r.content_english || r.content_gujarati || '';
-        const fullContent = rawContent.length > 120 ? rawContent.substring(0, 120).trim() + '...' : rawContent;
-        const luckyInfo = [
-          r.lucky_number ? `Lucky Number: ${r.lucky_number}` : '',
-          r.lucky_color ? `Lucky Color: ${r.lucky_color}` : '',
-        ].filter(Boolean).join(' | ');
-      const dateParam = r.date || '';
-      return `
+  const rashiPreviewRows = rashifals.map(r => {
+    const emoji = RASHI_EMOJI[r.rashi] || '';
+    const name = r.rashi_gujarati ? `${r.rashi.charAt(0).toUpperCase() + r.rashi.slice(1)} (${r.rashi_gujarati})` : r.rashi.charAt(0).toUpperCase() + r.rashi.slice(1);
+    const rawContent = r.content_english || r.content_gujarati || '';
+    const fullContent = rawContent.length > 120 ? rawContent.substring(0, 120).trim() + '...' : rawContent;
+    const luckyInfo = [
+      r.lucky_number ? `Lucky Number: ${r.lucky_number}` : '',
+      r.lucky_color ? `Lucky Color: ${r.lucky_color}` : '',
+    ].filter(Boolean).join(' | ');
+    return `
 <tr>
   <td style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.05);">
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -204,15 +215,15 @@ function getRashifalEmailHtml(userName: string, formattedDate: string, rashifals
           <p style="color:#ff6b35;font-size:15px;font-weight:700;margin:0 0 6px;">${name}</p>
           <p style="color:#e8dcc8;font-size:13px;line-height:1.6;margin:0;">${fullContent}</p>
           ${luckyInfo ? `<p style="color:#c9a87c;font-size:12px;margin:8px 0 0;font-style:italic;">${luckyInfo}</p>` : ''}
-          <a href="${BASE_URL}/rashifal?date=${dateParam}" style="color:#ff6b35;font-size:12px;text-decoration:none;font-weight:600;display:inline-block;margin-top:8px;">See More &rarr;</a>
+          <a href="${BASE_URL}/rashifal?tab=weekly" style="color:#ff6b35;font-size:12px;text-decoration:none;font-weight:600;display:inline-block;margin-top:8px;">See More &rarr;</a>
         </td>
       </tr>
     </table>
   </td>
 </tr>`;
-    }).join('');
+  }).join('');
 
-    return `
+  return `
 <!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -228,14 +239,14 @@ function getRashifalEmailHtml(userName: string, formattedDate: string, rashifals
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:linear-gradient(145deg,#12081f 0%,#0d0618 100%);border-radius:24px;border:1px solid rgba(255,107,53,0.2);">
 <tr><td style="padding:40px 35px 20px;text-align:center;">
 <span style="display:inline-block;padding:8px 20px;background:rgba(255,107,53,0.15);border-radius:30px;color:#ff6b35;font-size:12px;letter-spacing:2px;text-transform:uppercase;border:1px solid rgba(255,107,53,0.3);">
-Daily Rashifal Updated
+Weekly Rashifal Updated
 </span>
-<h1 style="color:#ffffff;font-size:28px;font-weight:600;margin:20px 0 0;">Today's Horoscope is Ready!</h1>
+<h1 style="color:#ffffff;font-size:28px;font-weight:600;margin:20px 0 0;">This Week's Horoscope is Ready!</h1>
 </td></tr>
 <tr><td style="padding:20px 35px;">
 <p style="color:#e8dcc8;font-size:16px;margin-bottom:15px;">Namaste <strong style="color:#ff6b35;">${userName}</strong>,</p>
 <p style="color:#b8a896;font-size:15px;line-height:1.7;">
-The daily rashifal for <strong style="color:#ff6b35;">${formattedDate}</strong> has been uploaded. Here's a preview of each sign:
+The weekly rashifal for <strong style="color:#ff6b35;">${startDate} - ${endDate}</strong> has been uploaded. Here's a preview of each sign:
 </p>
 </td></tr>
 ${rashifals.length > 0 ? `
@@ -246,8 +257,8 @@ ${rashiPreviewRows}
 </td></tr>
 ` : ''}
 <tr><td style="padding:25px 35px 40px;text-align:center;">
-<a href="${BASE_URL}/rashifal" style="display:inline-block;padding:16px 40px;background:linear-gradient(135deg,#ff6b35 0%,#ff8c5a 100%);color:#ffffff;text-decoration:none;border-radius:30px;font-weight:600;font-size:14px;letter-spacing:1px;text-transform:uppercase;">
-View Full Rashifal
+<a href="${BASE_URL}/rashifal?tab=weekly" style="display:inline-block;padding:16px 40px;background:linear-gradient(135deg,#ff6b35 0%,#ff8c5a 100%);color:#ffffff;text-decoration:none;border-radius:30px;font-weight:600;font-size:14px;letter-spacing:1px;text-transform:uppercase;">
+View Weekly Rashifal
 </a>
 </td></tr>
 </table>

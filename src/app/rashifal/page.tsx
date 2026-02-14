@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { 
@@ -59,21 +60,40 @@ interface RashifalData {
   love_rating: number;
   career_rating: number;
   health_rating: number;
+  week_start?: string;
+  week_end?: string;
+}
+
+function getMonday(d: Date): Date {
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  date.setDate(diff);
+  return date;
 }
 
 export default function RashifalPage() {
   const { theme } = useTheme();
   const { language } = useTranslation();
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get('tab') === 'weekly' ? 'weekly' : 'daily';
+
+  const [viewType, setViewType] = useState<'daily' | 'weekly'>(initialTab);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedWeekStart, setSelectedWeekStart] = useState(() => getMonday(new Date()).toISOString().split('T')[0]);
   const [selectedRashi, setSelectedRashi] = useState<string | null>(null);
   const [rashifalData, setRashifalData] = useState<RashifalData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchRashifal();
-  }, [selectedDate]);
+    if (viewType === 'daily') {
+      fetchDailyRashifal();
+    } else {
+      fetchWeeklyRashifal();
+    }
+  }, [selectedDate, selectedWeekStart, viewType]);
 
-  const fetchRashifal = async () => {
+  const fetchDailyRashifal = async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/rashifal?date=${selectedDate}`);
@@ -88,10 +108,31 @@ export default function RashifalPage() {
     }
   };
 
+  const fetchWeeklyRashifal = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/weekly-rashifal?week_start=${selectedWeekStart}`);
+      const data = await res.json();
+      if (data.success) {
+        setRashifalData(data.data || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch weekly rashifal:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const changeDate = (days: number) => {
     const date = new Date(selectedDate);
     date.setDate(date.getDate() + days);
     setSelectedDate(date.toISOString().split('T')[0]);
+  };
+
+  const changeWeek = (weeks: number) => {
+    const date = new Date(selectedWeekStart);
+    date.setDate(date.getDate() + (weeks * 7));
+    setSelectedWeekStart(date.toISOString().split('T')[0]);
   };
 
   const getRashiData = (rashi: string) => {
@@ -112,7 +153,7 @@ export default function RashifalPage() {
   };
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+    const date = new Date(dateStr + 'T00:00:00');
     const options: Intl.DateTimeFormatOptions = { 
       weekday: 'long', 
       year: 'numeric', 
@@ -124,8 +165,20 @@ export default function RashifalPage() {
     return date.toLocaleDateString('en-IN', options);
   };
 
+  const formatWeekRange = (startStr: string) => {
+    const start = new Date(startStr + 'T00:00:00');
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    const opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' };
+    const yearOpts: Intl.DateTimeFormatOptions = { year: 'numeric' };
+    const locale = language === 'gu' ? 'gu-IN' : language === 'hi' ? 'hi-IN' : 'en-IN';
+    return `${start.toLocaleDateString(locale, opts)} - ${end.toLocaleDateString(locale, opts)}, ${end.toLocaleDateString(locale, yearOpts)}`;
+  };
+
   const selectedRashiData = selectedRashi ? getRashiData(selectedRashi) : null;
   const selectedRashiInfo = selectedRashi ? RASHI_DATA.find(r => r.english === selectedRashi) : null;
+
+  const todayMonday = getMonday(new Date()).toISOString().split('T')[0];
 
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-[#0a0a0f] text-[#f5f0e8]' : 'bg-[#fdfbf7] text-[#4a3f35]'}`}>
@@ -133,35 +186,65 @@ export default function RashifalPage() {
       
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-24">
         {/* Header */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
             <h1 className="font-[family-name:var(--font-cinzel)] text-4xl md:text-5xl font-bold text-gradient-ancient mb-4">
-              {language === 'gu' ? 'દૈનિક રાશિફળ' : language === 'hi' ? 'दैनिक राशिफल' : 'Daily Horoscope'}
+              {viewType === 'daily' 
+                ? (language === 'gu' ? 'દૈનિક રાશિફળ' : language === 'hi' ? 'दैनिक राशिफल' : 'Daily Horoscope')
+                : (language === 'gu' ? 'સાપ્તાહિક રાશિફળ' : language === 'hi' ? 'साप्ताहिक राशिफल' : 'Weekly Horoscope')
+              }
             </h1>
             <p className={`text-base md:text-lg ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-              {language === 'gu' ? 'આજનું તમારું ભાગ્ય જાણો' : language === 'hi' ? 'आज का अपना भाग्य जानें' : 'Know your fortune today'}
+              {viewType === 'daily'
+                ? (language === 'gu' ? 'આજનું તમારું ભાગ્ય જાણો' : language === 'hi' ? 'आज का अपना भाग्य जानें' : 'Know your fortune today')
+                : (language === 'gu' ? 'આ અઠવાડિયાનું તમારું ભાગ્ય જાણો' : language === 'hi' ? 'इस सप्ताह का अपना भाग्य जानें' : 'Know your fortune this week')
+              }
             </p>
           </div>
 
-        {/* Date Selector */}
+        {/* Daily / Weekly Toggle */}
+        <div className="flex justify-center mb-8">
+          <div className={`flex p-1.5 rounded-2xl border ${theme === 'dark' ? 'bg-[#12121a] border-[#ff6b35]/20' : 'bg-white border-[#ff6b35]/20'} shadow-lg`}>
+            <Button
+              variant={viewType === 'daily' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => { setViewType('daily'); setSelectedRashi(null); }}
+              className={`rounded-xl px-6 ${viewType === 'daily' ? 'bg-[#ff6b35] text-white shadow-lg' : 'text-[#ff6b35] hover:bg-[#ff6b35]/10'}`}
+            >
+              {language === 'gu' ? 'દૈનિક' : language === 'hi' ? 'दैनिक' : 'Daily'}
+            </Button>
+            <Button
+              variant={viewType === 'weekly' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => { setViewType('weekly'); setSelectedRashi(null); }}
+              className={`rounded-xl px-6 ${viewType === 'weekly' ? 'bg-[#ff6b35] text-white shadow-lg' : 'text-[#ff6b35] hover:bg-[#ff6b35]/10'}`}
+            >
+              {language === 'gu' ? 'સાપ્તાહિક' : language === 'hi' ? 'साप्ताहिक' : 'Weekly'}
+            </Button>
+          </div>
+        </div>
+
+        {/* Date / Week Selector */}
         <div className="flex items-center justify-center gap-4 mb-12">
           <Button
             variant="outline"
             size="icon"
-            onClick={() => changeDate(-1)}
+            onClick={() => viewType === 'daily' ? changeDate(-1) : changeWeek(-1)}
             className="rounded-full"
           >
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <div className={`flex items-center gap-2 px-6 py-3 rounded-2xl ${theme === 'dark' ? 'bg-[#12121a]' : 'bg-white'} shadow-lg`}>
               <Calendar className="w-5 h-5 text-[#ff6b35]" />
-              <span className="font-medium text-sm md:text-base">{formatDate(selectedDate)}</span>
+              <span className="font-medium text-sm md:text-base">
+                {viewType === 'daily' ? formatDate(selectedDate) : formatWeekRange(selectedWeekStart)}
+              </span>
             </div>
           <Button
             variant="outline"
             size="icon"
-            onClick={() => changeDate(1)}
+            onClick={() => viewType === 'daily' ? changeDate(1) : changeWeek(1)}
             className="rounded-full"
-            disabled={selectedDate === new Date().toISOString().split('T')[0]}
+            disabled={viewType === 'daily' ? selectedDate === new Date().toISOString().split('T')[0] : selectedWeekStart === todayMonday}
           >
             <ChevronRight className="w-5 h-5" />
           </Button>
@@ -172,6 +255,7 @@ export default function RashifalPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            key={viewType}
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
           >
             {RASHI_DATA.map((rashi) => {
@@ -194,7 +278,9 @@ export default function RashifalPage() {
                         );
                       })()}
                       <h3 className="font-bold text-base md:text-lg mb-1 capitalize">{getRashiName(rashi)}</h3>
-
+                      {data && (
+                        <span className="inline-block w-2 h-2 rounded-full bg-green-500 mt-1" title="Data available" />
+                      )}
                   </CardContent>
                 </Card>
               );
@@ -230,6 +316,11 @@ export default function RashifalPage() {
                       <h2 className="font-[family-name:var(--font-cinzel)] text-2xl md:text-3xl font-bold capitalize">
                     {selectedRashiInfo && getRashiName(selectedRashiInfo)}
                   </h2>
+                  {viewType === 'weekly' && (
+                    <p className={`text-sm mt-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                      {formatWeekRange(selectedWeekStart)}
+                    </p>
+                  )}
                 </div>
 
                 {loading ? (
@@ -241,8 +332,6 @@ export default function RashifalPage() {
                       <p className={`text-base md:text-lg leading-relaxed mb-8 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                         {getContent(selectedRashiData)}
                       </p>
-
-
                   </>
                 )}
               </CardContent>
