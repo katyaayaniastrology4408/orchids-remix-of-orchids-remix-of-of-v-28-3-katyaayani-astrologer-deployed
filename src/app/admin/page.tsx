@@ -1647,7 +1647,11 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
               )}
 
               {activeTab === "rashifal" && (
-                <RashifalManager isDark={isDark} t={t} isActionLoading={isActionLoading} setIsActionLoading={setIsActionLoading} setSuccess={setSuccess} setError={setError} />
+                <RashifalManager isDark={isDark} t={t} isActionLoading={isActionLoading} setIsActionLoading={setIsActionLoading} setSuccess={setSuccess} setError={setError} mode="daily" />
+              )}
+
+              {activeTab === "weekly-rashifal" && (
+                <RashifalManager isDark={isDark} t={t} isActionLoading={isActionLoading} setIsActionLoading={setIsActionLoading} setSuccess={setSuccess} setError={setError} mode="weekly" />
               )}
 
               {activeTab === "blog" && (
@@ -3193,7 +3197,8 @@ function SidebarContent({ activeTab, setActiveTab, handleLogout, isDark, t }: {
           <NavItem icon={<KeyRound className="w-4 h-4" />} label={t("Resets")} active={activeTab === "resets"} onClick={() => setActiveTab("resets")} isDark={isDark} />
             <NavItem icon={<Star className="w-4 h-4" />} label={t("Feedback")} active={activeTab === "feedback"} onClick={() => setActiveTab("feedback")} isDark={isDark} />
               <NavItem icon={<Bell className="w-4 h-4" />} label={t("Broadcast")} active={activeTab === "broadcast"} onClick={() => setActiveTab("broadcast")} isDark={isDark} />
-              <NavItem icon={<Sun className="w-4 h-4" />} label={t("Rashifal")} active={activeTab === "rashifal"} onClick={() => setActiveTab("rashifal")} isDark={isDark} />
+                <NavItem icon={<Sun className="w-4 h-4" />} label={t("Daily Rashifal")} active={activeTab === "rashifal"} onClick={() => setActiveTab("rashifal")} isDark={isDark} />
+                <NavItem icon={<Calendar className="w-4 h-4" />} label={t("Weekly Rashifal")} active={activeTab === "weekly-rashifal"} onClick={() => setActiveTab("weekly-rashifal")} isDark={isDark} />
             <NavItem icon={<FileText className="w-4 h-4" />} label={t("Blog")} active={activeTab === "blog"} onClick={() => setActiveTab("blog")} isDark={isDark} />
                   <NavItem icon={<SearchIcon className="w-4 h-4" />} label={t("SEO Manager")} active={activeTab === "seo"} onClick={() => setActiveTab("seo")} isDark={isDark} />
                   <NavItem icon={<Tag className="w-4 h-4" />} label={t("Keywords")} active={activeTab === "keywords"} onClick={() => setActiveTab("keywords")} isDark={isDark} />
@@ -3317,15 +3322,16 @@ const RASHI_ICONS: Record<string, string> = {
   libra: '♎', scorpio: '♏', sagittarius: '♐', capricorn: '♑', aquarius: '♒', pisces: '♓',
 };
 
-function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSuccess, setError }: { 
+function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSuccess, setError, mode = 'daily' }: { 
   isDark: boolean, 
   t: (key: string) => string,
   isActionLoading: boolean,
   setIsActionLoading: (v: boolean) => void,
   setSuccess: (v: string) => void,
-  setError: (v: string) => void
+  setError: (v: string) => void,
+  mode?: 'daily' | 'weekly'
 }) {
-  const [rashifalMode, setRashifalMode] = useState<'daily' | 'weekly'>('daily');
+  const [rashifalMode, setRashifalMode] = useState<'daily' | 'weekly'>(mode);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedRashi, setSelectedRashi] = useState('aries');
   const [rashifalForm, setRashifalForm] = useState({
@@ -3492,25 +3498,20 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-2xl font-bold font-[family-name:var(--font-cinzel)] text-[#ff6b35]">{t("Rashifal Manager")}</h2>
-          <p className="text-muted-foreground">{t("Add or edit horoscope predictions for all 12 rashis")}</p>
+          <div className="flex flex-col gap-2">
+            <h2 className="text-2xl font-bold font-[family-name:var(--font-cinzel)] text-[#ff6b35]">
+              {rashifalMode === 'daily' ? t("Daily Rashifal Manager") : t("Weekly Rashifal Manager")}
+            </h2>
+            <p className="text-muted-foreground">
+              {rashifalMode === 'daily' 
+                ? t("Add or edit daily horoscope predictions for all 12 rashis") 
+                : t("Add or edit weekly horoscope predictions for all 12 rashis")}
+            </p>
+          </div>
+          <span className={`px-4 py-2 rounded-xl text-sm font-bold ${rashifalMode === 'daily' ? 'bg-blue-500/10 text-blue-500' : 'bg-purple-500/10 text-purple-500'}`}>
+            {rashifalMode === 'daily' ? t("Daily Mode") : t("Weekly Mode")}
+          </span>
         </div>
-        <div className={`flex p-1 rounded-xl border ${isDark ? 'bg-white/5 border-[#ff6b35]/20' : 'bg-[#ff6b35]/5 border-[#ff6b35]/20'}`}>
-          <button
-            onClick={() => setRashifalMode('daily')}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${rashifalMode === 'daily' ? 'bg-[#ff6b35] text-white shadow-lg' : 'text-[#ff6b35] hover:bg-[#ff6b35]/10'}`}
-          >
-            {t("Daily")}
-          </button>
-          <button
-            onClick={() => setRashifalMode('weekly')}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${rashifalMode === 'weekly' ? 'bg-[#ff6b35] text-white shadow-lg' : 'text-[#ff6b35] hover:bg-[#ff6b35]/10'}`}
-          >
-            {t("Weekly")}
-          </button>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Date & Rashi Selection */}
