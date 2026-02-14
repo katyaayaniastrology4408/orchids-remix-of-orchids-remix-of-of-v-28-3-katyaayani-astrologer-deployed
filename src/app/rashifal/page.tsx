@@ -76,9 +76,9 @@ function RashifalPageContent() {
   const { theme } = useTheme();
   const { language } = useTranslation();
   const searchParams = useSearchParams();
-  const initialTab = searchParams.get('tab') === 'weekly' ? 'weekly' : 'daily';
+    const initialTab = searchParams.get('tab') === 'weekly' ? 'weekly' : 'daily';
 
-  const [viewType, setViewType] = useState<'daily' | 'weekly'>(initialTab);
+    const [viewType] = useState<'daily' | 'weekly'>(initialTab);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedWeekStart, setSelectedWeekStart] = useState(() => getMonday(new Date()).toISOString().split('T')[0]);
   const [selectedRashi, setSelectedRashi] = useState<string | null>(null);
@@ -201,29 +201,7 @@ function RashifalPageContent() {
             </p>
           </div>
 
-        {/* Daily / Weekly Toggle */}
-        <div className="flex justify-center mb-8">
-          <div className={`flex p-1.5 rounded-2xl border ${theme === 'dark' ? 'bg-[#12121a] border-[#ff6b35]/20' : 'bg-white border-[#ff6b35]/20'} shadow-lg`}>
-            <Button
-              variant={viewType === 'daily' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => { setViewType('daily'); setSelectedRashi(null); }}
-              className={`rounded-xl px-6 ${viewType === 'daily' ? 'bg-[#ff6b35] text-white shadow-lg' : 'text-[#ff6b35] hover:bg-[#ff6b35]/10'}`}
-            >
-              {language === 'gu' ? 'દૈનિક' : language === 'hi' ? 'दैनिक' : 'Daily'}
-            </Button>
-            <Button
-              variant={viewType === 'weekly' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => { setViewType('weekly'); setSelectedRashi(null); }}
-              className={`rounded-xl px-6 ${viewType === 'weekly' ? 'bg-[#ff6b35] text-white shadow-lg' : 'text-[#ff6b35] hover:bg-[#ff6b35]/10'}`}
-            >
-              {language === 'gu' ? 'સાપ્તાહિક' : language === 'hi' ? 'साप्ताहिक' : 'Weekly'}
-            </Button>
-          </div>
-        </div>
-
-        {/* Date / Week Selector */}
+          {/* Date / Week Selector */}
         <div className="flex items-center justify-center gap-4 mb-12">
           <Button
             variant="outline"

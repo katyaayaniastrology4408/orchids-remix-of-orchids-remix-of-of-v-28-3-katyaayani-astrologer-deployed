@@ -150,7 +150,42 @@ export default function BlogPage() {
           </Card>
         </Link>
 
-        {/* Hindu Calendar Banner */}
+          {/* Weekly Horoscope Banner */}
+          <Link href="/rashifal?tab=weekly">
+            <Card className={`mb-6 overflow-hidden cursor-pointer transition-all hover:scale-[1.01] ${
+              theme === 'dark' ? 'bg-gradient-to-r from-[#1a1224] to-[#12121a]' : 'bg-gradient-to-r from-purple-50 to-orange-50'
+            } border-none shadow-xl`}>
+              <CardContent className="p-6 md:p-8">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div>
+                    <h2 className="font-[family-name:var(--font-cinzel)] text-xl md:text-2xl font-bold mb-2">
+                      {language === 'gu' ? 'સાપ્તાહિક રાશિફળ' : language === 'hi' ? 'साप्ताहिक राशिफल' : 'Weekly Horoscope'}
+                    </h2>
+                    <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {language === 'gu' ? 'આ અઠવાડિયાનું તમારી રાશિનું ભાગ્યફળ જાણો' :
+                       language === 'hi' ? 'इस सप्ताह का अपनी राशि का भाग्यफल जानें' :
+                       'Know your zodiac fortune for this week'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex -space-x-2">
+                      {RASHI_DATA.slice(6, 12).map((rashi) => (
+                        <div 
+                          key={rashi.english}
+                          className={`w-10 h-10 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-purple-500/20' : 'bg-purple-100'} border-2 ${theme === 'dark' ? 'border-[#0a0a0f]' : 'border-white'}`}
+                        >
+                          <rashi.icon className="w-5 h-5 text-purple-500" />
+                        </div>
+                      ))}
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-purple-500 ml-2" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* Hindu Calendar Banner */}
         <Link href="/hindu-calendar">
           <Card className={`mb-8 overflow-hidden cursor-pointer transition-all hover:scale-[1.01] ${
             theme === 'dark' ? 'bg-gradient-to-r from-[#1a1a24] to-[#12121a]' : 'bg-gradient-to-r from-purple-50 to-orange-50'
