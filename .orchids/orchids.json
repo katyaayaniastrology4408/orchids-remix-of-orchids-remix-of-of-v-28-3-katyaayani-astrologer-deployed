@@ -1,9 +1,9 @@
 {
-  "projectId": "01ac65df-ade6-4ea7-93c6-79aaabeb8936",
+  "projectId": "82257351-6e7a-48cd-a2d1-b2ac49e135b9",
   "createdAt": 1765688394053,
   "version": "1.0",
   "startupCommands": [
-    "npm install; npm run dev"
+    "bun install; node \"node_modules/next/dist/bin/next\" dev --port 3000"
   ],
   "templateId": "any",
   "detectedFramework": "nextjs"
