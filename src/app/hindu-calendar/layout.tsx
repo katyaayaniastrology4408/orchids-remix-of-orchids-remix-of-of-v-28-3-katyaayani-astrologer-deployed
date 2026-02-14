@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { getSeoMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const seo = await getSeoMetadata("/hindu-calendar");
-  return { title: "Hindu Calendar", ...seo };
+  return getSeoMetadata("/hindu-calendar");
 }
 
 export default function HinduCalendarLayout({

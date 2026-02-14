@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
       default: "Katyaayani Astrologer - Best Vedic Astrologer | Kundali, Horoscope & Jyotish",
       template: "%s | Katyaayani Astrologer",
     },
-    description: "Katyaayani Astrologer (Rudram Joshi) - Expert Vedic astrology consultations, kundali analysis, horoscope readings, vastu shastra & personalized remedies since 2007. Book online consultation today.",
+    description: "Katyaayani Astrologer connects modern times with ancient astrology, blending ancient wisdom with today's technology to provide accurate guidance, practical solutions, and personalized remedies. Expert Vedic astrology consultations, kundali analysis, horoscope readings, vastu shastra since 2007. Book online consultation today.",
     keywords: [
       "katyaayani astrologer", "katyaayani jyotish", "vedic astrologer", "best astrologer india",
       "kundali", "horoscope", "jyotish", "astrology consultation", "vastu shastra", "rashifal",
@@ -53,7 +53,7 @@ export async function generateMetadata(): Promise<Metadata> {
       url: SITE_URL,
       locale: "en_IN",
       title: "Katyaayani Astrologer - Best Vedic Astrologer | Kundali, Horoscope & Jyotish",
-      description: "Expert Vedic astrology consultations, kundali analysis, horoscope readings, vastu shastra & personalized remedies since 2007.",
+      description: "Katyaayani Astrologer connects modern times with ancient astrology, blending ancient wisdom with today's technology. Expert kundali analysis, horoscope readings, vastu consultation & personalized remedies since 2007.",
       images: [
         {
           url: OG_IMAGE,
@@ -66,7 +66,7 @@ export async function generateMetadata(): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title: "Katyaayani Astrologer - Best Vedic Astrologer",
-      description: "Expert Vedic astrology consultations, kundali analysis, horoscope readings & personalized remedies since 2007.",
+      description: "Katyaayani Astrologer connects modern times with ancient astrology. Expert kundali, horoscope & jyotish consultations since 2007.",
       images: [OG_IMAGE],
     },
     alternates: {

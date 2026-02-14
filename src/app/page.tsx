@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   
   return {
     title: (seo.title as string) || "Katyaayani Astrologer - Best Vedic Astrologer | Kundali, Horoscope & Jyotish Consultation",
-    description: seo.description || "Katyaayani Astrologer (Rudram Joshi) - Expert Vedic astrology consultations, kundali analysis, horoscope readings, vastu shastra, and personalized remedies. Trusted astrologer since 2007. Book online or home consultation today.",
+    description: seo.description || "Katyaayani Astrologer connects modern times with ancient astrology, blending ancient wisdom with today's technology to provide accurate guidance, practical solutions, and personalized remedies. Expert Vedic astrology consultations, kundali analysis, horoscope readings, vastu shastra since 2007. Book online or home consultation today.",
     keywords: (seo.keywords as string[]) || [
       "katyaayani astrologer", "katyaayani jyotish", "vedic astrologer", "best astrologer",
       "kundali analysis", "horoscope reading", "jyotish consultation", "astrology online",
@@ -26,13 +26,13 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: "Katyaayani Astrologer",
       url: SITE_URL,
       title: "Katyaayani Astrologer - Expert Vedic Astrology & Jyotish Consultations",
-      description: "Unlock Vedic wisdom with Katyaayani Astrologer (Rudram Joshi). Expert kundali analysis, horoscope readings, vastu consultation & personalized remedies since 2007.",
+      description: "Katyaayani Astrologer connects modern times with ancient astrology, blending ancient wisdom with today's technology. Expert kundali analysis, horoscope readings, vastu consultation & personalized remedies since 2007.",
       locale: "en_IN",
     },
     twitter: {
       card: "summary_large_image",
       title: "Katyaayani Astrologer - Expert Vedic Astrology Consultations",
-      description: "Unlock Vedic wisdom with Katyaayani Astrologer. Expert kundali, horoscope & jyotish consultations since 2007.",
+      description: "Katyaayani Astrologer connects modern times with ancient astrology. Expert kundali, horoscope & jyotish consultations since 2007.",
     },
     alternates: {
       canonical: SITE_URL,
@@ -66,10 +66,11 @@ export default function HomePage() {
       <div className="sr-only">
         <h1>Katyaayani Astrologer - Best Vedic Astrologer for Kundali, Horoscope & Jyotish Consultation</h1>
         <p>
-          Katyaayani Astrologer (Rudram Joshi) is a trusted Vedic astrologer offering expert astrology consultations since 2007. 
-          Our services include kundali analysis, horoscope reading, rashifal predictions, vastu shastra consultation, 
-          marriage and kundali matching, career astrology, health astrology, and personalized Vedic remedies.
-        </p>
+            Katyaayani Astrologer connects modern times with ancient astrology, blending ancient wisdom with today&apos;s technology 
+            to provide accurate guidance, practical solutions, and personalized remedies — creating a perfect balance between 
+            tradition and contemporary life. Our services include kundali analysis, horoscope reading, rashifal predictions, 
+            vastu shastra consultation, marriage and kundali matching, career astrology, health astrology, and personalized Vedic remedies.
+          </p>
         <p>
           Book your astrology consultation online or at home. We serve clients worldwide through video call consultations 
           and in-person sessions. Get accurate birth chart analysis, daily horoscope predictions, Hindu panchang, 

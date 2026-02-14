@@ -25,62 +25,100 @@ export function generateSlug(text: string): string {
     .replace(/^-|-$/g, "");
 }
 
+// Brand description used across SEO
+const BRAND_DESC = "Katyaayani Astrologer connects modern times with ancient astrology, blending ancient wisdom with today's technology to provide accurate guidance, practical solutions, and personalized remedies — creating a perfect balance between tradition and contemporary life.";
+
 // ─── Default Meta Fallbacks Per Page ───
 const PAGE_DEFAULTS: Record<string, { title: string; description: string; keywords: string }> = {
   "/": {
     title: "Katyaayani Astrologer - Best Vedic Astrologer | Kundali, Horoscope & Jyotish Consultation",
-    description: "Katyaayani Astrologer (Rudram Joshi) - Expert Vedic astrology consultations, kundali analysis, horoscope readings, vastu shastra & personalized remedies since 2007. Book online or home consultation today.",
-    keywords: "katyaayani astrologer, katyaayani jyotish, vedic astrologer, best astrologer, kundali analysis, horoscope reading, jyotish consultation, astrology online, vastu shastra, rudram joshi astrologer, indian astrology, birth chart analysis, rashifal, panchang, hindu calendar, astrology consultation online, best vedic astrologer india, kundali matching, marriage astrology, career astrology, health astrology, astrology remedies, કાત્યાયની જ્યોતિષ, कात्यायनी ज्योतिष",
+    description: `${BRAND_DESC} Expert Vedic astrology consultations, kundali analysis, horoscope readings, vastu shastra & personalized remedies since 2007. Book online or home consultation today.`,
+    keywords: "katyaayani astrologer, katyaayani jyotish, vedic astrologer, best astrologer, kundali analysis, horoscope reading, jyotish consultation, astrology online, vastu shastra, rudram joshi astrologer, indian astrology, birth chart analysis, rashifal, panchang, hindu calendar, astrology consultation online, best vedic astrologer india, kundali matching, marriage astrology, career astrology, health astrology, astrology remedies, ancient astrology modern times, vedic wisdom technology, કાત્યાયની જ્યોતિષ, कात्यायनी ज्योतिष",
   },
   "/about": {
     title: "About Katyaayani Astrologer (Rudram Joshi) - Trusted Vedic Astrologer Since 2007",
-    description: "Learn about Katyaayani Astrologer (Rudram Joshi) - a trusted Vedic astrology expert with 17+ years experience offering kundali analysis, horoscope readings, vastu consultation & spiritual guidance.",
-    keywords: "about katyaayani astrologer, rudram joshi astrologer, vedic astrologer experience, trusted astrologer india, katyaayani jyotish about",
+    description: `${BRAND_DESC} Learn about Rudram Joshi - a trusted Vedic astrology expert with 18+ years experience offering kundali analysis, horoscope readings, vastu consultation & spiritual guidance.`,
+    keywords: "about katyaayani astrologer, rudram joshi astrologer, vedic astrologer experience, trusted astrologer india, katyaayani jyotish about, ancient wisdom modern astrology",
   },
   "/services": {
     title: "Astrology Services - Kundali, Horoscope, Vastu & Marriage Matching | Katyaayani",
-    description: "Explore Katyaayani Astrologer's services: kundali analysis, horoscope reading, kundali matching for marriage, vastu shastra, career astrology, health astrology & personalized Vedic remedies.",
-    keywords: "astrology services, kundali matching, horoscope analysis, vastu shastra consultation, marriage astrology, career astrology, gemstone recommendation, vedic remedies, katyaayani services",
+    description: `Explore Katyaayani Astrologer's services: kundali analysis, horoscope reading, kundali matching for marriage, vastu shastra, career astrology, health astrology & personalized Vedic remedies. ${BRAND_DESC}`,
+    keywords: "astrology services, kundali matching, horoscope analysis, vastu shastra consultation, marriage astrology, career astrology, gemstone recommendation, vedic remedies, katyaayani services, personalized astrology solutions",
   },
   "/booking": {
     title: "Book Astrology Consultation Online | Katyaayani Astrologer",
-    description: "Book your personalized Vedic astrology consultation with Katyaayani Astrologer. Choose online video call or in-person home visit sessions. Easy booking, trusted astrologer.",
-    keywords: "book astrology appointment, online astrology consultation, astrology booking, katyaayani booking, vedic consultation appointment, astrologer near me",
+    description: `Book your personalized Vedic astrology consultation with Katyaayani Astrologer. Choose online video call or in-person home visit sessions. ${BRAND_DESC}`,
+    keywords: "book astrology appointment, online astrology consultation, astrology booking, katyaayani booking, vedic consultation appointment, astrologer near me, book astrologer online",
   },
   "/blog": {
     title: "Astrology Blog - Vedic Insights, Horoscope Updates & Spiritual Wisdom | Katyaayani",
-    description: "Read the latest astrology articles, Vedic insights, horoscope updates, rashifal predictions, panchang information & spiritual wisdom from Katyaayani Astrologer.",
-    keywords: "astrology blog, vedic knowledge, horoscope updates, spiritual articles, astrology tips, katyaayani blog, jyotish articles",
+    description: `Read the latest astrology articles, Vedic insights, horoscope updates, rashifal predictions, panchang information & spiritual wisdom. ${BRAND_DESC}`,
+    keywords: "astrology blog, vedic knowledge, horoscope updates, spiritual articles, astrology tips, katyaayani blog, jyotish articles, vedic wisdom blog",
   },
   "/horoscope": {
-    title: "Daily Horoscope - Today's Zodiac Predictions | Katyaayani Astrologer",
-    description: "Get accurate daily horoscope predictions for all 12 zodiac signs by Katyaayani Astrologer. Personalized Vedic astrology forecasts for love, career, health & finance.",
-    keywords: "daily horoscope, zodiac predictions, today horoscope, astrology forecast, rashi, horoscope today, katyaayani horoscope, zodiac signs daily",
+    title: "Daily Horoscope & Yearly Predictions - Zodiac Forecasts | Katyaayani Astrologer",
+    description: `Get accurate daily horoscope and yearly predictions for all 12 zodiac signs by Katyaayani Astrologer. Personalized Vedic astrology forecasts for love, career, health & finance. ${BRAND_DESC}`,
+    keywords: "daily horoscope, yearly horoscope, zodiac predictions, today horoscope, astrology forecast, rashi, horoscope today, katyaayani horoscope, zodiac signs daily, yearly predictions 2026",
   },
   "/rashifal": {
-    title: "Rashifal - Daily Rashi Predictions | Katyaayani Astrologer",
-    description: "Read your daily rashifal and rashi predictions by Katyaayani Astrologer. Accurate Vedic astrology forecasts in Hindi & Gujarati for all zodiac signs.",
-    keywords: "rashifal, rashi, daily rashifal, aaj ka rashifal, rashi bhavishya, vedic astrology hindi, rashifal today, katyaayani rashifal, રાશિફળ",
+    title: "Rashifal - Daily & Weekly Rashi Predictions in Hindi & Gujarati | Katyaayani Astrologer",
+    description: `Read your daily and weekly rashifal predictions by Katyaayani Astrologer. Accurate Vedic astrology forecasts in Hindi & Gujarati for all 12 zodiac signs. ${BRAND_DESC}`,
+    keywords: "rashifal, daily rashifal, weekly rashifal, aaj ka rashifal, rashi bhavishya, vedic astrology hindi, rashifal today, katyaayani rashifal, રાશિફળ, साप्ताहिक राशिफल, દૈનિક રાશિફળ",
   },
   "/hindu-calendar": {
     title: "Hindu Calendar 2026 - Panchang, Tithi & Nakshatra | Katyaayani Astrologer",
-    description: "Check the Hindu calendar with daily panchang, tithi, nakshatra, yoga, karana & auspicious muhurat timings. Plan your rituals and ceremonies with Katyaayani Astrologer.",
-    keywords: "hindu calendar 2026, panchang today, tithi today, nakshatra, muhurat, hindu panchang, katyaayani panchang, vikram samvat, હિંદુ કેલેન્ડર",
+    description: `Check the Hindu calendar with daily panchang, tithi, nakshatra, yoga, karana & auspicious muhurat timings. Plan your rituals and ceremonies. ${BRAND_DESC}`,
+    keywords: "hindu calendar 2026, panchang today, tithi today, nakshatra, muhurat, hindu panchang, katyaayani panchang, vikram samvat, હિંદુ કેલેન્ડર, हिन्दू कैलेंडर 2026",
   },
   "/important-days": {
     title: "Important Hindu Festivals & Vrat Days 2026 | Katyaayani Astrologer",
-    description: "Discover important Hindu festivals, vrat dates, ekadashi, purnima, amavasya & auspicious days with detailed panchang information by Katyaayani Astrologer.",
-    keywords: "hindu festivals 2026, vrat dates, important hindu days, ekadashi dates, purnima dates, amavasya dates, katyaayani festivals",
+    description: `Discover important Hindu festivals, vrat dates, ekadashi, purnima, amavasya & auspicious days with detailed panchang information. ${BRAND_DESC}`,
+    keywords: "hindu festivals 2026, vrat dates, important hindu days, ekadashi dates, purnima dates, amavasya dates, katyaayani festivals, તહેવારો 2026, त्योहार 2026",
   },
   "/online-consulting": {
     title: "Online Astrology Consultation - Video Call Sessions Worldwide | Katyaayani",
-    description: "Get expert Vedic astrology consultation online via video call with Katyaayani Astrologer. Available worldwide. Convenient, personalized & accurate kundali and horoscope sessions.",
-    keywords: "online astrology consultation, virtual astrology session, video call astrology, online kundali reading, astrologer online, katyaayani online consultation, worldwide astrology",
+    description: `Get expert Vedic astrology consultation online via video call with Katyaayani Astrologer. Available worldwide. Convenient, personalized & accurate kundali and horoscope sessions. ${BRAND_DESC}`,
+    keywords: "online astrology consultation, virtual astrology session, video call astrology, online kundali reading, astrologer online, katyaayani online consultation, worldwide astrology, astrology from home",
   },
   "/feedback": {
     title: "Client Reviews & Testimonials | Katyaayani Astrologer",
-    description: "Read genuine testimonials and reviews from satisfied clients of Katyaayani Astrologer. Trusted by hundreds of clients for Vedic astrology consultations since 2007.",
-    keywords: "katyaayani astrologer reviews, astrology testimonials, client feedback, astrologer reviews, trusted astrologer reviews",
+    description: `Read genuine testimonials and reviews from satisfied clients of Katyaayani Astrologer. Trusted by hundreds of clients for Vedic astrology consultations since 2007. ${BRAND_DESC}`,
+    keywords: "katyaayani astrologer reviews, astrology testimonials, client feedback, astrologer reviews, trusted astrologer reviews, client experiences",
+  },
+  "/privacy": {
+    title: "Privacy Policy | Katyaayani Astrologer",
+    description: "Read the privacy policy of Katyaayani Astrologer. Learn how we collect, use, and protect your personal information during astrology consultations and website usage.",
+    keywords: "privacy policy, katyaayani astrologer privacy, data protection, personal information policy",
+  },
+  "/terms": {
+    title: "Terms & Conditions | Katyaayani Astrologer",
+    description: "Read the terms and conditions for using Katyaayani Astrologer's services. Understand our service policies, booking terms, and user responsibilities.",
+    keywords: "terms and conditions, katyaayani astrologer terms, service agreement, booking terms, astrology consultation terms",
+  },
+  "/refund-policy": {
+    title: "Refund & Cancellation Policy | Katyaayani Astrologer",
+    description: "Review the refund and cancellation policy for Katyaayani Astrologer's astrology consultation services. Understand our booking cancellation and refund procedures.",
+    keywords: "refund policy, cancellation policy, katyaayani refund, booking cancellation, astrology consultation refund",
+  },
+  "/disclaimer": {
+    title: "Disclaimer | Katyaayani Astrologer",
+    description: "Read the disclaimer for Katyaayani Astrologer's services. Understand the nature of astrological guidance and the limitations of our predictions and remedies.",
+    keywords: "disclaimer, katyaayani astrologer disclaimer, astrology disclaimer, vedic astrology guidance",
+  },
+  "/signin": {
+    title: "Sign In to Your Account | Katyaayani Astrologer",
+    description: "Sign in to your Katyaayani Astrologer account to access personalized horoscope readings, booking history, and exclusive astrology consultations.",
+    keywords: "sign in, login, katyaayani astrologer login, astrology account",
+  },
+  "/signup": {
+    title: "Create Your Account | Katyaayani Astrologer",
+    description: "Create your free account on Katyaayani Astrologer to get personalized horoscope readings, book consultations, and receive daily rashifal predictions.",
+    keywords: "sign up, register, create account, katyaayani astrologer account, free astrology account",
+  },
+  "/profile": {
+    title: "My Profile | Katyaayani Astrologer",
+    description: "Manage your Katyaayani Astrologer profile, view booking history, check horoscope readings, and update your personal information.",
+    keywords: "my profile, account settings, katyaayani profile, booking history, astrology dashboard",
   },
 };
 

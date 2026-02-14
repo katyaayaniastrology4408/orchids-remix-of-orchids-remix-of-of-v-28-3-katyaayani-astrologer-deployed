@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { getSeoMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const seo = await getSeoMetadata("/terms");
-  return { title: "Terms & Conditions", ...seo };
+  return getSeoMetadata("/terms");
 }
 
 export default function TermsLayout({
