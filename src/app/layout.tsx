@@ -17,7 +17,7 @@ import SchemaMarkup from "@/components/SchemaMarkup";
 const ICON_BASE = 'https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const SITE_URL = "https://katyaayaniastrologer.com";
+  const SITE_URL = "https://www.katyaayaniastrologer.com";
   const OG_IMAGE = `${ICON_BASE}?width=1200&height=630&resize=contain`;
 
   return {

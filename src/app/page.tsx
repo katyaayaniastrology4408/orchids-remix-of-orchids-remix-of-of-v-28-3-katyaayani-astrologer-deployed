@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { getSeoMetadata, generateSchemaMarkup } from "@/lib/seo";
 import HomePageClient from "@/components/homepage/HomePageClient";
 
-const SITE_URL = "https://katyaayaniastrologer.com";
+const SITE_URL = "https://www.katyaayaniastrologer.com";
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeoMetadata("/");

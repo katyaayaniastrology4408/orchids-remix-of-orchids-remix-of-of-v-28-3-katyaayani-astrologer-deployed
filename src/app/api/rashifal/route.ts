@@ -8,7 +8,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://katyaayaniastrologer.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.katyaayaniastrologer.com';
 
 const RASHI_DATA = [
   { english: 'aries', gujarati: 'મેષ', hindi: 'मेष' },

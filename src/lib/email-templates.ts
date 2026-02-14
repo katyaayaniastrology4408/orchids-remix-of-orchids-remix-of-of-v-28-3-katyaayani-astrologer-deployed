@@ -1,6 +1,6 @@
 // Logo URL - hosted on Supabase storage
 const LOGO_URL = 'https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/project-uploads/749cf92f-0c06-43d7-b795-4c90a58526eb/logo_withoutname-1770224400752.png';
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://katyaayaniastrologer.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.katyaayaniastrologer.com';
 const CURRENT_YEAR = new Date().getFullYear();
 
 // Base template wrapper with consistent branding
