@@ -49,55 +49,75 @@ const baseTemplate = (content: string, userName: string = 'Seeker', preheader?: 
             </td>
           </tr>
           
-          <!-- Footer -->
-          <tr>
-            <td style="padding-top: 35px; text-align: center;">
-              <!-- Logo in Footer -->
-              <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 20px;">
-                <tr>
-                  <td style="vertical-align: middle;">
-                    <img src="${LOGO_URL}" alt="Katyaayani Logo" width="35" height="35" style="display: block; border-radius: 50%; opacity: 0.8;" />
-                  </td>
-                  <td style="padding-left: 10px; vertical-align: middle;">
-                    <span style="color: #888; font-size: 14px; font-weight: 600; letter-spacing: 2px;">KATYAAYANI</span>
-                  </td>
-                </tr>
-              </table>
-              
-              <p style="color: #c9a87c; font-style: italic; font-size: 14px; margin-bottom: 20px;">"The stars impel, they do not compel."</p>
-              
-              <!-- Navigation Links -->
-              <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 20px;">
-                <tr>
-                  <td style="padding: 0 12px;"><a href="${BASE_URL}" style="color: #888; font-size: 12px; text-decoration: none;">Website</a></td>
-                  <td style="color: #444;">|</td>
-                  <td style="padding: 0 12px;"><a href="${BASE_URL}/booking" style="color: #888; font-size: 12px; text-decoration: none;">Book Consultation</a></td>
-                  <td style="color: #444;">|</td>
-                  <td style="padding: 0 12px;"><a href="mailto:katyaayaniastrologer01@gmail.com" style="color: #888; font-size: 12px; text-decoration: none;">Contact</a></td>
-                  <td style="color: #444;">|</td>
-                  <td style="padding: 0 12px;"><a href="${BASE_URL}/privacy" style="color: #888; font-size: 12px; text-decoration: none;">Privacy</a></td>
-                </tr>
-              </table>
-              
-              <!-- Divider -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 20px 0;">
-                <tr>
-                  <td style="height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(255, 107, 53, 0.3) 50%, transparent 100%);"></td>
-                </tr>
-              </table>
-              
-              <!-- Copyright -->
-              <p style="color: #666; font-size: 11px; margin-bottom: 8px;">
-                © ${CURRENT_YEAR} <strong style="color: #ff6b35;">Katyaayani Astrologer</strong>. All rights reserved.
-              </p>
-              <p style="color: #555; font-size: 10px; margin-bottom: 5px;">
-                This email was sent to <span style="color: #c9a87c;">${userName}</span> as a registered user of Katyaayani Astrologer.
-              </p>
-              <p style="color: #444; font-size: 10px;">
-                Need help? Contact us at <a href="mailto:katyaayaniastrologer01@gmail.com" style="color: #ff6b35; text-decoration: none;">katyaayaniastrologer01@gmail.com</a>
-              </p>
-            </td>
-          </tr>
+            <!-- Footer -->
+            <tr>
+              <td style="padding-top: 35px; text-align: center;">
+                <!-- Logo in Footer -->
+                <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 20px;">
+                  <tr>
+                    <td style="vertical-align: middle;">
+                      <img src="${LOGO_URL}" alt="Katyaayani Logo" width="40" height="40" style="display: block; border-radius: 50%; border: 2px solid #ff6b35;" />
+                    </td>
+                    <td style="padding-left: 12px; vertical-align: middle;">
+                      <span style="color: #ff6b35; font-size: 16px; font-weight: 700; letter-spacing: 2px; display: block;">KATYAAYANI</span>
+                      <span style="color: #c9a87c; font-size: 9px; letter-spacing: 4px; text-transform: uppercase; display: block; margin-top: 2px;">ASTROLOGER</span>
+                    </td>
+                  </tr>
+                </table>
+                
+                <p style="color: #c9a87c; font-style: italic; font-size: 14px; margin-bottom: 20px;">"The stars impel, they do not compel."</p>
+                
+                <!-- Contact Info -->
+                <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 15px;">
+                  <tr>
+                    <td style="text-align: center;">
+                      <p style="color: #e8dcc8; font-size: 13px; margin: 0 0 6px;">
+                        <a href="tel:+919824929588" style="color: #e8dcc8; text-decoration: none;">+91 98249 29588</a>
+                      </p>
+                      <p style="color: #b8a896; font-size: 12px; margin: 0 0 6px;">
+                        <a href="mailto:katyaayaniastrologer01@gmail.com" style="color: #b8a896; text-decoration: none;">katyaayaniastrologer01@gmail.com</a>
+                      </p>
+                      <p style="margin: 8px 0 0;">
+                        <a href="https://wa.me/919824929588?text=Hello! I would like to know about online astrology consultation." style="display: inline-block; padding: 6px 16px; background: rgba(37, 211, 102, 0.15); border-radius: 20px; color: #25d366; font-size: 11px; text-decoration: none; border: 1px solid rgba(37, 211, 102, 0.3); letter-spacing: 1px;">Chat on WhatsApp</a>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+                
+                <!-- Navigation Links -->
+                <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 20px;">
+                  <tr>
+                    <td style="padding: 0 10px;"><a href="${BASE_URL}" style="color: #888; font-size: 12px; text-decoration: none;">Home</a></td>
+                    <td style="color: #444;">|</td>
+                    <td style="padding: 0 10px;"><a href="${BASE_URL}/services" style="color: #888; font-size: 12px; text-decoration: none;">Services</a></td>
+                    <td style="color: #444;">|</td>
+                    <td style="padding: 0 10px;"><a href="${BASE_URL}/booking" style="color: #888; font-size: 12px; text-decoration: none;">Book Now</a></td>
+                    <td style="color: #444;">|</td>
+                    <td style="padding: 0 10px;"><a href="${BASE_URL}/blog" style="color: #888; font-size: 12px; text-decoration: none;">Blog</a></td>
+                    <td style="color: #444;">|</td>
+                    <td style="padding: 0 10px;"><a href="${BASE_URL}/about" style="color: #888; font-size: 12px; text-decoration: none;">About</a></td>
+                  </tr>
+                </table>
+                
+                <!-- Divider -->
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 20px 0;">
+                  <tr>
+                    <td style="height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(255, 107, 53, 0.3) 50%, transparent 100%);"></td>
+                  </tr>
+                </table>
+                
+                <!-- Copyright -->
+                <p style="color: #666; font-size: 11px; margin-bottom: 8px;">
+                  &copy; ${CURRENT_YEAR} <strong style="color: #ff6b35;">Katyaayani Astrologer</strong>. All rights reserved.
+                </p>
+                <p style="color: #555; font-size: 10px; margin-bottom: 5px;">
+                  This email was sent to <span style="color: #c9a87c;">${userName}</span> as a registered user of Katyaayani Astrologer.
+                </p>
+                <p style="color: #444; font-size: 10px;">
+                  <a href="${BASE_URL}" style="color: #ff6b35; text-decoration: none;">www.katyaayaniastrologer.com</a>
+                </p>
+              </td>
+            </tr>
           
         </table>
       </td>
