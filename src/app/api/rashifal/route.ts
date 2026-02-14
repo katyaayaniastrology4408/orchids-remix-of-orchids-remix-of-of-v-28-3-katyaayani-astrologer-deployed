@@ -126,25 +126,25 @@ export async function POST(request: NextRequest) {
 
                 const validUsers = (allUsers || []).filter(u => u.email && u.email.includes('@'));
                 
-                if (validUsers.length > 0) {
-                  const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('en-IN', {
-                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-                  });
+              if (validUsers.length > 0) {
+                    const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('en-IN', {
+                      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                    });
 
-                  let sentCount = 0;
-                  for (const user of validUsers) {
+                    // Pick one random user to send daily rashifal email
+                    const randomUser = validUsers[Math.floor(Math.random() * validUsers.length)];
+                    let sentCount = 0;
                     try {
-                      const userName = user.name || 'Valued Seeker';
+                      const userName = randomUser.name || 'Valued Seeker';
                       await sendEmail({
-                        to: user.email,
+                        to: randomUser.email,
                         subject: `Today's Rashifal Has Been Updated! - ${formattedDate}`,
                         html: getRashifalEmailHtml(userName, formattedDate, upsertData),
                       });
-                      sentCount++;
+                      sentCount = 1;
                     } catch (err) {
-                      console.error(`Failed to send to ${user.email}:`, err);
+                      console.error(`Failed to send to ${randomUser.email}:`, err);
                     }
-                  }
 
                 // Record notification
                 await supabase.from('rashifal_notifications').insert({
