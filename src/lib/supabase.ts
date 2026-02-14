@@ -24,9 +24,7 @@ export const supabase = new Proxy({} as any, {
         if (prop === 'auth') return noopAuth;
         return () => ({ data: null, error: new Error('Supabase not configured') });
       }
-        supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-          global: { fetch: (url, options = {}) => fetch(url, { ...options, cache: 'no-store' }) },
-        });
+        supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
     }
     return supabaseClient[prop];
   }
@@ -46,7 +44,6 @@ export const getSupabaseAdmin = () => {
       autoRefreshToken: false,
       persistSession: false,
     },
-    global: { fetch: (url, options = {}) => fetch(url, { ...options, cache: 'no-store' }) },
   });
 };
 
@@ -72,7 +69,6 @@ export const supabaseAdmin = typeof window === 'undefined'
                 autoRefreshToken: false,
                 persistSession: false,
               },
-              global: { fetch: (url, options = {}) => fetch(url, { ...options, cache: 'no-store' }) },
             });
         }
         return adminClient[prop];

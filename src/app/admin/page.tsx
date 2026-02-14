@@ -296,55 +296,43 @@ export default function AdminDashboard() {
       const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000)).toISOString();
       const sixtyDaysAgo = new Date(now.getTime() - (60 * 24 * 60 * 60 * 1000)).toISOString();
 
-      // Fetch all counts and data in parallel to avoid connection issues
-      const [
-        { count: bookingCount },
-        { count: userCount },
-        { count: enquiryCount },
-        { data: revenueDataRaw },
-        { count: currentBookings },
-        { count: previousBookings },
-        { count: currentUsers },
-        { count: previousUsers },
-        { count: currentEnquiries },
-        { count: previousEnquiries },
-      ] = await Promise.all([
-        supabase.from('bookings').select('*', { count: 'exact', head: true }),
-        supabase.from('profiles').select('*', { count: 'exact', head: true }),
-        supabase.from('enquiries').select('*', { count: 'exact', head: true }),
-        supabase.from('bookings').select('amount, created_at').eq('payment_status', 'completed'),
-        supabase.from('bookings').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo),
-        supabase.from('bookings').select('*', { count: 'exact', head: true }).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo),
-        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo),
-        supabase.from('profiles').select('*', { count: 'exact', head: true }).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo),
-        supabase.from('enquiries').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo),
-        supabase.from('enquiries').select('*', { count: 'exact', head: true }).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo),
-      ]);
+      // Fetch counts first (batch 1)
+        const { count: bookingCount } = await supabase.from('bookings').select('*', { count: 'exact', head: true });
+        const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+        const { count: enquiryCount } = await supabase.from('enquiries').select('*', { count: 'exact', head: true });
+        const { data: revenueDataRaw } = await supabase.from('bookings').select('amount, created_at').eq('payment_status', 'completed');
 
-      const totalRevenue = revenueDataRaw?.reduce((acc: number, curr: { amount?: number }) => acc + (Number(curr.amount) || 0), 0) || 0;
-      const currentRevenue = revenueDataRaw?.filter((r: { created_at?: string }) => r.created_at && r.created_at >= thirtyDaysAgo).reduce((acc: number, curr: { amount?: number }) => acc + (Number(curr.amount) || 0), 0) || 0;
-      const previousRevenue = revenueDataRaw?.filter((r: { created_at?: string }) => r.created_at && r.created_at >= sixtyDaysAgo && r.created_at < thirtyDaysAgo).reduce((acc: number, curr: { amount?: number }) => acc + (Number(curr.amount) || 0), 0) || 0;
+        // Fetch trend counts (batch 2)
+        const { count: currentBookings } = await supabase.from('bookings').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo);
+        const { count: previousBookings } = await supabase.from('bookings').select('*', { count: 'exact', head: true }).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo);
+        const { count: currentUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo);
+        const { count: previousUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo);
+        const { count: currentEnquiries } = await supabase.from('enquiries').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo);
+        const { count: previousEnquiries } = await supabase.from('enquiries').select('*', { count: 'exact', head: true }).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo);
 
-      setStats({
-        totalBookings: bookingCount || 0,
-        totalUsers: userCount || 0,
-        totalEnquiries: enquiryCount || 0,
-        totalRevenue,
-        bookingsTrend: calculateTrend(currentBookings || 0, previousBookings || 0),
-        usersTrend: calculateTrend(currentUsers || 0, previousUsers || 0),
-        enquiriesTrend: calculateTrend(currentEnquiries || 0, previousEnquiries || 0),
-        revenueTrend: calculateTrend(currentRevenue, previousRevenue)
-      });
+        const totalRevenue = revenueDataRaw?.reduce((acc: number, curr: { amount?: number }) => acc + (Number(curr.amount) || 0), 0) || 0;
+        const currentRevenue = revenueDataRaw?.filter((r: { created_at?: string }) => r.created_at && r.created_at >= thirtyDaysAgo).reduce((acc: number, curr: { amount?: number }) => acc + (Number(curr.amount) || 0), 0) || 0;
+        const previousRevenue = revenueDataRaw?.filter((r: { created_at?: string }) => r.created_at && r.created_at >= sixtyDaysAgo && r.created_at < thirtyDaysAgo).reduce((acc: number, curr: { amount?: number }) => acc + (Number(curr.amount) || 0), 0) || 0;
 
-const [bookingsRes, usersRes, enquiriesRes, feedbackRes, blockedRes, resetRequestsRes, meetingCodesRes] = await Promise.all([
-          supabase.from('bookings').select('*').order('created_at', { ascending: false }),
-          supabase.from('profiles').select('*').order('created_at', { ascending: false }),
-          supabase.from('enquiries').select('*').order('created_at', { ascending: false }),
-          supabase.from('feedback').select('*').order('created_at', { ascending: false }),
-          supabase.from('blocked_dates').select('*').order('date', { ascending: true }),
-          supabase.from('password_reset_requests').select('*').order('created_at', { ascending: false }),
-          supabase.from('meeting_codes').select('*').order('created_at', { ascending: false })
-        ]);
+        setStats({
+          totalBookings: bookingCount || 0,
+          totalUsers: userCount || 0,
+          totalEnquiries: enquiryCount || 0,
+          totalRevenue,
+          bookingsTrend: calculateTrend(currentBookings || 0, previousBookings || 0),
+          usersTrend: calculateTrend(currentUsers || 0, previousUsers || 0),
+          enquiriesTrend: calculateTrend(currentEnquiries || 0, previousEnquiries || 0),
+          revenueTrend: calculateTrend(currentRevenue, previousRevenue)
+        });
+
+        // Fetch full data (batch 3)
+        const bookingsRes = await supabase.from('bookings').select('*').order('created_at', { ascending: false });
+        const usersRes = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+        const enquiriesRes = await supabase.from('enquiries').select('*').order('created_at', { ascending: false });
+        const feedbackRes = await supabase.from('feedback').select('*').order('created_at', { ascending: false });
+        const blockedRes = await supabase.from('blocked_dates').select('*').order('date', { ascending: true });
+        const resetRequestsRes = await supabase.from('password_reset_requests').select('*').order('created_at', { ascending: false });
+        const meetingCodesRes = await supabase.from('meeting_codes').select('*').order('created_at', { ascending: false });
 
         const bData = bookingsRes.data || [];
         const uData = (usersRes.data || []).map((u: any) => ({
