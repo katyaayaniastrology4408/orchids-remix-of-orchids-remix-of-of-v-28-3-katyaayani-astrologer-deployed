@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
@@ -72,7 +72,7 @@ function getMonday(d: Date): Date {
   return date;
 }
 
-export default function RashifalPage() {
+function RashifalPageContent() {
   const { theme } = useTheme();
   const { language } = useTranslation();
   const searchParams = useSearchParams();
@@ -342,5 +342,13 @@ export default function RashifalPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function RashifalPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-[#ff6b35] border-t-transparent rounded-full" /></div>}>
+      <RashifalPageContent />
+    </Suspense>
   );
 }
