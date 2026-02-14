@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { week_start, week_end, rashifals } = body;
+    const { week_start, week_end, rashifals, sendNotification } = body;
 
     if (!week_start || !week_end || !rashifals || !Array.isArray(rashifals)) {
       return NextResponse.json(
@@ -120,6 +120,8 @@ export async function POST(request: NextRequest) {
 
     // Send email to ALL users
     let emailResult = null;
+
+    if (sendNotification) {
     const { data: existingNotif } = await supabase
       .from('weekly_rashifal_notifications')
       .select('id')
@@ -175,6 +177,7 @@ export async function POST(request: NextRequest) {
     } else {
       emailResult = { skipped: true, reason: 'Notification already sent for this week' };
     }
+    } // end sendNotification check
 
     return NextResponse.json({ success: true, data, emailResult });
   } catch (error) {

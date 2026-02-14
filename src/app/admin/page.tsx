@@ -3338,9 +3338,10 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
   });
   const [existingData, setExistingData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [sendNotification, setSendNotification] = useState(false);
+  const [sendNotification, setSendNotification] = useState(true);
+  const [weeklySendNotification, setWeeklySendNotification] = useState(true);
 
-  // Weekly state
+    // Weekly state
   const getMonday = (d: Date) => {
     const date = new Date(d);
     const day = date.getDay();
@@ -3462,11 +3463,12 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
       const res = await fetch('/api/weekly-rashifal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          week_start: weekStart,
-          week_end: weekEnd,
-          rashifals: [{ rashi: selectedRashi, ...weeklyForm }],
-        }),
+          body: JSON.stringify({
+            week_start: weekStart,
+            week_end: weekEnd,
+            rashifals: [{ rashi: selectedRashi, ...weeklyForm }],
+            sendNotification: weeklySendNotification,
+          }),
       });
       const data = await res.json();
       if (data.success) {
@@ -3641,19 +3643,57 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
                       className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}
                     />
                   </div>
+                  </div>
+
+                {/* Email Notification Toggle */}
+                <div className={`p-4 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#ff6b35]/5 border-[#ff6b35]/10'}`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Mail className="w-5 h-5 text-[#ff6b35]" />
+                      <div>
+                        <p className="font-bold text-sm">{rashifalMode === 'daily' ? t("Send Email to Random User") : t("Send Email to All Users")}</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {rashifalMode === 'daily' 
+                            ? t("A random user will receive daily horoscope email notification")
+                            : t("All registered users will receive weekly horoscope email notification")}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => rashifalMode === 'daily' ? setSendNotification(!sendNotification) : setWeeklySendNotification(!weeklySendNotification)}
+                      className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+                        (rashifalMode === 'daily' ? sendNotification : weeklySendNotification)
+                          ? 'bg-[#ff6b35]' 
+                          : isDark ? 'bg-white/20' : 'bg-gray-300'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-200 ${
+                          (rashifalMode === 'daily' ? sendNotification : weeklySendNotification) ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  {(rashifalMode === 'daily' ? sendNotification : weeklySendNotification) && (
+                    <div className="mt-3 flex items-center gap-2 text-xs text-green-500 font-bold">
+                      <CheckCircle2 className="w-3 h-3" />
+                      {rashifalMode === 'daily' ? t("Email will be sent to 1 random user") : t("Email will be sent to all registered users")}
+                    </div>
+                  )}
                 </div>
 
-              <Button type="submit" className="w-full bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white font-black h-12 rounded-xl" disabled={isActionLoading}>
-                {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
-                {hasExisting ? t("Update Rashifal") : t("Save Rashifal")}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                <Button type="submit" className="w-full bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white font-black h-12 rounded-xl" disabled={isActionLoading}>
+                  {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+                  {hasExisting ? t("Update Rashifal") : t("Save Rashifal")}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
 // Blog Manager Component
 function BlogManager({ isDark, t, isActionLoading, setIsActionLoading, setSuccess, setError }: {

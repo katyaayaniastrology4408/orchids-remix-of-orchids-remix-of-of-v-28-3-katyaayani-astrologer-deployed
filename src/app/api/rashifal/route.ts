@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { date, rashifals } = body;
+    const { date, rashifals, sendNotification } = body;
     
     if (!date || !rashifals || !Array.isArray(rashifals)) {
       return NextResponse.json(
@@ -109,6 +109,7 @@ export async function POST(request: NextRequest) {
             // Send rashifal email to ALL users
             let emailResult = null;
 
+            if (sendNotification) {
             // Check if notification already sent for this date
             const { data: existingNotif } = await supabase
               .from('rashifal_notifications')
@@ -160,11 +161,12 @@ export async function POST(request: NextRequest) {
               console.error('Error sending rashifal notifications:', err);
               emailResult = { sent: false, reason: 'Email sending failed' };
             }
-          } else {
-            emailResult = { skipped: true, reason: 'Notification already sent for this date' };
-          }
-    
-    return NextResponse.json({ success: true, data, emailResult });
+            } else {
+              emailResult = { skipped: true, reason: 'Notification already sent for this date' };
+            }
+            } // end sendNotification check
+      
+      return NextResponse.json({ success: true, data, emailResult });
   } catch (error) {
     console.error('Error saving rashifal:', error);
     return NextResponse.json(
