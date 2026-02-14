@@ -42,22 +42,16 @@ export async function POST(request: NextRequest) {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
 
-    let sentCount = 0;
-    for (const user of validUsers) {
-      try {
-        const userName = user.name || 'Valued Seeker';
-        await sendEmail({
-          to: user.email,
-          subject: `Today's Rashifal Has Been Updated! - ${formattedDate}`,
-          html: dailyRashifalEmailTemplate(userName, formattedDate, rashifalData),
-        });
-        sentCount++;
-      } catch (err) {
-        console.error(`Failed to send to ${user.email}:`, err);
-      }
-    }
+      // Send to one random user only
+      const randomUser = validUsers[Math.floor(Math.random() * validUsers.length)];
+      const userName = randomUser.name || 'Valued Seeker';
+      await sendEmail({
+        to: randomUser.email,
+        subject: `Today's Rashifal Has Been Updated! - ${formattedDate}`,
+        html: dailyRashifalEmailTemplate(userName, formattedDate, rashifalData),
+      });
 
-    return NextResponse.json({ success: true, totalUsers: sentCount });
+      return NextResponse.json({ success: true, totalUsers: 1, sentTo: randomUser.email });
   } catch (error) {
     console.error('Error sending daily rashifal emails:', error);
     return NextResponse.json({ error: 'Failed to send emails' }, { status: 500 });
