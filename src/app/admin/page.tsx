@@ -3338,8 +3338,7 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
   });
   const [existingData, setExistingData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [sendNotification, setSendNotification] = useState(true);
-  const [weeklySendNotification, setWeeklySendNotification] = useState(true);
+    const [sendingEmail, setSendingEmail] = useState(false);
 
     // Weekly state
   const getMonday = (d: Date) => {
@@ -3431,61 +3430,73 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
       const res = await fetch('/api/rashifal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          date: selectedDate,
-          rashifals: [{ rashi: selectedRashi, ...rashifalForm }],
-          sendNotification,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        let msg = t("Rashifal saved successfully!");
-        if (data.emailResult?.sent) {
-          msg += ` ${t("Email notification sent to")} ${data.emailResult.totalUsers} ${t("users")}`;
-        }
-        setSuccess(msg);
-        fetchExistingRashifal();
-      } else {
-        setError(data.error || t("Failed to save rashifal"));
-      }
-    } catch (err) { setError(t("An error occurred")); }
-    finally { setIsActionLoading(false); }
-  };
-
-  const handleSaveWeeklyRashifal = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!weeklyForm.content_gujarati && !weeklyForm.content_english) {
-      setError(t("Please enter content in at least one language"));
-      return;
-    }
-    setIsActionLoading(true);
-    try {
-      const res = await fetch('/api/weekly-rashifal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            week_start: weekStart,
-            week_end: weekEnd,
-            rashifals: [{ rashi: selectedRashi, ...weeklyForm }],
-            sendNotification: weeklySendNotification,
+            date: selectedDate,
+            rashifals: [{ rashi: selectedRashi, ...rashifalForm }],
           }),
       });
       const data = await res.json();
-      if (data.success) {
-        let msg = t("Weekly Rashifal saved successfully!");
-        if (data.emailResult?.sent) {
-          msg += ` ${t("Email notification sent to")} ${data.emailResult.totalUsers} ${t("users")}`;
-        } else if (data.emailResult?.skipped) {
-          msg += ` (${t("Email already sent for this week")})`;
+        if (data.success) {
+          setSuccess(t("Rashifal saved successfully!"));
+          fetchExistingRashifal();
+        } else {
+          setError(data.error || t("Failed to save rashifal"));
         }
-        setSuccess(msg);
-        fetchWeeklyRashifal();
-      } else {
-        setError(data.error || t("Failed to save weekly rashifal"));
+      } catch (err) { setError(t("An error occurred")); }
+      finally { setIsActionLoading(false); }
+    };
+
+    const handleSaveWeeklyRashifal = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!weeklyForm.content_gujarati && !weeklyForm.content_english) {
+        setError(t("Please enter content in at least one language"));
+        return;
       }
-    } catch (err) { setError(t("An error occurred")); }
-    finally { setIsActionLoading(false); }
-  };
+      setIsActionLoading(true);
+      try {
+        const res = await fetch('/api/weekly-rashifal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              week_start: weekStart,
+              week_end: weekEnd,
+              rashifals: [{ rashi: selectedRashi, ...weeklyForm }],
+            }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          setSuccess(t("Weekly Rashifal saved successfully!"));
+          fetchWeeklyRashifal();
+        } else {
+          setError(data.error || t("Failed to save weekly rashifal"));
+        }
+      } catch (err) { setError(t("An error occurred")); }
+      finally { setIsActionLoading(false); }
+    };
+
+    const handleSendRashifalEmail = async () => {
+      setSendingEmail(true);
+      try {
+        const endpoint = rashifalMode === 'daily' 
+          ? `/api/rashifal/send-email` 
+          : `/api/weekly-rashifal/send-email`;
+        const payload = rashifalMode === 'daily' 
+          ? { date: selectedDate }
+          : { week_start: weekStart, week_end: weekEnd };
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (data.success) {
+          setSuccess(`${t("Email sent successfully to")} ${data.totalUsers} ${t("users")}!`);
+        } else {
+          setError(data.error || t("Failed to send emails"));
+        }
+      } catch (err) { setError(t("An error occurred while sending emails")); }
+      finally { setSendingEmail(false); }
+    };
 
   const currentData = rashifalMode === 'daily' ? existingData : weeklyExistingData;
   const currentForm = rashifalMode === 'daily' ? rashifalForm : weeklyForm;
@@ -3645,49 +3656,33 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
                   </div>
                   </div>
 
-                {/* Email Notification Toggle */}
-                <div className={`p-4 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#ff6b35]/5 border-[#ff6b35]/10'}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Mail className="w-5 h-5 text-[#ff6b35]" />
-                      <div>
-                        <p className="font-bold text-sm">{rashifalMode === 'daily' ? t("Send Email to Random User") : t("Send Email to All Users")}</p>
-                        <p className="text-[10px] text-muted-foreground">
-                          {rashifalMode === 'daily' 
-                            ? t("A random user will receive daily horoscope email notification")
-                            : t("All registered users will receive weekly horoscope email notification")}
-                        </p>
-                      </div>
-                    </div>
+                  {/* Email Notification Toggle */}
+
+                  <Button type="submit" className="w-full bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white font-black h-12 rounded-xl" disabled={isActionLoading}>
+                    {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+                    {hasExisting ? t("Update Rashifal") : t("Save Rashifal")}
+                  </Button>
+
+                  {/* Send Mail Button - separate from save */}
+                  {currentData.length > 0 && (
                     <button
                       type="button"
-                      onClick={() => rashifalMode === 'daily' ? setSendNotification(!sendNotification) : setWeeklySendNotification(!weeklySendNotification)}
-                      className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 focus:outline-none ${
-                        (rashifalMode === 'daily' ? sendNotification : weeklySendNotification)
-                          ? 'bg-[#ff6b35]' 
-                          : isDark ? 'bg-white/20' : 'bg-gray-300'
+                      onClick={handleSendRashifalEmail}
+                      disabled={sendingEmail}
+                      className={`w-full flex items-center justify-center gap-2 h-12 rounded-xl font-black text-white transition-all duration-200 ${
+                        sendingEmail 
+                          ? 'bg-green-600/50 cursor-not-allowed' 
+                          : 'bg-green-600 hover:bg-green-700 active:scale-[0.98]'
                       }`}
                     >
-                      <span
-                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-200 ${
-                          (rashifalMode === 'daily' ? sendNotification : weeklySendNotification) ? 'translate-x-6' : 'translate-x-1'
-                        }`}
-                      />
+                      {sendingEmail ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /> {t("Sending Emails...")}</>
+                      ) : (
+                        <><Mail className="w-4 h-4" /> {rashifalMode === 'daily' ? t("Send Daily Rashifal Email to All Users") : t("Send Weekly Rashifal Email to All Users")}</>
+                      )}
                     </button>
-                  </div>
-                  {(rashifalMode === 'daily' ? sendNotification : weeklySendNotification) && (
-                    <div className="mt-3 flex items-center gap-2 text-xs text-green-500 font-bold">
-                      <CheckCircle2 className="w-3 h-3" />
-                      {rashifalMode === 'daily' ? t("Email will be sent to 1 random user") : t("Email will be sent to all registered users")}
-                    </div>
                   )}
-                </div>
-
-                <Button type="submit" className="w-full bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white font-black h-12 rounded-xl" disabled={isActionLoading}>
-                  {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
-                  {hasExisting ? t("Update Rashifal") : t("Save Rashifal")}
-                </Button>
-              </form>
+                </form>
             </CardContent>
           </Card>
         </div>

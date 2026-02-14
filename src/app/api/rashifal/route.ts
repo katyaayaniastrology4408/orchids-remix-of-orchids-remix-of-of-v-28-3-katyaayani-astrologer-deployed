@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { sendEmail } from '@/lib/email.config';
-import { dailyRashifalEmailTemplate } from '@/lib/email-templates';
 export const dynamic = 'force-dynamic' ; 
 
 const supabase = createClient(
@@ -68,7 +66,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { date, rashifals, sendNotification } = body;
+    const { date, rashifals } = body;
     
     if (!date || !rashifals || !Array.isArray(rashifals)) {
       return NextResponse.json(
@@ -105,68 +103,8 @@ export async function POST(request: NextRequest) {
         .select();
       
       if (error) throw error;
-
-            // Send rashifal email to ALL users
-            let emailResult = null;
-
-            if (sendNotification) {
-            // Check if notification already sent for this date
-            const { data: existingNotif } = await supabase
-              .from('rashifal_notifications')
-              .select('id')
-              .eq('date', date)
-              .maybeSingle();
-
-            if (!existingNotif) {
-              try {
-                const { data: allUsers } = await supabase
-                  .from('profiles')
-                  .select('email, name')
-                  .not('email', 'is', null);
-
-                const validUsers = (allUsers || []).filter(u => u.email && u.email.includes('@'));
-                
-              if (validUsers.length > 0) {
-                    const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('en-IN', {
-                      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-                    });
-
-                    // Pick one random user to send daily rashifal email
-                    const randomUser = validUsers[Math.floor(Math.random() * validUsers.length)];
-                    let sentCount = 0;
-                    try {
-                      const userName = randomUser.name || 'Valued Seeker';
-                    await sendEmail({
-                      to: randomUser.email,
-                      subject: `Today's Rashifal Has Been Updated! - ${formattedDate}`,
-                      html: dailyRashifalEmailTemplate(userName, formattedDate, upsertData),
-                    });
-                      sentCount = 1;
-                    } catch (err) {
-                      console.error(`Failed to send to ${randomUser.email}:`, err);
-                    }
-
-                // Record notification
-                await supabase.from('rashifal_notifications').insert({
-                  date,
-                  total_users: sentCount,
-                  status: 'sent'
-                });
-
-                  emailResult = { sent: true, totalUsers: sentCount };
-              } else {
-                emailResult = { sent: false, reason: 'No users to notify' };
-              }
-            } catch (err) {
-              console.error('Error sending rashifal notifications:', err);
-              emailResult = { sent: false, reason: 'Email sending failed' };
-            }
-            } else {
-              emailResult = { skipped: true, reason: 'Notification already sent for this date' };
-            }
-            } // end sendNotification check
       
-      return NextResponse.json({ success: true, data, emailResult });
+      return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error('Error saving rashifal:', error);
     return NextResponse.json(

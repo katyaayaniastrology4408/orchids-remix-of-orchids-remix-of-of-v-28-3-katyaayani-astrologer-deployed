@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { sendEmail } from '@/lib/email.config';
-import { weeklyRashifalEmailTemplate } from '@/lib/email-templates';
 export const dynamic = 'force-dynamic';
 
 const supabase = createClient(
@@ -80,7 +78,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { week_start, week_end, rashifals, sendNotification } = body;
+    const { week_start, week_end, rashifals } = body;
 
     if (!week_start || !week_end || !rashifals || !Array.isArray(rashifals)) {
       return NextResponse.json(
@@ -118,68 +116,7 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
-    // Send email to ALL users
-    let emailResult = null;
-
-    if (sendNotification) {
-    const { data: existingNotif } = await supabase
-      .from('weekly_rashifal_notifications')
-      .select('id')
-      .eq('week_start', week_start)
-      .maybeSingle();
-
-    if (!existingNotif) {
-      try {
-        const { data: allUsers } = await supabase
-          .from('profiles')
-          .select('email, name')
-          .not('email', 'is', null);
-
-        const validUsers = (allUsers || []).filter(u => u.email && u.email.includes('@'));
-
-        if (validUsers.length > 0) {
-          const formattedStart = new Date(week_start + 'T00:00:00').toLocaleDateString('en-IN', {
-            day: 'numeric', month: 'long', year: 'numeric'
-          });
-          const formattedEnd = new Date(week_end + 'T00:00:00').toLocaleDateString('en-IN', {
-            day: 'numeric', month: 'long', year: 'numeric'
-          });
-
-          let sentCount = 0;
-          for (const user of validUsers) {
-            try {
-              const userName = user.name || 'Valued Seeker';
-              await sendEmail({
-                to: user.email,
-                subject: `Weekly Rashifal Updated! (${formattedStart} - ${formattedEnd})`,
-                html: weeklyRashifalEmailTemplate(userName, formattedStart, formattedEnd, upsertData),
-              });
-              sentCount++;
-            } catch (err) {
-              console.error(`Failed to send to ${user.email}:`, err);
-            }
-          }
-
-          await supabase.from('weekly_rashifal_notifications').insert({
-            week_start,
-            total_users: sentCount,
-            status: 'sent'
-          });
-
-          emailResult = { sent: true, totalUsers: sentCount };
-        } else {
-          emailResult = { sent: false, reason: 'No users to notify' };
-        }
-      } catch (err) {
-        console.error('Error sending weekly rashifal notifications:', err);
-        emailResult = { sent: false, reason: 'Email sending failed' };
-      }
-    } else {
-      emailResult = { skipped: true, reason: 'Notification already sent for this week' };
-    }
-    } // end sendNotification check
-
-    return NextResponse.json({ success: true, data, emailResult });
+    return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error('Error saving weekly rashifal:', error);
     return NextResponse.json(
