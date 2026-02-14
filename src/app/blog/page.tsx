@@ -272,7 +272,7 @@ export default function BlogPage() {
                   <CardContent className="p-6">
                     <h3 className="font-bold text-lg mb-2 line-clamp-2">{getPostTitle(post)}</h3>
                     {getPostExcerpt(post) && (
-                      <p className={`text-sm line-clamp-2 mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <p className={`text-sm line-clamp-2 mb-4 whitespace-pre-line ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                         {getPostExcerpt(post)}
                       </p>
                     )}

@@ -307,9 +307,9 @@ function RashifalPageContent() {
                   </div>
                 ) : (
                   <>
-                      <p className={`text-base md:text-lg leading-relaxed mb-8 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        {getContent(selectedRashiData)}
-                      </p>
+                      <p className={`text-base md:text-lg leading-relaxed mb-8 whitespace-pre-line ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                          {getContent(selectedRashiData)}
+                        </p>
                   </>
                 )}
               </CardContent>
