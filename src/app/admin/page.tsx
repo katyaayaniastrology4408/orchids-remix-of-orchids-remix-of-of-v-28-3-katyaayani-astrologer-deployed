@@ -296,26 +296,34 @@ export default function AdminDashboard() {
       const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000)).toISOString();
       const sixtyDaysAgo = new Date(now.getTime() - (60 * 24 * 60 * 60 * 1000)).toISOString();
 
-      // Total counts
-      const { count: bookingCount } = await supabase.from('bookings').select('*', { count: 'exact', head: true });
-      const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
-      const { count: enquiryCount } = await supabase.from('enquiries').select('*', { count: 'exact', head: true });
-      
-      const { data: revenueDataRaw } = await supabase.from('bookings').select('amount, created_at').eq('payment_status', 'completed');
+      // Fetch all counts and data in parallel to avoid connection issues
+      const [
+        { count: bookingCount },
+        { count: userCount },
+        { count: enquiryCount },
+        { data: revenueDataRaw },
+        { count: currentBookings },
+        { count: previousBookings },
+        { count: currentUsers },
+        { count: previousUsers },
+        { count: currentEnquiries },
+        { count: previousEnquiries },
+      ] = await Promise.all([
+        supabase.from('bookings').select('*', { count: 'exact', head: true }),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('enquiries').select('*', { count: 'exact', head: true }),
+        supabase.from('bookings').select('amount, created_at').eq('payment_status', 'completed'),
+        supabase.from('bookings').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo),
+        supabase.from('bookings').select('*', { count: 'exact', head: true }).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo),
+        supabase.from('enquiries').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo),
+        supabase.from('enquiries').select('*', { count: 'exact', head: true }).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo),
+      ]);
+
       const totalRevenue = revenueDataRaw?.reduce((acc: number, curr: { amount?: number }) => acc + (Number(curr.amount) || 0), 0) || 0;
-
-      // Period counts for trends
-      const { count: currentBookings } = await supabase.from('bookings').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo);
-      const { count: previousBookings } = await supabase.from('bookings').select('*', { count: 'exact', head: true }).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo);
-
-      const { count: currentUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo);
-      const { count: previousUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo);
-
-      const { count: currentEnquiries } = await supabase.from('enquiries').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo);
-      const { count: previousEnquiries } = await supabase.from('enquiries').select('*', { count: 'exact', head: true }).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo);
-
-const currentRevenue = revenueDataRaw?.filter((r: { created_at?: string }) => r.created_at && r.created_at >= thirtyDaysAgo).reduce((acc: number, curr: { amount?: number }) => acc + (Number(curr.amount) || 0), 0) || 0;
-        const previousRevenue = revenueDataRaw?.filter((r: { created_at?: string }) => r.created_at && r.created_at >= sixtyDaysAgo && r.created_at < thirtyDaysAgo).reduce((acc: number, curr: { amount?: number }) => acc + (Number(curr.amount) || 0), 0) || 0;
+      const currentRevenue = revenueDataRaw?.filter((r: { created_at?: string }) => r.created_at && r.created_at >= thirtyDaysAgo).reduce((acc: number, curr: { amount?: number }) => acc + (Number(curr.amount) || 0), 0) || 0;
+      const previousRevenue = revenueDataRaw?.filter((r: { created_at?: string }) => r.created_at && r.created_at >= sixtyDaysAgo && r.created_at < thirtyDaysAgo).reduce((acc: number, curr: { amount?: number }) => acc + (Number(curr.amount) || 0), 0) || 0;
 
       setStats({
         totalBookings: bookingCount || 0,
