@@ -47,7 +47,7 @@ export default function Footer() {
             <div className="md:col-span-1 lg:col-span-2">
             <div className="flex items-center gap-2 mb-4">
                 <Image 
-                      src="https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/LOGO/Gemini_Generated_Image_6u6muz6u6muz6u6m.ico"
+                      src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=80&height=80&resize=contain"
                     alt="Katyaayani Astrologer"
                 width={40}
                 height={40}

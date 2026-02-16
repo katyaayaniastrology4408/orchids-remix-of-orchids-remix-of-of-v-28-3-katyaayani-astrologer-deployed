@@ -14,10 +14,10 @@ import PageViewTracker from "@/components/PageViewTracker";
 import NewsletterPopup from "@/components/NewsletterPopup";
 import SchemaMarkup from "@/components/SchemaMarkup";
 
-const LOGO_URL = 'https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/LOGO/Gemini_Generated_Image_6u6muz6u6muz6u6m.ico';
+const ICON_BASE = 'https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png';
 
 const SITE_URL = "https://www.katyaayaniastrologer.com";
-const OG_IMAGE = LOGO_URL;
+const OG_IMAGE = `${ICON_BASE}?width=1200&height=630&resize=contain`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -74,11 +74,11 @@ export const metadata: Metadata = {
     description: "Katyaayani Astrologer connects modern times with ancient astrology, blending ancient wisdom with today's technology. Expert kundali analysis, horoscope readings, vastu consultation & personalized remedies since 2007.",
     images: [
         {
-          url: OG_IMAGE,
-          width: 1200,
-          height: 630,
-          alt: "Katyaayani Astrologer - Vedic Astrology Consultations",
-          type: "image/x-icon",
+      url: OG_IMAGE,
+            width: 1200,
+            height: 630,
+            alt: "Katyaayani Astrologer - Vedic Astrology Consultations",
+            type: "image/png",
         },
       ],
     countryName: "India",
@@ -100,12 +100,13 @@ export const metadata: Metadata = {
   },
   icons: {
       icon: [
-        { url: LOGO_URL, type: 'image/x-icon', sizes: 'any' },
+        { url: `${ICON_BASE}?width=32&height=32&resize=contain`, type: 'image/png', sizes: '32x32' },
+        { url: `${ICON_BASE}?width=16&height=16&resize=contain`, type: 'image/png', sizes: '16x16' },
       ],
       apple: [
-        { url: LOGO_URL, type: 'image/x-icon', sizes: 'any' },
+        { url: `${ICON_BASE}?width=180&height=180&resize=contain`, type: 'image/png', sizes: '180x180' },
       ],
-      shortcut: LOGO_URL,
+      shortcut: `${ICON_BASE}?width=64&height=64&resize=contain`,
     },
   other: {
     // Geo & Location (helps Bing, Yandex, DuckDuckGo local search)
@@ -122,7 +123,7 @@ export const metadata: Metadata = {
     "language": "English, Hindi, Gujarati",
     "content-language": "en, hi, gu",
     "msapplication-TileColor": "#FF6B00",
-    "msapplication-TileImage": LOGO_URL,
+    "msapplication-TileImage": `${ICON_BASE}?width=144&height=144&resize=contain`,
     "msapplication-config": "/browserconfig.xml",
     "msapplication-navbutton-color": "#FF6B00",
     "msapplication-starturl": "https://www.katyaayaniastrologer.com",
