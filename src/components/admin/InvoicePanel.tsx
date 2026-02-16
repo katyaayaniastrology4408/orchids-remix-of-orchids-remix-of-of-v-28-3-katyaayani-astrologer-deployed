@@ -55,7 +55,7 @@ export default function InvoicePanel({ isDark, setSuccess, setError }: Props) {
   const [form, setForm] = useState({
     user_name: "", user_email: "", user_phone: "", user_address: "",
     service_type: "Kundli Reading", service_description: "",
-    amount: "", tax_amount: "0", notes: "", disclaimer: DEFAULT_DISCLAIMER,
+      amount: "", notes: "", disclaimer: DEFAULT_DISCLAIMER,
   });
 
   const fetchInvoices = async () => {
@@ -79,23 +79,22 @@ export default function InvoicePanel({ isDark, setSuccess, setError }: Props) {
     }
     setSaving(true);
     try {
-      const amt = parseFloat(form.amount) || 0;
-      const tax = parseFloat(form.tax_amount) || 0;
-      const res = await fetch("/api/admin/invoices", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          amount: amt,
-          tax_amount: tax,
-          total_amount: amt + tax,
-        }),
+        const amt = parseFloat(form.amount) || 0;
+        const res = await fetch("/api/admin/invoices", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...form,
+            amount: amt,
+            tax_amount: 0,
+            total_amount: amt,
+          }),
       });
       const data = await res.json();
       if (data.success) {
         setSuccess("Invoice created successfully!");
         setShowForm(false);
-        setForm({ user_name: "", user_email: "", user_phone: "", user_address: "", service_type: "Kundli Reading", service_description: "", amount: "", tax_amount: "0", notes: "", disclaimer: DEFAULT_DISCLAIMER });
+        setForm({ user_name: "", user_email: "", user_phone: "", user_address: "", service_type: "Kundli Reading", service_description: "", amount: "", notes: "", disclaimer: DEFAULT_DISCLAIMER });
         fetchInvoices();
       } else {
         setError(data.error || "Failed to create invoice");
@@ -240,13 +239,11 @@ export default function InvoicePanel({ isDark, setSuccess, setError }: Props) {
         </tr>
       </tbody>
     </table>
-    <div class="total-section">
-      <div class="total-box">
-        <div class="total-row"><span>Subtotal</span><span>&#8377;${Number(inv.amount).toLocaleString('en-IN')}</span></div>
-        <div class="total-row"><span>Tax</span><span>&#8377;${Number(inv.tax_amount).toLocaleString('en-IN')}</span></div>
-        <div class="total-row grand"><span>Total</span><span>&#8377;${Number(inv.total_amount).toLocaleString('en-IN')}</span></div>
+      <div class="total-section">
+        <div class="total-box">
+          <div class="total-row grand"><span>Total</span><span>&#8377;${Number(inv.total_amount).toLocaleString('en-IN')}</span></div>
+        </div>
       </div>
-    </div>
     ${inv.notes ? `<div class="notes"><h4>Notes</h4><p>${inv.notes}</p></div>` : ''}
     ${inv.disclaimer ? `<div class="disclaimer"><h4>Disclaimer</h4><p>${inv.disclaimer}</p></div>` : ''}
   </div>
@@ -318,16 +315,10 @@ export default function InvoicePanel({ isDark, setSuccess, setError }: Props) {
                 <Input value={form.service_description} onChange={e => setForm(p => ({ ...p, service_description: e.target.value }))} placeholder="Description" className={`rounded-xl ${isDark ? "bg-[#0a0a0f] border-white/10" : ""}`} />
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
+            <div>
                 <label className="text-xs font-bold opacity-50 block mb-1"><IndianRupee className="w-3 h-3 inline mr-1" />Amount (INR) *</label>
                 <Input type="number" value={form.amount} onChange={e => setForm(p => ({ ...p, amount: e.target.value }))} placeholder="0" className={`rounded-xl ${isDark ? "bg-[#0a0a0f] border-white/10" : ""}`} />
               </div>
-              <div>
-                <label className="text-xs font-bold opacity-50 block mb-1">Tax Amount (INR)</label>
-                <Input type="number" value={form.tax_amount} onChange={e => setForm(p => ({ ...p, tax_amount: e.target.value }))} placeholder="0" className={`rounded-xl ${isDark ? "bg-[#0a0a0f] border-white/10" : ""}`} />
-              </div>
-            </div>
             <div>
               <label className="text-xs font-bold opacity-50 block mb-1">Notes</label>
               <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder="Additional notes..." rows={3} className={`w-full p-3 rounded-xl border text-sm resize-none ${isDark ? "bg-[#0a0a0f] border-white/10 text-white" : "bg-white border-gray-200"}`} />
@@ -412,13 +403,11 @@ export default function InvoicePanel({ isDark, setSuccess, setError }: Props) {
                   </tbody>
                 </table>
               </div>
-              <div className="flex justify-end">
-                <div className="w-64 space-y-2">
-                  <div className="flex justify-between text-sm"><span className="opacity-60">Subtotal</span><span>₹{Number(previewInvoice.amount).toLocaleString('en-IN')}</span></div>
-                  <div className="flex justify-between text-sm"><span className="opacity-60">Tax</span><span>₹{Number(previewInvoice.tax_amount).toLocaleString('en-IN')}</span></div>
-                  <div className="flex justify-between text-lg font-black border-t-2 border-amber-500 pt-2 mt-2"><span>Total</span><span className="text-amber-500">₹{Number(previewInvoice.total_amount).toLocaleString('en-IN')}</span></div>
+                <div className="flex justify-end">
+                  <div className="w-64 space-y-2">
+                    <div className="flex justify-between text-lg font-black border-t-2 border-amber-500 pt-2"><span>Total</span><span className="text-amber-500">₹{Number(previewInvoice.total_amount).toLocaleString('en-IN')}</span></div>
+                  </div>
                 </div>
-              </div>
               {previewInvoice.notes && (
                 <div className={`p-4 rounded-xl ${isDark ? "bg-amber-500/5 border border-amber-500/20" : "bg-amber-50 border border-amber-200"}`}>
                   <p className="text-[10px] font-bold tracking-widest text-amber-600 mb-2">NOTES</p>
