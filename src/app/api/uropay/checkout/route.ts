@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         customer_name: name,
         customer_email: email,
         customer_mobile: phone,
-        callback_url: `${origin}/booking?booking_id=${order_id}&payment_status=success`,
+        callback_url: `${origin}/booking?booking_id=${order_id}&payment_status=pending`,
       }),
     });
 

@@ -237,29 +237,26 @@ export default function BookingPage() {
   }, [user]);
 
 useEffect(() => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const bid = urlParams.get('booking_id');
-      const pStatus = urlParams.get('payment_status');
-      if (bid) {
-        setBookingId(bid);
-        if (pStatus === 'success') {
-          setStep(4);
-          setPaymentSuccess(true);
-          setPaymentFailed(false);
-          setShowPaymentSuccessPopup(true);
-          confirmPayment(bid);
-          fetchBookingDetails(bid);
-        } else if (pStatus === 'failed') {
-          setStep(4);
-          setPaymentSuccess(false);
-          setPaymentFailed(true);
-          fetchBookingDetails(bid);
-        } else {
+        const urlParams = new URLSearchParams(window.location.search);
+        const bid = urlParams.get('booking_id');
+        const pStatus = urlParams.get('payment_status');
+        if (bid) {
+          setBookingId(bid);
           setStep(4);
           fetchBookingDetails(bid);
+          if (pStatus === 'success') {
+            // Legacy/direct success - verify with DB via polling
+            setPaymentSuccess(true);
+            setPaymentFailed(false);
+            setShowPaymentSuccessPopup(true);
+            confirmPayment(bid);
+          } else if (pStatus === 'failed') {
+            setPaymentSuccess(false);
+            setPaymentFailed(true);
+          }
+          // For 'pending' or any other status, polling will detect the actual state
         }
-      }
-    }, []);
+      }, []);
 
   useEffect(() => {
     if (step === 4 && bookingId && formData.name && !paymentSuccess && !hasSentPendingNotification) {
@@ -269,14 +266,73 @@ useEffect(() => {
     }
   }, [step, bookingId, formData.name, paymentSuccess, paymentFailed, hasSentPendingNotification]);
 
+  // Poll booking payment status every 3 seconds when on step 4 with pending payment
+  // This catches the case where UROPay popup closes (Continue Shopping) and webhook already updated DB
   useEffect(() => {
-    if (!selectedDate) {
-      const today = new Date();
-      if (today.getDay() === 0) {
-        setSelectedDate(today);
+    if (step !== 4 || !bookingId || paymentSuccess || paymentFailed) return;
+
+    let isCancelled = false;
+    const pollInterval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/bookings/${bookingId}`);
+        if (!res.ok || isCancelled) return;
+        const data = await res.json();
+        if (!data || isCancelled) return;
+
+        const dbStatus = data.payment_status;
+        if (dbStatus === 'completed' || dbStatus === 'success') {
+          setPaymentSuccess(true);
+          setPaymentFailed(false);
+          setShowPaymentSuccessPopup(true);
+          if (data.payment_intent_id) setPaymentTransactionId(data.payment_intent_id);
+          if (data.invoice_number) setInvoiceNumber(data.invoice_number);
+          if (data.full_name) setFormData(prev => ({
+            ...prev,
+            name: data.full_name || prev.name,
+            email: data.email || prev.email,
+            phone: data.phone || prev.phone,
+            city: data.city || prev.city,
+            address: data.address || prev.address,
+            birthDate: data.date_of_birth || prev.birthDate,
+            birthTime: data.time_of_birth || prev.birthTime,
+            birthPlace: data.place_of_birth || prev.birthPlace,
+            questions: data.special_requests || prev.questions,
+          }));
+          if (data.service_type) setSelectedType(data.service_type);
+          confirmPayment(bookingId);
+          clearInterval(pollInterval);
+        } else if (dbStatus === 'failed' || dbStatus === 'cancelled') {
+          setPaymentFailed(true);
+          setPaymentSuccess(false);
+          if (data.full_name) setFormData(prev => ({
+            ...prev,
+            name: data.full_name || prev.name,
+            email: data.email || prev.email,
+            phone: data.phone || prev.phone,
+            city: data.city || prev.city,
+            address: data.address || prev.address,
+          }));
+          clearInterval(pollInterval);
+        }
+      } catch (err) {
+        // Silently continue polling
       }
-    }
-  }, [selectedDate]);
+    }, 3000);
+
+    return () => {
+      isCancelled = true;
+      clearInterval(pollInterval);
+    };
+  }, [step, bookingId, paymentSuccess, paymentFailed]);
+
+  useEffect(() => {
+      if (!selectedDate) {
+        const today = new Date();
+        if (today.getDay() === 0) {
+          setSelectedDate(today);
+        }
+      }
+    }, [selectedDate]);
 
   const profilePic = userGender.toLowerCase() === "female" 
     ? "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Screenshot-2025-12-25-000158-1766601181550.png?width=8000&height=8000&resize=contain" 
@@ -317,7 +373,13 @@ useEffect(() => {
     setSelectedTime(time);
   };
 
-  const handleDownloadInvoice = () => {
+    const handleRetryPayment = () => {
+      setPaymentFailed(false);
+      setPaymentSuccess(false);
+      setIsProcessingPayment(false);
+    };
+
+    const handleDownloadInvoice = () => {
     const price = getCurrentPrice() / 100;
     const serviceName = selectedConsultation ? getText(selectedConsultation.title) : "Consultation Session";
     const dateStr = selectedDate?.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) || '';
@@ -677,23 +739,49 @@ const fetchBookingDetails = async (bid: string) => {
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
               <Script src="https://cdn.uropay.me/uropay-embed.min.js" strategy="lazyOnload" />
               
-              <div className="mb-8 print:hidden">
-                <div className="w-24 h-24 rounded-full bg-[#ff6b35]/20 flex items-center justify-center mx-auto mb-6">
-                  {paymentSuccess ? <Check className="w-12 h-12 text-green-500" /> : <CreditCard className="w-12 h-12 text-[#ff6b35]" />}
-                </div>
-                <h2 className="font-[family-name:var(--font-cinzel)] text-4xl font-bold mb-4 text-gradient-ancient">
-                  {paymentSuccess ? t("Booking Confirmed!") : t("Complete Your Payment")}
-                </h2>
-                <p className={`text-xl ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'}`}>
-                  {paymentSuccess 
-                    ? t("Thank you for booking your consultation.") 
-                    : t("Please complete your payment to confirm your consultation.")}
-                </p>
+                <div className="mb-8 print:hidden">
+                  <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 ${paymentFailed ? 'bg-red-500/20' : paymentSuccess ? 'bg-green-500/20' : 'bg-[#ff6b35]/20'}`}>
+                    {paymentSuccess ? <Check className="w-12 h-12 text-green-500" /> : paymentFailed ? <AlertCircle className="w-12 h-12 text-red-500" /> : <CreditCard className="w-12 h-12 text-[#ff6b35]" />}
+                  </div>
+                  <h2 className="font-[family-name:var(--font-cinzel)] text-4xl font-bold mb-4 text-gradient-ancient">
+                    {paymentSuccess ? t("Booking Confirmed!") : paymentFailed ? (language === 'gu' ? 'ચુકવણી નિષ્ફળ!' : language === 'hi' ? 'भुगतान विफल!' : 'Payment Failed!') : t("Complete Your Payment")}
+                  </h2>
+                  <p className={`text-xl ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'}`}>
+                    {paymentSuccess 
+                      ? t("Thank you for booking your consultation.") 
+                      : paymentFailed
+                      ? (language === 'gu' ? 'તમારી ચુકવણી પ્રક્રિયા નિષ્ફળ થઈ. કૃપા કરી ફરીથી પ્રયાસ કરો.' : language === 'hi' ? 'आपका भुगतान विफल हो गया। कृपया पुनः प्रयास करें।' : 'Your payment could not be processed. Please try again.')
+                      : t("Please complete your payment to confirm your consultation.")}
+                  </p>
+
+                  {/* Payment Status Badge */}
+                  {(paymentSuccess || paymentFailed) && (
+                    <div className={`inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-full text-sm font-bold ${paymentSuccess ? 'bg-green-500/20 text-green-500 border border-green-500/30' : 'bg-red-500/20 text-red-500 border border-red-500/30'}`}>
+                      {paymentSuccess ? <Check className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                      {paymentSuccess ? (language === 'gu' ? 'ચુકવણી સફળ' : language === 'hi' ? 'भुगतान सफल' : 'Payment Successful') : (language === 'gu' ? 'ચુકવણી નિષ્ફળ' : language === 'hi' ? 'भुगतान विफल' : 'Payment Failed')}
+                    </div>
+                  )}
+
+                  {/* Polling indicator - when waiting for payment confirmation */}
+                  {!paymentSuccess && !paymentFailed && bookingId && (
+                    <div className="mt-4 flex items-center justify-center gap-2 text-sm text-[#ff6b35]">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      {language === 'gu' ? 'ચુકવણીની સ્થિતિ તપાસી રહ્યા છીએ...' : language === 'hi' ? 'भुगतान स्थिति जांच रहे हैं...' : 'Checking payment status...'}
+                    </div>
+                  )}
                 
                 {!paymentSuccess && (
-                  <div className="mt-12 p-8 rounded-3xl border border-[#ff6b35]/20 bg-[#ff6b35]/5 max-w-md mx-auto">
-                    <div className="flex justify-between items-center mb-6">
-                      <span className="text-lg opacity-70">{t('Amount to Pay:')}</span>
+                    <div className="mt-12 p-8 rounded-3xl border border-[#ff6b35]/20 bg-[#ff6b35]/5 max-w-md mx-auto">
+                      {paymentFailed && (
+                        <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+                          <p className="text-red-500 font-bold text-sm flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4" />
+                            {language === 'gu' ? 'ચુકવણી પ્રક્રિયા નિષ્ફળ થઈ. કૃપા કરી ફરીથી પ્રયાસ કરો.' : language === 'hi' ? 'भुगतान प्रक्रिया विफल हुई। कृपया पुनः प्रयास करें।' : 'Payment processing failed. Please try again.'}
+                          </p>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center mb-6">
+                        <span className="text-lg opacity-70">{paymentFailed ? (language === 'gu' ? 'ફરી ચૂકવો:' : language === 'hi' ? 'पुनः भुगतान करें:' : 'Retry Payment:') : t('Amount to Pay:')}</span>
                       <span className="text-3xl font-bold text-[#ff6b35]">₹ {formatCurrency(getCurrentPrice() / 100)}</span>
                     </div>
                     <div className="flex justify-center">
@@ -838,9 +926,9 @@ src="https://yiuhyqfkdnuzalqyxshe.supabase.co/storage/v1/object/sign/logo/logo_w
                     </div>
 
                     <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                      <div className={`px-6 py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest shadow-sm border-2 ${paymentSuccess ? "bg-[#f0fdf4]/10 border-green-500 text-green-500" : "bg-[#fff7ed]/10 border-orange-500 text-orange-500"}`}>
-                        {paymentSuccess ? t("Booking Confirmed") : t("Status: Payment Pending")}
-                      </div>
+                        <div className={`px-6 py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest shadow-sm border-2 ${paymentSuccess ? "bg-[#f0fdf4]/10 border-green-500 text-green-500" : paymentFailed ? "bg-[#fef2f2]/10 border-red-500 text-red-500" : "bg-[#fff7ed]/10 border-orange-500 text-orange-500"}`}>
+                          {paymentSuccess ? t("Booking Confirmed") : paymentFailed ? t("Payment Failed") : t("Status: Payment Pending")}
+                        </div>
                       <div className="text-center md:text-right">
                         <p className={`text-xs italic mb-2 ${theme === 'dark' ? 'text-[#cccccc]' : 'text-[#4b5563]'} font-medium`}>"असतो મા સદ્ગમય । તમસો મા જ્યોતિર્ગમય ।"</p>
                         <p className={`text-[9px] uppercase tracking-widest ${theme === 'dark' ? 'text-[#444444]' : 'text-[#9ca3af]'} font-bold`}>{t('Katyaayani Jyotish • Ahmedabad • +91 98249 29588')}</p>
@@ -851,20 +939,26 @@ src="https://yiuhyqfkdnuzalqyxshe.supabase.co/storage/v1/object/sign/logo/logo_w
               </div>
 
 <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8 print:hidden">
-                  {!paymentSuccess && (
-                    <Button variant="ghost" onClick={() => setStep(3)} className="text-[#a0998c]">{t('Change details')}</Button>
-                  )}
-                   <Link href="/"><Button className="bg-[#ff6b35]/10 hover:bg-[#ff8c5e] text-[#ff6b35] border border-[#ff6b35]/20 px-8">{t('Return Home')}</Button></Link>
-                   {paymentSuccess && (
-                     <>
-                       <Button onClick={handleDownloadInvoice} className="bg-[#ff6b35] hover:bg-[#ff8c5e] text-white px-8">
-                         <Download className="w-4 h-4 mr-2" />
-                         {language === 'gu' ? 'ઇન્વૉઇસ ડાઉનલોડ' : language === 'hi' ? 'इनवॉइस डाउनलोड' : 'Download Invoice'}
+                     {paymentFailed && (
+                       <Button onClick={handleRetryPayment} className="bg-red-500 hover:bg-red-600 text-white px-8 font-bold">
+                         <AlertCircle className="w-4 h-4 mr-2" />
+                         {language === 'gu' ? 'ફરીથી ચુકવણી કરો' : language === 'hi' ? 'पुनः भुगतान करें' : 'Retry Payment'}
                        </Button>
-                       <Link href="/profile"><Button variant="outline" className="border-[#ff6b35] text-[#ff6b35]">{t('View My Bookings')}</Button></Link>
-                     </>
-                   )}
-                 </div>
+                     )}
+                     {!paymentSuccess && !paymentFailed && (
+                       <Button variant="ghost" onClick={() => setStep(3)} className="text-[#a0998c]">{t('Change details')}</Button>
+                     )}
+                     <Link href="/"><Button className="bg-[#ff6b35]/10 hover:bg-[#ff8c5e] text-[#ff6b35] border border-[#ff6b35]/20 px-8">{t('Return Home')}</Button></Link>
+                     {paymentSuccess && (
+                       <>
+                         <Button onClick={handleDownloadInvoice} className="bg-[#ff6b35] hover:bg-[#ff8c5e] text-white px-8">
+                           <Download className="w-4 h-4 mr-2" />
+                           {language === 'gu' ? 'ઇન્વૉઇસ ડાઉનલોડ' : language === 'hi' ? 'इनवॉइस डाउनलोड' : 'Download Invoice'}
+                         </Button>
+                         <Link href="/profile"><Button variant="outline" className="border-[#ff6b35] text-[#ff6b35]">{t('View My Bookings')}</Button></Link>
+                       </>
+                     )}
+                   </div>
               </motion.div>
             )}
           </div>
