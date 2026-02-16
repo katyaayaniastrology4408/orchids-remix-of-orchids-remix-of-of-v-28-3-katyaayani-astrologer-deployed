@@ -59,8 +59,9 @@ import {
         Send,
         Inbox,
         AlertCircle,
-        Gauge
-      } from "lucide-react";
+          Gauge,
+          Palette
+        } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -1683,10 +1684,14 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
                   <AuditLogsViewer isDark={isDark} t={t} />
                 )}
 
-                {activeTab === "settings" && (
+                  {activeTab === "branding" && (
+                    <BrandingManager isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                  )}
 
-            <div className="space-y-6 pb-20 md:pb-0">
-              {/* SMTP Email Stats */}
+                  {activeTab === "settings" && (
+
+              <div className="space-y-6 pb-20 md:pb-0">
+                {/* SMTP Email Stats */}
               <Card className={isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div>
@@ -3205,8 +3210,9 @@ function SidebarContent({ activeTab, setActiveTab, handleLogout, isDark, t }: {
                   <NavItem icon={<FileText className="w-4 h-4" />} label={t("Pages")} active={activeTab === "pages"} onClick={() => setActiveTab("pages")} isDark={isDark} />
                   <NavItem icon={<Link2 className="w-4 h-4" />} label={t("Redirects")} active={activeTab === "redirects"} onClick={() => setActiveTab("redirects")} isDark={isDark} />
                   <NavItem icon={<Globe className="w-4 h-4" />} label={t("Sitemap")} active={activeTab === "sitemap"} onClick={() => setActiveTab("sitemap")} isDark={isDark} />
-                  <NavItem icon={<Activity className="w-4 h-4" />} label={t("Audit Logs")} active={activeTab === "audit-logs"} onClick={() => setActiveTab("audit-logs")} isDark={isDark} />
-                  <NavItem icon={<Settings className="w-4 h-4" />} label={t("Settings")} active={activeTab === "settings"} onClick={() => setActiveTab("settings")} isDark={isDark} />
+                    <NavItem icon={<Activity className="w-4 h-4" />} label={t("Audit Logs")} active={activeTab === "audit-logs"} onClick={() => setActiveTab("audit-logs")} isDark={isDark} />
+                    <NavItem icon={<Palette className="w-4 h-4" />} label={t("Branding")} active={activeTab === "branding"} onClick={() => setActiveTab("branding")} isDark={isDark} />
+                    <NavItem icon={<Settings className="w-4 h-4" />} label={t("Settings")} active={activeTab === "settings"} onClick={() => setActiveTab("settings")} isDark={isDark} />
 
         </nav>
       </div>
@@ -4822,11 +4828,160 @@ function AuditLogsViewer({ isDark, t }: { isDark: boolean; t: (key: string) => s
                   </div>
                 )}
                 {log.ip_address && <p className="text-[9px] text-muted-foreground mt-1">IP: {log.ip_address}</p>}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+}
+
+function BrandingManager({ isDark, t, setSuccess, setError }: { isDark: boolean; t: (k: string) => string; setSuccess: (s: string) => void; setError: (s: string) => void }) {
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [logoUrl, setLogoUrl] = useState("https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/LOGO/Gemini_Generated_Image_6u6muz6u6muz6u6m.ico");
+  const [faviconUrl, setFaviconUrl] = useState("https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/LOGO/Gemini_Generated_Image_6u6muz6u6muz6u6m.ico");
+  const [ogImageUrl, setOgImageUrl] = useState("https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/LOGO/Gemini_Generated_Image_6u6muz6u6muz6u6m.ico");
+  const [siteName, setSiteName] = useState("Katyaayani Astrologer");
+  const [siteTagline, setSiteTagline] = useState("Best Vedic Astrologer | Kundali, Horoscope & Jyotish");
+
+  useEffect(() => {
+    fetchBranding();
+  }, []);
+
+  const fetchBranding = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/branding");
+      const data = await res.json();
+      if (data.settings) {
+        if (data.settings.logo_url) setLogoUrl(data.settings.logo_url);
+        if (data.settings.favicon_url) setFaviconUrl(data.settings.favicon_url);
+        if (data.settings.og_image_url) setOgImageUrl(data.settings.og_image_url);
+        if (data.settings.site_name) setSiteName(data.settings.site_name);
+        if (data.settings.site_tagline) setSiteTagline(data.settings.site_tagline);
+      }
+    } catch { /* use defaults */ }
+    setLoading(false);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/branding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          settings: {
+            logo_url: logoUrl,
+            favicon_url: faviconUrl,
+            og_image_url: ogImageUrl,
+            site_name: siteName,
+            site_tagline: siteTagline,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSuccess("Branding settings saved successfully!");
+      } else {
+        setError(data.error || "Failed to save");
+      }
+    } catch {
+      setError("Failed to save branding settings");
+    }
+    setSaving(false);
+  };
+
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[#ff6b35]" /></div>;
+
+  return (
+    <div className="space-y-6 pb-20 md:pb-0">
+      <Card className={isDark ? "bg-[#12121a] border-[#ff6b35]/10" : "bg-white border-[#ff6b35]/20"}>
+        <CardHeader>
+          <CardTitle className="text-[#ff6b35] flex items-center gap-2">
+            <Palette className="w-6 h-6" /> {t("Branding & Logo Settings")}
+          </CardTitle>
+          <CardDescription>{t("Manage your site logo, favicon, preview image and branding")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label className="text-sm font-bold">{t("Logo URL")}</Label>
+            <Input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://..." className={isDark ? "bg-white/5 border-white/10" : ""} />
+            {logoUrl && (
+              <div className={`p-4 rounded-xl border flex items-center gap-4 ${isDark ? "bg-white/5 border-white/10" : "bg-[#fcfaf7] border-[#ff6b35]/10"}`}>
+                <img src={logoUrl} alt="Logo Preview" className="w-16 h-16 object-contain rounded-lg" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                <span className="text-xs text-muted-foreground">{t("Logo Preview")}</span>
               </div>
-            ))}
+            )}
           </div>
-        )}
-      </CardContent>
-    </Card>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-bold">{t("Favicon URL")}</Label>
+            <Input value={faviconUrl} onChange={(e) => setFaviconUrl(e.target.value)} placeholder="https://..." className={isDark ? "bg-white/5 border-white/10" : ""} />
+            {faviconUrl && (
+              <div className={`p-4 rounded-xl border flex items-center gap-4 ${isDark ? "bg-white/5 border-white/10" : "bg-[#fcfaf7] border-[#ff6b35]/10"}`}>
+                <img src={faviconUrl} alt="Favicon Preview" className="w-8 h-8 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                <span className="text-xs text-muted-foreground">{t("Favicon Preview (shown in browser tab)")}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-bold">{t("Preview Image (OG Image)")}</Label>
+            <Input value={ogImageUrl} onChange={(e) => setOgImageUrl(e.target.value)} placeholder="https://..." className={isDark ? "bg-white/5 border-white/10" : ""} />
+            <p className="text-[10px] text-muted-foreground">{t("This image appears when your site is shared on social media (WhatsApp, Facebook, Twitter)")}</p>
+            {ogImageUrl && (
+              <div className={`p-4 rounded-xl border ${isDark ? "bg-white/5 border-white/10" : "bg-[#fcfaf7] border-[#ff6b35]/10"}`}>
+                <img src={ogImageUrl} alt="OG Image Preview" className="w-full max-w-[400px] h-auto rounded-lg" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-bold">{t("Site Name")}</Label>
+            <Input value={siteName} onChange={(e) => setSiteName(e.target.value)} placeholder="Katyaayani Astrologer" className={isDark ? "bg-white/5 border-white/10" : ""} />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-bold">{t("Site Tagline")}</Label>
+            <Input value={siteTagline} onChange={(e) => setSiteTagline(e.target.value)} placeholder="Best Vedic Astrologer..." className={isDark ? "bg-white/5 border-white/10" : ""} />
+          </div>
+
+          <Button onClick={handleSave} disabled={saving} className="bg-[#ff6b35] hover:bg-[#e55a2b] text-white w-full md:w-auto">
+            {saving ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> {t("Saving...")}</> : t("Save Branding Settings")}
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card className={isDark ? "bg-[#12121a] border-[#ff6b35]/10" : "bg-white border-[#ff6b35]/20"}>
+        <CardHeader>
+          <CardTitle className="text-sm font-bold text-[#ff6b35]">{t("Current Branding URLs")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {[
+            { label: "Logo", url: logoUrl },
+            { label: "Favicon", url: faviconUrl },
+            { label: "OG Image", url: ogImageUrl },
+          ].map((item) => (
+            <div key={item.label} className={`flex items-center justify-between p-3 rounded-lg border ${isDark ? "bg-white/5 border-white/10" : "bg-[#fcfaf7] border-[#ff6b35]/10"}`}>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold">{item.label}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{item.url}</p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="ml-2 border-[#ff6b35]/20 text-[#ff6b35] text-xs"
+                onClick={() => { navigator.clipboard.writeText(item.url); setSuccess(`${item.label} URL copied!`); }}
+              >
+                {t("Copy")}
+              </Button>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

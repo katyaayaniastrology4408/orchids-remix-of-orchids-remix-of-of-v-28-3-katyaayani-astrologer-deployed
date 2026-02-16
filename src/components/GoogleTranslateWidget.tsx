@@ -387,7 +387,7 @@ interface TranslationContextType {
 }
 
 export const TranslationContext = createContext<TranslationContextType>({
-  language: "hi",
+  language: "en",
   setLanguage: () => {},
   t: (key: string) => key,
 });
@@ -401,7 +401,7 @@ export function TranslationProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [language, setLanguage] = useState<Language>("hi");
+  const [language, setLanguage] = useState<Language>("en");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -419,7 +419,7 @@ export function TranslationProvider({
 
   const t = (key: string): string => {
     if (!key) return "";
-    const lang = language || "hi";
+      const lang = language || "en";
     const langTranslations = translations[lang];
     if (!langTranslations) return key;
     return langTranslations[key] || key;
@@ -459,7 +459,7 @@ export default function GoogleTranslateWidget() {
           className="flex items-center gap-1 px-2 py-1.5 rounded-md border border-[#ff6b35] text-[#ff6b35] hover:bg-[#ff6b35]/10 transition-colors"
         >
           <Languages className="w-3 h-3" />
-          <span className="text-sm">Hindi</span>
+            <span className="text-sm">English</span>
           <ChevronDown className="w-2.5 h-2.5" />
         </button>
       </div>
