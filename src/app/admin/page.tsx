@@ -58,10 +58,13 @@ import {
         X as XIcon,
         Send,
         Inbox,
-        AlertCircle,
-          Gauge,
-          Palette
-        } from "lucide-react";
+          AlertCircle,
+            Gauge,
+    Palette,
+    Zap,
+    Shield,
+    Server,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -78,6 +81,15 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import SeoTestingPanel from "@/components/admin/SeoTestingPanel";
+import SeoMonitorPanel from "@/components/admin/SeoMonitorPanel";
+import AutomationPanel from "@/components/admin/AutomationPanel";
+import PerformancePanel from "@/components/admin/PerformancePanel";
+import SecurityPanel from "@/components/admin/SecurityPanel";
+import SchedulingPanel from "@/components/admin/SchedulingPanel";
+import ReportsPanel from "@/components/admin/ReportsPanel";
+import DevOpsPanel from "@/components/admin/DevOpsPanel";
+import ScalingPanel from "@/components/admin/ScalingPanel";
 
 type Activity = {
   id: string;
@@ -208,6 +220,9 @@ export default function AdminDashboard() {
   const [resetRequests, setResetRequests] = useState<PasswordResetRequest[]>([]);
   const [meetingCodes, setMeetingCodes] = useState<MeetingCode[]>([]);
   
+  const [consultationNotes, setConsultationNotes] = useState<{id: string; user_id: string; user_email: string; note: string; category: string; created_at: string}[]>([]);
+  const [newNote, setNewNote] = useState({ note: "", category: "general" });
+  const [isLoadingNotes, setIsLoadingNotes] = useState(false);
   const [newBlockedDate, setNewBlockedDate] = useState({ date: "", reason: "" });
   const [newMeetingCode, setNewMeetingCode] = useState({ invoiceNumber: "", meetLink: "" });
   const [availabilityFilterDate, setAvailabilityFilterDate] = useState("");
@@ -254,6 +269,10 @@ export default function AdminDashboard() {
     checkAuth();
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (selectedUser) fetchConsultationNotes(selectedUser.email);
+  }, [selectedUser]);
 
   useEffect(() => {
     if (activeTab === "settings") {
@@ -419,6 +438,40 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
   const handleSendResetEmail = (email: string, password?: string) => {
     const gmailUrl = getGmailLink({ email, password }, "password_reset_draft");
     window.parent.postMessage({ type: "OPEN_EXTERNAL_URL", data: { url: gmailUrl } }, "*");
+  };
+
+  const fetchConsultationNotes = async (email: string) => {
+    setIsLoadingNotes(true);
+    try {
+      const res = await fetch(`/api/admin/consultation-notes?user_email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      if (data.success) setConsultationNotes(data.data || []);
+    } catch { /* ignore */ } finally { setIsLoadingNotes(false); }
+  };
+
+  const addConsultationNote = async () => {
+    if (!selectedUser || !newNote.note.trim()) return;
+    try {
+      const res = await fetch('/api/admin/consultation-notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: selectedUser.id, user_email: selectedUser.email, note: newNote.note, category: newNote.category }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setConsultationNotes(prev => [data.data, ...prev]);
+        setNewNote({ note: "", category: "general" });
+        setSuccess(t("Note added successfully"));
+      }
+    } catch { setError(t("Failed to add note")); }
+  };
+
+  const deleteConsultationNote = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/consultation-notes?id=${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) setConsultationNotes(prev => prev.filter(n => n.id !== id));
+    } catch { setError(t("Failed to delete note")); }
   };
 
   const handleResetUserPassword = async (email: string) => {
@@ -1684,11 +1737,47 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
                   <AuditLogsViewer isDark={isDark} t={t} />
                 )}
 
-                  {activeTab === "branding" && (
-                    <BrandingManager isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
-                  )}
+                    {activeTab === "branding" && (
+                      <BrandingManager isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                    )}
 
-                  {activeTab === "settings" && (
+                    {activeTab === "seo-testing" && (
+                      <SeoTestingPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                    )}
+
+                    {activeTab === "seo-monitor" && (
+                      <SeoMonitorPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                    )}
+
+                    {activeTab === "automation" && (
+                      <AutomationPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                    )}
+
+                    {activeTab === "performance" && (
+                      <PerformancePanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                    )}
+
+                    {activeTab === "security" && (
+                      <SecurityPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                    )}
+
+                    {activeTab === "scheduling" && (
+                      <SchedulingPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                    )}
+
+                    {activeTab === "reports" && (
+                      <ReportsPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                    )}
+
+                    {activeTab === "devops" && (
+                      <DevOpsPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                    )}
+
+                    {activeTab === "scaling" && (
+                      <ScalingPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                    )}
+
+                    {activeTab === "settings" && (
 
               <div className="space-y-6 pb-20 md:pb-0">
                 {/* SMTP Email Stats */}
@@ -2091,23 +2180,74 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
                       </div>
                     </div>
                   </div>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Button className="w-full bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white font-bold h-12 rounded-xl" onClick={() => handleResetUserPassword(selectedUser.email)}>
-                    <KeyRound className="w-4 h-4 mr-2" /> {t("Send Reset Email")}
-                  </Button>
-                  <Button variant="outline" className="w-full border-[#ff6b35] text-[#ff6b35] font-bold h-12 rounded-xl" onClick={() => setSelectedUser(null)}>
-                    {t("Close Profile")}
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+                  </div>
 
-      {/* Booking Details Modal */}
+                  {/* Consultation Notes */}
+                  <div className={`p-4 md:p-6 rounded-2xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
+                    <h3 className="text-sm font-bold mb-4 flex items-center gap-2 text-[#ff6b35]"><FileText className="w-4 h-4" /> {t("Consultation Notes")}</h3>
+                    <div className="space-y-3 mb-4">
+                      <textarea
+                        value={newNote.note}
+                        onChange={(e) => setNewNote(prev => ({ ...prev, note: e.target.value }))}
+                        placeholder={t("Add a note about this client...")}
+                        className={`w-full p-3 rounded-xl border text-sm resize-none h-20 ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-[#ff6b35]/10'}`}
+                      />
+                      <div className="flex gap-2">
+                        <select
+                          value={newNote.category}
+                          onChange={(e) => setNewNote(prev => ({ ...prev, category: e.target.value }))}
+                          className={`px-3 py-2 rounded-xl border text-xs ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-[#ff6b35]/10'}`}
+                        >
+                          <option value="general">{t("General")}</option>
+                          <option value="consultation">{t("Consultation")}</option>
+                          <option value="follow-up">{t("Follow-up")}</option>
+                          <option value="important">{t("Important")}</option>
+                        </select>
+                        <Button size="sm" className="bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white rounded-xl" onClick={addConsultationNote} disabled={!newNote.note.trim()}>
+                          {t("Add Note")}
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {isLoadingNotes ? (
+                        <p className="text-xs text-muted-foreground text-center py-4">{t("Loading notes...")}</p>
+                      ) : consultationNotes.length > 0 ? (
+                        consultationNotes.map((n) => (
+                          <div key={n.id} className={`p-3 rounded-xl border text-xs ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-[#ff6b35]/5'}`}>
+                            <div className="flex justify-between items-start mb-1">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                                n.category === 'important' ? 'bg-red-500/10 text-red-500' :
+                                n.category === 'consultation' ? 'bg-blue-500/10 text-blue-500' :
+                                n.category === 'follow-up' ? 'bg-amber-500/10 text-amber-500' :
+                                'bg-green-500/10 text-green-500'
+                              }`}>{t(n.category)}</span>
+                              <button onClick={() => deleteConsultationNote(n.id)} className="text-red-400 hover:text-red-500 text-[10px]">✕</button>
+                            </div>
+                            <p className="mt-1">{n.note}</p>
+                            <p className="text-muted-foreground text-[10px] mt-1">{new Date(n.created_at).toLocaleString()}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic text-center py-2">{t("No notes yet")}</p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Button className="w-full bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white font-bold h-12 rounded-xl" onClick={() => handleResetUserPassword(selectedUser.email)}>
+                      <KeyRound className="w-4 h-4 mr-2" /> {t("Send Reset Email")}
+                    </Button>
+                    <Button variant="outline" className="w-full border-[#ff6b35] text-[#ff6b35] font-bold h-12 rounded-xl" onClick={() => setSelectedUser(null)}>
+                      {t("Close Profile")}
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Booking Details Modal */}
       <AnimatePresence>
         {selectedBooking && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -3211,8 +3351,26 @@ function SidebarContent({ activeTab, setActiveTab, handleLogout, isDark, t }: {
                   <NavItem icon={<Link2 className="w-4 h-4" />} label={t("Redirects")} active={activeTab === "redirects"} onClick={() => setActiveTab("redirects")} isDark={isDark} />
                   <NavItem icon={<Globe className="w-4 h-4" />} label={t("Sitemap")} active={activeTab === "sitemap"} onClick={() => setActiveTab("sitemap")} isDark={isDark} />
                     <NavItem icon={<Activity className="w-4 h-4" />} label={t("Audit Logs")} active={activeTab === "audit-logs"} onClick={() => setActiveTab("audit-logs")} isDark={isDark} />
-                    <NavItem icon={<Palette className="w-4 h-4" />} label={t("Branding")} active={activeTab === "branding"} onClick={() => setActiveTab("branding")} isDark={isDark} />
-                    <NavItem icon={<Settings className="w-4 h-4" />} label={t("Settings")} active={activeTab === "settings"} onClick={() => setActiveTab("settings")} isDark={isDark} />
+                      <NavItem icon={<Palette className="w-4 h-4" />} label={t("Branding")} active={activeTab === "branding"} onClick={() => setActiveTab("branding")} isDark={isDark} />
+
+                    <div className="my-4 border-t border-[#ff6b35]/10 pt-4">
+                      <p className="text-[9px] uppercase tracking-[0.15em] font-bold text-muted-foreground/50 px-4 mb-2">{t("Optimization & Monitoring")}</p>
+                    </div>
+                    <NavItem icon={<Search className="w-4 h-4" />} label={t("SEO Testing")} active={activeTab === "seo-testing"} onClick={() => setActiveTab("seo-testing")} isDark={isDark} />
+                    <NavItem icon={<Monitor className="w-4 h-4" />} label={t("SEO Monitor")} active={activeTab === "seo-monitor"} onClick={() => setActiveTab("seo-monitor")} isDark={isDark} />
+                    <NavItem icon={<Zap className="w-4 h-4" />} label={t("Automation")} active={activeTab === "automation"} onClick={() => setActiveTab("automation")} isDark={isDark} />
+                    <NavItem icon={<Gauge className="w-4 h-4" />} label={t("Performance")} active={activeTab === "performance"} onClick={() => setActiveTab("performance")} isDark={isDark} />
+
+                    <div className="my-4 border-t border-[#ff6b35]/10 pt-4">
+                      <p className="text-[9px] uppercase tracking-[0.15em] font-bold text-muted-foreground/50 px-4 mb-2">{t("Enterprise")}</p>
+                    </div>
+                    <NavItem icon={<Shield className="w-4 h-4" />} label={t("Security")} active={activeTab === "security"} onClick={() => setActiveTab("security")} isDark={isDark} />
+                    <NavItem icon={<Clock className="w-4 h-4" />} label={t("Scheduling")} active={activeTab === "scheduling"} onClick={() => setActiveTab("scheduling")} isDark={isDark} />
+                    <NavItem icon={<FileText className="w-4 h-4" />} label={t("Reports")} active={activeTab === "reports"} onClick={() => setActiveTab("reports")} isDark={isDark} />
+                    <NavItem icon={<Server className="w-4 h-4" />} label={t("DevOps")} active={activeTab === "devops"} onClick={() => setActiveTab("devops")} isDark={isDark} />
+                    <NavItem icon={<Globe className="w-4 h-4" />} label={t("Scaling")} active={activeTab === "scaling"} onClick={() => setActiveTab("scaling")} isDark={isDark} />
+
+                      <NavItem icon={<Settings className="w-4 h-4" />} label={t("Settings")} active={activeTab === "settings"} onClick={() => setActiveTab("settings")} isDark={isDark} />
 
         </nav>
       </div>
