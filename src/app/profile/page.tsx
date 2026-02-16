@@ -29,6 +29,11 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [expandedPaymentId, setExpandedPaymentId] = useState<string | null>(null);
+  const [rescheduleBookingId, setRescheduleBookingId] = useState<string | null>(null);
+  const [rescheduleReason, setRescheduleReason] = useState("");
+  const [rescheduleDate, setRescheduleDate] = useState("");
+  const [rescheduleTime, setRescheduleTime] = useState("");
+  const [isSubmittingReschedule, setIsSubmittingReschedule] = useState(false);
   const [editForm, setEditForm] = useState({
     name: "",
     dob: "",
@@ -40,6 +45,36 @@ export default function ProfilePage() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t, language } = useTranslation();
+
+  const handleRescheduleSubmit = async (bookingId: string) => {
+    setIsSubmittingReschedule(true);
+    try {
+      const res = await fetch("/api/reschedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          booking_id: bookingId,
+          reason: rescheduleReason,
+          requested_date: rescheduleDate || null,
+          requested_time: rescheduleTime || null,
+        }),
+      });
+      const result = await res.json();
+      if (result.success) {
+        toast.success(language === 'gu' ? 'રિશેડ્યૂલ વિનંતી મોકલવામાં આવી!' : language === 'hi' ? 'रिशेड्यूल अनुरोध भेजा गया!' : 'Reschedule request sent!');
+        setRescheduleBookingId(null);
+        setRescheduleReason("");
+        setRescheduleDate("");
+        setRescheduleTime("");
+      } else {
+        toast.error(result.error || "Failed to send request");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setIsSubmittingReschedule(false);
+    }
+  };
 
   const fetchUserBookings = async (email: string) => {
     try {
@@ -575,17 +610,103 @@ export default function ProfilePage() {
                                   </Button>
                                 )}
                               </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    ))}
-                </div>
-              )}
+                              )}
+
+                              {/* Reschedule Button */}
+                              {booking.status !== 'cancelled' && (
+                                <div className="mt-4">
+                                  {rescheduleBookingId === booking.id ? (
+                                    <motion.div
+                                      initial={{ opacity: 0, height: 0 }}
+                                      animate={{ opacity: 1, height: "auto" }}
+                                      className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 border-dashed ${theme === 'dark' ? 'bg-[#0a0a0f] border-amber-500/30' : 'bg-amber-50 border-amber-400/30'}`}
+                                    >
+                                      <div className="flex items-center gap-2 mb-4">
+                                        <CalendarDays className="w-5 h-5 text-amber-500" />
+                                        <span className="font-bold text-sm sm:text-base">
+                                          {language === 'gu' ? 'રિશેડ્યૂલ વિનંતી' : language === 'hi' ? 'रिशेड्यूल अनुरोध' : 'Reschedule Request'}
+                                        </span>
+                                      </div>
+                                      <div className="space-y-3">
+                                        <div>
+                                          <Label className="text-xs font-bold opacity-60">
+                                            {language === 'gu' ? 'કારણ' : language === 'hi' ? 'कारण' : 'Reason'}
+                                          </Label>
+                                          <textarea
+                                            value={rescheduleReason}
+                                            onChange={(e) => setRescheduleReason(e.target.value)}
+                                            placeholder={language === 'gu' ? 'રિશેડ્યૂલ કરવાનું કારણ...' : language === 'hi' ? 'रिशेड्यूल का कारण...' : 'Reason for rescheduling...'}
+                                            className={`w-full p-3 rounded-xl border text-sm min-h-[80px] resize-none ${theme === 'dark' ? 'bg-[#12121a] border-white/10 text-white' : 'bg-white border-gray-200'}`}
+                                          />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                          <div>
+                                            <Label className="text-xs font-bold opacity-60">
+                                              {language === 'gu' ? 'નવી તારીખ (વૈકલ્પિક)' : language === 'hi' ? 'नई तारीख (वैकल्पिक)' : 'New Date (Optional)'}
+                                            </Label>
+                                            <Input
+                                              type="date"
+                                              value={rescheduleDate}
+                                              onChange={(e) => setRescheduleDate(e.target.value)}
+                                              className={`rounded-xl ${theme === 'dark' ? 'bg-[#12121a] border-white/10' : ''}`}
+                                            />
+                                          </div>
+                                          <div>
+                                            <Label className="text-xs font-bold opacity-60">
+                                              {language === 'gu' ? 'નવો સમય (વૈકલ્પિક)' : language === 'hi' ? 'नया समय (वैकल्पिक)' : 'New Time (Optional)'}
+                                            </Label>
+                                            <Input
+                                              type="time"
+                                              value={rescheduleTime}
+                                              onChange={(e) => setRescheduleTime(e.target.value)}
+                                              className={`rounded-xl ${theme === 'dark' ? 'bg-[#12121a] border-white/10' : ''}`}
+                                            />
+                                          </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                          <Button
+                                            onClick={() => handleRescheduleSubmit(booking.id)}
+                                            disabled={isSubmittingReschedule || !rescheduleReason.trim()}
+                                            className="flex-1 bg-amber-500 hover:bg-amber-600 text-white h-11 rounded-xl font-bold"
+                                          >
+                                            {isSubmittingReschedule ? (
+                                              <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                              language === 'gu' ? 'વિનંતી મોકલો' : language === 'hi' ? 'अनुरोध भेजें' : 'Send Request'
+                                            )}
+                                          </Button>
+                                          <Button
+                                            variant="ghost"
+                                            onClick={() => { setRescheduleBookingId(null); setRescheduleReason(""); setRescheduleDate(""); setRescheduleTime(""); }}
+                                            className="h-11 rounded-xl"
+                                          >
+                                            {language === 'gu' ? 'રદ કરો' : language === 'hi' ? 'रद्द करें' : 'Cancel'}
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    </motion.div>
+                                  ) : (
+                                    <Button
+                                      variant="outline"
+                                      onClick={() => setRescheduleBookingId(booking.id)}
+                                      className={`w-full h-11 rounded-xl text-sm font-bold border-2 ${theme === 'dark' ? 'border-amber-500/30 text-amber-400 hover:bg-amber-500/10' : 'border-amber-400/40 text-amber-600 hover:bg-amber-50'}`}
+                                    >
+                                      <CalendarDays className="w-4 h-4 mr-2" />
+                                      {language === 'gu' ? 'રિશેડ્યૂલ કરો' : language === 'hi' ? 'रिशेड्यूल करें' : 'Request Reschedule'}
+                                    </Button>
+                                  )}
+                                </div>
+                              )}
+                              </CardContent>
+                          </Card>
+                        </motion.div>
+                      ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </main>
+        </main>
 
       <Footer />
     </div>
