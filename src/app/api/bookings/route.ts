@@ -191,12 +191,34 @@ export async function POST(request: NextRequest) {
 
     const booking = data[0];
 
+    // Auto-create invoice in invoices table
+    try {
+      await supabase.from("invoices").insert([{
+        invoice_number: invoiceNumber,
+        booking_id: booking.id,
+        user_name: booking.full_name,
+        user_email: booking.email,
+        user_phone: booking.phone || '',
+        user_address: booking.address || booking.city || '',
+        service_type: booking.service_type,
+        service_description: `${booking.service_type} - Consultation on ${booking.booking_date} at ${booking.booking_time}`,
+        amount: booking.amount || 0,
+        tax_amount: 0,
+        total_amount: booking.amount || 0,
+        notes: 'Thank you for choosing Katyaayani Astrologer.',
+        disclaimer: 'This invoice is auto-generated at the time of booking. For any queries, contact us at katyaayaniastrologer01@gmail.com',
+        status: 'paid',
+      }]);
+    } catch (invoiceErr) {
+      console.error("Auto-invoice creation error:", invoiceErr);
+    }
+
     // 1. Send Emails via Notification Helper
     await sendBookingNotification(booking, 'new');
 
     // 2. Telegram Notification removed from here to only fire after payment confirmation in callback
 
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({ success: true, data, invoiceNumber });
   } catch (error) {
     console.error("Booking creation error:", error);
     return NextResponse.json(

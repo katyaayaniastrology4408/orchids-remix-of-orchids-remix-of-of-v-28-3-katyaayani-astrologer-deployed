@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Moon, Home, Building2, Video, Calendar, Clock, User, Mail, Phone, MapPin, ArrowLeft, Check, Loader2, Sun, Menu, X, AlertCircle, CreditCard, Lock, Sparkles, PartyPopper, Copy, CheckCircle } from "lucide-react";
+import { Moon, Home, Building2, Video, Calendar, Clock, User, Mail, Phone, MapPin, ArrowLeft, Check, Loader2, Sun, Menu, X, AlertCircle, CreditCard, Lock, Sparkles, PartyPopper, Copy, CheckCircle, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -314,6 +314,23 @@ useEffect(() => {
     }
     setSlotError(null);
     setSelectedTime(time);
+  };
+
+  const handleDownloadInvoice = () => {
+    const price = getCurrentPrice() / 100;
+    const serviceName = selectedConsultation ? getText(selectedConsultation.title) : "Consultation Session";
+    const dateStr = selectedDate?.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) || '';
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Invoice ${invoiceNumber}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;background:#fff;color:#1a1a2e;padding:40px}@page{size:A4;margin:20mm}.invoice-box{max-width:800px;margin:auto;padding:40px;border:2px solid #ff6b35;border-radius:16px}.header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #eee;padding-bottom:20px;margin-bottom:30px}.logo-section h1{color:#ff6b35;font-size:28px;margin-bottom:4px}.logo-section p{color:#888;font-size:11px;text-transform:uppercase;letter-spacing:2px}.invoice-info{text-align:right}.invoice-info .inv-num{color:#ff6b35;font-size:18px;font-weight:900;margin-bottom:4px}.invoice-info .inv-date{color:#888;font-size:12px}.section-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:30px}.section-box{background:#f9fafb;border:1px solid #eee;border-radius:12px;padding:20px}.section-title{color:#ff6b35;font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:12px}.section-box p{margin-bottom:4px;font-size:14px}.section-box .name{font-weight:700;font-size:16px}table{width:100%;border-collapse:collapse;margin-bottom:30px;border-radius:12px;overflow:hidden}thead tr{background:#f9fafb}th{padding:14px 16px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#888;font-weight:700}th:last-child{text-align:right}td{padding:14px 16px;border-bottom:1px solid #eee}td:last-child{text-align:right;font-weight:700;font-size:18px}.total-row{background:#fff7ed}td.total-label{text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#888;font-weight:700}.total-amount{color:#ff6b35;font-size:24px;font-weight:900}.footer{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:20px;border-top:1px solid #eee}.status{background:#f0fdf4;border:2px solid #22c55e;color:#22c55e;padding:8px 20px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px}.footer-right{text-align:right}.footer-right .quote{font-style:italic;font-size:12px;color:#888;margin-bottom:4px}.footer-right .company{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:#bbb}.disclaimer{margin-top:20px;padding:16px;background:#f9fafb;border-radius:8px;font-size:11px;color:#888;text-align:center;border:1px solid #eee}@media print{body{padding:0}.invoice-box{border:none;padding:20px}}</style></head><body><div class="invoice-box"><div class="header"><div class="logo-section"><h1>\u0915\u093E\u0924\u094D\u092F\u093E\u092F\u0928\u0940 \u091C\u094D\u092F\u094B\u0924\u093F\u0937</h1><p>Vedic Wisdom for Modern Destinies</p></div><div class="invoice-info"><div class="inv-num">Invoice #: ${invoiceNumber}</div><div class="inv-date">Issued on: ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</div></div></div><div class="section-grid"><div class="section-box"><div class="section-title">Client Details</div><p class="name">${formData.name}</p><p>${formData.email}</p><p>${formData.phone}</p>${formData.city ? `<p>${formData.city}</p>` : ''}</div><div class="section-box"><div class="section-title">Consultation Details</div><p class="name">${serviceName}</p><p>${dateStr}</p><p style="color:#ff6b35;font-weight:700">${selectedTime}</p></div></div><table><thead><tr><th>Service Description</th><th>Amount</th></tr></thead><tbody><tr><td><strong>${serviceName}</strong><br><span style="font-size:12px;color:#888">Professional Vedic astrological guidance and calculations.</span></td><td>\u20B9 ${formatCurrency(price)}</td></tr><tr class="total-row"><td class="total-label">Total Amount Paid</td><td class="total-amount">\u20B9 ${formatCurrency(price)}</td></tr></tbody></table><div class="footer"><div class="status">BOOKING CONFIRMED</div><div class="footer-right"><p class="quote">\u201C\u0905\u0938\u0924\u094B \u0AAE\u0ABE \u0AB8\u0AA6\u0ACD\u0A97\u0AAE\u0AAF \u0964 \u0AA4\u0AAE\u0AB8\u094B \u0AAE\u0ABE \u0A9C\u0ACD\u0AAF\u094B\u0AA4\u0ABF\u0AB0\u0ACD\u0A97\u0AAE\u0AAF \u0964\u201D</p><p class="company">Katyaayani Jyotish \u2022 Ahmedabad \u2022 +91 98249 29588</p></div></div><div class="disclaimer">This invoice is auto-generated at the time of booking. For any queries, contact us at katyaayaniastrologer01@gmail.com</div></div></body></html>`;
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Invoice-${invoiceNumber}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(t('Invoice downloaded successfully!'));
   };
 
 const fetchBookingDetails = async (bid: string) => {
@@ -830,11 +847,17 @@ src="https://yiuhyqfkdnuzalqyxshe.supabase.co/storage/v1/object/sign/logo/logo_w
                   {!paymentSuccess && (
                     <Button variant="ghost" onClick={() => setStep(3)} className="text-[#a0998c]">{t('Change details')}</Button>
                   )}
-                  <Link href="/"><Button className="bg-[#ff6b35]/10 hover:bg-[#ff8c5e] text-[#ff6b35] border border-[#ff6b35]/20 px-8">{t('Return Home')}</Button></Link>
-                  {paymentSuccess && (
-                    <Link href="/profile"><Button variant="outline" className="border-[#ff6b35] text-[#ff6b35]">{t('View My Bookings')}</Button></Link>
-                  )}
-                </div>
+                   <Link href="/"><Button className="bg-[#ff6b35]/10 hover:bg-[#ff8c5e] text-[#ff6b35] border border-[#ff6b35]/20 px-8">{t('Return Home')}</Button></Link>
+                   {paymentSuccess && (
+                     <>
+                       <Button onClick={handleDownloadInvoice} className="bg-[#ff6b35] hover:bg-[#ff8c5e] text-white px-8">
+                         <Download className="w-4 h-4 mr-2" />
+                         {language === 'gu' ? 'ઇન્વૉઇસ ડાઉનલોડ' : language === 'hi' ? 'इनवॉइस डाउनलोड' : 'Download Invoice'}
+                       </Button>
+                       <Link href="/profile"><Button variant="outline" className="border-[#ff6b35] text-[#ff6b35]">{t('View My Bookings')}</Button></Link>
+                     </>
+                   )}
+                 </div>
               </motion.div>
             )}
           </div>
@@ -909,10 +932,19 @@ src="https://yiuhyqfkdnuzalqyxshe.supabase.co/storage/v1/object/sign/logo/logo_w
                 </div>
               )}
 
-              <Button
-                onClick={() => setShowPaymentSuccessPopup(false)}
-                className="w-full bg-[#ff6b35] hover:bg-[#ff8c5e] text-white font-bold py-5 rounded-xl"
-              >
+                <Button
+                  onClick={handleDownloadInvoice}
+                  variant="outline"
+                  className="w-full border-[#ff6b35] text-[#ff6b35] hover:bg-[#ff6b35]/10 font-bold py-5 rounded-xl"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  {language === 'gu' ? 'ઇન્વૉઇસ ડાઉનલોડ કરો' : language === 'hi' ? 'इनवॉइस डाउनलोड करें' : 'Download Invoice'}
+                </Button>
+
+                <Button
+                  onClick={() => setShowPaymentSuccessPopup(false)}
+                  className="w-full bg-[#ff6b35] hover:bg-[#ff8c5e] text-white font-bold py-5 rounded-xl"
+                >
                 {language === 'gu' ? 'બંધ કરો' : language === 'hi' ? 'बंद करें' : 'Close'}
               </Button>
             </div>
