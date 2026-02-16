@@ -8,10 +8,15 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin", "/admin/", "/api/"],
+        disallow: ["/admin", "/admin/", "/api/", "/signin", "/signup", "/profile"],
       },
       {
         userAgent: "Googlebot",
+        allow: "/",
+        disallow: ["/admin", "/admin/", "/api/"],
+      },
+      {
+        userAgent: "Googlebot-Image",
         allow: "/",
         disallow: ["/admin", "/admin/", "/api/"],
       },
@@ -26,7 +31,65 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin", "/admin/", "/api/"],
       },
       {
-        userAgent: "Yandex",
+        userAgent: "Slurp",
+        allow: "/",
+        disallow: ["/admin", "/admin/", "/api/"],
+      },
+      {
+        userAgent: "DuckDuckBot",
+        allow: "/",
+        disallow: ["/admin", "/admin/", "/api/"],
+      },
+      {
+        userAgent: "Baiduspider",
+        allow: "/",
+        disallow: ["/admin", "/admin/", "/api/"],
+      },
+      {
+        userAgent: "YandexBot",
+        allow: "/",
+        disallow: ["/admin", "/admin/", "/api/"],
+      },
+      {
+        userAgent: "facebot",
+        allow: "/",
+      },
+      {
+        userAgent: "facebookexternalhit",
+        allow: "/",
+      },
+      {
+        userAgent: "Twitterbot",
+        allow: "/",
+      },
+      {
+        userAgent: "LinkedInBot",
+        allow: "/",
+      },
+      {
+        userAgent: "Pinterest",
+        allow: "/",
+      },
+      {
+        userAgent: "WhatsApp",
+        allow: "/",
+      },
+      {
+        userAgent: "TelegramBot",
+        allow: "/",
+      },
+      {
+        userAgent: "Applebot",
+        allow: "/",
+        disallow: ["/admin", "/admin/", "/api/"],
+      },
+      {
+        userAgent: "Sogou",
+        allow: "/",
+        disallow: ["/admin", "/admin/", "/api/"],
+      },
+      {
+        userAgent: "ia_archiver",
         allow: "/",
         disallow: ["/admin", "/admin/", "/api/"],
       },
