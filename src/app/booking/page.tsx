@@ -521,9 +521,18 @@ const fetchBookingDetails = async (bid: string) => {
       <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b ${theme === 'dark' ? 'bg-[#0a0a0f]/95 border-[#ff6b35]/20' : 'bg-[#ebe3d5]/95 border-[#ff6b35]/20'}`}>
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=8000&height=8000&resize=contain" alt="Logo" width={48} height={48} className="rounded-full" />
-            <span className="font-[family-name:var(--font-cinzel)] text-xl font-semibold text-gradient-ancient">कात्यायनी ज्योतिष</span>
-          </Link>
+              <Image 
+                src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=112&height=112&resize=contain"
+                alt="Katyaayani Astrologer"
+                width={56}
+                height={56}
+                priority
+                className="object-contain"
+              />
+              <span className="font-[family-name:var(--font-cinzel)] text-xs md:text-sm lg:text-base font-bold text-gradient-ancient leading-tight whitespace-nowrap">
+                KATYAAYANI<br />ASTROLOGER
+              </span>
+            </Link>
 <div className="hidden md:flex items-center gap-6">
               <Link href="/" className="hover:text-[#ff6b35] transition-colors text-xl">{t('Home')}</Link>
               <Link href="/services" className="hover:text-[#ff6b35] transition-colors text-xl">{t('Services')}</Link>
