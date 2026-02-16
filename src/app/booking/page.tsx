@@ -108,6 +108,7 @@ export default function BookingPage() {
     const [invoiceNumber, setInvoiceNumber] = useState<string | null>(null);
     const [showPaymentSuccessPopup, setShowPaymentSuccessPopup] = useState(false);
     const [copiedInvoice, setCopiedInvoice] = useState(false);
+    const [paymentTransactionId, setPaymentTransactionId] = useState<string | null>(null);
   
     const [formData, setFormData] = useState({
     name: "",
@@ -320,7 +321,7 @@ useEffect(() => {
     const price = getCurrentPrice() / 100;
     const serviceName = selectedConsultation ? getText(selectedConsultation.title) : "Consultation Session";
     const dateStr = selectedDate?.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) || '';
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Invoice ${invoiceNumber}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;background:#fff;color:#1a1a2e;padding:40px}@page{size:A4;margin:20mm}.invoice-box{max-width:800px;margin:auto;padding:40px;border:2px solid #ff6b35;border-radius:16px}.header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #eee;padding-bottom:20px;margin-bottom:30px}.logo-section h1{color:#ff6b35;font-size:28px;margin-bottom:4px}.logo-section p{color:#888;font-size:11px;text-transform:uppercase;letter-spacing:2px}.invoice-info{text-align:right}.invoice-info .inv-num{color:#ff6b35;font-size:18px;font-weight:900;margin-bottom:4px}.invoice-info .inv-date{color:#888;font-size:12px}.section-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:30px}.section-box{background:#f9fafb;border:1px solid #eee;border-radius:12px;padding:20px}.section-title{color:#ff6b35;font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:12px}.section-box p{margin-bottom:4px;font-size:14px}.section-box .name{font-weight:700;font-size:16px}table{width:100%;border-collapse:collapse;margin-bottom:30px;border-radius:12px;overflow:hidden}thead tr{background:#f9fafb}th{padding:14px 16px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#888;font-weight:700}th:last-child{text-align:right}td{padding:14px 16px;border-bottom:1px solid #eee}td:last-child{text-align:right;font-weight:700;font-size:18px}.total-row{background:#fff7ed}td.total-label{text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#888;font-weight:700}.total-amount{color:#ff6b35;font-size:24px;font-weight:900}.footer{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:20px;border-top:1px solid #eee}.status{background:#f0fdf4;border:2px solid #22c55e;color:#22c55e;padding:8px 20px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px}.footer-right{text-align:right}.footer-right .quote{font-style:italic;font-size:12px;color:#888;margin-bottom:4px}.footer-right .company{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:#bbb}.disclaimer{margin-top:20px;padding:16px;background:#f9fafb;border-radius:8px;font-size:11px;color:#888;text-align:center;border:1px solid #eee}@media print{body{padding:0}.invoice-box{border:none;padding:20px}}</style></head><body><div class="invoice-box"><div class="header"><div class="logo-section"><h1>\u0915\u093E\u0924\u094D\u092F\u093E\u092F\u0928\u0940 \u091C\u094D\u092F\u094B\u0924\u093F\u0937</h1><p>Vedic Wisdom for Modern Destinies</p></div><div class="invoice-info"><div class="inv-num">Invoice #: ${invoiceNumber}</div><div class="inv-date">Issued on: ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</div></div></div><div class="section-grid"><div class="section-box"><div class="section-title">Client Details</div><p class="name">${formData.name}</p><p>${formData.email}</p><p>${formData.phone}</p>${formData.city ? `<p>${formData.city}</p>` : ''}</div><div class="section-box"><div class="section-title">Consultation Details</div><p class="name">${serviceName}</p><p>${dateStr}</p><p style="color:#ff6b35;font-weight:700">${selectedTime}</p></div></div><table><thead><tr><th>Service Description</th><th>Amount</th></tr></thead><tbody><tr><td><strong>${serviceName}</strong><br><span style="font-size:12px;color:#888">Professional Vedic astrological guidance and calculations.</span></td><td>\u20B9 ${formatCurrency(price)}</td></tr><tr class="total-row"><td class="total-label">Total Amount Paid</td><td class="total-amount">\u20B9 ${formatCurrency(price)}</td></tr></tbody></table><div class="footer"><div class="status">BOOKING CONFIRMED</div><div class="footer-right"><p class="quote">\u201C\u0905\u0938\u0924\u094B \u0AAE\u0ABE \u0AB8\u0AA6\u0ACD\u0A97\u0AAE\u0AAF \u0964 \u0AA4\u0AAE\u0AB8\u094B \u0AAE\u0ABE \u0A9C\u0ACD\u0AAF\u094B\u0AA4\u0ABF\u0AB0\u0ACD\u0A97\u0AAE\u0AAF \u0964\u201D</p><p class="company">Katyaayani Jyotish \u2022 Ahmedabad \u2022 +91 98249 29588</p></div></div><div class="disclaimer">This invoice is auto-generated at the time of booking. For any queries, contact us at katyaayaniastrologer01@gmail.com</div></div></body></html>`;
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Invoice ${invoiceNumber}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;background:#fff;color:#1a1a2e;padding:40px}@page{size:A4;margin:20mm}.invoice-box{max-width:800px;margin:auto;padding:40px;border:2px solid #ff6b35;border-radius:16px}.header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #eee;padding-bottom:20px;margin-bottom:30px}.logo-section h1{color:#ff6b35;font-size:28px;margin-bottom:4px}.logo-section p{color:#888;font-size:11px;text-transform:uppercase;letter-spacing:2px}.invoice-info{text-align:right}.invoice-info .inv-num{color:#ff6b35;font-size:18px;font-weight:900;margin-bottom:4px}.invoice-info .inv-date{color:#888;font-size:12px}.section-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:30px}.section-box{background:#f9fafb;border:1px solid #eee;border-radius:12px;padding:20px}.section-title{color:#ff6b35;font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:12px}.section-box p{margin-bottom:4px;font-size:14px}.section-box .name{font-weight:700;font-size:16px}table{width:100%;border-collapse:collapse;margin-bottom:30px;border-radius:12px;overflow:hidden}thead tr{background:#f9fafb}th{padding:14px 16px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#888;font-weight:700}th:last-child{text-align:right}td{padding:14px 16px;border-bottom:1px solid #eee}td:last-child{text-align:right;font-weight:700;font-size:18px}.total-row{background:#fff7ed}td.total-label{text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#888;font-weight:700}.total-amount{color:#ff6b35;font-size:24px;font-weight:900}.footer{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:20px;border-top:1px solid #eee}.status{background:#f0fdf4;border:2px solid #22c55e;color:#22c55e;padding:8px 20px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px}.footer-right{text-align:right}.footer-right .quote{font-style:italic;font-size:12px;color:#888;margin-bottom:4px}.footer-right .company{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:#bbb}.disclaimer{margin-top:20px;padding:16px;background:#f9fafb;border-radius:8px;font-size:11px;color:#888;text-align:center;border:1px solid #eee}@media print{body{padding:0}.invoice-box{border:none;padding:20px}}</style></head><body><div class="invoice-box"><div class="header"><div class="logo-section"><h1>\u0915\u093E\u0924\u094D\u092F\u093E\u092F\u0928\u0940 \u091C\u094D\u092F\u094B\u0924\u093F\u0937</h1><p>Vedic Wisdom for Modern Destinies</p></div><div class="invoice-info"><div class="inv-num">Invoice #: ${invoiceNumber}</div>${paymentTransactionId ? `<div style="color:#22c55e;font-size:12px;font-weight:700;margin-bottom:4px">Transaction ID: ${paymentTransactionId}</div>` : ''}<div class="inv-date">Issued on: ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</div></div></div><div class="section-grid"><div class="section-box"><div class="section-title">Client Details</div><p class="name">${formData.name}</p><p>${formData.email}</p><p>${formData.phone}</p>${formData.city ? `<p>${formData.city}</p>` : ''}</div><div class="section-box"><div class="section-title">Consultation Details</div><p class="name">${serviceName}</p><p>${dateStr}</p><p style="color:#ff6b35;font-weight:700">${selectedTime}</p></div></div><table><thead><tr><th>Service Description</th><th>Amount</th></tr></thead><tbody><tr><td><strong>${serviceName}</strong><br><span style="font-size:12px;color:#888">Professional Vedic astrological guidance and calculations.</span></td><td>\u20B9 ${formatCurrency(price)}</td></tr><tr class="total-row"><td class="total-label">Total Amount Paid</td><td class="total-amount">\u20B9 ${formatCurrency(price)}</td></tr></tbody></table><div class="footer"><div class="status">BOOKING CONFIRMED</div><div class="footer-right"><p class="quote">\u201C\u0905\u0938\u0924\u094B \u0AAE\u0ABE \u0AB8\u0AA6\u0ACD\u0A97\u0AAE\u0AAF \u0964 \u0AA4\u0AAE\u0AB8\u094B \u0AAE\u0ABE \u0A9C\u0ACD\u0AAF\u094B\u0AA4\u0ABF\u0AB0\u0ACD\u0A97\u0AAE\u0AAF \u0964\u201D</p><p class="company">Katyaayani Jyotish \u2022 Ahmedabad \u2022 +91 98249 29588</p></div></div><div class="disclaimer">This invoice is auto-generated at the time of booking. For any queries, contact us at katyaayaniastrologer01@gmail.com</div></div></body></html>`;
     const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -338,14 +339,15 @@ const fetchBookingDetails = async (bid: string) => {
         const response = await fetch(`/api/bookings/${bid}`);
         if (response.ok) {
           const data = await response.json();
-          setFormData({ name: data.full_name, email: data.email, phone: data.phone, city: data.city || "", address: data.address || "", birthDate: data.date_of_birth, birthTime: data.time_of_birth, birthPlace: data.place_of_birth, questions: data.special_requests || "" });
-          setSelectedType(data.service_type);
-          setSelectedDate(new Date(data.booking_date));
-          setSelectedTime(data.booking_time);
-          setInvoiceNumber(data.invoice_number);
-if (data.payment_status === 'success' || data.payment_status === 'completed') {
-              setPaymentSuccess(true);
-            }
+            setFormData({ name: data.full_name, email: data.email, phone: data.phone, city: data.city || "", address: data.address || "", birthDate: data.date_of_birth, birthTime: data.time_of_birth, birthPlace: data.place_of_birth, questions: data.special_requests || "" });
+            setSelectedType(data.service_type);
+            setSelectedDate(new Date(data.booking_date));
+            setSelectedTime(data.booking_time);
+            setInvoiceNumber(data.invoice_number);
+            if (data.payment_intent_id) setPaymentTransactionId(data.payment_intent_id);
+            if (data.payment_status === 'success' || data.payment_status === 'completed') {
+                setPaymentSuccess(true);
+              }
         }
       } catch (error) {
         console.error("Error fetching booking:", error);
@@ -780,9 +782,14 @@ src="https://yiuhyqfkdnuzalqyxshe.supabase.co/storage/v1/object/sign/logo/logo_w
                         </div>
                       <div className="text-left md:text-right">
                           {invoiceNumber && (
-                            <p className="text-lg font-black text-[#ff6b35] mb-1">{t('Invoice #:')} {invoiceNumber}</p>
-                          )}
-                          <p className={`text-xs font-bold ${theme === 'dark' ? 'text-[#888888]' : 'text-[#666666]'}`}>{t('Issued on:')} {new Date().toLocaleDateString(language === 'en' ? 'en-IN' : language === 'hi' ? 'hi-IN' : 'gu-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                              <p className="text-lg font-black text-[#ff6b35] mb-1">{t('Invoice #:')} {invoiceNumber}</p>
+                            )}
+                            {paymentTransactionId && (
+                              <p className={`text-xs font-bold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
+                                {language === 'gu' ? 'ટ્રાન્ઝેક્શન ID:' : language === 'hi' ? 'ट्रांज़ैक्शन ID:' : 'Transaction ID:'} {paymentTransactionId}
+                              </p>
+                            )}
+                            <p className={`text-xs font-bold ${theme === 'dark' ? 'text-[#888888]' : 'text-[#666666]'}`}>{t('Issued on:')} {new Date().toLocaleDateString(language === 'en' ? 'en-IN' : language === 'hi' ? 'hi-IN' : 'gu-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                         </div>
                     </div>
 
@@ -892,23 +899,28 @@ src="https://yiuhyqfkdnuzalqyxshe.supabase.co/storage/v1/object/sign/logo/logo_w
                   <p className={`text-xs uppercase tracking-widest font-bold mb-2 ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#75695e]'}`}>
                     {language === 'gu' ? 'તમારો ઇન્વૉઇસ નંબર' : language === 'hi' ? 'आपका इनवॉइस नंबर' : 'Your Invoice Number'}
                   </p>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-mono text-2xl font-black text-[#ff6b35] tracking-wider">{invoiceNumber}</span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        navigator.clipboard.writeText(invoiceNumber);
-                        setCopiedInvoice(true);
-                        setTimeout(() => setCopiedInvoice(false), 2000);
-                      }}
-                      className="border-[#ff6b35]/30 text-[#ff6b35] hover:bg-[#ff6b35]/10"
-                    >
-                      {copiedInvoice ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    </Button>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-mono text-2xl font-black text-[#ff6b35] tracking-wider">{invoiceNumber}</span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(invoiceNumber);
+                          setCopiedInvoice(true);
+                          setTimeout(() => setCopiedInvoice(false), 2000);
+                        }}
+                        className="border-[#ff6b35]/30 text-[#ff6b35] hover:bg-[#ff6b35]/10"
+                      >
+                        {copiedInvoice ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      </Button>
+                    </div>
+                    {paymentTransactionId && (
+                      <p className={`text-xs font-bold mt-2 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
+                        {language === 'gu' ? 'ટ્રાન્ઝેક્શન ID:' : language === 'hi' ? 'ट्रांज़ैक्शन ID:' : 'Transaction ID:'} {paymentTransactionId}
+                      </p>
+                    )}
                   </div>
-                </div>
-              )}
+                )}
 
               {selectedType === 'online' && (
                 <div className={`p-4 rounded-xl ${theme === 'dark' ? 'bg-green-500/10 border border-green-500/20' : 'bg-green-50 border border-green-200'}`}>

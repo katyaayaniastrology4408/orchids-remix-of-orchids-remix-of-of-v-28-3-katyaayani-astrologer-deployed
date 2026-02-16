@@ -50,11 +50,23 @@ export async function POST(request: NextRequest) {
           .eq("id", order_id);
 
       if (updateError) {
-        console.error("Supabase update error (webhook success):", updateError);
-        return NextResponse.json({ success: false }, { status: 500 });
-      }
+          console.error("Supabase update error (webhook success):", updateError);
+          return NextResponse.json({ success: false }, { status: 500 });
+        }
 
-      // Notify Telegram Bot
+        // Update invoice status to paid and add transaction ID
+        const transactionId = payload.transaction_id || payload.uropay_order_id || '';
+        if (booking.invoice_number) {
+          await supabase
+            .from("invoices")
+            .update({ 
+              status: 'paid',
+              notes: transactionId ? `Payment Transaction ID: ${transactionId}. Thank you for choosing Katyaayani Astrologer.` : 'Thank you for choosing Katyaayani Astrologer.'
+            })
+            .eq("invoice_number", booking.invoice_number);
+        }
+
+        // Notify Telegram Bot
       const botToken = process.env.TELEGRAM_BOOKING_BOT_TOKEN;
       const chatId = process.env.TELEGRAM_BOOKING_CHAT_ID;
 
