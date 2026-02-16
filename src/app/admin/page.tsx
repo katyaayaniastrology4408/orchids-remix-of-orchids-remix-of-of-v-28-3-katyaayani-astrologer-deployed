@@ -90,6 +90,8 @@ import SchedulingPanel from "@/components/admin/SchedulingPanel";
 import ReportsPanel from "@/components/admin/ReportsPanel";
 import DevOpsPanel from "@/components/admin/DevOpsPanel";
 import ScalingPanel from "@/components/admin/ScalingPanel";
+import ReschedulePanel from "@/components/admin/ReschedulePanel";
+import InvoicePanel from "@/components/admin/InvoicePanel";
 
 type Activity = {
   id: string;
@@ -1777,6 +1779,14 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
                       <ScalingPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
                     )}
 
+                    {activeTab === "reschedule" && (
+                      <ReschedulePanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                    )}
+
+                    {activeTab === "invoices" && (
+                      <InvoicePanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                    )}
+
                     {activeTab === "settings" && (
 
               <div className="space-y-6 pb-20 md:pb-0">
@@ -3332,6 +3342,8 @@ function SidebarContent({ activeTab, setActiveTab, handleLogout, isDark, t }: {
             <div className="my-4 border-t border-[#ff6b35]/10 pt-4"></div>
             <NavItem icon={<LayoutDashboard className="w-4 h-4" />} label={t("Dashboard")} active={activeTab === "dashboard"} onClick={() => setActiveTab("dashboard")} isDark={isDark} />
           <NavItem icon={<Calendar className="w-4 h-4" />} label={t("Bookings")} active={activeTab === "bookings"} onClick={() => setActiveTab("bookings")} isDark={isDark} />
+          <NavItem icon={<RefreshCw className="w-4 h-4" />} label={t("Reschedule")} active={activeTab === "reschedule"} onClick={() => setActiveTab("reschedule")} isDark={isDark} />
+          <NavItem icon={<CreditCard className="w-4 h-4" />} label={t("Invoices")} active={activeTab === "invoices"} onClick={() => setActiveTab("invoices")} isDark={isDark} />
           <NavItem icon={<MessageSquare className="w-4 h-4" />} label={t("Enquiries")} active={activeTab === "enquiries"} onClick={() => setActiveTab("enquiries")} isDark={isDark} />
           <NavItem icon={<CalendarDays className="w-4 h-4" />} label={t("Availability")} active={activeTab === "availability"} onClick={() => setActiveTab("availability")} isDark={isDark} />
           <NavItem icon={<Users className="w-4 h-4" />} label={t("Users")} active={activeTab === "users"} onClick={() => setActiveTab("users")} isDark={isDark} />
