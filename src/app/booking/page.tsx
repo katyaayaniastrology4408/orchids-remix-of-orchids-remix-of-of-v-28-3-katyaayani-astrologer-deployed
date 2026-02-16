@@ -373,12 +373,6 @@ useEffect(() => {
     setSelectedTime(time);
   };
 
-    const handleRetryPayment = () => {
-      setPaymentFailed(false);
-      setPaymentSuccess(false);
-      setIsProcessingPayment(false);
-    };
-
     const handleDownloadInvoice = () => {
     const price = getCurrentPrice() / 100;
     const serviceName = selectedConsultation ? getText(selectedConsultation.title) : "Consultation Session";
@@ -483,6 +477,13 @@ const fetchBookingDetails = async (bid: string) => {
     } finally {
       setIsCreatingOrder(false);
     }
+  };
+
+  const handleRetryPayment = () => {
+    setPaymentFailed(false);
+    setPaymentSuccess(false);
+    setHasSentPendingNotification(false);
+    // This will re-show the payment buttons and restart polling
   };
 
   const handlePayment = async () => {
