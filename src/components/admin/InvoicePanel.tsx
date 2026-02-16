@@ -54,8 +54,8 @@ export default function InvoicePanel({ isDark, setSuccess, setError }: Props) {
 
   const [form, setForm] = useState({
     user_name: "", user_email: "", user_phone: "", user_address: "",
-    service_type: "Kundli Reading", service_description: "",
-      amount: "", notes: "", disclaimer: DEFAULT_DISCLAIMER,
+    service_type: "Home Consultation (Outside 6.5km)", service_description: "",
+      amount: "2101", notes: "", disclaimer: DEFAULT_DISCLAIMER,
   });
 
   const fetchInvoices = async () => {
@@ -94,7 +94,7 @@ export default function InvoicePanel({ isDark, setSuccess, setError }: Props) {
       if (data.success) {
         setSuccess("Invoice created successfully!");
         setShowForm(false);
-        setForm({ user_name: "", user_email: "", user_phone: "", user_address: "", service_type: "Kundli Reading", service_description: "", amount: "", notes: "", disclaimer: DEFAULT_DISCLAIMER });
+          setForm({ user_name: "", user_email: "", user_phone: "", user_address: "", service_type: "Home Consultation (Outside 6.5km)", service_description: "", amount: "2101", notes: "", disclaimer: DEFAULT_DISCLAIMER });
         fetchInvoices();
       } else {
         setError(data.error || "Failed to create invoice");
@@ -298,18 +298,21 @@ export default function InvoicePanel({ isDark, setSuccess, setError }: Props) {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold opacity-50 block mb-1">Service Type *</label>
-                <select value={form.service_type} onChange={e => setForm(p => ({ ...p, service_type: e.target.value }))} className={`w-full h-10 px-3 rounded-xl border text-sm ${isDark ? "bg-[#0a0a0f] border-white/10 text-white" : "bg-white border-gray-200"}`}>
-                  <option>Kundli Reading</option>
-                  <option>Match Making</option>
-                  <option>Career Consultation</option>
-                  <option>Health Consultation</option>
-                  <option>Vastu Consultation</option>
-                  <option>Gem Stone Consultation</option>
-                  <option>Numerology</option>
-                  <option>Other</option>
-                </select>
-              </div>
+                  <label className="text-xs font-bold opacity-50 block mb-1">Service Type *</label>
+                  <select value={form.service_type} onChange={e => {
+                    const val = e.target.value;
+                    const priceMap: Record<string, string> = {
+                      "Home Consultation (Outside 6.5km)": "2101",
+                      "Home Consultation (Within 6.5km)": "1101",
+                      "Office Consultation": "851",
+                    };
+                    setForm(p => ({ ...p, service_type: val, amount: priceMap[val] || p.amount }));
+                  }} className={`w-full h-10 px-3 rounded-xl border text-sm ${isDark ? "bg-[#0a0a0f] border-white/10 text-white" : "bg-white border-gray-200"}`}>
+                    <option>Home Consultation (Outside 6.5km)</option>
+                    <option>Home Consultation (Within 6.5km)</option>
+                    <option>Office Consultation</option>
+                  </select>
+                </div>
               <div>
                 <label className="text-xs font-bold opacity-50 block mb-1">Service Description</label>
                 <Input value={form.service_description} onChange={e => setForm(p => ({ ...p, service_description: e.target.value }))} placeholder="Description" className={`rounded-xl ${isDark ? "bg-[#0a0a0f] border-white/10" : ""}`} />
