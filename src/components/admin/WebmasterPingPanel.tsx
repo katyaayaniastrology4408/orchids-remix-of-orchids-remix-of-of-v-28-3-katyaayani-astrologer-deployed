@@ -40,15 +40,18 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
     setGoogleCode(localStorage.getItem("google_verification_code") || "");
   }, []);
 
-  const fetchPingLogs = async () => {
-    setLogsLoading(true);
-    try {
-      const res = await fetch("/api/admin/seo/indexnow");
-      const data = await res.json();
-      if (data.success) setPingLogs(data.logs || []);
-    } catch (err) { console.error(err); }
-    finally { setLogsLoading(false); }
-  };
+    const fetchPingLogs = async () => {
+      setLogsLoading(true);
+      try {
+        const res = await fetch("/api/admin/seo/indexnow");
+        if (!res.ok) return;
+        const text = await res.text();
+        if (!text) return;
+        const data = JSON.parse(text);
+        if (data.success) setPingLogs(data.logs || []);
+      } catch (err) { console.error(err); }
+      finally { setLogsLoading(false); }
+    };
 
   const checkSitemap = async () => {
     try {

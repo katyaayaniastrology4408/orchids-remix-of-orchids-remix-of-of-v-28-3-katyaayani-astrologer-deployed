@@ -291,21 +291,24 @@ export default function AdminDashboard() {
     }
   };
 
-  const fetchEmailStats = async () => {
-    setEmailStatsLoading(true);
-    try {
-      const res = await fetch("/api/admin/email-stats");
-      const data = await res.json();
-      if (data.success) {
-        setEmailStats(data.stats);
-        setRecentEmails(data.recentEmails || []);
+    const fetchEmailStats = async () => {
+      setEmailStatsLoading(true);
+      try {
+        const res = await fetch("/api/admin/email-stats");
+        if (!res.ok) return;
+        const text = await res.text();
+        if (!text) return;
+        const data = JSON.parse(text);
+        if (data.success) {
+          setEmailStats(data.stats);
+          setRecentEmails(data.recentEmails || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch email stats:", err);
+      } finally {
+        setEmailStatsLoading(false);
       }
-    } catch (err) {
-      console.error("Failed to fetch email stats:", err);
-    } finally {
-      setEmailStatsLoading(false);
-    }
-  };
+    };
 
   const fetchData = async () => {
     const calculateTrend = (current: number, previous: number) => {

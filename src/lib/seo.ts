@@ -126,7 +126,7 @@ const PAGE_DEFAULTS: Record<string, { title: string; description: string; keywor
 export function generateSchemaMarkup(pagePath: string, seoData?: { meta_title?: string; meta_description?: string; og_image?: string }): Record<string, unknown> {
   const title = seoData?.meta_title || PAGE_DEFAULTS[pagePath]?.title || SITE_NAME;
   const description = seoData?.meta_description || PAGE_DEFAULTS[pagePath]?.description || "";
-  const image = seoData?.og_image || `${SITE_URL}/og-image.jpg`;
+    const image = seoData?.og_image || `${SITE_URL}/opengraph-image`;
   const url = `${SITE_URL}${pagePath === "/" ? "" : pagePath}`;
 
   // Base Organization schema (always included)
@@ -426,25 +426,25 @@ export async function getSeoMetadata(pagePath: string): Promise<Metadata> {
     // Open Graph: DB -> auto from title/description
     const ogTitle = data?.og_title || title;
     const ogDescription = data?.og_description || description;
-    const ogImage = data?.og_image;
+      const ogImage = data?.og_image || `${SITE_URL}/opengraph-image`;
 
-    const openGraph: Record<string, unknown> = {
-      type: "website",
-      siteName: SITE_NAME,
-      url: canonicalUrl,
-    };
-    if (ogTitle) openGraph.title = ogTitle;
-    if (ogDescription) openGraph.description = ogDescription;
-    if (ogImage) openGraph.images = [{ url: ogImage, width: 1200, height: 630, alt: ogTitle }];
+      const openGraph: Record<string, unknown> = {
+        type: "website",
+        siteName: SITE_NAME,
+        url: canonicalUrl,
+      };
+      if (ogTitle) openGraph.title = ogTitle;
+      if (ogDescription) openGraph.description = ogDescription;
+      openGraph.images = [{ url: ogImage, width: 1200, height: 630, alt: ogTitle || SITE_NAME }];
     metadata.openGraph = openGraph as Metadata["openGraph"];
 
-    // Twitter card
-    metadata.twitter = {
-      card: "summary_large_image",
-      title: (ogTitle as string) || undefined,
-      description: (ogDescription as string) || undefined,
-      ...(ogImage ? { images: [ogImage] } : {}),
-    };
+      // Twitter card
+      metadata.twitter = {
+        card: "summary_large_image",
+        title: (ogTitle as string) || undefined,
+        description: (ogDescription as string) || undefined,
+        images: [{ url: ogImage, alt: ogTitle || SITE_NAME }],
+      };
 
     // Canonical: DB -> auto-generate
     metadata.alternates = {
