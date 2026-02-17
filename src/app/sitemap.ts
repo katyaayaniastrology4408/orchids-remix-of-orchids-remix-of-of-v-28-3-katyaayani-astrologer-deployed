@@ -14,7 +14,8 @@ export const dynamic = "force-dynamic";
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.katyaayaniastrologer.com";
+  // HARDCODED: env var doesn't resolve on deployed server, causing localhost in sitemap
+  const baseUrl = "https://www.katyaayaniastrologer.com";
   const supabase = getSupabase();
 
   // --- Static Pages ---
