@@ -18,6 +18,7 @@ const ICON_BASE = 'https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/im
 
 const SITE_URL = "https://www.katyaayaniastrologer.com";
 const OG_IMAGE = `${SITE_URL}/opengraph-image`;
+const LOGO_URL = "https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/LOGO/favicon_bg_fixed.ico";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -70,14 +71,14 @@ export const metadata: Metadata = {
     url: SITE_URL,
     locale: "en_IN",
     alternateLocale: ["hi_IN", "gu_IN"],
-    title: "Katyaayani Astrologer - Best Vedic Astrologer | Kundali, Horoscope & Jyotish",
-    description: "Katyaayani Astrologer connects modern times with ancient astrology, blending ancient wisdom with today's technology. Expert kundali analysis, horoscope readings, vastu consultation & personalized remedies since 2007.",
+    title: "A Journey Within - Katyayani Vedic Astrology",
+    description: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom. Expert kundali analysis, horoscope readings, vastu consultation & personalized remedies since 2007.",
     images: [
         {
       url: OG_IMAGE,
             width: 1200,
             height: 630,
-            alt: "Katyaayani Astrologer - Vedic Astrology Consultations",
+            alt: "Founder Kumar Rishi in traditional attire - Katyaayani Astrologer",
             type: "image/png",
         },
       ],
@@ -85,9 +86,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Katyaayani Astrologer - Best Vedic Astrologer",
-    description: "Katyaayani Astrologer connects modern times with ancient astrology. Expert kundali, horoscope & jyotish consultations since 2007.",
-    images: [{ url: OG_IMAGE, alt: "Katyaayani Astrologer" }],
+    title: "A Journey Within - Katyayani Vedic Astrology",
+    description: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
+    images: [{ url: OG_IMAGE, alt: "Founder Kumar Rishi in traditional attire - Katyaayani Astrologer" }],
   },
   alternates: {
     canonical: SITE_URL,

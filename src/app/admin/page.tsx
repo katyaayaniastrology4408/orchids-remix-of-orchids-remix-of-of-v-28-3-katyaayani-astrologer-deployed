@@ -84,6 +84,7 @@ import {
 } from "@/components/ui/input-otp";
 import SeoTestingPanel from "@/components/admin/SeoTestingPanel";
 import SeoMonitorPanel from "@/components/admin/SeoMonitorPanel";
+import SocialPreviewPanel from "@/components/admin/SocialPreviewPanel";
 import WebmasterPingPanel from "@/components/admin/WebmasterPingPanel";
 import AutomationPanel from "@/components/admin/AutomationPanel";
 import PerformancePanel from "@/components/admin/PerformancePanel";
@@ -1776,6 +1777,10 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
 
                       {activeTab === "seo-monitor" && (
                         <SeoMonitorPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                      )}
+
+                      {activeTab === "social-preview" && (
+                        <SocialPreviewPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
                       )}
 
                       {activeTab === "webmaster-ping" && (
@@ -3574,8 +3579,8 @@ function SidebarContent({ activeTab, setActiveTab, handleLogout, isDark, t }: {
     <div className="flex flex-col h-full overflow-y-auto">
       <div className="p-6">
         <div className="flex items-center gap-3 mb-8">
-          <div className="p-2 rounded-xl bg-[#ff6b35]/10 border border-[#ff6b35]/20">
-            <Sun className="w-6 h-6 text-[#ff6b35]" />
+          <div className="w-10 h-10 rounded-xl overflow-hidden border border-[#ff6b35]/20 bg-[#ff6b35]/5 flex items-center justify-center">
+            <img src="https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/LOGO/favicon_bg_fixed.ico" alt="Katyaayani Logo" className="w-8 h-8 object-contain" />
           </div>
           <div>
             <h1 className="font-[family-name:var(--font-cinzel)] text-sm font-bold tracking-tight text-[#ff6b35] leading-tight text-left">Katyaayani Astrologer</h1>
@@ -3615,6 +3620,7 @@ function SidebarContent({ activeTab, setActiveTab, handleLogout, isDark, t }: {
                     </div>
                     <NavItem icon={<Search className="w-4 h-4" />} label={t("SEO Testing")} active={activeTab === "seo-testing"} onClick={() => setActiveTab("seo-testing")} isDark={isDark} />
                       <NavItem icon={<Monitor className="w-4 h-4" />} label={t("SEO Monitor")} active={activeTab === "seo-monitor"} onClick={() => setActiveTab("seo-monitor")} isDark={isDark} />
+                    <NavItem icon={<Eye className="w-4 h-4" />} label={t("Social Preview")} active={activeTab === "social-preview"} onClick={() => setActiveTab("social-preview")} isDark={isDark} />
                       <NavItem icon={<Send className="w-4 h-4" />} label={t("Google & Bing SEO")} active={activeTab === "webmaster-ping"} onClick={() => setActiveTab("webmaster-ping")} isDark={isDark} />
                     <NavItem icon={<Zap className="w-4 h-4" />} label={t("Automation")} active={activeTab === "automation"} onClick={() => setActiveTab("automation")} isDark={isDark} />
                     <NavItem icon={<Gauge className="w-4 h-4" />} label={t("Performance")} active={activeTab === "performance"} onClick={() => setActiveTab("performance")} isDark={isDark} />

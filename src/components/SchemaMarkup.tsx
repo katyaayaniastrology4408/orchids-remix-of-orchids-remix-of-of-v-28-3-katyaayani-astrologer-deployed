@@ -4,11 +4,13 @@ import { usePathname } from "next/navigation";
 
 const SITE_URL = "https://www.katyaayaniastrologer.com";
 const LOGO_URL = "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=256&height=256&resize=contain";
+const OG_IMAGE = "https://www.katyaayaniastrologer.com/opengraph-image";
 
 const ORG_SCHEMA = {
   "@type": "Organization",
   "@id": `${SITE_URL}/#organization`,
-  name: "Katyaayani Astrologer",
+  name: "Katyayani Vedic Astrology",
+  alternateName: "Katyaayani Astrologer",
   url: SITE_URL,
   logo: {
     "@type": "ImageObject",
@@ -16,14 +18,24 @@ const ORG_SCHEMA = {
     width: 256,
     height: 256,
   },
-  description: "Katyaayani Astrologer connects modern times with ancient astrology, blending ancient wisdom with today's technology to provide accurate guidance, practical solutions, and personalized remedies.",
+  image: OG_IMAGE,
+  description: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
   foundingDate: "2007",
+  founder: {
+    "@type": "Person",
+    "@id": `${SITE_URL}/#founder`,
+    name: "Kumar Rishi G",
+    image: OG_IMAGE,
+    jobTitle: "Founder & Chief Vedic Astrologer",
+    worksFor: { "@id": `${SITE_URL}/#organization` },
+  },
   areaServed: { "@type": "Country", name: "India" },
   serviceType: ["Vedic Astrology", "Kundali Analysis", "Horoscope Reading", "Vastu Shastra", "Marriage Matching"],
   sameAs: [],
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "customer service",
+    email: "katyaayaniastrologer01@gmail.com",
     availableLanguage: ["English", "Hindi", "Gujarati"],
   },
 };
@@ -32,13 +44,14 @@ const SCHEMA_DEFAULTS: Record<string, Record<string, unknown>> = {
   "/": {
     "@context": "https://schema.org",
     "@graph": [
-      {
-        "@type": "WebSite",
-        "@id": `${SITE_URL}/#website`,
-        name: "Katyaayani Astrologer",
-        url: SITE_URL,
-        description: "Expert Vedic astrology consultations, kundali analysis, horoscope readings & vastu shastra since 2007.",
-        publisher: { "@id": `${SITE_URL}/#organization` },
+        {
+          "@type": "WebSite",
+          "@id": `${SITE_URL}/#website`,
+          name: "Katyayani Vedic Astrology",
+          alternateName: "Katyaayani Astrologer",
+          url: SITE_URL,
+          description: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
+          publisher: { "@id": `${SITE_URL}/#organization` },
         potentialAction: {
           "@type": "SearchAction",
           target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/blog?q={search_term_string}` },
@@ -47,13 +60,14 @@ const SCHEMA_DEFAULTS: Record<string, Record<string, unknown>> = {
         inLanguage: "en-IN",
       },
       ORG_SCHEMA,
-      {
-        "@type": "ProfessionalService",
-        "@id": `${SITE_URL}/#service`,
-        name: "Katyaayani Astrologer",
-        url: SITE_URL,
-        image: LOGO_URL,
-        description: "Expert Vedic astrology consultations since 2007.",
+        {
+          "@type": "ProfessionalService",
+          "@id": `${SITE_URL}/#service`,
+          name: "Katyayani Vedic Astrology",
+          url: SITE_URL,
+          image: OG_IMAGE,
+          logo: LOGO_URL,
+          description: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
         serviceType: "Vedic Astrology Consultation",
         areaServed: { "@type": "Country", name: "India" },
         hasOfferCatalog: {

@@ -25,14 +25,24 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       siteName: "Katyaayani Astrologer",
       url: SITE_URL,
-      title: "Katyaayani Astrologer - Expert Vedic Astrology & Jyotish Consultations",
-      description: "Katyaayani Astrologer connects modern times with ancient astrology, blending ancient wisdom with today's technology. Expert kundali analysis, horoscope readings, vastu consultation & personalized remedies since 2007.",
+      title: "A Journey Within - Katyayani Vedic Astrology",
+      description: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom. Expert kundali analysis, horoscope readings, vastu consultation & personalized remedies since 2007.",
       locale: "en_IN",
+      images: [
+        {
+          url: `${SITE_URL}/opengraph-image`,
+          width: 1200,
+          height: 630,
+          alt: "Founder Kumar Rishi in traditional attire - Katyaayani Astrologer",
+          type: "image/png",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
-      title: "Katyaayani Astrologer - Expert Vedic Astrology Consultations",
-      description: "Katyaayani Astrologer connects modern times with ancient astrology. Expert kundali, horoscope & jyotish consultations since 2007.",
+      title: "A Journey Within - Katyayani Vedic Astrology",
+      description: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
+      images: [{ url: `${SITE_URL}/opengraph-image`, alt: "Founder Kumar Rishi in traditional attire - Katyaayani Astrologer" }],
     },
     alternates: {
       canonical: SITE_URL,
