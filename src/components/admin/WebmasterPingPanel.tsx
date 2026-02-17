@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,8 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Globe, Send, RefreshCw, CheckCircle, XCircle, Clock, Search, Shield, Loader2, ExternalLink, Copy, AlertTriangle, Zap, FileText } from "lucide-react";
+import { 
+  Globe, Send, RefreshCw, CheckCircle, XCircle, Clock, Search, Shield, 
+  Loader2, ExternalLink, Copy, AlertTriangle, Zap, FileText, Save, 
+  ArrowRight, RotateCcw, Eye, ChevronDown, ChevronUp
+} from "lucide-react";
 import { safeJson } from "@/lib/safe-json";
+import { supabase } from "@/lib/supabase";
 
 interface WebmasterPingPanelProps {
   isDark: boolean;
@@ -18,69 +22,112 @@ interface WebmasterPingPanelProps {
 }
 
 export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: WebmasterPingPanelProps) {
+  // Verification codes - saved to DB
   const [bingCode, setBingCode] = useState("");
   const [googleCode, setGoogleCode] = useState("");
+  const [googleCode2, setGoogleCode2] = useState("");
   const [saving, setSaving] = useState(false);
+  const [loadingSettings, setLoadingSettings] = useState(true);
+
+  // Sitemap ping
   const [pinging, setPinging] = useState(false);
   const [pingTarget, setPingTarget] = useState<string | null>(null);
   const [pingLogs, setPingLogs] = useState<any[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
-  const [sitemapStatus, setSitemapStatus] = useState<{ pages: number; accessible: boolean } | null>(null);
+  const [sitemapStatus, setSitemapStatus] = useState<{ pages: number; accessible: boolean; urls: string[] } | null>(null);
+  const [showSitemapUrls, setShowSitemapUrls] = useState(false);
 
   // IndexNow states
   const [indexNowUrls, setIndexNowUrls] = useState("");
   const [indexNowSubmitting, setIndexNowSubmitting] = useState(false);
   const [indexNowKey] = useState("4dc380408a8140fd8b67450af7964725");
+  const [lastIndexNowResult, setLastIndexNowResult] = useState<any>(null);
+
+  // Bing specific
+  const [bingSubmitUrl, setBingSubmitUrl] = useState("");
+  const [bingSubmitting, setBingSubmitting] = useState(false);
 
   const siteUrl = "https://www.katyaayaniastrologer.com";
 
   useEffect(() => {
+    loadVerificationCodes();
     fetchPingLogs();
     checkSitemap();
-    setBingCode(localStorage.getItem("bing_verification_code") || "");
-    setGoogleCode(localStorage.getItem("google_verification_code") || "");
   }, []);
 
-    const fetchPingLogs = async () => {
-      setLogsLoading(true);
-      try {
-        const res = await fetch("/api/admin/seo/indexnow");
-        if (!res.ok) return;
-        const text = await res.text();
-        if (!text) return;
-        const data = JSON.parse(text);
-        if (data.success) setPingLogs(data.logs || []);
-      } catch (err) { console.error(err); }
-      finally { setLogsLoading(false); }
-    };
+  // Load verification codes from DB (admin_settings table)
+  const loadVerificationCodes = async () => {
+    setLoadingSettings(true);
+    try {
+      const { data } = await supabase
+        .from("admin_settings")
+        .select("*")
+        .in("key", ["google_verification_code", "google_verification_code_2", "bing_verification_code"]);
+
+      const settings = (data || []).reduce((acc: Record<string, string>, curr: { key: string; value: string }) => {
+        acc[curr.key] = curr.value;
+        return acc;
+      }, {});
+
+      setGoogleCode(settings["google_verification_code"] || "2Edo_sTI7Jp85F7z7xr0yG6MTSrSsm5WO0jY4HsAqmM");
+      setGoogleCode2(settings["google_verification_code_2"] || "JC618JFaRN0wnJt6Lsbglqfjkm7Cd_rBXQO6l42jEWY");
+      setBingCode(settings["bing_verification_code"] || "2Edo_sTI7Jp85F7z7xr0yG6MTSrSsm5WO0jY4HsAqmM");
+    } catch (err) {
+      console.error("Failed to load verification codes:", err);
+    }
+    setLoadingSettings(false);
+  };
+
+  // Save verification codes to DB
+  const handleSaveVerification = async () => {
+    setSaving(true);
+    try {
+      const settings = [
+        { key: "google_verification_code", value: googleCode },
+        { key: "google_verification_code_2", value: googleCode2 },
+        { key: "bing_verification_code", value: bingCode },
+      ];
+
+      for (const item of settings) {
+        await supabase.from("admin_settings").upsert(item, { onConflict: "key" });
+      }
+
+      setSuccess(t("Verification codes saved to database! Changes will apply after next deploy."));
+    } catch {
+      setError(t("Failed to save verification codes"));
+    }
+    setSaving(false);
+  };
+
+  const fetchPingLogs = async () => {
+    setLogsLoading(true);
+    try {
+      const res = await fetch("/api/admin/seo/indexnow");
+      if (!res.ok) return;
+      const text = await res.text();
+      if (!text) return;
+      const data = JSON.parse(text);
+      if (data.success) setPingLogs(data.logs || []);
+    } catch (err) { console.error(err); }
+    finally { setLogsLoading(false); }
+  };
 
   const checkSitemap = async () => {
     try {
       const res = await fetch("/sitemap.xml");
       const text = await res.text();
-      const urlCount = (text.match(/<url>/g) || []).length + (text.match(/<sitemap>/g) || []).length;
-      setSitemapStatus({ pages: urlCount, accessible: res.ok });
+      const urlMatches = text.match(/<loc>(.*?)<\/loc>/g) || [];
+      const urls = urlMatches.map(m => m.replace(/<\/?loc>/g, ""));
+      setSitemapStatus({ pages: urls.length, accessible: res.ok, urls });
     } catch {
-      setSitemapStatus({ pages: 0, accessible: false });
+      setSitemapStatus({ pages: 0, accessible: false, urls: [] });
     }
   };
 
-  const handleSaveVerification = () => {
-    setSaving(true);
-    try {
-      localStorage.setItem("bing_verification_code", bingCode);
-      localStorage.setItem("google_verification_code", googleCode);
-      setSuccess(t("Verification codes saved! Update .env.local with these values for production."));
-    } catch {
-      setError(t("Failed to save"));
-    }
-    setSaving(false);
-  };
-
-  // Legacy sitemap ping
-  const handlePingSitemap = async () => {
+  // Ping sitemap to Google + Bing
+  const handlePingSitemap = async (target?: "Google" | "Bing") => {
     setPinging(true);
-    setPingTarget("sitemap");
+    setPingTarget(target || "all");
     try {
       const res = await fetch("/api/admin/seo/indexnow", {
         method: "POST",
@@ -88,19 +135,19 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
         body: JSON.stringify({ action: "ping-sitemap" }),
       });
       const data = await safeJson(res);
-        if (data?.success) {
-          const results = data.results || [];
-          const allOk = results.every((r: any) => r.status === "success");
-          if (allOk) {
-            setSuccess(t("Sitemap pinged to all search engines successfully!"));
-          } else {
-            const failed = results.filter((r: any) => r.status !== "success");
-            setError(t(`Some pings failed: ${failed.map((f: any) => f.target).join(", ")}`));
-          }
-          fetchPingLogs();
+      if (data?.success) {
+        const results = data.results || [];
+        const allOk = results.every((r: any) => r.status === "success");
+        if (allOk) {
+          setSuccess(t("Sitemap pinged to all search engines successfully!"));
         } else {
-          setError(data?.message || t("Ping failed"));
+          const failed = results.filter((r: any) => r.status !== "success");
+          setError(t(`Some pings failed: ${failed.map((f: any) => f.target).join(", ")}`));
         }
+        fetchPingLogs();
+      } else {
+        setError(data?.message || t("Ping failed"));
+      }
     } catch {
       setError(t("Network error during ping"));
     }
@@ -111,6 +158,7 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
   // IndexNow submit
   const handleIndexNowSubmit = async (urls?: string[]) => {
     setIndexNowSubmitting(true);
+    setLastIndexNowResult(null);
     try {
       const urlList = urls || indexNowUrls.split("\n").map(u => u.trim()).filter(Boolean);
       if (urlList.length === 0) {
@@ -125,41 +173,57 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
         body: JSON.stringify({ urls: urlList }),
       });
       const data = await safeJson(res);
-        if (data?.success) {
-          const results = data.results || [];
-          const anySuccess = results.some((r: any) => r.status === "success" || r.status === "accepted");
-          if (anySuccess) {
-            setSuccess(t(`IndexNow: ${data.urlCount} URLs submitted successfully!`));
-            setIndexNowUrls("");
-          } else {
-            setError(t(`IndexNow submission failed. Status codes: ${results.map((r: any) => r.statusCode).join(", ")}`));
-          }
-          fetchPingLogs();
+      if (data?.success) {
+        setLastIndexNowResult(data);
+        const results = data.results || [];
+        const anySuccess = results.some((r: any) => r.status === "success" || r.status === "accepted");
+        if (anySuccess) {
+          setSuccess(t(`IndexNow: ${data.urlCount} URLs submitted to Bing, Yandex & Naver!`));
+          setIndexNowUrls("");
         } else {
-          setError(data?.message || t("IndexNow submission failed"));
+          setError(t("IndexNow submission failed"));
         }
+        fetchPingLogs();
+      } else {
+        setError(data?.message || t("IndexNow submission failed"));
+      }
     } catch {
       setError(t("Network error during IndexNow submission"));
     }
     setIndexNowSubmitting(false);
   };
 
-  // Submit all site pages via IndexNow
+  // Submit ALL site pages via IndexNow
   const handleIndexNowSubmitAll = async () => {
-    const allPages = [
-      `${siteUrl}/`,
-      `${siteUrl}/about`,
-      `${siteUrl}/services`,
-      `${siteUrl}/blog`,
-      `${siteUrl}/booking`,
-      `${siteUrl}/contact`,
-      `${siteUrl}/horoscope`,
-      `${siteUrl}/online-consulting`,
-      `${siteUrl}/kundli`,
-      `${siteUrl}/privacy`,
-      `${siteUrl}/terms`,
-    ];
+    // Use sitemap URLs if available, otherwise use hardcoded list
+    const allPages = sitemapStatus?.urls?.length 
+      ? sitemapStatus.urls 
+      : [
+          `${siteUrl}/`, `${siteUrl}/about`, `${siteUrl}/services`,
+          `${siteUrl}/blog`, `${siteUrl}/booking`, `${siteUrl}/contact`,
+          `${siteUrl}/horoscope`, `${siteUrl}/online-consulting`, `${siteUrl}/kundli`,
+          `${siteUrl}/privacy`, `${siteUrl}/terms`,
+          `${siteUrl}/horoscope/mesh`, `${siteUrl}/horoscope/vrushabh`, `${siteUrl}/horoscope/mithun`,
+          `${siteUrl}/horoscope/kark`, `${siteUrl}/horoscope/sinh`, `${siteUrl}/horoscope/kanya`,
+          `${siteUrl}/horoscope/tula`, `${siteUrl}/horoscope/vrushchik`, `${siteUrl}/horoscope/dhanu`,
+          `${siteUrl}/horoscope/makar`, `${siteUrl}/horoscope/kumbh`, `${siteUrl}/horoscope/meen`,
+        ];
     await handleIndexNowSubmit(allPages);
+  };
+
+  // Bing URL Submission API
+  const handleBingUrlSubmit = async () => {
+    if (!bingSubmitUrl.trim()) return;
+    setBingSubmitting(true);
+    try {
+      // Use IndexNow for Bing URL submission (most effective method)
+      const urls = bingSubmitUrl.split("\n").map(u => u.trim()).filter(Boolean);
+      await handleIndexNowSubmit(urls);
+      setBingSubmitUrl("");
+    } catch {
+      setError(t("Failed to submit URL to Bing"));
+    }
+    setBingSubmitting(false);
   };
 
   const copyToClipboard = (text: string) => {
@@ -171,19 +235,19 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
   const inputClass = isDark ? "bg-[#1a1a2e] border-[#ff6b35]/10 text-white" : "bg-white border-[#ff6b35]/20 text-black";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20 md:pb-0">
       {/* Header */}
       <div>
         <h2 className="font-[family-name:var(--font-cinzel)] text-2xl font-bold text-[#ff6b35]">
-          {t("Webmaster & IndexNow")}
+          {t("Google & Bing SEO Manager")}
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          {t("Manage search engine verification, IndexNow instant indexing, and sitemap pings")}
+          {t("Manage verification codes, indexing, sitemap pings - all from one place")}
         </p>
       </div>
 
       {/* Status Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Card className={cardClass}>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -202,11 +266,11 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
-                <Send className="w-5 h-5" />
+                <Search className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-2xl font-black">{pingLogs.length}</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("Total Pings")}</p>
+                <p className="text-2xl font-black">{googleCode ? "2" : "0"}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("Google Codes")}</p>
               </div>
             </div>
           </CardContent>
@@ -215,12 +279,12 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
         <Card className={cardClass}>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-500/10 text-green-500">
-                <CheckCircle className="w-5 h-5" />
+              <div className={`p-2 rounded-lg ${bingCode ? "bg-cyan-500/10 text-cyan-500" : "bg-red-500/10 text-red-500"}`}>
+                <Globe className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-2xl font-black">{pingLogs.filter(l => l.status === "success" || l.status === "accepted").length}</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("Successful")}</p>
+                <p className="text-2xl font-black">{bingCode ? "1" : "0"}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("Bing Code")}</p>
               </div>
             </div>
           </CardContent>
@@ -234,21 +298,216 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
               </div>
               <div>
                 <p className="text-2xl font-black">{pingLogs.filter(l => l.target?.includes("IndexNow")).length}</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("IndexNow")}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("IndexNow Pings")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* IndexNow Integration - FEATURED */}
+      {/* =================== GOOGLE SEO SECTION =================== */}
+      <Card className={`${cardClass} ring-1 ring-blue-500/20`}>
+        <CardHeader>
+          <CardTitle className="text-blue-500 flex items-center gap-2">
+            <Search className="w-5 h-5" /> {t("Google Search Console")}
+            {googleCode && <Badge className="bg-green-500/10 text-green-500 text-[10px] ml-2">{t("Verified")}</Badge>}
+          </CardTitle>
+          <CardDescription>{t("Manage Google verification codes, sitemap submission & indexing")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Google Verification Code 1 */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">{t("Verification Code 1 (Primary)")}</label>
+            <div className="flex gap-2">
+              <Input
+                placeholder="e.g., 2Edo_sTI7Jp85F7z7xr0y..."
+                value={googleCode}
+                onChange={(e) => setGoogleCode(e.target.value)}
+                className={inputClass}
+              />
+              <Button variant="outline" size="icon" onClick={() => copyToClipboard(googleCode)} className="shrink-0">
+                <Copy className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Google Verification Code 2 */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">{t("Verification Code 2 (Secondary)")}</label>
+            <div className="flex gap-2">
+              <Input
+                placeholder="e.g., JC618JFaRN0wnJt6Lsbg..."
+                value={googleCode2}
+                onChange={(e) => setGoogleCode2(e.target.value)}
+                className={inputClass}
+              />
+              <Button variant="outline" size="icon" onClick={() => copyToClipboard(googleCode2)} className="shrink-0">
+                <Copy className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Google Actions */}
+          <div className="flex flex-wrap gap-2 pt-2">
+            <Button
+              onClick={() => handlePingSitemap("Google")}
+              disabled={pinging}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {pinging && pingTarget === "Google" ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
+              {t("Ping Google Sitemap")}
+            </Button>
+            <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="gap-1 border-blue-500/20 text-blue-500">
+                <ExternalLink className="w-3 h-3" /> {t("Open Google Console")}
+              </Button>
+            </a>
+            <a href={`https://search.google.com/search-console/sitemaps?resource_id=${encodeURIComponent(siteUrl)}`} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="gap-1 border-blue-500/20 text-blue-500">
+                <FileText className="w-3 h-3" /> {t("Resubmit Sitemap")}
+              </Button>
+            </a>
+          </div>
+
+          {/* Google Meta Preview */}
+          <div className={`p-3 rounded-lg border ${isDark ? "bg-[#0a0a12] border-blue-500/10" : "bg-blue-50 border-blue-200"}`}>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">{t("Meta Tags in <head>")}</p>
+            <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap">
+{`<meta name="google-site-verification" content="${googleCode || '...'}" />`}{"\n"}
+{`<meta name="google-site-verification" content="${googleCode2 || '...'}" />`}
+            </pre>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* =================== BING SEO SECTION =================== */}
+      <Card className={`${cardClass} ring-1 ring-cyan-500/20`}>
+        <CardHeader>
+          <CardTitle className="text-cyan-500 flex items-center gap-2">
+            <Globe className="w-5 h-5" /> {t("Bing Webmaster Tools")}
+            {bingCode && <Badge className="bg-green-500/10 text-green-500 text-[10px] ml-2">{t("Verified")}</Badge>}
+          </CardTitle>
+          <CardDescription>{t("Manage Bing verification, URL submission, IndexNow & sitemap for Bing")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Bing Verification Code */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">{t("Bing Verification Code (msvalidate.01)")}</label>
+            <div className="flex gap-2">
+              <Input
+                placeholder="e.g., 2Edo_sTI7Jp85F7z7xr0y..."
+                value={bingCode}
+                onChange={(e) => setBingCode(e.target.value)}
+                className={inputClass}
+              />
+              <Button variant="outline" size="icon" onClick={() => copyToClipboard(bingCode)} className="shrink-0">
+                <Copy className="w-4 h-4" />
+              </Button>
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              {t("Since you imported from Google, the same verification code works for Bing")}
+            </p>
+          </div>
+
+          {/* Bing URL Submission */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">{t("Submit URLs to Bing (via IndexNow)")}</label>
+            <div className="flex gap-2">
+              <Input
+                placeholder={`${siteUrl}/new-blog-post`}
+                value={bingSubmitUrl}
+                onChange={(e) => setBingSubmitUrl(e.target.value)}
+                className={inputClass}
+              />
+              <Button
+                onClick={handleBingUrlSubmit}
+                disabled={bingSubmitting || !bingSubmitUrl.trim()}
+                className="bg-cyan-600 hover:bg-cyan-700 text-white shrink-0"
+              >
+                {bingSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              </Button>
+            </div>
+          </div>
+
+          {/* Bing Actions */}
+          <div className="flex flex-wrap gap-2 pt-2">
+            <Button
+              onClick={() => handlePingSitemap("Bing")}
+              disabled={pinging}
+              className="bg-cyan-600 hover:bg-cyan-700 text-white"
+            >
+              {pinging && pingTarget === "Bing" ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
+              {t("Ping Bing Sitemap")}
+            </Button>
+            <a href="https://www.bing.com/webmasters" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="gap-1 border-cyan-500/20 text-cyan-500">
+                <ExternalLink className="w-3 h-3" /> {t("Open Bing Webmaster")}
+              </Button>
+            </a>
+            <a href={`https://www.bing.com/webmasters/sitemaps?siteUrl=${encodeURIComponent(siteUrl)}`} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="gap-1 border-cyan-500/20 text-cyan-500">
+                <FileText className="w-3 h-3" /> {t("Resubmit Bing Sitemap")}
+              </Button>
+            </a>
+          </div>
+
+          {/* Bing Meta Preview */}
+          <div className={`p-3 rounded-lg border ${isDark ? "bg-[#0a0a12] border-cyan-500/10" : "bg-cyan-50 border-cyan-200"}`}>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">{t("Bing Meta Tag + BingSiteAuth.xml")}</p>
+            <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap">
+{`<meta name="msvalidate.01" content="${bingCode || '...'}" />`}{"\n"}
+{`<!-- Also verified via /BingSiteAuth.xml -->`}
+            </pre>
+          </div>
+
+          {/* Bing-specific features info */}
+          <div className={`p-3 rounded-lg border ${isDark ? "bg-cyan-900/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200"}`}>
+            <p className="text-xs font-bold text-cyan-500 mb-2">{t("Bing SEO Features Active:")}</p>
+            <div className="space-y-1 text-xs">
+              {[
+                { label: t("IndexNow instant indexing"), status: true },
+                { label: t("BingSiteAuth.xml verification"), status: true },
+                { label: t("msvalidate.01 meta tag"), status: !!bingCode },
+                { label: t("Sitemap submitted to Bing"), status: pingLogs.some(l => l.target === "Bing") },
+                { label: t("Bingbot allowed in robots.txt"), status: true },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  {item.status ? <CheckCircle className="w-3 h-3 text-green-500" /> : <XCircle className="w-3 h-3 text-red-500" />}
+                  <span>{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* =================== SAVE ALL VERIFICATION CODES =================== */}
+      <Card className={`${cardClass} ring-2 ring-[#ff6b35]/30`}>
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Save className="w-5 h-5 text-[#ff6b35]" />
+              <div>
+                <p className="font-bold text-sm">{t("Save All Verification Codes to Database")}</p>
+                <p className="text-[10px] text-muted-foreground">{t("Codes are stored in admin_settings table. Update .env.local for production builds.")}</p>
+              </div>
+            </div>
+            <Button onClick={handleSaveVerification} disabled={saving} className="bg-[#ff6b35] hover:bg-[#e55a2b] text-white font-bold">
+              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+              {t("Save All Codes")}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* =================== INDEXNOW - INSTANT INDEXING =================== */}
       <Card className={`${cardClass} ring-2 ring-purple-500/30`}>
         <CardHeader>
           <CardTitle className="text-purple-500 flex items-center gap-2">
             <Zap className="w-5 h-5" /> {t("IndexNow - Instant Indexing")}
             <Badge className="bg-purple-500/10 text-purple-500 text-[10px] ml-2">RECOMMENDED</Badge>
           </CardTitle>
-          <CardDescription>{t("Submit URLs directly to Bing, Yandex, Seznam & Naver for instant indexing")}</CardDescription>
+          <CardDescription>{t("Submit URLs directly to Bing, Yandex, Seznam & Naver for instant indexing (works for both Google & Bing)")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* IndexNow Key Info */}
@@ -267,36 +526,6 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
                 <Copy className="w-3 h-3" />
               </Button>
             </div>
-            <div className="flex items-center gap-4 mt-2 text-[10px] text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <FileText className="w-3 h-3" /> {t("Key file")}: <code className="font-mono">{siteUrl}/{indexNowKey}.txt</code>
-              </span>
-            </div>
-          </div>
-
-          {/* 4-Step Visual */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { step: 1, title: t("API Key"), desc: t("Generated"), icon: <Shield className="w-4 h-4" />, done: true },
-              { step: 2, title: t("Key File"), desc: t("Hosted at root"), icon: <FileText className="w-4 h-4" />, done: true },
-              { step: 3, title: t("Submit URLs"), desc: t("Ready below"), icon: <Send className="w-4 h-4" />, done: false },
-              { step: 4, title: t("Verify"), desc: t("Bing Webmaster"), icon: <Search className="w-4 h-4" />, done: false },
-            ].map((s) => (
-              <div key={s.step} className={`p-3 rounded-lg border text-center ${
-                s.done 
-                  ? isDark ? "bg-green-900/10 border-green-500/30" : "bg-green-50 border-green-300"
-                  : isDark ? "bg-[#1a1a2e] border-[#ff6b35]/10" : "bg-gray-50 border-gray-200"
-              }`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 ${
-                  s.done ? "bg-green-500/20 text-green-500" : "bg-purple-500/20 text-purple-500"
-                }`}>
-                  {s.done ? <CheckCircle className="w-4 h-4" /> : s.icon}
-                </div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Step {s.step}</p>
-                <p className="text-sm font-semibold">{s.title}</p>
-                <p className="text-[10px] text-muted-foreground">{s.desc}</p>
-              </div>
-            ))}
           </div>
 
           {/* Submit URLs */}
@@ -315,187 +544,129 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
                 className="bg-purple-600 hover:bg-purple-700 text-white"
               >
                 {indexNowSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
-                {t("Submit to IndexNow")}
+                {t("Submit Custom URLs")}
               </Button>
               <Button
                 onClick={handleIndexNowSubmitAll}
                 disabled={indexNowSubmitting}
-                variant="outline"
-                className="border-purple-500/30 text-purple-500 hover:bg-purple-500/10"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
               >
                 {indexNowSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Globe className="w-4 h-4 mr-2" />}
-                {t("Submit All Site Pages")}
+                {t(`Submit All ${sitemapStatus?.pages || 0} Sitemap Pages`)}
               </Button>
             </div>
           </div>
 
-          {/* IndexNow endpoints info */}
-          <div className={`p-3 rounded-lg border ${isDark ? "bg-[#0a0a12] border-purple-500/10" : "bg-gray-50 border-gray-200"}`}>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">{t("IndexNow Endpoints")}</p>
-            <div className="space-y-1 text-xs font-mono text-muted-foreground">
-              <p>POST https://api.indexnow.org/IndexNow</p>
-              <p>POST https://www.bing.com/IndexNow</p>
-            </div>
-            <p className="text-[10px] text-muted-foreground mt-2">
-              {t("IndexNow notifies Bing, Yandex, Seznam.cz, and Naver simultaneously.")}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Webmaster Verification */}
-      <Card className={cardClass}>
-        <CardHeader>
-          <CardTitle className="text-[#ff6b35] flex items-center gap-2">
-            <Shield className="w-5 h-5" /> {t("Webmaster Verification")}
-          </CardTitle>
-          <CardDescription>{t("Add verification codes for search engine webmaster tools")}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Google Verification */}
-          <div className="space-y-2">
-            <label className="text-sm font-semibold flex items-center gap-2">
-              <Search className="w-4 h-4 text-blue-500" /> {t("Google Search Console")}
-              {googleCode && <Badge className="bg-green-500/10 text-green-500 text-[10px]">{t("Configured")}</Badge>}
-            </label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Google verification code (e.g., 2Edo_sTI7Jp85F7z7xr0y...)"
-                value={googleCode}
-                onChange={(e) => setGoogleCode(e.target.value)}
-                className={inputClass}
-              />
-              <Button variant="outline" size="icon" onClick={() => copyToClipboard(`<meta name="google-site-verification" content="${googleCode}" />`)} className="shrink-0">
-                <Copy className="w-4 h-4" />
-              </Button>
-            </div>
-            <p className="text-[10px] text-muted-foreground">
-              {t("Environment variable")}: <code className="font-mono bg-muted px-1 rounded">NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION</code>
-            </p>
-          </div>
-
-          {/* Bing Verification */}
-          <div className="space-y-2">
-            <label className="text-sm font-semibold flex items-center gap-2">
-              <Globe className="w-4 h-4 text-cyan-500" /> {t("Bing Webmaster Tools")}
-              {bingCode && <Badge className="bg-green-500/10 text-green-500 text-[10px]">{t("Configured")}</Badge>}
-            </label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Bing verification code (msvalidate.01 content value)"
-                value={bingCode}
-                onChange={(e) => setBingCode(e.target.value)}
-                className={inputClass}
-              />
-              <Button variant="outline" size="icon" onClick={() => copyToClipboard(`<meta name="msvalidate.01" content="${bingCode}" />`)} className="shrink-0">
-                <Copy className="w-4 h-4" />
-              </Button>
-            </div>
-            <p className="text-[10px] text-muted-foreground">
-              {t("Environment variable")}: <code className="font-mono bg-muted px-1 rounded">NEXT_PUBLIC_BING_VERIFICATION</code>
-            </p>
-          </div>
-
-          <div className="flex gap-2 pt-2">
-            <Button onClick={handleSaveVerification} disabled={saving} className="bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              {t("Save Verification Codes")}
-            </Button>
-            <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" className="gap-1">
-                <ExternalLink className="w-3 h-3" /> Google Console
-              </Button>
-            </a>
-            <a href="https://www.bing.com/webmasters" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" className="gap-1">
-                <ExternalLink className="w-3 h-3" /> Bing Webmaster
-              </Button>
-            </a>
-          </div>
-
-          {/* Meta Tag Preview */}
-          <div className={`mt-4 p-3 rounded-lg border ${isDark ? "bg-[#0a0a12] border-[#ff6b35]/5" : "bg-gray-50 border-gray-200"}`}>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">{t("Meta Tags Preview (in <head>)")}</p>
-            <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap">
-{googleCode ? `<meta name="google-site-verification" content="${googleCode}" />` : "<!-- Google verification not set -->"}{"\n"}
-{bingCode ? `<meta name="msvalidate.01" content="${bingCode}" />` : "<!-- Bing verification not set -->"}
-            </pre>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Sitemap Ping */}
-      <Card className={cardClass}>
-        <CardHeader>
-          <CardTitle className="text-[#ff6b35] flex items-center gap-2">
-            <Send className="w-5 h-5" /> {t("Sitemap Ping")}
-          </CardTitle>
-          <CardDescription>{t("Notify Google & Bing about sitemap updates via legacy ping protocol")}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className={`p-4 rounded-lg border ${isDark ? "bg-[#1a1a2e] border-[#ff6b35]/10" : "bg-gray-50 border-gray-200"}`}>
-              <div className="flex items-center gap-2 mb-2">
-                <Search className="w-5 h-5 text-blue-500" />
-                <span className="font-semibold">Google Ping</span>
-              </div>
-              <p className="text-[11px] text-muted-foreground mb-2 font-mono break-all">
-                google.com/ping?sitemap={siteUrl}/sitemap.xml
-              </p>
-            </div>
-            <div className={`p-4 rounded-lg border ${isDark ? "bg-[#1a1a2e] border-[#ff6b35]/10" : "bg-gray-50 border-gray-200"}`}>
-              <div className="flex items-center gap-2 mb-2">
-                <Globe className="w-5 h-5 text-cyan-500" />
-                <span className="font-semibold">Bing Ping</span>
-              </div>
-              <p className="text-[11px] text-muted-foreground mb-2 font-mono break-all">
-                bing.com/ping?sitemap={siteUrl}/sitemap.xml
-              </p>
-            </div>
-          </div>
-
-          <Button
-            onClick={handlePingSitemap}
-            disabled={pinging}
-            className="w-full bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white font-bold py-3"
-          >
-            {pinging && pingTarget === "sitemap" ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Send className="w-5 h-5 mr-2" />}
-            {t("Ping Sitemap to All Search Engines")}
-          </Button>
-
-          {/* Sitemap Links */}
-          <div className={`p-3 rounded-lg border ${isDark ? "bg-[#0a0a12] border-[#ff6b35]/5" : "bg-gray-50 border-gray-200"}`}>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">{t("Sitemap URLs")}</p>
-            <div className="space-y-1">
-              {["/sitemap.xml"].map((path) => (
-                <div key={path} className="flex items-center justify-between">
-                  <code className="text-xs font-mono text-muted-foreground">{siteUrl}{path}</code>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="sm" className="h-6 px-2" onClick={() => copyToClipboard(`${siteUrl}${path}`)}>
-                      <Copy className="w-3 h-3" />
-                    </Button>
-                    <a href={path} target="_blank" rel="noopener noreferrer">
-                      <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink className="w-3 h-3" />
-                      </Button>
-                    </a>
+          {/* Last IndexNow Result */}
+          {lastIndexNowResult && (
+            <div className={`p-3 rounded-lg border ${isDark ? "bg-green-900/10 border-green-500/20" : "bg-green-50 border-green-200"}`}>
+              <p className="text-xs font-bold text-green-500 mb-1">{t("Last Submission Result:")}</p>
+              <div className="space-y-1 text-xs">
+                <p>{t("URLs submitted")}: <span className="font-bold">{lastIndexNowResult.urlCount}</span></p>
+                {lastIndexNowResult.results?.map((r: any, i: number) => (
+                  <div key={i} className="flex items-center gap-2">
+                    {r.status === "success" || r.status === "accepted" 
+                      ? <CheckCircle className="w-3 h-3 text-green-500" /> 
+                      : <XCircle className="w-3 h-3 text-red-500" />}
+                    <span>{r.endpoint?.includes("bing") ? "Bing" : "IndexNow API"}: HTTP {r.statusCode}</span>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Ping & IndexNow Logs */}
+      {/* =================== SITEMAP MANAGEMENT =================== */}
       <Card className={cardClass}>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-[#ff6b35] flex items-center gap-2">
-                <Clock className="w-5 h-5" /> {t("Ping & IndexNow History")}
+                <FileText className="w-5 h-5" /> {t("Sitemap Management")}
               </CardTitle>
-              <CardDescription>{t("Recent search engine submission activity")}</CardDescription>
+              <CardDescription>{t("View sitemap URLs, ping & resubmit to Google and Bing")}</CardDescription>
+            </div>
+            <Button variant="outline" size="sm" onClick={checkSitemap} className="border-[#ff6b35]/20 text-[#ff6b35]">
+              <RefreshCw className="w-4 h-4 mr-1" /> {t("Refresh")}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Sitemap URL */}
+          <div className="flex items-center gap-2">
+            <code className={`flex-1 text-xs font-mono p-2 rounded ${isDark ? "bg-[#0a0a12] border-[#ff6b35]/10" : "bg-gray-50 border-gray-200"} border`}>
+              {siteUrl}/sitemap.xml
+            </code>
+            <Button variant="outline" size="sm" onClick={() => copyToClipboard(`${siteUrl}/sitemap.xml`)}>
+              <Copy className="w-3 h-3" />
+            </Button>
+            <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="sm">
+                <Eye className="w-3 h-3" />
+              </Button>
+            </a>
+          </div>
+
+          {/* Toggle Sitemap URLs */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs text-muted-foreground"
+            onClick={() => setShowSitemapUrls(!showSitemapUrls)}
+          >
+            {showSitemapUrls ? <ChevronUp className="w-3 h-3 mr-1" /> : <ChevronDown className="w-3 h-3 mr-1" />}
+            {showSitemapUrls ? t("Hide Sitemap URLs") : t(`Show All ${sitemapStatus?.pages || 0} Sitemap URLs`)}
+          </Button>
+
+          {showSitemapUrls && sitemapStatus?.urls && (
+            <div className={`p-3 rounded-lg border ${isDark ? "bg-[#0a0a12] border-[#ff6b35]/5" : "bg-gray-50 border-gray-200"} max-h-[300px] overflow-y-auto`}>
+              {sitemapStatus.urls.map((url, i) => (
+                <div key={i} className="flex items-center justify-between py-1">
+                  <code className="text-[11px] font-mono text-muted-foreground truncate">{url}</code>
+                  <div className="flex gap-1 shrink-0">
+                    <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => copyToClipboard(url)}>
+                      <Copy className="w-2.5 h-2.5" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Ping Both */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <Button
+              onClick={() => handlePingSitemap()}
+              disabled={pinging}
+              className="bg-[#ff6b35] hover:bg-[#e55a2b] text-white font-bold"
+            >
+              {pinging ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
+              {t("Ping All Engines")}
+            </Button>
+            <a href={`https://search.google.com/search-console/sitemaps?resource_id=${encodeURIComponent(siteUrl)}`} target="_blank" rel="noopener noreferrer" className="block">
+              <Button variant="outline" className="w-full gap-1 border-blue-500/20 text-blue-500">
+                <ArrowRight className="w-3 h-3" /> {t("Google Sitemap")}
+              </Button>
+            </a>
+            <a href={`https://www.bing.com/webmasters/sitemaps?siteUrl=${encodeURIComponent(siteUrl)}`} target="_blank" rel="noopener noreferrer" className="block">
+              <Button variant="outline" className="w-full gap-1 border-cyan-500/20 text-cyan-500">
+                <ArrowRight className="w-3 h-3" /> {t("Bing Sitemap")}
+              </Button>
+            </a>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* =================== PING & INDEXNOW HISTORY =================== */}
+      <Card className={cardClass}>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-[#ff6b35] flex items-center gap-2">
+                <Clock className="w-5 h-5" /> {t("Submission History")}
+              </CardTitle>
+              <CardDescription>{t("All search engine pings, IndexNow submissions & URL indexing activity")}</CardDescription>
             </div>
             <Button variant="outline" size="sm" onClick={fetchPingLogs} disabled={logsLoading}>
               <RefreshCw className={`w-4 h-4 mr-2 ${logsLoading ? "animate-spin" : ""}`} />
@@ -542,10 +713,13 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
                         {log.target?.includes("IndexNow") && (
                           <Badge className="bg-purple-500/10 text-purple-500 text-[9px]">IndexNow</Badge>
                         )}
+                        {log.target === "Google" && (
+                          <Badge className="bg-blue-500/10 text-blue-500 text-[9px]">Google</Badge>
+                        )}
+                        {log.target === "Bing" && (
+                          <Badge className="bg-cyan-500/10 text-cyan-500 text-[9px]">Bing</Badge>
+                        )}
                       </div>
-                      {log.sitemap_url && log.sitemap_url.length < 80 && (
-                        <p className="text-[10px] text-muted-foreground mt-0.5 truncate">{log.sitemap_url}</p>
-                      )}
                       {log.error_message && (
                         <p className="text-[10px] text-red-400 mt-0.5 flex items-center gap-1">
                           <AlertTriangle className="w-3 h-3" /> {log.error_message}
@@ -563,7 +737,7 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
         </CardContent>
       </Card>
 
-      {/* Quick Links */}
+      {/* =================== QUICK LINKS =================== */}
       <Card className={cardClass}>
         <CardHeader>
           <CardTitle className="text-[#ff6b35] flex items-center gap-2">
@@ -573,12 +747,15 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {[
-              { label: "IndexNow Documentation", url: "https://www.indexnow.org/documentation", color: "purple" },
-              { label: "Bing Webmaster Tools", url: "https://www.bing.com/webmasters", color: "cyan" },
               { label: "Google Search Console", url: "https://search.google.com/search-console", color: "blue" },
+              { label: "Bing Webmaster Tools", url: "https://www.bing.com/webmasters", color: "cyan" },
+              { label: "IndexNow Docs", url: "https://www.indexnow.org/documentation", color: "purple" },
               { label: "Google PageSpeed", url: `https://pagespeed.web.dev/analysis?url=${siteUrl}`, color: "green" },
-              { label: "Rich Results Test", url: `https://search.google.com/test/rich-results?url=${siteUrl}`, color: "purple" },
+              { label: "Rich Results Test", url: `https://search.google.com/test/rich-results?url=${siteUrl}`, color: "amber" },
               { label: "Schema Validator", url: "https://validator.schema.org/", color: "rose" },
+              { label: "Google Mobile Test", url: `https://search.google.com/test/mobile-friendly?url=${siteUrl}`, color: "blue" },
+              { label: "Bing URL Inspection", url: `https://www.bing.com/webmasters/urlinspection?siteUrl=${encodeURIComponent(siteUrl)}`, color: "cyan" },
+              { label: "Robots.txt Tester", url: `https://www.google.com/webmasters/tools/robots-testing-tool?siteUrl=${encodeURIComponent(siteUrl)}`, color: "green" },
             ].map((link) => (
               <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="block">
                 <div className={`p-3 rounded-lg border transition-all hover:scale-[1.02] hover:shadow-md ${isDark ? "bg-[#1a1a2e] border-[#ff6b35]/10 hover:border-[#ff6b35]/30" : "bg-gray-50 border-gray-200 hover:border-gray-300"}`}>

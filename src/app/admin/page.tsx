@@ -2695,23 +2695,98 @@ function SeoManager({ isDark, t, isActionLoading, setIsActionLoading, setSuccess
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <h3 className="font-bold text-sm uppercase tracking-widest text-muted-foreground border-b border-[#ff6b35]/10 pb-2">{t("Open Graph")}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{t("OG Title")}</Label>
-                    <Input placeholder="Open Graph title..." value={seoForm.og_title} onChange={(e) => setSeoForm({ ...seoForm, og_title: e.target.value })} className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'} />
+                <div className="space-y-4">
+                  <h3 className="font-bold text-sm uppercase tracking-widest text-muted-foreground border-b border-[#ff6b35]/10 pb-2">{t("Open Graph & Social Sharing")}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>{t("OG Title")}</Label>
+                      <Input placeholder="Open Graph title..." value={seoForm.og_title} onChange={(e) => setSeoForm({ ...seoForm, og_title: e.target.value })} className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'} />
+                      <p className="text-[10px] text-muted-foreground">{t("Title shown when shared on Facebook, WhatsApp, LinkedIn, Bing etc.")}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("OG Image")}</Label>
+                      <div className="flex gap-2">
+                        <Input placeholder="https://... or upload below" value={seoForm.og_image} onChange={(e) => setSeoForm({ ...seoForm, og_image: e.target.value })} className={`flex-1 ${isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}`} />
+                        <label className="flex items-center gap-1 px-3 py-2 rounded-md border cursor-pointer hover:bg-[#ff6b35]/10 transition-colors text-xs font-bold text-[#ff6b35] border-[#ff6b35]/20">
+                          <Upload className="w-3 h-3" />
+                          {t("Upload")}
+                          <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            if (file.size > 5 * 1024 * 1024) { setError(t("Image must be under 5MB")); return; }
+                            setIsActionLoading(true);
+                            try {
+                              const ext = file.name.split('.').pop();
+                              const fileName = `og-${seoForm.page_path.replace(/\//g, '-').replace(/^-/, 'home')}-${Date.now()}.${ext}`;
+                              const { data: uploadData, error: uploadErr } = await supabase.storage.from('blog-images').upload(`og/${fileName}`, file, { upsert: true });
+                              if (uploadErr) throw uploadErr;
+                              const { data: urlData } = supabase.storage.from('blog-images').getPublicUrl(`og/${fileName}`);
+                              setSeoForm(prev => ({ ...prev, og_image: urlData.publicUrl }));
+                              setSuccess(t("OG Image uploaded!"));
+                            } catch (err: any) { setError(err.message || t("Upload failed")); }
+                            finally { setIsActionLoading(false); e.target.value = ''; }
+                          }} />
+                        </label>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground">{t("Recommended: 1200x630px, max 5MB (JPG/PNG)")}</p>
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>{t("OG Image URL")}</Label>
-                    <Input placeholder="https://..." value={seoForm.og_image} onChange={(e) => setSeoForm({ ...seoForm, og_image: e.target.value })} className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'} />
+                    <Label>{t("OG Description")}</Label>
+                    <Textarea placeholder="Description for social sharing..." value={seoForm.og_description} onChange={(e) => setSeoForm({ ...seoForm, og_description: e.target.value })} className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'} />
+                    <p className="text-[10px] text-muted-foreground">{seoForm.og_description.length}/200 {t("characters")}</p>
                   </div>
+
+                  {/* OG Image Preview */}
+                  {seoForm.og_image && (
+                    <div className="space-y-2">
+                      <Label className="text-xs">{t("Image Preview")}</Label>
+                      <div className="relative w-full max-w-md">
+                        <img src={seoForm.og_image} alt="OG Preview" className="w-full h-auto rounded-lg border border-[#ff6b35]/20 object-cover max-h-48" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                        <button type="button" onClick={() => setSeoForm({ ...seoForm, og_image: '' })} className="absolute top-2 right-2 p-1 rounded-full bg-red-500 text-white hover:bg-red-600"><XIcon className="w-3 h-3" /></button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Social Card Previews */}
+                  {(seoForm.og_title || seoForm.meta_title) && (
+                    <div className="space-y-3">
+                      <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("Social Card Preview")}</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Facebook Preview */}
+                        <div className={`rounded-lg border overflow-hidden ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
+                          <p className="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 bg-blue-500/10 text-blue-500">{t("Facebook / LinkedIn / Bing")}</p>
+                          {seoForm.og_image && <img src={seoForm.og_image} alt="" className="w-full h-32 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
+                          <div className={`p-3 ${isDark ? 'bg-[#1a1a2e]' : 'bg-[#f0f2f5]'}`}>
+                            <p className="text-[9px] uppercase text-muted-foreground tracking-wider">katyaayaniastrologer.com</p>
+                            <p className="text-sm font-bold truncate mt-0.5">{seoForm.og_title || seoForm.meta_title || t("Page Title")}</p>
+                            <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{seoForm.og_description || seoForm.meta_description || t("Page description...")}</p>
+                          </div>
+                        </div>
+                        {/* Twitter Preview */}
+                        <div className={`rounded-xl border overflow-hidden ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
+                          <p className="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 bg-sky-500/10 text-sky-500">{t("Twitter / X")}</p>
+                          {seoForm.og_image && <img src={seoForm.og_image} alt="" className="w-full h-32 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
+                          <div className={`p-3 ${isDark ? 'bg-[#1a1a2e]' : 'bg-white'}`}>
+                            <p className="text-sm font-bold truncate">{seoForm.og_title || seoForm.meta_title || t("Page Title")}</p>
+                            <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{seoForm.og_description || seoForm.meta_description || t("Page description...")}</p>
+                            <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1"><Link2 className="w-3 h-3" /> katyaayaniastrologer.com{seoForm.page_path}</p>
+                          </div>
+                        </div>
+                      </div>
+                      {/* WhatsApp Preview */}
+                      <div className={`rounded-lg border overflow-hidden max-w-sm ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
+                        <p className="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 bg-green-500/10 text-green-500">{t("WhatsApp")}</p>
+                        <div className={`p-3 rounded-b-lg ${isDark ? 'bg-[#1a2e1a]' : 'bg-[#dcf8c6]'}`}>
+                          {seoForm.og_image && <img src={seoForm.og_image} alt="" className="w-full h-28 object-cover rounded-lg mb-2" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
+                          <p className="text-xs font-bold">{seoForm.og_title || seoForm.meta_title || t("Page Title")}</p>
+                          <p className="text-[10px] text-muted-foreground line-clamp-2">{seoForm.og_description || seoForm.meta_description}</p>
+                          <p className="text-[10px] text-blue-500 mt-1">katyaayaniastrologer.com{seoForm.page_path}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="space-y-2">
-                  <Label>{t("OG Description")}</Label>
-                  <Textarea placeholder="Description for social sharing..." value={seoForm.og_description} onChange={(e) => setSeoForm({ ...seoForm, og_description: e.target.value })} className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'} />
-                </div>
-              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -2747,23 +2822,29 @@ function SeoManager({ isDark, t, isActionLoading, setIsActionLoading, setSuccess
             <div className="py-10 text-center text-muted-foreground italic">{t("No SEO entries yet. Add your first page!")}</div>
           ) : (
             <div className="space-y-3">
-              {seoEntries.map((entry) => (
-                <div key={entry.id} className={`p-4 rounded-xl border flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="px-2 py-0.5 rounded bg-[#ff6b35]/10 text-[#ff6b35] text-xs font-bold font-mono">{entry.page_path}</span>
-                      <span className="px-2 py-0.5 rounded bg-green-500/10 text-green-500 text-[8px] font-bold uppercase">{entry.robots || 'index, follow'}</span>
+                {seoEntries.map((entry) => (
+                  <div key={entry.id} className={`p-4 rounded-xl border flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
+                    {entry.og_image && (
+                      <img src={entry.og_image} alt="" className="w-16 h-16 rounded-lg object-cover border border-[#ff6b35]/10 flex-shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="px-2 py-0.5 rounded bg-[#ff6b35]/10 text-[#ff6b35] text-xs font-bold font-mono">{entry.page_path}</span>
+                        <span className="px-2 py-0.5 rounded bg-green-500/10 text-green-500 text-[8px] font-bold uppercase">{entry.robots || 'index, follow'}</span>
+                        {entry.og_title && <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-500 text-[8px] font-bold uppercase">OG</span>}
+                        {entry.og_image && <span className="px-2 py-0.5 rounded bg-purple-500/10 text-purple-500 text-[8px] font-bold uppercase flex items-center gap-0.5"><ImageIcon className="w-2.5 h-2.5" /> IMG</span>}
+                      </div>
+                      <p className="text-sm font-bold truncate">{entry.meta_title || t("No title set")}</p>
+                      <p className="text-xs text-muted-foreground truncate">{entry.meta_description || t("No description set")}</p>
+                      {entry.og_title && entry.og_title !== entry.meta_title && <p className="text-[10px] text-blue-400 mt-0.5 truncate">OG: {entry.og_title}</p>}
+                      {entry.meta_keywords && <p className="text-[10px] text-muted-foreground mt-1"><Tag className="w-3 h-3 inline mr-1" />{entry.meta_keywords}</p>}
                     </div>
-                    <p className="text-sm font-bold truncate">{entry.meta_title || t("No title set")}</p>
-                    <p className="text-xs text-muted-foreground truncate">{entry.meta_description || t("No description set")}</p>
-                    {entry.meta_keywords && <p className="text-[10px] text-muted-foreground mt-1"><Tag className="w-3 h-3 inline mr-1" />{entry.meta_keywords}</p>}
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="h-8 text-xs border-[#ff6b35]/20 text-[#ff6b35]" onClick={() => handleEdit(entry)}><Eye className="w-3 h-3 mr-1" /> {t("Edit")}</Button>
+                      <Button variant="outline" size="sm" className="h-8 text-xs text-red-500 border-red-500/20" onClick={() => handleDelete(entry.id)}><Trash2 className="w-3 h-3" /></Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="h-8 text-xs border-[#ff6b35]/20 text-[#ff6b35]" onClick={() => handleEdit(entry)}><Eye className="w-3 h-3 mr-1" /> {t("Edit")}</Button>
-                    <Button variant="outline" size="sm" className="h-8 text-xs text-red-500 border-red-500/20" onClick={() => handleDelete(entry.id)}><Trash2 className="w-3 h-3" /></Button>
-                  </div>
-                </div>
-              ))}
+                ))}
             </div>
           )}
         </CardContent>
