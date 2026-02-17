@@ -15,11 +15,26 @@ const ALL_PAGES = [
   "/hindu-calendar",
   "/important-days",
   "/online-consulting",
+  "/kundli",
+  "/contact",
   "/feedback",
   "/privacy",
   "/terms",
   "/refund-policy",
   "/disclaimer",
+  // Zodiac sign pages
+  "/horoscope/aries",
+  "/horoscope/taurus",
+  "/horoscope/gemini",
+  "/horoscope/cancer",
+  "/horoscope/leo",
+  "/horoscope/virgo",
+  "/horoscope/libra",
+  "/horoscope/scorpio",
+  "/horoscope/sagittarius",
+  "/horoscope/capricorn",
+  "/horoscope/aquarius",
+  "/horoscope/pisces",
 ];
 
 export async function POST() {

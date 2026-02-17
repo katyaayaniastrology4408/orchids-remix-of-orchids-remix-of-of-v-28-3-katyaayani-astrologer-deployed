@@ -190,7 +190,6 @@ export const metadata: Metadata = {
     yandex: "yandex-verification-code",
     other: {
       "msvalidate.01": "2Edo_sTI7Jp85F7z7xr0yG6MTSrSsm5WO0jY4HsAqmM",
-      "p:domain_verify": "pinterest-verification-code",
     },
   },
   manifest: "/manifest.json",
