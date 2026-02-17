@@ -95,6 +95,17 @@ import ScalingPanel from "@/components/admin/ScalingPanel";
 import ReschedulePanel from "@/components/admin/ReschedulePanel";
 import InvoicePanel from "@/components/admin/InvoicePanel";
 
+// Safe JSON parse helper - prevents "Unexpected end of JSON input" errors
+async function safeJson(res: Response) {
+  if (!res.ok) {
+    try { const text = await res.text(); return text ? JSON.parse(text) : { success: false }; } catch { return { success: false }; }
+  }
+  try {
+    const text = await res.text();
+    return text ? JSON.parse(text) : { success: false };
+  } catch { return { success: false }; }
+}
+
 type Activity = {
   id: string;
   type: 'booking' | 'user' | 'enquiry' | 'feedback' | 'reset_request' | 'admin_action';
@@ -451,7 +462,7 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
     setIsLoadingNotes(true);
     try {
       const res = await fetch(`/api/admin/consultation-notes?user_email=${encodeURIComponent(email)}`);
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) setConsultationNotes(data.data || []);
     } catch { /* ignore */ } finally { setIsLoadingNotes(false); }
   };
@@ -464,7 +475,7 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: selectedUser.id, user_email: selectedUser.email, note: newNote.note, category: newNote.category }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         setConsultationNotes(prev => [data.data, ...prev]);
         setNewNote({ note: "", category: "general" });
@@ -476,7 +487,7 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
   const deleteConsultationNote = async (id: string) => {
     try {
       const res = await fetch(`/api/admin/consultation-notes?id=${id}`, { method: 'DELETE' });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) setConsultationNotes(prev => prev.filter(n => n.id !== id));
     } catch { setError(t("Failed to delete note")); }
   };
@@ -489,7 +500,7 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      const data = await response.json();
+      const data = await safeJson(response);
       if (data.success) {
         setSuccess(t("Password reset successful. Opening Gmail..."));
         handleSendResetEmail(data.email, data.password);
@@ -515,7 +526,7 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
           status: "confirmed"
         }),
       });
-      const data = await response.json();
+      const data = await safeJson(response);
       if (response.ok && data.success) {
         setSuccess(t("Payment approved successfully!"));
         try {
@@ -563,7 +574,7 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(broadcast),
       });
-      const data = await response.json();
+      const data = await safeJson(response);
       if (data.success) {
         setSuccess(t(data.message));
         setBroadcast({ subject: "", message: "" });
@@ -591,7 +602,7 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newBlockedDate),
       });
-      const data = await response.json();
+      const data = await safeJson(response);
       if (response.ok) {
         setSuccess(t(data.message || "Date blocked successfully"));
         setNewBlockedDate({ date: "", reason: "" });
@@ -630,7 +641,7 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: id }),
         });
-        const data = await res.json();
+        const data = await safeJson(res);
         if (!data.success) throw new Error(data.error);
       } else {
         const { error } = await supabase.from(table).delete().eq('id', id);
@@ -711,7 +722,7 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
           
           setSuccess(t("Settings updated successfully"));
         } else {
-          const data = await response.json();
+          const data = await safeJson(response);
           setError(data.error || t("Failed to update settings"));
         }
       } catch (err) {
@@ -732,7 +743,7 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
       });
 
       if (!verifyRes.ok) {
-        const data = await verifyRes.json();
+          const data = await safeJson(verifyRes);
         setError(data.error || t("Invalid verification code"));
         setIsActionLoading(false);
         return;
@@ -776,7 +787,7 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
             skipOtp: true 
           }),
         });
-        const data = await response.json();
+        const data = await safeJson(response);
         if (response.ok) {
           setPwdStep(3); // Skip OTP verification step
           setSuccess(t("Credentials verified. Please enter new password."));
@@ -799,7 +810,7 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: pwdEmail, otp: otpValue }),
       });
-      const data = await response.json();
+      const data = await safeJson(response);
       if (response.ok) {
         setPwdStep(3);
         setSuccess(t("OTP verified successfully"));
@@ -838,7 +849,7 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
           isOtpVerified: true // Added this flag
         }),
       });
-      const data = await response.json();
+      const data = await safeJson(response);
       if (data.success) {
         setSuccess(t("Password updated successfully"));
         setPasswords({ current: "", new: "", confirm: "" });
@@ -861,7 +872,7 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
       const response = await fetch(`/api/bookings/${booking.id}/reschedule-email`, {
         method: "POST"
       });
-      const data = await response.json();
+      const data = await safeJson(response);
       if (data.success) {
         setSuccess(t("Reschedule email sent successfully"));
       } else {
@@ -2566,7 +2577,7 @@ function SeoManager({ isDark, t, isActionLoading, setIsActionLoading, setSuccess
     setLoading(true);
     try {
       const res = await fetch('/api/admin/seo');
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) setSeoEntries(data.data || []);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
@@ -2586,7 +2597,7 @@ function SeoManager({ isDark, t, isActionLoading, setIsActionLoading, setSuccess
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...seoForm, schema_markup: schemaMarkup }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         setSuccess(editingEntry ? t("SEO settings updated!") : t("SEO settings saved!"));
         setShowForm(false); setEditingEntry(null);
@@ -2619,7 +2630,7 @@ function SeoManager({ isDark, t, isActionLoading, setIsActionLoading, setSuccess
     setIsActionLoading(true);
     try {
       const res = await fetch(`/api/admin/seo?id=${id}`, { method: 'DELETE' });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) { setSuccess(t("SEO entry deleted!")); fetchSeoEntries(); }
       else { setError(data.error || t("Failed to delete")); }
     } catch (err) { setError(t("An error occurred")); }
@@ -2791,7 +2802,7 @@ function SeoManager({ isDark, t, isActionLoading, setIsActionLoading, setSuccess
       setLoading(true);
       try {
         const res = await fetch("/api/admin/seo/audit");
-        const data = await res.json();
+        const data = await safeJson(res);
         if (data.success) setAuditData(data.data);
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
@@ -2807,7 +2818,7 @@ function SeoManager({ isDark, t, isActionLoading, setIsActionLoading, setSuccess
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ page_path: pagePath }),
         });
-        const data = await res.json();
+        const data = await safeJson(res);
         if (data.success) fetchAudit();
       } catch (err) { console.error(err); }
       finally { setGenerating(null); }
@@ -2956,7 +2967,7 @@ function AnalyticsDashboard({ isDark, t }: { isDark: boolean; t: (key: string) =
     setLoading(true);
     try {
       const res = await fetch(`/api/admin/analytics?period=${period}`);
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) setAnalyticsData(data.data);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
@@ -3155,7 +3166,7 @@ function KeywordsManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
     setLoading(true);
     try {
       const res = await fetch('/api/admin/seo');
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) setSeoEntries(data.data || []);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
@@ -3202,7 +3213,7 @@ function KeywordsManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
           schema_markup: entry?.schema_markup || null,
         }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) { setSuccess(t("Keywords updated!")); fetchSeoEntries(); }
       else { setError(data.error || t("Failed to save")); }
     } catch (err) { setError(t("An error occurred")); }
@@ -3698,7 +3709,7 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
     setLoading(true);
     try {
       const res = await fetch(`/api/rashifal?date=${selectedDate}`);
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) setExistingData(data.data || []);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
@@ -3708,7 +3719,7 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
     setLoading(true);
     try {
       const res = await fetch(`/api/weekly-rashifal?week_start=${weekStart}`);
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) setWeeklyExistingData(data.data || []);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
@@ -3730,7 +3741,7 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
             rashifals: [{ rashi: selectedRashi, ...rashifalForm }],
           }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
         if (data.success) {
           setSuccess(t("Rashifal saved successfully!"));
           fetchExistingRashifal();
@@ -3758,7 +3769,7 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
               rashifals: [{ rashi: selectedRashi, ...weeklyForm }],
             }),
         });
-        const data = await res.json();
+        const data = await safeJson(res);
         if (data.success) {
           setSuccess(t("Weekly Rashifal saved successfully!"));
           fetchWeeklyRashifal();
@@ -3783,7 +3794,7 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        const data = await res.json();
+        const data = await safeJson(res);
         if (data.success) {
           setSuccess(`${t("Email sent successfully to")} ${data.totalUsers} ${t("users")}!`);
         } else {
@@ -4036,7 +4047,7 @@ function BlogManager({ isDark, t, isActionLoading, setIsActionLoading, setSucces
         formData.append('file', file);
         formData.append('folder', 'blog');
         const res = await fetch('/api/upload', { method: 'POST', body: formData });
-        const data = await res.json();
+        const data = await safeJson(res);
         if (data.success) {
           setBlogForm(prev => ({ ...prev, featured_image: data.url }));
           setSuccess('Image uploaded successfully!');
@@ -4054,7 +4065,7 @@ function BlogManager({ isDark, t, isActionLoading, setIsActionLoading, setSucces
     setLoading(true);
     try {
       const res = await fetch('/api/blog?limit=100&admin=true');
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         setBlogPosts(data.data || []);
       }
@@ -4101,7 +4112,7 @@ function BlogManager({ isDark, t, isActionLoading, setIsActionLoading, setSucces
           slug: blogForm.slug || generateSlug(blogForm.title),
         }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         setSuccess(editingPost ? t("Blog post updated!") : t("Blog post created!"));
         setShowForm(false);
@@ -4157,7 +4168,7 @@ function BlogManager({ isDark, t, isActionLoading, setIsActionLoading, setSucces
     setIsActionLoading(true);
     try {
       const res = await fetch(`/api/blog/${id}`, { method: 'DELETE' });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         setSuccess(t("Blog post deleted!"));
         fetchBlogPosts();
@@ -4802,7 +4813,7 @@ function SitemapManager({ isDark, t, isActionLoading, setIsActionLoading, setSuc
     setLoading(true);
     try {
       const res = await fetch("/api/admin/sitemap");
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) setEntries(data.data || []);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
@@ -4835,7 +4846,7 @@ function SitemapManager({ isDark, t, isActionLoading, setIsActionLoading, setSuc
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editing ? { ...form, id: editing.id } : form),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         setSuccess(editing ? t("Sitemap entry updated!") : t("Sitemap entry added!"));
         resetForm();
@@ -4855,7 +4866,7 @@ function SitemapManager({ isDark, t, isActionLoading, setIsActionLoading, setSuc
     setIsActionLoading(true);
     try {
       const res = await fetch(`/api/admin/sitemap?id=${id}`, { method: "DELETE" });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) { setSuccess(t("Sitemap entry deleted!")); fetchEntries(); fetchPreview(); }
       else { setError(data.error || t("Failed to delete")); }
     } catch (err) { setError(t("An error occurred")); }
@@ -4869,7 +4880,7 @@ function SitemapManager({ isDark, t, isActionLoading, setIsActionLoading, setSuc
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: entry.id, url_path: entry.url_path, change_frequency: entry.change_frequency, priority: entry.priority, is_active: !entry.is_active }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) fetchEntries();
     } catch (err) { console.error(err); }
   };
@@ -5143,8 +5154,8 @@ function BrandingManager({ isDark, t, setSuccess, setError }: { isDark: boolean;
         formData.append("file", file);
         formData.append("type", type);
         const res = await fetch("/api/admin/branding/upload", { method: "POST", body: formData });
-        if (!res.ok) { const d = await res.json(); throw new Error(d.error || "Upload failed"); }
-        const data = await res.json();
+        if (!res.ok) { const d = await safeJson(res); throw new Error(d.error || "Upload failed"); }
+        const data = await safeJson(res);
         if (data.url) {
           if (type === "logo") setLogoUrl(data.url);
           else if (type === "favicon") setFaviconUrl(data.url);
@@ -5166,7 +5177,7 @@ function BrandingManager({ isDark, t, setSuccess, setError }: { isDark: boolean;
     try {
         const res = await fetch("/api/admin/branding");
         if (!res.ok) throw new Error("Failed");
-        const data = await res.json();
+        const data = await safeJson(res);
       if (data.settings) {
         if (data.settings.logo_url) setLogoUrl(data.settings.logo_url);
         if (data.settings.favicon_url) setFaviconUrl(data.settings.favicon_url);
@@ -5194,7 +5205,7 @@ function BrandingManager({ isDark, t, setSuccess, setError }: { isDark: boolean;
           },
         }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         setSuccess("Branding settings saved successfully!");
       } else {

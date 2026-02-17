@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Loader2, Shield, Key, Lock, Database, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Download, Eye, EyeOff } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Loader2, Shield, Key, Lock, Database, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Download, Eye, EyeOff, Save } from "lucide-react";
 
 interface Props {
   isDark: boolean;
@@ -19,6 +20,11 @@ export default function SecurityPanel({ isDark, t, setSuccess, setError }: Props
   const [healthData, setHealthData] = useState<any>(null);
   const [healthLoading, setHealthLoading] = useState(false);
   const [showKeys, setShowKeys] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ current: "", newPass: "", confirm: "" });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [showPasswords, setShowPasswords] = useState(false);
+  const [emailForm, setEmailForm] = useState({ email: "" });
+  const [emailLoading, setEmailLoading] = useState(false);
 
   const cardCls = isDark ? "bg-[#12121a] border-[#ff6b35]/10" : "bg-white border-[#ff6b35]/20";
 
@@ -26,9 +32,11 @@ export default function SecurityPanel({ isDark, t, setSuccess, setError }: Props
     setBackupLoading(true);
     try {
       const res = await fetch("/api/admin/backup", { method: "POST" });
-      const data = await res.json();
-      if (data.success) { setBackupData(data); setSuccess("Backup created successfully!"); }
-      else setError(data.error || "Backup failed");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) { setBackupData(data); setSuccess("Backup created successfully!"); }
+        else setError(data.error || "Backup failed");
+      } else setError("Backup failed");
     } catch { setError("Failed to create backup"); }
     setBackupLoading(false);
   };
@@ -37,15 +45,82 @@ export default function SecurityPanel({ isDark, t, setSuccess, setError }: Props
     setHealthLoading(true);
     try {
       const res = await fetch("/api/admin/health-check");
-      const json = await res.json();
-      if (json.success) setHealthData(json.data);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) setHealthData(json.data);
+      }
     } catch {}
     setHealthLoading(false);
   };
 
-  useEffect(() => { checkHealth(); }, []);
+  const fetchAdminSettings = async () => {
+    try {
+      const res = await fetch("/api/admin/settings");
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          setEmailForm({ email: json.data.admin_email || "" });
+        }
+      }
+    } catch {}
+  };
 
-  const mask = (str: string) => showKeys ? str : str.slice(0, 8) + "•".repeat(20) + str.slice(-4);
+  useEffect(() => { checkHealth(); fetchAdminSettings(); }, []);
+
+  const changePassword = async () => {
+    if (!passwordForm.current || !passwordForm.newPass) {
+      setError("Please fill current and new password"); return;
+    }
+    if (passwordForm.newPass !== passwordForm.confirm) {
+      setError("New passwords don't match"); return;
+    }
+    if (passwordForm.newPass.length < 8) {
+      setError("Password must be at least 8 characters"); return;
+    }
+    setPasswordLoading(true);
+    try {
+      // Verify current password first
+      const verifyRes = await fetch("/api/admin/settings");
+      if (verifyRes.ok) {
+        const verifyJson = await verifyRes.json();
+        if (verifyJson.data?.admin_password !== passwordForm.current) {
+          setError("Current password is incorrect");
+          setPasswordLoading(false);
+          return;
+        }
+      }
+      // Update password
+      const res = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "admin_password", value: passwordForm.newPass }),
+      });
+      if (res.ok) {
+        setSuccess("Admin password changed successfully!");
+        setPasswordForm({ current: "", newPass: "", confirm: "" });
+      } else setError("Failed to change password");
+    } catch { setError("Failed to change password"); }
+    setPasswordLoading(false);
+  };
+
+  const changeEmail = async () => {
+    if (!emailForm.email || !emailForm.email.includes("@")) {
+      setError("Please enter a valid email"); return;
+    }
+    setEmailLoading(true);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "admin_email", value: emailForm.email }),
+      });
+      if (res.ok) setSuccess("Admin email updated!");
+      else setError("Failed to update email");
+    } catch { setError("Failed to update email"); }
+    setEmailLoading(false);
+  };
+
+  const mask = (str: string) => showKeys ? str : str.slice(0, 8) + "••••••••••••" + str.slice(-4);
 
   return (
     <div className="space-y-6 pb-20 md:pb-0">
@@ -58,11 +133,87 @@ export default function SecurityPanel({ isDark, t, setSuccess, setError }: Props
         </CardHeader>
       </Card>
 
-      {/* Admin Authentication */}
+      {/* Change Admin Email */}
       <Card className={cardCls}>
         <CardHeader>
           <CardTitle className="text-sm font-bold text-[#ff6b35] flex items-center gap-2">
-            <Key className="w-5 h-5" /> {t("Admin Authentication")}
+            <Key className="w-5 h-5" /> {t("Admin Email")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label className="text-xs">{t("Admin Login Email")}</Label>
+            <div className="flex gap-2 mt-1">
+              <Input
+                type="email"
+                value={emailForm.email}
+                onChange={(e) => setEmailForm({ email: e.target.value })}
+                className="h-9 text-sm"
+                placeholder="admin@example.com"
+              />
+              <Button onClick={changeEmail} disabled={emailLoading} size="sm" className="bg-[#ff6b35] hover:bg-[#e55a2b] text-white shrink-0">
+                {emailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4 mr-1" /> {t("Save")}</>}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Change Password */}
+      <Card className={cardCls}>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-bold text-[#ff6b35] flex items-center gap-2">
+              <Lock className="w-5 h-5" /> {t("Change Admin Password")}
+            </CardTitle>
+            <Button size="sm" variant="ghost" onClick={() => setShowPasswords(!showPasswords)} className="text-xs">
+              {showPasswords ? <EyeOff className="w-3 h-3 mr-1" /> : <Eye className="w-3 h-3 mr-1" />}
+              {showPasswords ? t("Hide") : t("Show")}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label className="text-xs">{t("Current Password")}</Label>
+            <Input
+              type={showPasswords ? "text" : "password"}
+              value={passwordForm.current}
+              onChange={(e) => setPasswordForm(prev => ({ ...prev, current: e.target.value }))}
+              className="mt-1 h-9 text-sm"
+              placeholder="Enter current password"
+            />
+          </div>
+          <div>
+            <Label className="text-xs">{t("New Password")}</Label>
+            <Input
+              type={showPasswords ? "text" : "password"}
+              value={passwordForm.newPass}
+              onChange={(e) => setPasswordForm(prev => ({ ...prev, newPass: e.target.value }))}
+              className="mt-1 h-9 text-sm"
+              placeholder="Enter new password (min 8 chars)"
+            />
+          </div>
+          <div>
+            <Label className="text-xs">{t("Confirm New Password")}</Label>
+            <Input
+              type={showPasswords ? "text" : "password"}
+              value={passwordForm.confirm}
+              onChange={(e) => setPasswordForm(prev => ({ ...prev, confirm: e.target.value }))}
+              className="mt-1 h-9 text-sm"
+              placeholder="Confirm new password"
+            />
+          </div>
+          <Button onClick={changePassword} disabled={passwordLoading} className="bg-[#ff6b35] hover:bg-[#e55a2b] text-white w-full">
+            {passwordLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> {t("Changing...")}</> : <><Lock className="w-4 h-4 mr-2" /> {t("Change Password")}</>}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Auth Features */}
+      <Card className={cardCls}>
+        <CardHeader>
+          <CardTitle className="text-sm font-bold text-[#ff6b35] flex items-center gap-2">
+            <Shield className="w-5 h-5" /> {t("Security Features")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -70,7 +221,6 @@ export default function SecurityPanel({ isDark, t, setSuccess, setError }: Props
             { label: "Authentication Method", value: "Cookie-based JWT session", status: "active" },
             { label: "Session Duration", value: "7 days auto-expiry", status: "active" },
             { label: "Login Protection", value: "Rate-limited login attempts", status: "active" },
-            { label: "Password Hashing", value: "bcrypt with salt rounds", status: "active" },
             { label: "CSRF Protection", value: "Same-origin validation via middleware", status: "active" },
           ].map((item, i) => (
             <div key={i} className={`flex items-center justify-between p-3 rounded-lg border ${cardCls}`}>
@@ -81,41 +231,6 @@ export default function SecurityPanel({ isDark, t, setSuccess, setError }: Props
               <Badge className="text-[10px] bg-green-500/10 text-green-500">{item.status}</Badge>
             </div>
           ))}
-        </CardContent>
-      </Card>
-
-      {/* Role-Based Access */}
-      <Card className={cardCls}>
-        <CardHeader>
-          <CardTitle className="text-sm font-bold text-[#ff6b35] flex items-center gap-2">
-            <Lock className="w-5 h-5" /> {t("Role-Based Access Control")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="border-b border-[#ff6b35]/10">
-                  <th className="text-left p-2 text-muted-foreground">{t("Role")}</th>
-                  <th className="text-left p-2 text-muted-foreground">{t("Access Level")}</th>
-                  <th className="text-left p-2 text-muted-foreground">{t("Status")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { role: "Super Admin", access: "Full access to all features, settings, and data", status: "active" },
-                  { role: "Public Users", access: "View website, submit bookings/enquiries", status: "active" },
-                  { role: "API Access", access: "Protected via middleware origin check + admin cookie", status: "active" },
-                ].map((r, i) => (
-                  <tr key={i} className="border-b border-[#ff6b35]/5">
-                    <td className="p-2 font-medium">{r.role}</td>
-                    <td className="p-2 text-muted-foreground">{r.access}</td>
-                    <td className="p-2"><Badge className="text-[10px] bg-green-500/10 text-green-500">{r.status}</Badge></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </CardContent>
       </Card>
 
@@ -146,18 +261,6 @@ export default function SecurityPanel({ isDark, t, setSuccess, setError }: Props
               <p className="text-[10px] text-muted-foreground font-mono break-all">{item.type === "info" ? item.key : mask(item.key)}</p>
             </div>
           ))}
-          <div className={`p-3 rounded-lg border border-yellow-500/20 ${cardCls}`}>
-            <div className="flex items-center gap-2 mb-1">
-              <AlertTriangle className="w-3 h-3 text-yellow-500" />
-              <p className="text-xs font-medium text-yellow-500">{t("Security Best Practices")}</p>
-            </div>
-            <ul className="text-[10px] text-muted-foreground space-y-1 ml-5 list-disc">
-              <li>{t("All admin API routes are protected by middleware authentication")}</li>
-              <li>{t("Service role key is never exposed to the client")}</li>
-              <li>{t("Database queries use parameterized inputs to prevent SQL injection")}</li>
-              <li>{t("User inputs are sanitized to prevent XSS attacks")}</li>
-            </ul>
-          </div>
         </CardContent>
       </Card>
 
@@ -169,12 +272,10 @@ export default function SecurityPanel({ isDark, t, setSuccess, setError }: Props
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-xs text-muted-foreground">{t("Create a full database backup including all tables, bookings, enquiries, blogs, and settings.")}</p>
-          <div className="flex gap-2">
-            <Button onClick={runBackup} disabled={backupLoading} className="bg-[#ff6b35] hover:bg-[#e55a2b] text-white">
-              {backupLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> {t("Creating Backup...")}</> : <><Database className="w-4 h-4 mr-2" /> {t("Create Backup Now")}</>}
-            </Button>
-          </div>
+          <p className="text-xs text-muted-foreground">{t("Create a full database backup of all tables, bookings, enquiries, blogs, and settings.")}</p>
+          <Button onClick={runBackup} disabled={backupLoading} className="bg-[#ff6b35] hover:bg-[#e55a2b] text-white">
+            {backupLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> {t("Creating Backup...")}</> : <><Database className="w-4 h-4 mr-2" /> {t("Create Backup Now")}</>}
+          </Button>
           {backupData && (
             <div className={`p-4 rounded-xl border ${cardCls}`}>
               <div className="flex items-center gap-2 mb-2">
@@ -194,7 +295,6 @@ export default function SecurityPanel({ isDark, t, setSuccess, setError }: Props
             </div>
           )}
 
-          {/* System Health */}
           {healthData?.services && (
             <div className="space-y-2 mt-4">
               <p className="text-xs font-medium">{t("System Health")}</p>

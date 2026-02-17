@@ -1,9 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Link2, Globe, Zap, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Code } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Loader2, Link2, Globe, Zap, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Code, Save } from "lucide-react";
 
 interface Props {
   isDark: boolean;
@@ -19,16 +21,59 @@ export default function AutomationPanel({ isDark, t, setSuccess, setError }: Pro
   const [sitemapResult, setSitemapResult] = useState<any>(null);
   const [schemaLoading, setSchemaLoading] = useState(false);
   const [schemaResult, setSchemaResult] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [settings, setSettings] = useState({
+    auto_sitemap: "true",
+    auto_sitemap_interval: "daily",
+  });
 
   const cardCls = isDark ? "bg-[#12121a] border-[#ff6b35]/10" : "bg-white border-[#ff6b35]/20";
+
+  const fetchSettings = async () => {
+    try {
+      const res = await fetch("/api/admin/site-settings");
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          setSettings(prev => ({
+            ...prev,
+            ...Object.fromEntries(
+              Object.entries(json.data).filter(([k]) => k in prev)
+            )
+          }));
+        }
+      }
+    } catch {}
+  };
+
+  useEffect(() => { fetchSettings(); }, []);
+
+  const saveSettings = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/site-settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ settings }),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) setSuccess("Automation settings saved!");
+        else setError("Failed to save");
+      } else setError("Failed to save");
+    } catch { setError("Failed to save"); }
+    setSaving(false);
+  };
 
   const scanBrokenLinks = async () => {
     setBrokenLoading(true);
     try {
       const res = await fetch("/api/admin/seo/broken-links");
-      const data = await res.json();
-      if (data.success) { setBrokenLinks(data.data); setSuccess(`Scan complete! Found ${data.data.brokenLinks?.length || 0} broken links`); }
-      else setError(data.error || "Scan failed");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) { setBrokenLinks(data.data); setSuccess(`Scan complete! Found ${data.data.brokenLinks?.length || 0} broken links`); }
+        else setError(data.error || "Scan failed");
+      } else setError("Scan failed");
     } catch { setError("Failed to scan broken links"); }
     setBrokenLoading(false);
   };
@@ -37,9 +82,11 @@ export default function AutomationPanel({ isDark, t, setSuccess, setError }: Pro
     setSitemapLoading(true);
     try {
       const res = await fetch("/api/admin/sitemap", { method: "POST" });
-      const data = await res.json();
-      if (data.success) { setSitemapResult(data); setSuccess("Sitemap regenerated!"); }
-      else setError(data.error || "Sitemap generation failed");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) { setSitemapResult(data); setSuccess("Sitemap regenerated!"); }
+        else setError(data.error || "Sitemap generation failed");
+      } else setError("Sitemap generation failed");
     } catch { setError("Failed to regenerate sitemap"); }
     setSitemapLoading(false);
   };
@@ -48,9 +95,11 @@ export default function AutomationPanel({ isDark, t, setSuccess, setError }: Pro
     setSchemaLoading(true);
     try {
       const res = await fetch("/api/admin/seo/advanced");
-      const data = await res.json();
-      if (data.success) { setSchemaResult(data.data); setSuccess("Schema data generated!"); }
-      else setError(data.error || "Schema generation failed");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) { setSchemaResult(data.data); setSuccess("Schema data generated!"); }
+        else setError(data.error || "Schema generation failed");
+      } else setError("Schema generation failed");
     } catch { setError("Failed to generate schema"); }
     setSchemaLoading(false);
   };
@@ -59,14 +108,21 @@ export default function AutomationPanel({ isDark, t, setSuccess, setError }: Pro
     <div className="space-y-6 pb-20 md:pb-0">
       <Card className={cardCls}>
         <CardHeader>
-          <CardTitle className="text-[#ff6b35] flex items-center gap-2">
-            <Zap className="w-6 h-6" /> {t("Advanced Automation")}
-          </CardTitle>
-          <CardDescription>{t("Auto sitemap scheduler, broken link scanner, and auto schema generation")}</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-[#ff6b35] flex items-center gap-2">
+                <Zap className="w-6 h-6" /> {t("Advanced Automation")}
+              </CardTitle>
+              <CardDescription>{t("Auto sitemap, broken link scanner, and schema generation")}</CardDescription>
+            </div>
+            <Button onClick={saveSettings} disabled={saving} size="sm" className="bg-[#ff6b35] hover:bg-[#e55a2b] text-white">
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4 mr-1" /> {t("Save")}</>}
+            </Button>
+          </div>
         </CardHeader>
       </Card>
 
-      {/* Auto Sitemap */}
+      {/* Auto Sitemap Settings */}
       <Card className={cardCls}>
         <CardHeader>
           <CardTitle className="text-sm font-bold text-[#ff6b35] flex items-center gap-2">
@@ -74,7 +130,31 @@ export default function AutomationPanel({ isDark, t, setSuccess, setError }: Pro
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-xs text-muted-foreground">{t("Regenerate your sitemap.xml with all current pages, blogs, and dynamic routes.")}</p>
+          <div className="flex items-center justify-between p-3 rounded-lg border border-[#ff6b35]/10">
+            <div>
+              <p className="text-xs font-medium">{t("Auto Sitemap Generation")}</p>
+              <p className="text-[10px] text-muted-foreground">{t("Automatically regenerate sitemap when blog/page changes happen")}</p>
+            </div>
+            <Switch
+              checked={settings.auto_sitemap === "true"}
+              onCheckedChange={(v) => setSettings(prev => ({ ...prev, auto_sitemap: v ? "true" : "false" }))}
+            />
+          </div>
+
+          <div>
+            <Label className="text-xs">{t("Regeneration Interval")}</Label>
+            <select
+              value={settings.auto_sitemap_interval}
+              onChange={(e) => setSettings(prev => ({ ...prev, auto_sitemap_interval: e.target.value }))}
+              className={`w-full mt-1 h-9 rounded-md border px-3 text-sm ${isDark ? "bg-[#12121a] border-[#ff6b35]/20 text-white" : "bg-white border-gray-300"}`}
+            >
+              <option value="hourly">Hourly</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="on_change">On Content Change Only</option>
+            </select>
+          </div>
+
           <Button onClick={regenerateSitemap} disabled={sitemapLoading} className="bg-[#ff6b35] hover:bg-[#e55a2b] text-white">
             {sitemapLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> {t("Generating...")}</> : <><RefreshCw className="w-4 h-4 mr-2" /> {t("Regenerate Sitemap Now")}</>}
           </Button>
@@ -88,10 +168,6 @@ export default function AutomationPanel({ isDark, t, setSuccess, setError }: Pro
               <a href="/sitemap.xml" target="_blank" className="text-xs text-[#ff6b35] hover:underline mt-1 inline-block">{t("View Sitemap →")}</a>
             </div>
           )}
-          <div className={`p-3 rounded-lg border ${cardCls}`}>
-            <p className="text-xs font-medium mb-1">{t("Auto-Schedule Info")}</p>
-            <p className="text-[10px] text-muted-foreground">{t("Sitemap is automatically regenerated when you publish new blog posts, add pages, or update redirects. You can also manually trigger it here anytime.")}</p>
-          </div>
         </CardContent>
       </Card>
 
@@ -103,7 +179,7 @@ export default function AutomationPanel({ isDark, t, setSuccess, setError }: Pro
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-xs text-muted-foreground">{t("Scan all internal and external links on your site for 404s and broken references.")}</p>
+          <p className="text-xs text-muted-foreground">{t("Scan all internal and external links for 404s and broken references.")}</p>
           <Button onClick={scanBrokenLinks} disabled={brokenLoading} className="bg-[#ff6b35] hover:bg-[#e55a2b] text-white">
             {brokenLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> {t("Scanning...")}</> : <><Link2 className="w-4 h-4 mr-2" /> {t("Scan Broken Links")}</>}
           </Button>
@@ -157,7 +233,7 @@ export default function AutomationPanel({ isDark, t, setSuccess, setError }: Pro
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-xs text-muted-foreground">{t("Generate structured data (JSON-LD) schemas for all your pages automatically.")}</p>
+          <p className="text-xs text-muted-foreground">{t("Generate structured data (JSON-LD) schemas for all pages automatically.")}</p>
           <Button onClick={generateSchema} disabled={schemaLoading} className="bg-[#ff6b35] hover:bg-[#e55a2b] text-white">
             {schemaLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> {t("Generating...")}</> : <><Code className="w-4 h-4 mr-2" /> {t("Generate Schema Data")}</>}
           </Button>
@@ -179,7 +255,7 @@ export default function AutomationPanel({ isDark, t, setSuccess, setError }: Pro
               ))}
               <div className={`p-3 rounded-lg border ${cardCls}`}>
                 <p className="text-xs font-medium mb-1 flex items-center gap-1"><AlertTriangle className="w-3 h-3 text-yellow-500" /> {t("Active Schemas")}</p>
-                <p className="text-[10px] text-muted-foreground">{t("Organization, LocalBusiness, WebSite, BreadcrumbList, and Article schemas are already embedded in your pages automatically via layout.tsx")}</p>
+                <p className="text-[10px] text-muted-foreground">{t("Organization, LocalBusiness, WebSite, BreadcrumbList, and Article schemas are embedded automatically.")}</p>
               </div>
             </div>
           )}

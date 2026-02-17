@@ -24,10 +24,11 @@ export default function ReportsPanel({ isDark, t, setSuccess, setError }: Props)
     setLoading(true);
     try {
       const res = await fetch("/api/admin/reports");
-      const json = await res.json();
-      if (json.success) { setData(json.data); setSuccess("Reports loaded!"); }
-      else setError(json.error || "Failed to load reports");
-    } catch { setError("Failed to fetch reports"); }
+        if (!res.ok) throw new Error("Failed");
+        const json = await res.json();
+        if (json.success) { setData(json.data); setSuccess("Reports loaded!"); }
+        else setError(json.error || "Failed to load reports");
+      } catch { setError("Failed to fetch reports"); }
     setLoading(false);
   };
 
@@ -35,7 +36,8 @@ export default function ReportsPanel({ isDark, t, setSuccess, setError }: Props)
     setSeoLoading(true);
     try {
       const res = await fetch("/api/admin/seo/validate");
-      const json = await res.json();
+        if (!res.ok) throw new Error("Failed");
+        const json = await res.json();
       if (json.success) setSeoData(json.data);
     } catch {}
     setSeoLoading(false);
