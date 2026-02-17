@@ -83,6 +83,7 @@ import {
 } from "@/components/ui/input-otp";
 import SeoTestingPanel from "@/components/admin/SeoTestingPanel";
 import SeoMonitorPanel from "@/components/admin/SeoMonitorPanel";
+import WebmasterPingPanel from "@/components/admin/WebmasterPingPanel";
 import AutomationPanel from "@/components/admin/AutomationPanel";
 import PerformancePanel from "@/components/admin/PerformancePanel";
 import SecurityPanel from "@/components/admin/SecurityPanel";
@@ -1747,9 +1748,13 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
                       <SeoTestingPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
                     )}
 
-                    {activeTab === "seo-monitor" && (
-                      <SeoMonitorPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
-                    )}
+                      {activeTab === "seo-monitor" && (
+                        <SeoMonitorPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                      )}
+
+                      {activeTab === "webmaster-ping" && (
+                        <WebmasterPingPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                      )}
 
                     {activeTab === "automation" && (
                       <AutomationPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
@@ -3369,7 +3374,8 @@ function SidebarContent({ activeTab, setActiveTab, handleLogout, isDark, t }: {
                       <p className="text-[9px] uppercase tracking-[0.15em] font-bold text-muted-foreground/50 px-4 mb-2">{t("Optimization & Monitoring")}</p>
                     </div>
                     <NavItem icon={<Search className="w-4 h-4" />} label={t("SEO Testing")} active={activeTab === "seo-testing"} onClick={() => setActiveTab("seo-testing")} isDark={isDark} />
-                    <NavItem icon={<Monitor className="w-4 h-4" />} label={t("SEO Monitor")} active={activeTab === "seo-monitor"} onClick={() => setActiveTab("seo-monitor")} isDark={isDark} />
+                      <NavItem icon={<Monitor className="w-4 h-4" />} label={t("SEO Monitor")} active={activeTab === "seo-monitor"} onClick={() => setActiveTab("seo-monitor")} isDark={isDark} />
+                      <NavItem icon={<Send className="w-4 h-4" />} label={t("Webmaster & Ping")} active={activeTab === "webmaster-ping"} onClick={() => setActiveTab("webmaster-ping")} isDark={isDark} />
                     <NavItem icon={<Zap className="w-4 h-4" />} label={t("Automation")} active={activeTab === "automation"} onClick={() => setActiveTab("automation")} isDark={isDark} />
                     <NavItem icon={<Gauge className="w-4 h-4" />} label={t("Performance")} active={activeTab === "performance"} onClick={() => setActiveTab("performance")} isDark={isDark} />
 
