@@ -62,9 +62,9 @@ export async function POST(req: NextRequest) {
           canonical_url,
           robots,
           schema_markup,
-          bing_keywords,
-          bing_meta_title,
-          bing_meta_description,
+          bing_keywords: bing_keywords || null,
+          bing_meta_title: bing_meta_title || null,
+          bing_meta_description: bing_meta_description || null,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "page_path" }

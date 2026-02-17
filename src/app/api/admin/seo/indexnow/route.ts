@@ -13,27 +13,31 @@ const HOST = new URL(SITE_URL).hostname;
 // Submit URLs to IndexNow (Bing, Yandex, etc.)
 export async function POST(req: NextRequest) {
   try {
-    const { urls, action } = await req.json();
+      const { urls, action, target } = await req.json();
 
     // Action: ping sitemap (legacy ping)
     if (action === "ping-sitemap") {
       const sitemapUrl = `${SITE_URL}/sitemap.xml`;
       const results: { target: string; status: string; statusCode?: number; error?: string }[] = [];
 
-      // Ping Google
-      try {
-        const googleRes = await fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`);
-        results.push({ target: "Google", status: googleRes.ok ? "success" : "failed", statusCode: googleRes.status });
-      } catch (e: unknown) {
-        results.push({ target: "Google", status: "error", error: e instanceof Error ? e.message : "Unknown error" });
+      // Ping Google (unless target is specifically "Bing")
+      if (!target || target === "Google" || target === "all") {
+        try {
+          const googleRes = await fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`);
+          results.push({ target: "Google", status: googleRes.ok ? "success" : "failed", statusCode: googleRes.status });
+        } catch (e: unknown) {
+          results.push({ target: "Google", status: "error", error: e instanceof Error ? e.message : "Unknown error" });
+        }
       }
 
-      // Ping Bing
-      try {
-        const bingRes = await fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`);
-        results.push({ target: "Bing", status: bingRes.ok ? "success" : "failed", statusCode: bingRes.status });
-      } catch (e: unknown) {
-        results.push({ target: "Bing", status: "error", error: e instanceof Error ? e.message : "Unknown error" });
+      // Ping Bing (unless target is specifically "Google")
+      if (!target || target === "Bing" || target === "all") {
+        try {
+          const bingRes = await fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`);
+          results.push({ target: "Bing", status: bingRes.ok ? "success" : "failed", statusCode: bingRes.status });
+        } catch (e: unknown) {
+          results.push({ target: "Bing", status: "error", error: e instanceof Error ? e.message : "Unknown error" });
+        }
       }
 
       // Log each ping

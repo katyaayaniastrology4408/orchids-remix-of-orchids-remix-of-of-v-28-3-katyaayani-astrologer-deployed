@@ -112,10 +112,8 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
     try {
       const res = await fetch("/api/admin/seo/indexnow");
       if (!res.ok) return;
-      const text = await res.text();
-      if (!text) return;
-      const data = JSON.parse(text);
-      if (data.success) setPingLogs(data.logs || []);
+      const data = await safeJson(res);
+      if (data?.success) setPingLogs(data.logs || []);
     } catch (err) { console.error(err); }
     finally { setLogsLoading(false); }
   };
@@ -137,11 +135,11 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
     setPinging(true);
     setPingTarget(target || "all");
     try {
-      const res = await fetch("/api/admin/seo/indexnow", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "ping-sitemap" }),
-      });
+        const res = await fetch("/api/admin/seo/indexnow", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "ping-sitemap", target: target || "all" }),
+        });
       const data = await safeJson(res);
       if (data?.success) {
         const results = data.results || [];
@@ -543,7 +541,7 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
                 { label: t("IndexNow instant indexing"), status: true },
                 { label: t("BingSiteAuth.xml verification"), status: true },
                 { label: t("msvalidate.01 meta tag"), status: !!bingCode },
-                { label: t("Sitemap submitted to Bing"), status: pingLogs.some(l => l.target === "Bing") },
+                  { label: t("Sitemap submitted to Bing"), status: pingLogs.some(l => l.target === "Bing" || l.target?.includes("Bing") || l.target?.includes("IndexNow")) },
                 { label: t("Bingbot allowed in robots.txt"), status: true },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-2">
