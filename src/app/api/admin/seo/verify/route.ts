@@ -48,8 +48,9 @@ export async function GET() {
       if (rRes.ok) {
         const rText = await rRes.text();
         robotsOk = true;
-        robotsAllowsGoogle = rText.includes("Googlebot") || rText.includes("User-agent: *");
-        robotsAllowsBing = rText.includes("Bingbot") || rText.includes("User-agent: *");
+        const rLower = rText.toLowerCase();
+        robotsAllowsGoogle = rLower.includes("googlebot") || rLower.includes("user-agent: *");
+        robotsAllowsBing = rLower.includes("bingbot") || rLower.includes("msnbot") || rLower.includes("user-agent: *");
       }
     } catch { robotsOk = false; }
 

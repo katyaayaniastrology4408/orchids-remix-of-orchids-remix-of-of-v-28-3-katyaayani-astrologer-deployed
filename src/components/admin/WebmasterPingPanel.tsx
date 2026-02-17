@@ -1184,6 +1184,158 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
         </CardContent>
       </Card>
 
+      {/* =================== SEO IMAGE LIBRARY =================== */}
+      <Card className={`${cardClass} ring-1 ring-pink-500/20`}>
+        <CardHeader>
+          <CardTitle className="text-pink-500 flex items-center gap-2">
+            <ImageIcon className="w-5 h-5" /> {t("SEO Image Library")}
+            <Badge className="bg-pink-500/10 text-pink-500 text-[10px] ml-2">Google &amp; Bing</Badge>
+          </CardTitle>
+          <CardDescription>{t("Images used for Google Search, Bing search results, WhatsApp/Facebook sharing. Upload new images and apply to any page.")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+
+          {/* Preset Images from your uploads */}
+          <div className="space-y-3">
+            <p className="text-sm font-bold">{t("Your Brand Images (Click to Apply to All Pages)")}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                {
+                  label: t("Cover / Banner"),
+                  desc: t("Best for Google & Bing search preview (1200x630)"),
+                  url: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/82257351-6e7a-48cd-a2d1-b2ac49e135b9/coverimage-1771354510444.png",
+                  badge: "ACTIVE",
+                  badgeColor: "bg-green-500",
+                },
+                {
+                  label: t("Logo with Name"),
+                  desc: t("Full logo - Katyaayani Astrologer"),
+                  url: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/82257351-6e7a-48cd-a2d1-b2ac49e135b9/Gemini_Generated_Image_6u6muz6u6muz6u6m-1771354508220.png",
+                  badge: "LOGO",
+                  badgeColor: "bg-blue-500",
+                },
+                {
+                  label: t("Logo Icon Only"),
+                  desc: t("KA symbol - for favicon / icon use"),
+                  url: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/82257351-6e7a-48cd-a2d1-b2ac49e135b9/logowithoutname-1771354510455.png",
+                  badge: "ICON",
+                  badgeColor: "bg-orange-500",
+                },
+              ].map((img, i) => (
+                <div key={i} className={`rounded-xl border overflow-hidden transition-all hover:shadow-lg ${isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-white"}`}>
+                  <div className="relative aspect-video bg-gray-900 overflow-hidden">
+                    <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
+                    <span className={`absolute top-2 left-2 text-[9px] font-black text-white px-2 py-0.5 rounded ${img.badgeColor}`}>{img.badge}</span>
+                  </div>
+                  <div className="p-3 space-y-2">
+                    <p className="text-xs font-bold">{img.label}</p>
+                    <p className="text-[10px] text-muted-foreground">{img.desc}</p>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        className="flex-1 text-[10px] h-7 bg-[#ff6b35] hover:bg-[#e55a2b] text-white"
+                        onClick={async () => {
+                          try {
+                            const res = await fetch("/api/admin/seo/bulk-og-image", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ og_image: img.url }),
+                            });
+                            const data = await res.json();
+                            if (data.success) setSuccess(t(`Applied to ${data.updated} pages!`));
+                            else setError(data.error || t("Failed"));
+                            fetchOgEntries();
+                          } catch { setError(t("Error applying image")); }
+                        }}
+                      >
+                        <Globe className="w-3 h-3 mr-1" /> {t("Apply to All Pages")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 w-7 p-0 shrink-0"
+                        onClick={() => copyToClipboard(img.url)}
+                      >
+                        <Copy className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Upload New OG Image */}
+          <div className={`p-4 rounded-xl border-2 border-dashed ${isDark ? "border-pink-500/30 bg-pink-900/5" : "border-pink-300 bg-pink-50"} space-y-3`}>
+            <p className="text-sm font-bold text-pink-500 flex items-center gap-2">
+              <Upload className="w-4 h-4" /> {t("Upload New Image for Google & Bing")}
+            </p>
+            <p className="text-[11px] text-muted-foreground">{t("Recommended: 1200x630px, JPG or PNG, under 5MB. This will be used for all search engine sharing.")}</p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <label className={`flex-1 flex flex-col items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed cursor-pointer transition-all hover:border-pink-400 ${isDark ? "border-pink-500/20 bg-white/5 hover:bg-pink-900/10" : "border-pink-200 bg-white hover:bg-pink-50"}`}>
+                {ogUploading ? (
+                  <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
+                ) : (
+                  <>
+                    <ImageIcon className="w-8 h-8 text-pink-400" />
+                    <span className="text-sm font-semibold text-pink-500">{t("Click to Upload Image")}</span>
+                    <span className="text-[10px] text-muted-foreground">JPG, PNG, WEBP — max 5MB</span>
+                  </>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    if (file.size > 5 * 1024 * 1024) { setError(t("Image must be under 5MB")); return; }
+                    setOgUploading(true);
+                    try {
+                      const { createClient } = await import('@supabase/supabase-js');
+                      const sb = createClient(
+                        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+                      );
+                      const ext = file.name.split(".").pop();
+                      const fileName = `seo-og-${Date.now()}.${ext}`;
+                      const { error: uploadErr } = await sb.storage.from("blog-images").upload(`og/${fileName}`, file, { upsert: true });
+                      if (uploadErr) throw uploadErr;
+                      const { data: urlData } = sb.storage.from("blog-images").getPublicUrl(`og/${fileName}`);
+                      const newUrl = urlData.publicUrl;
+                      // Apply to all pages
+                      const res = await fetch("/api/admin/seo/bulk-og-image", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ og_image: newUrl }),
+                      });
+                      const data = await res.json();
+                      if (data.success) {
+                        setSuccess(t(`Image uploaded & applied to ${data.updated} pages!`));
+                        fetchOgEntries();
+                      } else setError(data.error || t("Upload failed"));
+                    } catch (err: any) { setError(err.message || t("Upload failed")); }
+                    finally { setOgUploading(false); e.target.value = ""; }
+                  }}
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* How it works info */}
+          <div className={`p-3 rounded-lg ${isDark ? "bg-blue-900/10 border border-blue-500/20" : "bg-blue-50 border border-blue-200"}`}>
+            <p className="text-xs font-bold text-blue-500 mb-2">{t("How these images are used:")}</p>
+            <div className="space-y-1 text-[11px] text-muted-foreground">
+              <div className="flex items-center gap-2"><Globe className="w-3 h-3 text-blue-500" /> <span><strong>Google:</strong> {t("Shows in Knowledge Panel, Image Search & when shared on Gmail")}</span></div>
+              <div className="flex items-center gap-2"><Globe className="w-3 h-3 text-cyan-500" /> <span><strong>Bing:</strong> {t("Shows in Bing Image Search & Bing social preview cards")}</span></div>
+              <div className="flex items-center gap-2"><Globe className="w-3 h-3 text-green-500" /> <span><strong>WhatsApp / Facebook:</strong> {t("Shows as thumbnail when someone shares your website link")}</span></div>
+              <div className="flex items-center gap-2"><Globe className="w-3 h-3 text-sky-500" /> <span><strong>Twitter/X:</strong> {t("Shows as large card image when link is tweeted")}</span></div>
+            </div>
+          </div>
+
+        </CardContent>
+      </Card>
+
       {/* =================== QUICK LINKS =================== */}
       <Card className={cardClass}>
         <CardHeader>
