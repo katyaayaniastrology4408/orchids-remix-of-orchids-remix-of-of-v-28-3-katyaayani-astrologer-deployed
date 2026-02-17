@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { 
   Globe, Send, RefreshCw, CheckCircle, XCircle, Clock, Search, Shield, 
   Loader2, ExternalLink, Copy, AlertTriangle, Zap, FileText, Save, 
-  ArrowRight, RotateCcw, Eye, ChevronDown, ChevronUp
+  ArrowRight, RotateCcw, Eye, ChevronDown, ChevronUp, Upload, ImageIcon, Trash2, Link2, XIcon
 } from "lucide-react";
 import { safeJson } from "@/lib/safe-json";
 import { supabase } from "@/lib/supabase";
@@ -47,12 +47,20 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
   const [bingSubmitUrl, setBingSubmitUrl] = useState("");
   const [bingSubmitting, setBingSubmitting] = useState(false);
 
+  // OG Image management
+  const [ogEntries, setOgEntries] = useState<any[]>([]);
+  const [ogLoading, setOgLoading] = useState(true);
+  const [ogUploading, setOgUploading] = useState(false);
+  const [editingOg, setEditingOg] = useState<any>(null);
+  const [ogForm, setOgForm] = useState({ og_title: "", og_description: "", og_image: "" });
+
   const siteUrl = "https://www.katyaayaniastrologer.com";
 
   useEffect(() => {
     loadVerificationCodes();
     fetchPingLogs();
     checkSitemap();
+    fetchOgEntries();
   }, []);
 
   // Load verification codes from DB (admin_settings table)
@@ -229,6 +237,73 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     setSuccess(t("Copied to clipboard!"));
+  };
+
+  // OG Management
+  const fetchOgEntries = async () => {
+    setOgLoading(true);
+    try {
+      const res = await fetch("/api/admin/seo");
+      const data = await safeJson(res);
+      if (data.success) setOgEntries(data.data || []);
+    } catch (err) { console.error(err); }
+    finally { setOgLoading(false); }
+  };
+
+  const handleOgEdit = (entry: any) => {
+    setEditingOg(entry);
+    setOgForm({
+      og_title: entry.og_title || "",
+      og_description: entry.og_description || "",
+      og_image: entry.og_image || "",
+    });
+  };
+
+  const handleOgSave = async () => {
+    if (!editingOg) return;
+    try {
+      const res = await fetch("/api/admin/seo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          page_path: editingOg.page_path,
+          meta_title: editingOg.meta_title,
+          meta_description: editingOg.meta_description,
+          meta_keywords: editingOg.meta_keywords,
+          og_title: ogForm.og_title,
+          og_description: ogForm.og_description,
+          og_image: ogForm.og_image,
+          canonical_url: editingOg.canonical_url,
+          robots: editingOg.robots,
+          schema_markup: editingOg.schema_markup,
+        }),
+      });
+      const data = await safeJson(res);
+      if (data.success) {
+        setSuccess(t("OG settings updated for ") + editingOg.page_path);
+        setEditingOg(null);
+        setOgForm({ og_title: "", og_description: "", og_image: "" });
+        fetchOgEntries();
+      } else {
+        setError(data.error || t("Failed to save"));
+      }
+    } catch { setError(t("An error occurred")); }
+  };
+
+  const handleOgImageUpload = async (file: File) => {
+    if (file.size > 5 * 1024 * 1024) { setError(t("Image must be under 5MB")); return; }
+    setOgUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const pageName = editingOg?.page_path?.replace(/\//g, "-").replace(/^-/, "home") || "page";
+      const fileName = `og-${pageName}-${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from("blog-images").upload(`og/${fileName}`, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+      const { data: urlData } = supabase.storage.from("blog-images").getPublicUrl(`og/${fileName}`);
+      setOgForm(prev => ({ ...prev, og_image: urlData.publicUrl }));
+      setSuccess(t("OG Image uploaded!"));
+    } catch (err: any) { setError(err.message || t("Upload failed")); }
+    finally { setOgUploading(false); }
   };
 
   const cardClass = isDark ? "bg-[#12121a] border-[#ff6b35]/10" : "bg-white border-[#ff6b35]/20";
@@ -730,6 +805,140 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
                   <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-2">
                     {new Date(log.created_at).toLocaleString()}
                   </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* =================== OG IMAGE & SOCIAL SHARING =================== */}
+      <Card className={`${cardClass} ring-1 ring-orange-500/20`}>
+        <CardHeader>
+          <CardTitle className="text-[#ff6b35] flex items-center gap-2">
+            <ImageIcon className="w-5 h-5" /> {t("Open Graph & Social Sharing")}
+          </CardTitle>
+          <CardDescription>{t("Change OG images, titles & descriptions for Google, Bing, Facebook, WhatsApp, Twitter sharing")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {ogLoading ? (
+            <div className="py-6 text-center"><Loader2 className="w-5 h-5 animate-spin mx-auto text-[#ff6b35]" /></div>
+          ) : ogEntries.length === 0 ? (
+            <p className="text-sm text-muted-foreground italic text-center py-4">{t("No SEO entries yet. Go to SEO Manager to add pages first.")}</p>
+          ) : (
+            <div className="space-y-3">
+              {ogEntries.map((entry) => (
+                <div key={entry.id}>
+                  {editingOg?.id === entry.id ? (
+                    /* Edit Mode */
+                    <div className={`p-4 rounded-xl border-2 border-[#ff6b35]/30 space-y-4 ${isDark ? "bg-[#1a1a2e]" : "bg-[#fff8f5]"}`}>
+                      <div className="flex items-center justify-between">
+                        <span className="px-2 py-0.5 rounded bg-[#ff6b35]/10 text-[#ff6b35] text-xs font-bold font-mono">{entry.page_path}</span>
+                        <Button variant="ghost" size="sm" onClick={() => { setEditingOg(null); setOgForm({ og_title: "", og_description: "", og_image: "" }); }}>
+                          <XIcon className="w-4 h-4" />
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-semibold">{t("OG Title")}</label>
+                          <Input value={ogForm.og_title} onChange={(e) => setOgForm({ ...ogForm, og_title: e.target.value })} placeholder={entry.meta_title || "OG Title..."} className={inputClass} />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-semibold">{t("OG Image URL")}</label>
+                          <div className="flex gap-2">
+                            <Input value={ogForm.og_image} onChange={(e) => setOgForm({ ...ogForm, og_image: e.target.value })} placeholder="https://..." className={`flex-1 ${inputClass}`} />
+                            <label className="flex items-center gap-1 px-3 py-2 rounded-md border cursor-pointer hover:bg-[#ff6b35]/10 transition-colors text-xs font-bold text-[#ff6b35] border-[#ff6b35]/20">
+                              {ogUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                              {t("Upload")}
+                              <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleOgImageUpload(file);
+                                e.target.value = "";
+                              }} />
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold">{t("OG Description")}</label>
+                        <Textarea value={ogForm.og_description} onChange={(e) => setOgForm({ ...ogForm, og_description: e.target.value })} placeholder={entry.meta_description || "Description for social sharing..."} className={`${inputClass} min-h-[60px]`} />
+                        <p className="text-[10px] text-muted-foreground">{ogForm.og_description.length}/200 {t("characters")}</p>
+                      </div>
+
+                      {/* OG Image Preview */}
+                      {ogForm.og_image && (
+                        <div className="relative w-full max-w-md">
+                          <img src={ogForm.og_image} alt="OG Preview" className="w-full h-auto rounded-lg border border-[#ff6b35]/20 object-cover max-h-48" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                          <button type="button" onClick={() => setOgForm({ ...ogForm, og_image: "" })} className="absolute top-2 right-2 p-1 rounded-full bg-red-500 text-white hover:bg-red-600">
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Social Card Preview */}
+                      {(ogForm.og_title || entry.meta_title) && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          {/* Facebook Preview */}
+                          <div className={`rounded-lg border overflow-hidden ${isDark ? "border-white/10" : "border-gray-200"}`}>
+                            <p className="text-[9px] font-bold uppercase tracking-widest px-2 py-1 bg-blue-500/10 text-blue-500">Facebook / LinkedIn</p>
+                            {ogForm.og_image && <img src={ogForm.og_image} alt="" className="w-full h-24 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />}
+                            <div className={`p-2 ${isDark ? "bg-[#1a1a2e]" : "bg-[#f0f2f5]"}`}>
+                              <p className="text-[9px] uppercase text-muted-foreground">katyaayaniastrologer.com</p>
+                              <p className="text-xs font-bold truncate">{ogForm.og_title || entry.meta_title}</p>
+                              <p className="text-[10px] text-muted-foreground line-clamp-1">{ogForm.og_description || entry.meta_description}</p>
+                            </div>
+                          </div>
+                          {/* Twitter Preview */}
+                          <div className={`rounded-lg border overflow-hidden ${isDark ? "border-white/10" : "border-gray-200"}`}>
+                            <p className="text-[9px] font-bold uppercase tracking-widest px-2 py-1 bg-sky-500/10 text-sky-500">Twitter / X</p>
+                            {ogForm.og_image && <img src={ogForm.og_image} alt="" className="w-full h-24 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />}
+                            <div className={`p-2 ${isDark ? "bg-[#1a1a2e]" : "bg-white"}`}>
+                              <p className="text-xs font-bold truncate">{ogForm.og_title || entry.meta_title}</p>
+                              <p className="text-[10px] text-muted-foreground line-clamp-1">{ogForm.og_description || entry.meta_description}</p>
+                            </div>
+                          </div>
+                          {/* WhatsApp Preview */}
+                          <div className={`rounded-lg border overflow-hidden ${isDark ? "border-white/10" : "border-gray-200"}`}>
+                            <p className="text-[9px] font-bold uppercase tracking-widest px-2 py-1 bg-green-500/10 text-green-500">WhatsApp</p>
+                            <div className={`p-2 ${isDark ? "bg-[#1a2e1a]" : "bg-[#dcf8c6]"}`}>
+                              {ogForm.og_image && <img src={ogForm.og_image} alt="" className="w-full h-20 object-cover rounded mb-1" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />}
+                              <p className="text-xs font-bold truncate">{ogForm.og_title || entry.meta_title}</p>
+                              <p className="text-[10px] text-muted-foreground line-clamp-1">{ogForm.og_description || entry.meta_description}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <Button onClick={handleOgSave} className="bg-[#ff6b35] hover:bg-[#e55a2b] text-white font-bold">
+                        <Save className="w-4 h-4 mr-2" /> {t("Save OG Changes")}
+                      </Button>
+                    </div>
+                  ) : (
+                    /* View Mode */
+                    <div className={`p-3 rounded-xl border flex items-center gap-3 ${isDark ? "bg-white/5 border-white/10" : "bg-[#fcfaf7] border-[#ff6b35]/10"}`}>
+                      {entry.og_image ? (
+                        <img src={entry.og_image} alt="" className="w-14 h-14 rounded-lg object-cover border border-[#ff6b35]/10 flex-shrink-0" onError={(e) => { (e.target as HTMLImageElement).src = ""; (e.target as HTMLImageElement).className = "w-14 h-14 rounded-lg bg-gray-200 flex-shrink-0"; }} />
+                      ) : (
+                        <div className={`w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0 ${isDark ? "bg-white/5" : "bg-gray-100"}`}>
+                          <ImageIcon className="w-5 h-5 text-muted-foreground/40" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="px-2 py-0.5 rounded bg-[#ff6b35]/10 text-[#ff6b35] text-xs font-bold font-mono">{entry.page_path}</span>
+                          {entry.og_title && <Badge className="bg-blue-500/10 text-blue-500 text-[8px]">OG</Badge>}
+                          {entry.og_image && <Badge className="bg-purple-500/10 text-purple-500 text-[8px]">IMG</Badge>}
+                        </div>
+                        <p className="text-sm font-bold truncate mt-0.5">{entry.og_title || entry.meta_title || "No title"}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{entry.og_description || entry.meta_description || "No description"}</p>
+                      </div>
+                      <Button variant="outline" size="sm" className="shrink-0 h-8 text-xs border-[#ff6b35]/20 text-[#ff6b35]" onClick={() => handleOgEdit(entry)}>
+                        <Eye className="w-3 h-3 mr-1" /> {t("Edit OG")}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

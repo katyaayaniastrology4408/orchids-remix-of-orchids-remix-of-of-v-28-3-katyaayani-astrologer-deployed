@@ -3580,7 +3580,7 @@ function SidebarContent({ activeTab, setActiveTab, handleLogout, isDark, t }: {
                     </div>
                     <NavItem icon={<Search className="w-4 h-4" />} label={t("SEO Testing")} active={activeTab === "seo-testing"} onClick={() => setActiveTab("seo-testing")} isDark={isDark} />
                       <NavItem icon={<Monitor className="w-4 h-4" />} label={t("SEO Monitor")} active={activeTab === "seo-monitor"} onClick={() => setActiveTab("seo-monitor")} isDark={isDark} />
-                      <NavItem icon={<Send className="w-4 h-4" />} label={t("Webmaster & Ping")} active={activeTab === "webmaster-ping"} onClick={() => setActiveTab("webmaster-ping")} isDark={isDark} />
+                      <NavItem icon={<Send className="w-4 h-4" />} label={t("Google & Bing SEO")} active={activeTab === "webmaster-ping"} onClick={() => setActiveTab("webmaster-ping")} isDark={isDark} />
                     <NavItem icon={<Zap className="w-4 h-4" />} label={t("Automation")} active={activeTab === "automation"} onClick={() => setActiveTab("automation")} isDark={isDark} />
                     <NavItem icon={<Gauge className="w-4 h-4" />} label={t("Performance")} active={activeTab === "performance"} onClick={() => setActiveTab("performance")} isDark={isDark} />
 
