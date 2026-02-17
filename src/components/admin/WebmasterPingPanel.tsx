@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Globe, Send, RefreshCw, CheckCircle, XCircle, Clock, Search, Shield, Loader2, ExternalLink, Copy, AlertTriangle } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Globe, Send, RefreshCw, CheckCircle, XCircle, Clock, Search, Shield, Loader2, ExternalLink, Copy, AlertTriangle, Zap, FileText } from "lucide-react";
 
 interface WebmasterPingPanelProps {
   isDark: boolean;
@@ -25,12 +26,16 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
   const [logsLoading, setLogsLoading] = useState(true);
   const [sitemapStatus, setSitemapStatus] = useState<{ pages: number; accessible: boolean } | null>(null);
 
+  // IndexNow states
+  const [indexNowUrls, setIndexNowUrls] = useState("");
+  const [indexNowSubmitting, setIndexNowSubmitting] = useState(false);
+  const [indexNowKey] = useState("4dc380408a8140fd8b67450af7964725");
+
   const siteUrl = "https://www.katyaayaniastrologer.com";
 
   useEffect(() => {
     fetchPingLogs();
     checkSitemap();
-    // Load saved codes from localStorage
     setBingCode(localStorage.getItem("bing_verification_code") || "");
     setGoogleCode(localStorage.getItem("google_verification_code") || "");
   }, []);
@@ -38,9 +43,9 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
   const fetchPingLogs = async () => {
     setLogsLoading(true);
     try {
-      const res = await fetch("/api/admin/seo/ping?limit=30");
+      const res = await fetch("/api/admin/seo/indexnow");
       const data = await res.json();
-      if (data.success) setPingLogs(data.data || []);
+      if (data.success) setPingLogs(data.logs || []);
     } catch (err) { console.error(err); }
     finally { setLogsLoading(false); }
   };
@@ -68,34 +73,89 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
     setSaving(false);
   };
 
-  const handlePing = async (target?: string) => {
+  // Legacy sitemap ping
+  const handlePingSitemap = async () => {
     setPinging(true);
-    setPingTarget(target || "all");
+    setPingTarget("sitemap");
     try {
-      const res = await fetch("/api/admin/seo/ping", {
+      const res = await fetch("/api/admin/seo/indexnow", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(target ? { target } : {}),
+        body: JSON.stringify({ action: "ping-sitemap" }),
       });
       const data = await res.json();
       if (data.success) {
         const results = data.results || [];
         const allOk = results.every((r: any) => r.status === "success");
         if (allOk) {
-          setSuccess(t(`Ping sent to ${target || "all search engines"} successfully!`));
+          setSuccess(t("Sitemap pinged to all search engines successfully!"));
         } else {
           const failed = results.filter((r: any) => r.status !== "success");
           setError(t(`Some pings failed: ${failed.map((f: any) => f.target).join(", ")}`));
         }
         fetchPingLogs();
       } else {
-        setError(data.error || t("Ping failed"));
+        setError(data.message || t("Ping failed"));
       }
     } catch {
       setError(t("Network error during ping"));
     }
     setPinging(false);
     setPingTarget(null);
+  };
+
+  // IndexNow submit
+  const handleIndexNowSubmit = async (urls?: string[]) => {
+    setIndexNowSubmitting(true);
+    try {
+      const urlList = urls || indexNowUrls.split("\n").map(u => u.trim()).filter(Boolean);
+      if (urlList.length === 0) {
+        setError(t("Please enter at least one URL"));
+        setIndexNowSubmitting(false);
+        return;
+      }
+
+      const res = await fetch("/api/admin/seo/indexnow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ urls: urlList }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const results = data.results || [];
+        const anySuccess = results.some((r: any) => r.status === "success" || r.status === "accepted");
+        if (anySuccess) {
+          setSuccess(t(`IndexNow: ${data.urlCount} URLs submitted successfully!`));
+          setIndexNowUrls("");
+        } else {
+          setError(t(`IndexNow submission failed. Status codes: ${results.map((r: any) => r.statusCode).join(", ")}`));
+        }
+        fetchPingLogs();
+      } else {
+        setError(data.message || t("IndexNow submission failed"));
+      }
+    } catch {
+      setError(t("Network error during IndexNow submission"));
+    }
+    setIndexNowSubmitting(false);
+  };
+
+  // Submit all site pages via IndexNow
+  const handleIndexNowSubmitAll = async () => {
+    const allPages = [
+      `${siteUrl}/`,
+      `${siteUrl}/about`,
+      `${siteUrl}/services`,
+      `${siteUrl}/blog`,
+      `${siteUrl}/booking`,
+      `${siteUrl}/contact`,
+      `${siteUrl}/horoscope`,
+      `${siteUrl}/online-consulting`,
+      `${siteUrl}/kundli`,
+      `${siteUrl}/privacy`,
+      `${siteUrl}/terms`,
+    ];
+    await handleIndexNowSubmit(allPages);
   };
 
   const copyToClipboard = (text: string) => {
@@ -111,10 +171,10 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
       {/* Header */}
       <div>
         <h2 className="font-[family-name:var(--font-cinzel)] text-2xl font-bold text-[#ff6b35]">
-          {t("Webmaster & Search Engine Ping")}
+          {t("Webmaster & IndexNow")}
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          {t("Manage search engine verification, sitemap submissions, and indexing pings")}
+          {t("Manage search engine verification, IndexNow instant indexing, and sitemap pings")}
         </p>
       </div>
 
@@ -155,7 +215,7 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
                 <CheckCircle className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-2xl font-black">{pingLogs.filter(l => l.status === "success").length}</p>
+                <p className="text-2xl font-black">{pingLogs.filter(l => l.status === "success" || l.status === "accepted").length}</p>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("Successful")}</p>
               </div>
             </div>
@@ -165,17 +225,119 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
         <Card className={cardClass}>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-red-500/10 text-red-500">
-                <XCircle className="w-5 h-5" />
+              <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500">
+                <Zap className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-2xl font-black">{pingLogs.filter(l => l.status === "failed").length}</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("Failed")}</p>
+                <p className="text-2xl font-black">{pingLogs.filter(l => l.target?.includes("IndexNow")).length}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("IndexNow")}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* IndexNow Integration - FEATURED */}
+      <Card className={`${cardClass} ring-2 ring-purple-500/30`}>
+        <CardHeader>
+          <CardTitle className="text-purple-500 flex items-center gap-2">
+            <Zap className="w-5 h-5" /> {t("IndexNow - Instant Indexing")}
+            <Badge className="bg-purple-500/10 text-purple-500 text-[10px] ml-2">RECOMMENDED</Badge>
+          </CardTitle>
+          <CardDescription>{t("Submit URLs directly to Bing, Yandex, Seznam & Naver for instant indexing")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* IndexNow Key Info */}
+          <div className={`p-4 rounded-lg border ${isDark ? "bg-purple-900/10 border-purple-500/20" : "bg-purple-50 border-purple-200"}`}>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-bold flex items-center gap-2">
+                <Shield className="w-4 h-4 text-purple-500" /> {t("API Key")}
+              </span>
+              <Badge className="bg-green-500/10 text-green-500 text-[10px]">{t("Active")}</Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <code className={`flex-1 text-xs font-mono p-2 rounded ${isDark ? "bg-[#0a0a12]" : "bg-white"} border ${isDark ? "border-purple-500/10" : "border-purple-200"}`}>
+                {indexNowKey}
+              </code>
+              <Button variant="outline" size="sm" onClick={() => copyToClipboard(indexNowKey)} className="shrink-0">
+                <Copy className="w-3 h-3" />
+              </Button>
+            </div>
+            <div className="flex items-center gap-4 mt-2 text-[10px] text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <FileText className="w-3 h-3" /> {t("Key file")}: <code className="font-mono">{siteUrl}/{indexNowKey}.txt</code>
+              </span>
+            </div>
+          </div>
+
+          {/* 4-Step Visual */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { step: 1, title: t("API Key"), desc: t("Generated"), icon: <Shield className="w-4 h-4" />, done: true },
+              { step: 2, title: t("Key File"), desc: t("Hosted at root"), icon: <FileText className="w-4 h-4" />, done: true },
+              { step: 3, title: t("Submit URLs"), desc: t("Ready below"), icon: <Send className="w-4 h-4" />, done: false },
+              { step: 4, title: t("Verify"), desc: t("Bing Webmaster"), icon: <Search className="w-4 h-4" />, done: false },
+            ].map((s) => (
+              <div key={s.step} className={`p-3 rounded-lg border text-center ${
+                s.done 
+                  ? isDark ? "bg-green-900/10 border-green-500/30" : "bg-green-50 border-green-300"
+                  : isDark ? "bg-[#1a1a2e] border-[#ff6b35]/10" : "bg-gray-50 border-gray-200"
+              }`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 ${
+                  s.done ? "bg-green-500/20 text-green-500" : "bg-purple-500/20 text-purple-500"
+                }`}>
+                  {s.done ? <CheckCircle className="w-4 h-4" /> : s.icon}
+                </div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Step {s.step}</p>
+                <p className="text-sm font-semibold">{s.title}</p>
+                <p className="text-[10px] text-muted-foreground">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Submit URLs */}
+          <div className="space-y-3">
+            <label className="text-sm font-semibold">{t("Submit URLs via IndexNow")}</label>
+            <Textarea
+              placeholder={`Enter URLs (one per line):\n${siteUrl}/\n${siteUrl}/blog\n${siteUrl}/services`}
+              value={indexNowUrls}
+              onChange={(e) => setIndexNowUrls(e.target.value)}
+              className={`${inputClass} min-h-[100px] font-mono text-xs`}
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button
+                onClick={() => handleIndexNowSubmit()}
+                disabled={indexNowSubmitting || !indexNowUrls.trim()}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                {indexNowSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
+                {t("Submit to IndexNow")}
+              </Button>
+              <Button
+                onClick={handleIndexNowSubmitAll}
+                disabled={indexNowSubmitting}
+                variant="outline"
+                className="border-purple-500/30 text-purple-500 hover:bg-purple-500/10"
+              >
+                {indexNowSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Globe className="w-4 h-4 mr-2" />}
+                {t("Submit All Site Pages")}
+              </Button>
+            </div>
+          </div>
+
+          {/* IndexNow endpoints info */}
+          <div className={`p-3 rounded-lg border ${isDark ? "bg-[#0a0a12] border-purple-500/10" : "bg-gray-50 border-gray-200"}`}>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">{t("IndexNow Endpoints")}</p>
+            <div className="space-y-1 text-xs font-mono text-muted-foreground">
+              <p>POST https://api.indexnow.org/IndexNow</p>
+              <p>POST https://www.bing.com/IndexNow</p>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">
+              {t("IndexNow notifies Bing, Yandex, Seznam.cz, and Naver simultaneously.")}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Webmaster Verification */}
       <Card className={cardClass}>
@@ -258,77 +420,48 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
         </CardContent>
       </Card>
 
-      {/* Search Engine Ping */}
+      {/* Sitemap Ping */}
       <Card className={cardClass}>
         <CardHeader>
           <CardTitle className="text-[#ff6b35] flex items-center gap-2">
-            <Send className="w-5 h-5" /> {t("Search Engine Ping")}
+            <Send className="w-5 h-5" /> {t("Sitemap Ping")}
           </CardTitle>
-          <CardDescription>{t("Notify search engines about your sitemap updates for faster indexing")}</CardDescription>
+          <CardDescription>{t("Notify Google & Bing about sitemap updates via legacy ping protocol")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Ping Targets */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Google Ping */}
             <div className={`p-4 rounded-lg border ${isDark ? "bg-[#1a1a2e] border-[#ff6b35]/10" : "bg-gray-50 border-gray-200"}`}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Search className="w-5 h-5 text-blue-500" />
-                  <span className="font-semibold">Google</span>
-                </div>
-                <Badge className="bg-blue-500/10 text-blue-500 text-[10px]">Ping API</Badge>
+              <div className="flex items-center gap-2 mb-2">
+                <Search className="w-5 h-5 text-blue-500" />
+                <span className="font-semibold">Google Ping</span>
               </div>
-              <p className="text-[11px] text-muted-foreground mb-3 font-mono break-all">
-                {`google.com/ping?sitemap=${siteUrl}/sitemap.xml`}
+              <p className="text-[11px] text-muted-foreground mb-2 font-mono break-all">
+                google.com/ping?sitemap={siteUrl}/sitemap.xml
               </p>
-              <Button
-                onClick={() => handlePing("Google")}
-                disabled={pinging}
-                size="sm"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {pinging && pingTarget === "Google" ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
-                {t("Ping Google")}
-              </Button>
             </div>
-
-            {/* Bing Ping */}
             <div className={`p-4 rounded-lg border ${isDark ? "bg-[#1a1a2e] border-[#ff6b35]/10" : "bg-gray-50 border-gray-200"}`}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-cyan-500" />
-                  <span className="font-semibold">Bing</span>
-                </div>
-                <Badge className="bg-cyan-500/10 text-cyan-500 text-[10px]">Ping API</Badge>
+              <div className="flex items-center gap-2 mb-2">
+                <Globe className="w-5 h-5 text-cyan-500" />
+                <span className="font-semibold">Bing Ping</span>
               </div>
-              <p className="text-[11px] text-muted-foreground mb-3 font-mono break-all">
-                {`bing.com/ping?sitemap=${siteUrl}/sitemap.xml`}
+              <p className="text-[11px] text-muted-foreground mb-2 font-mono break-all">
+                bing.com/ping?sitemap={siteUrl}/sitemap.xml
               </p>
-              <Button
-                onClick={() => handlePing("Bing")}
-                disabled={pinging}
-                size="sm"
-                className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
-              >
-                {pinging && pingTarget === "Bing" ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
-                {t("Ping Bing")}
-              </Button>
             </div>
           </div>
 
-          {/* Ping All Button */}
           <Button
-            onClick={() => handlePing()}
+            onClick={handlePingSitemap}
             disabled={pinging}
             className="w-full bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white font-bold py-3"
           >
-            {pinging && pingTarget === "all" ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Send className="w-5 h-5 mr-2" />}
-            {t("Ping All Search Engines")}
+            {pinging && pingTarget === "sitemap" ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Send className="w-5 h-5 mr-2" />}
+            {t("Ping Sitemap to All Search Engines")}
           </Button>
 
           {/* Sitemap Links */}
           <div className={`p-3 rounded-lg border ${isDark ? "bg-[#0a0a12] border-[#ff6b35]/5" : "bg-gray-50 border-gray-200"}`}>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">{t("Sitemap URLs for Submission")}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">{t("Sitemap URLs")}</p>
             <div className="space-y-1">
               {["/sitemap.xml"].map((path) => (
                 <div key={path} className="flex items-center justify-between">
@@ -350,15 +483,15 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
         </CardContent>
       </Card>
 
-      {/* Ping Logs */}
+      {/* Ping & IndexNow Logs */}
       <Card className={cardClass}>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-[#ff6b35] flex items-center gap-2">
-                <Clock className="w-5 h-5" /> {t("Ping History")}
+                <Clock className="w-5 h-5" /> {t("Ping & IndexNow History")}
               </CardTitle>
-              <CardDescription>{t("Recent search engine ping activity")}</CardDescription>
+              <CardDescription>{t("Recent search engine submission activity")}</CardDescription>
             </div>
             <Button variant="outline" size="sm" onClick={fetchPingLogs} disabled={logsLoading}>
               <RefreshCw className={`w-4 h-4 mr-2 ${logsLoading ? "animate-spin" : ""}`} />
@@ -374,7 +507,7 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
           ) : pingLogs.length === 0 ? (
             <div className="text-center py-8">
               <Send className="w-10 h-10 mx-auto mb-3 text-muted-foreground/30" />
-              <p className="text-sm text-muted-foreground italic">{t("No ping history yet. Send your first ping!")}</p>
+              <p className="text-sm text-muted-foreground italic">{t("No history yet. Submit your first URLs!")}</p>
             </div>
           ) : (
             <div className="space-y-2 max-h-[400px] overflow-y-auto">
@@ -383,22 +516,32 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
                   key={log.id}
                   className={`flex items-center justify-between p-3 rounded-lg border ${isDark ? "bg-[#1a1a2e] border-[#ff6b35]/5" : "bg-gray-50 border-gray-200"}`}
                 >
-                  <div className="flex items-center gap-3">
-                    {log.status === "success" ? (
+                  <div className="flex items-center gap-3 min-w-0">
+                    {log.status === "success" || log.status === "accepted" ? (
                       <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
                     ) : (
                       <XCircle className="w-4 h-4 text-red-500 shrink-0" />
                     )}
-                    <div>
-                      <div className="flex items-center gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-semibold">{log.target}</span>
-                        <Badge className={`text-[9px] ${log.status === "success" ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"}`}>
-                          {log.status === "success" ? "OK" : "FAILED"}
+                        <Badge className={`text-[9px] ${
+                          log.status === "success" || log.status === "accepted" 
+                            ? "bg-green-500/10 text-green-500" 
+                            : "bg-red-500/10 text-red-500"
+                        }`}>
+                          {log.status === "success" ? "OK" : log.status === "accepted" ? "ACCEPTED" : "FAILED"}
                         </Badge>
-                        {log.response_code > 0 && (
-                          <Badge variant="outline" className="text-[9px]">HTTP {log.response_code}</Badge>
+                        {log.status_code > 0 && (
+                          <Badge variant="outline" className="text-[9px]">HTTP {log.status_code}</Badge>
+                        )}
+                        {log.target?.includes("IndexNow") && (
+                          <Badge className="bg-purple-500/10 text-purple-500 text-[9px]">IndexNow</Badge>
                         )}
                       </div>
+                      {log.sitemap_url && log.sitemap_url.length < 80 && (
+                        <p className="text-[10px] text-muted-foreground mt-0.5 truncate">{log.sitemap_url}</p>
+                      )}
                       {log.error_message && (
                         <p className="text-[10px] text-red-400 mt-0.5 flex items-center gap-1">
                           <AlertTriangle className="w-3 h-3" /> {log.error_message}
@@ -406,7 +549,7 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
                       )}
                     </div>
                   </div>
-                  <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                  <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-2">
                     {new Date(log.created_at).toLocaleString()}
                   </span>
                 </div>
@@ -426,11 +569,11 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {[
-              { label: "Google Search Console", url: "https://search.google.com/search-console", color: "blue" },
+              { label: "IndexNow Documentation", url: "https://www.indexnow.org/documentation", color: "purple" },
               { label: "Bing Webmaster Tools", url: "https://www.bing.com/webmasters", color: "cyan" },
+              { label: "Google Search Console", url: "https://search.google.com/search-console", color: "blue" },
               { label: "Google PageSpeed", url: `https://pagespeed.web.dev/analysis?url=${siteUrl}`, color: "green" },
               { label: "Rich Results Test", url: `https://search.google.com/test/rich-results?url=${siteUrl}`, color: "purple" },
-              { label: "Mobile Friendly Test", url: `https://search.google.com/test/mobile-friendly?url=${siteUrl}`, color: "amber" },
               { label: "Schema Validator", url: "https://validator.schema.org/", color: "rose" },
             ].map((link) => (
               <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="block">
