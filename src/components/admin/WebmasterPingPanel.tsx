@@ -43,6 +43,10 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
   const [indexNowKey] = useState("4dc380408a8140fd8b67450af7964725");
   const [lastIndexNowResult, setLastIndexNowResult] = useState<any>(null);
 
+  // Live verification check
+  const [verifyStatus, setVerifyStatus] = useState<any>(null);
+  const [verifying, setVerifying] = useState(false);
+
   // Bing specific
   const [bingSubmitUrl, setBingSubmitUrl] = useState("");
   const [bingSubmitting, setBingSubmitting] = useState(false);
@@ -61,6 +65,7 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
     fetchPingLogs();
     checkSitemap();
     fetchOgEntries();
+    runVerificationCheck();
   }, []);
 
   // Load verification codes from DB (admin_settings table)
@@ -84,6 +89,19 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
       console.error("Failed to load verification codes:", err);
     }
     setLoadingSettings(false);
+  };
+
+  // Live verification check against the real production site
+  const runVerificationCheck = async () => {
+    setVerifying(true);
+    try {
+      const res = await fetch("/api/admin/seo/verify");
+      const data = await safeJson(res);
+      setVerifyStatus(data);
+    } catch (err) {
+      console.error("Verification check failed:", err);
+    }
+    setVerifying(false);
   };
 
   // Save verification codes to DB
@@ -377,6 +395,228 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
           </CardContent>
         </Card>
       </div>
+
+      {/* =================== LIVE VERIFICATION STATUS =================== */}
+      <Card className={`${cardClass} ring-2 ring-green-500/30`}>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-green-500 flex items-center gap-2">
+                <Shield className="w-5 h-5" /> {t("Live Verification Status")}
+                <Badge className="bg-green-500/10 text-green-500 text-[10px] ml-1">LIVE CHECK</Badge>
+              </CardTitle>
+              <CardDescription>{t("Real-time check: Are Google & Bing tags actually live on your website?")}</CardDescription>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={runVerificationCheck}
+              disabled={verifying}
+              className="border-green-500/20 text-green-500 shrink-0"
+            >
+              <RefreshCw className={`w-4 h-4 mr-1 ${verifying ? "animate-spin" : ""}`} />
+              {verifying ? t("Checking...") : t("Re-check")}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {verifying && !verifyStatus ? (
+            <div className="flex items-center justify-center py-6 gap-2 text-muted-foreground">
+              <Loader2 className="w-5 h-5 animate-spin text-green-500" />
+              <span className="text-sm">{t("Checking live site...")}</span>
+            </div>
+          ) : verifyStatus?.success === false ? (
+            <div className={`p-3 rounded-lg border ${isDark ? "bg-red-900/10 border-red-500/20" : "bg-red-50 border-red-200"}`}>
+              <p className="text-sm text-red-500 flex items-center gap-2">
+                <XCircle className="w-4 h-4" />
+                {t("Could not reach live site. This check only works after deployment.")}
+              </p>
+            </div>
+          ) : verifyStatus ? (
+            <div className="space-y-3">
+              {/* Grid of checks */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                {/* Google Meta Tag */}
+                <div className={`p-3 rounded-xl border flex items-start gap-3 ${
+                  verifyStatus.google?.metaTagFound
+                    ? isDark ? "bg-green-900/10 border-green-500/20" : "bg-green-50 border-green-200"
+                    : isDark ? "bg-red-900/10 border-red-500/20" : "bg-red-50 border-red-200"
+                }`}>
+                  {verifyStatus.google?.metaTagFound
+                    ? <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
+                    : <XCircle className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />}
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold flex items-center gap-1">
+                      <Search className="w-3 h-3 text-blue-500" /> Google Verification
+                    </p>
+                    {verifyStatus.google?.metaTagFound ? (
+                      <>
+                        <p className="text-[10px] text-green-600 font-semibold">{verifyStatus.google.count} tag(s) found in &lt;head&gt;</p>
+                        {verifyStatus.google.codes?.map((code: string, i: number) => (
+                          <p key={i} className="text-[9px] font-mono text-muted-foreground truncate mt-0.5">{code.substring(0, 40)}...</p>
+                        ))}
+                      </>
+                    ) : (
+                      <p className="text-[10px] text-red-500">{t("Tag NOT found in live site HTML")}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Bing Meta Tag */}
+                <div className={`p-3 rounded-xl border flex items-start gap-3 ${
+                  verifyStatus.bing?.metaTagFound
+                    ? isDark ? "bg-green-900/10 border-green-500/20" : "bg-green-50 border-green-200"
+                    : isDark ? "bg-red-900/10 border-red-500/20" : "bg-red-50 border-red-200"
+                }`}>
+                  {verifyStatus.bing?.metaTagFound
+                    ? <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
+                    : <XCircle className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />}
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold flex items-center gap-1">
+                      <Globe className="w-3 h-3 text-cyan-500" /> Bing Verification (msvalidate.01)
+                    </p>
+                    {verifyStatus.bing?.metaTagFound ? (
+                      <>
+                        <p className="text-[10px] text-green-600 font-semibold">{t("Tag found in <head>")}</p>
+                        <p className="text-[9px] font-mono text-muted-foreground truncate mt-0.5">{verifyStatus.bing.code?.substring(0, 40)}...</p>
+                      </>
+                    ) : (
+                      <p className="text-[10px] text-red-500">{t("msvalidate.01 tag NOT found")}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Bing XML File */}
+                <div className={`p-3 rounded-xl border flex items-start gap-3 ${
+                  verifyStatus.bing?.xmlFileFound
+                    ? isDark ? "bg-green-900/10 border-green-500/20" : "bg-green-50 border-green-200"
+                    : isDark ? "bg-amber-900/10 border-amber-500/20" : "bg-amber-50 border-amber-200"
+                }`}>
+                  {verifyStatus.bing?.xmlFileFound
+                    ? <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
+                    : <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 shrink-0" />}
+                  <div>
+                    <p className="text-sm font-bold">{t("BingSiteAuth.xml")}</p>
+                    <p className={`text-[10px] ${verifyStatus.bing?.xmlFileFound ? "text-green-600 font-semibold" : "text-amber-600"}`}>
+                      {verifyStatus.bing?.xmlFileFound ? t("File accessible at /BingSiteAuth.xml") : t("Optional — meta tag is sufficient")}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Sitemap */}
+                <div className={`p-3 rounded-xl border flex items-start gap-3 ${
+                  verifyStatus.sitemap?.accessible
+                    ? isDark ? "bg-green-900/10 border-green-500/20" : "bg-green-50 border-green-200"
+                    : isDark ? "bg-red-900/10 border-red-500/20" : "bg-red-50 border-red-200"
+                }`}>
+                  {verifyStatus.sitemap?.accessible
+                    ? <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
+                    : <XCircle className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />}
+                  <div>
+                    <p className="text-sm font-bold">{t("Sitemap.xml")}</p>
+                    <p className={`text-[10px] ${verifyStatus.sitemap?.accessible ? "text-green-600 font-semibold" : "text-red-500"}`}>
+                      {verifyStatus.sitemap?.accessible
+                        ? `${verifyStatus.sitemap.urlCount} ${t("URLs indexed")}`
+                        : t("Sitemap not accessible")}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Robots.txt - Googlebot */}
+                <div className={`p-3 rounded-xl border flex items-start gap-3 ${
+                  verifyStatus.robots?.allowsGooglebot
+                    ? isDark ? "bg-green-900/10 border-green-500/20" : "bg-green-50 border-green-200"
+                    : isDark ? "bg-red-900/10 border-red-500/20" : "bg-red-50 border-red-200"
+                }`}>
+                  {verifyStatus.robots?.allowsGooglebot
+                    ? <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
+                    : <XCircle className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />}
+                  <div>
+                    <p className="text-sm font-bold flex items-center gap-1">
+                      <Search className="w-3 h-3 text-blue-500" /> {t("Googlebot in robots.txt")}
+                    </p>
+                    <p className={`text-[10px] ${verifyStatus.robots?.allowsGooglebot ? "text-green-600 font-semibold" : "text-red-500"}`}>
+                      {verifyStatus.robots?.allowsGooglebot ? t("Googlebot allowed to crawl") : t("Googlebot may be blocked")}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Robots.txt - Bingbot */}
+                <div className={`p-3 rounded-xl border flex items-start gap-3 ${
+                  verifyStatus.robots?.allowsBingbot
+                    ? isDark ? "bg-green-900/10 border-green-500/20" : "bg-green-50 border-green-200"
+                    : isDark ? "bg-red-900/10 border-red-500/20" : "bg-red-50 border-red-200"
+                }`}>
+                  {verifyStatus.robots?.allowsBingbot
+                    ? <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
+                    : <XCircle className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />}
+                  <div>
+                    <p className="text-sm font-bold flex items-center gap-1">
+                      <Globe className="w-3 h-3 text-cyan-500" /> {t("Bingbot in robots.txt")}
+                    </p>
+                    <p className={`text-[10px] ${verifyStatus.robots?.allowsBingbot ? "text-green-600 font-semibold" : "text-red-500"}`}>
+                      {verifyStatus.robots?.allowsBingbot ? t("Bingbot allowed to crawl") : t("Bingbot may be blocked")}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Summary score */}
+              {(() => {
+                const checks = [
+                  verifyStatus.google?.metaTagFound,
+                  verifyStatus.bing?.metaTagFound,
+                  verifyStatus.sitemap?.accessible,
+                  verifyStatus.robots?.allowsGooglebot,
+                  verifyStatus.robots?.allowsBingbot,
+                ];
+                const passed = checks.filter(Boolean).length;
+                const total = checks.length;
+                const allPassed = passed === total;
+                return (
+                  <div className={`p-3 rounded-xl border flex items-center justify-between ${
+                    allPassed
+                      ? isDark ? "bg-green-900/20 border-green-500/40" : "bg-green-100 border-green-300"
+                      : isDark ? "bg-amber-900/10 border-amber-500/20" : "bg-amber-50 border-amber-200"
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      {allPassed
+                        ? <CheckCircle className="w-5 h-5 text-green-500" />
+                        : <AlertTriangle className="w-5 h-5 text-amber-500" />}
+                      <div>
+                        <p className={`text-sm font-bold ${allPassed ? "text-green-600" : "text-amber-600"}`}>
+                          {allPassed ? t("All checks passed! Google & Bing are properly set up.") : `${passed}/${total} ${t("checks passed")}`}
+                        </p>
+                        {verifyStatus.checkedAt && (
+                          <p className="text-[10px] text-muted-foreground">{t("Checked at")}: {new Date(verifyStatus.checkedAt).toLocaleTimeString()}</p>
+                        )}
+                      </div>
+                    </div>
+                    <Badge className={`text-sm font-black px-3 py-1 ${allPassed ? "bg-green-500 text-white" : "bg-amber-500 text-white"}`}>
+                      {passed}/{total}
+                    </Badge>
+                  </div>
+                );
+              })()}
+
+              {/* Note about local vs production */}
+              <div className={`p-2 rounded-lg ${isDark ? "bg-blue-900/10 border border-blue-500/20" : "bg-blue-50 border border-blue-200"}`}>
+                <p className="text-[10px] text-blue-500 flex items-start gap-1">
+                  <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" />
+                  {t("Note: This checks the live production site (katyaayaniastrologer.com). On localhost, Google/Bing cannot verify. After deployment, all checks should be green.")}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <Button onClick={runVerificationCheck} className="bg-green-600 hover:bg-green-700 text-white">
+                <Shield className="w-4 h-4 mr-2" /> {t("Run Verification Check")}
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* =================== GOOGLE SEO SECTION =================== */}
       <Card className={`${cardClass} ring-1 ring-blue-500/20`}>
