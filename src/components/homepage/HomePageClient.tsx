@@ -33,8 +33,9 @@ export default function HomePageClient() {
     const fetchPanchangData = async () => {
       try {
         const today = new Date().toISOString().split('T')[0];
-        const res = await fetch(`/api/panchang?t=${today}`, { cache: 'no-store' });
-        const data = await res.json();
+          const res = await fetch(`/api/panchang?t=${today}`, { cache: 'no-store' });
+          if (!res.ok) return;
+          const data = await res.json();
         if (data.success) {
           lastFetchDate = today;
           setPanchangApiData(data.data);

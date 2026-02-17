@@ -33,7 +33,8 @@ export default function CosmicInsights({ panchangApiData }: { panchangApiData?: 
     const fetchPanchangData = async () => {
       try {
         const res = await fetch('/api/panchang');
-        const data = await res.json();
+          if (!res.ok) return;
+          const data = await res.json();
         if (data.success) {
           setLocalPanchangApi(data.data);
         }

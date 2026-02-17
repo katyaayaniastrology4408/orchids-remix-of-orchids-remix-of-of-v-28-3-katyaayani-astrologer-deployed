@@ -159,7 +159,7 @@ export default function SchemaMarkup() {
     if (pathname.startsWith("/admin")) return;
 
     fetch(`/api/admin/seo?page_path=${encodeURIComponent(pathname)}`)
-      .then((res) => res.json())
+      .then((res) => { if (!res.ok) throw new Error('not ok'); return res.json(); })
       .then((data) => {
         if (data.success && data.data?.schema_markup) {
           setSchema(data.data.schema_markup);
