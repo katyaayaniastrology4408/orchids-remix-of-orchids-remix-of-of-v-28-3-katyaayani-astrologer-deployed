@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Globe, Send, RefreshCw, CheckCircle, XCircle, Clock, Search, Shield, Loader2, ExternalLink, Copy, AlertTriangle, Zap, FileText } from "lucide-react";
+import { safeJson } from "@/lib/safe-json";
 
 interface WebmasterPingPanelProps {
   isDark: boolean;
@@ -86,20 +87,20 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "ping-sitemap" }),
       });
-      const data = await res.json();
-      if (data.success) {
-        const results = data.results || [];
-        const allOk = results.every((r: any) => r.status === "success");
-        if (allOk) {
-          setSuccess(t("Sitemap pinged to all search engines successfully!"));
+      const data = await safeJson(res);
+        if (data?.success) {
+          const results = data.results || [];
+          const allOk = results.every((r: any) => r.status === "success");
+          if (allOk) {
+            setSuccess(t("Sitemap pinged to all search engines successfully!"));
+          } else {
+            const failed = results.filter((r: any) => r.status !== "success");
+            setError(t(`Some pings failed: ${failed.map((f: any) => f.target).join(", ")}`));
+          }
+          fetchPingLogs();
         } else {
-          const failed = results.filter((r: any) => r.status !== "success");
-          setError(t(`Some pings failed: ${failed.map((f: any) => f.target).join(", ")}`));
+          setError(data?.message || t("Ping failed"));
         }
-        fetchPingLogs();
-      } else {
-        setError(data.message || t("Ping failed"));
-      }
     } catch {
       setError(t("Network error during ping"));
     }
@@ -123,20 +124,20 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ urls: urlList }),
       });
-      const data = await res.json();
-      if (data.success) {
-        const results = data.results || [];
-        const anySuccess = results.some((r: any) => r.status === "success" || r.status === "accepted");
-        if (anySuccess) {
-          setSuccess(t(`IndexNow: ${data.urlCount} URLs submitted successfully!`));
-          setIndexNowUrls("");
+      const data = await safeJson(res);
+        if (data?.success) {
+          const results = data.results || [];
+          const anySuccess = results.some((r: any) => r.status === "success" || r.status === "accepted");
+          if (anySuccess) {
+            setSuccess(t(`IndexNow: ${data.urlCount} URLs submitted successfully!`));
+            setIndexNowUrls("");
+          } else {
+            setError(t(`IndexNow submission failed. Status codes: ${results.map((r: any) => r.statusCode).join(", ")}`));
+          }
+          fetchPingLogs();
         } else {
-          setError(t(`IndexNow submission failed. Status codes: ${results.map((r: any) => r.statusCode).join(", ")}`));
+          setError(data?.message || t("IndexNow submission failed"));
         }
-        fetchPingLogs();
-      } else {
-        setError(data.message || t("IndexNow submission failed"));
-      }
     } catch {
       setError(t("Network error during IndexNow submission"));
     }

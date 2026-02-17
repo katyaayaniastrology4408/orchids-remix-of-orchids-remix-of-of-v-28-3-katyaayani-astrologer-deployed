@@ -439,25 +439,49 @@ export const dictionary: Record<string, { hi: string; gu: string }> = {
   "Invalid verification code": { hi: "अमान्य सत्यापन कोड", gu: "અમાન્ય ચકાસણી કોડ" },
 };
 
-// Build reverse lookup maps for faster DOM translation
-// English text -> { hi, gu }
+// Build lookup maps
 const lowerCaseMap: Record<string, { hi: string; gu: string }> = {};
+// Sort keys by length descending for greedy replacement
+const sortedKeys: string[] = [];
 for (const [key, value] of Object.entries(dictionary)) {
   lowerCaseMap[key.toLowerCase().trim()] = value;
+  sortedKeys.push(key);
 }
+sortedKeys.sort((a, b) => b.length - a.length);
 
 export function translateText(text: string, lang: "hi" | "gu" | "en"): string | null {
-  if (lang === "en") return null; // no translation needed
+  if (lang === "en") return null;
   const trimmed = text.trim();
   if (!trimmed) return null;
+  // Skip if only numbers, symbols, or very short
+  if (/^[\d\s\-\+\.\,\:\;\!\?\@\#\$\%\&\*\(\)\/\\₹€\$]+$/.test(trimmed)) return null;
+  if (trimmed.length < 2) return null;
   
-  // Exact match
+  // 1. Exact match
   const exact = dictionary[trimmed];
   if (exact) return exact[lang];
   
-  // Case-insensitive match
+  // 2. Case-insensitive exact match
   const lower = lowerCaseMap[trimmed.toLowerCase()];
   if (lower) return lower[lang];
   
-  return null;
+  // 3. Word-level / phrase-level replacement (greedy, longest match first)
+  let result = trimmed;
+  let changed = false;
+  for (const key of sortedKeys) {
+    if (key.length < 3) continue; // skip very short keys to avoid false matches
+    const val = dictionary[key];
+    // Case-insensitive search
+    const regex = new RegExp(escapeRegex(key), "gi");
+    if (regex.test(result)) {
+      result = result.replace(regex, val[lang]);
+      changed = true;
+    }
+  }
+  
+  return changed ? result : null;
+}
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
