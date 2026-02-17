@@ -189,7 +189,7 @@ export const metadata: Metadata = {
     google: ["2Edo_sTI7Jp85F7z7xr0yG6MTSrSsm5WO0jY4HsAqmM", "JC618JFaR6PWY6n1KlEKLwBnTB2Qekmi-2rjnke5S5M"],
     yandex: "yandex-verification-code",
     other: {
-      "msvalidate.01": process.env.NEXT_PUBLIC_BING_VERIFICATION || "",
+      "msvalidate.01": "2Edo_sTI7Jp85F7z7xr0yG6MTSrSsm5WO0jY4HsAqmM",
       "p:domain_verify": "pinterest-verification-code",
     },
   },
