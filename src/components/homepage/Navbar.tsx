@@ -64,9 +64,12 @@ export default function Navbar() {
                 priority
               className="object-contain"
             />
-          <span className="font-[family-name:var(--font-cinzel)] text-xs md:text-sm lg:text-base font-bold text-gradient-ancient leading-tight whitespace-nowrap">
-            KATYAAYANI<br />ASTROLOGER
-          </span>
+          <span
+              className="font-[family-name:var(--font-cinzel)] text-xs md:text-sm lg:text-base font-bold text-gradient-ancient leading-tight whitespace-nowrap notranslate"
+              translate="no"
+            >
+              KATYAAYANI<br />ASTROLOGER
+            </span>
         </Link>
 
           <div className="hidden md:flex flex-1 justify-center gap-3 lg:gap-6 mx-4">

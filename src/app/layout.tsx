@@ -1,17 +1,10 @@
 import type { Metadata } from "next";
-import { Open_Sans } from "next/font/google";
+import { Open_Sans, Cinzel } from "next/font/google";
 import "./globals.css";
 import { VisualEditsMessenger } from "orchids-visual-edits";
 import ErrorReporter from "@/components/ErrorReporter";
 import Script from "next/script";
 import { Providers } from "@/components/Providers";
-
-const openSans = Open_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-  variable: "--font-open-sans-next",
-});
 import UnifiedLoginPopup from "@/components/auth/UnifiedLoginPopup";
 import EnquiryPopup from "@/components/EnquiryPopup";
 import FloatingEnquiry from "@/components/FloatingEnquiry";
@@ -21,6 +14,20 @@ import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import PageViewTracker from "@/components/PageViewTracker";
 import NewsletterPopup from "@/components/NewsletterPopup";
 import SchemaMarkup from "@/components/SchemaMarkup";
+
+const openSans = Open_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-open-sans-next",
+});
+
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "900"],
+  display: "swap",
+  variable: "--font-cinzel",
+});
 
 const ICON_BASE = 'https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png';
 
@@ -213,7 +220,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className={openSans.variable} suppressHydrationWarning>
+        <html lang="en" className={`${openSans.variable} ${cinzel.variable}`} suppressHydrationWarning>
           <head>
           </head>
           <body className="antialiased" suppressHydrationWarning>
