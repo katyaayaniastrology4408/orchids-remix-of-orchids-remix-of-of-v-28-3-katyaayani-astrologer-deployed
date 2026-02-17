@@ -3266,7 +3266,7 @@ function AnalyticsDashboard({ isDark, t }: { isDark: boolean; t: (key: string) =
   );
 }
 
-// Keywords Manager Component
+// Keywords Manager Component - Google + Bing unified
 function KeywordsManager({ isDark, t, isActionLoading, setIsActionLoading, setSuccess, setError }: {
   isDark: boolean;
   t: (key: string) => string;
@@ -3278,8 +3278,11 @@ function KeywordsManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
   const [seoEntries, setSeoEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedPage, setSelectedPage] = useState('');
-  const [keywords, setKeywords] = useState('');
-  const [newKeyword, setNewKeyword] = useState('');
+  const [googleKeywords, setGoogleKeywords] = useState('');
+  const [bingKeywords, setBingKeywords] = useState('');
+  const [newGoogleKeyword, setNewGoogleKeyword] = useState('');
+  const [newBingKeyword, setNewBingKeyword] = useState('');
+  const [kwTab, setKwTab] = useState<'google' | 'bing'>('google');
 
   useEffect(() => { fetchSeoEntries(); }, []);
 
@@ -3296,21 +3299,33 @@ function KeywordsManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
   useEffect(() => {
     if (selectedPage) {
       const entry = seoEntries.find(e => e.page_path === selectedPage);
-      setKeywords(entry?.meta_keywords || '');
+      setGoogleKeywords(entry?.meta_keywords || '');
+      setBingKeywords(entry?.bing_keywords || '');
     }
   }, [selectedPage, seoEntries]);
 
-  const keywordList = keywords.split(',').map(k => k.trim()).filter(Boolean);
+  const googleList = googleKeywords.split(',').map(k => k.trim()).filter(Boolean);
+  const bingList = bingKeywords.split(',').map(k => k.trim()).filter(Boolean);
 
-  const addKeyword = () => {
-    if (!newKeyword.trim()) return;
-    const updated = keywordList.includes(newKeyword.trim()) ? keywordList : [...keywordList, newKeyword.trim()];
-    setKeywords(updated.join(', '));
-    setNewKeyword('');
+  const addGoogleKeyword = () => {
+    if (!newGoogleKeyword.trim()) return;
+    const updated = googleList.includes(newGoogleKeyword.trim()) ? googleList : [...googleList, newGoogleKeyword.trim()];
+    setGoogleKeywords(updated.join(', '));
+    setNewGoogleKeyword('');
   };
+  const removeGoogleKeyword = (kw: string) => setGoogleKeywords(googleList.filter(k => k !== kw).join(', '));
 
-  const removeKeyword = (kw: string) => {
-    setKeywords(keywordList.filter(k => k !== kw).join(', '));
+  const addBingKeyword = () => {
+    if (!newBingKeyword.trim()) return;
+    const updated = bingList.includes(newBingKeyword.trim()) ? bingList : [...bingList, newBingKeyword.trim()];
+    setBingKeywords(updated.join(', '));
+    setNewBingKeyword('');
+  };
+  const removeBingKeyword = (kw: string) => setBingKeywords(bingList.filter(k => k !== kw).join(', '));
+
+  const copyGoogleToBing = () => {
+    setBingKeywords(googleKeywords);
+    setSuccess(t("Copied Google keywords to Bing"));
   };
 
   const handleSaveKeywords = async () => {
@@ -3325,7 +3340,10 @@ function KeywordsManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
           page_path: selectedPage,
           meta_title: entry?.meta_title || '',
           meta_description: entry?.meta_description || '',
-          meta_keywords: keywords,
+          meta_keywords: googleKeywords,
+          bing_keywords: bingKeywords,
+          bing_meta_title: entry?.bing_meta_title || '',
+          bing_meta_description: entry?.bing_meta_description || '',
           og_title: entry?.og_title || '',
           og_description: entry?.og_description || '',
           og_image: entry?.og_image || '',
@@ -3335,34 +3353,66 @@ function KeywordsManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
         }),
       });
       const data = await safeJson(res);
-      if (data.success) { setSuccess(t("Keywords updated!")); fetchSeoEntries(); }
+      if (data.success) { setSuccess(t("Google & Bing keywords saved!")); fetchSeoEntries(); }
       else { setError(data.error || t("Failed to save")); }
     } catch (err) { setError(t("An error occurred")); }
     finally { setIsActionLoading(false); }
   };
 
   // Aggregate all keywords across pages
-  const allKeywords: Record<string, number> = {};
+  const allGoogleKeywords: Record<string, number> = {};
+  const allBingKeywords: Record<string, number> = {};
   seoEntries.forEach(entry => {
     if (entry.meta_keywords) {
       entry.meta_keywords.split(',').map((k: string) => k.trim()).filter(Boolean).forEach((kw: string) => {
-        allKeywords[kw] = (allKeywords[kw] || 0) + 1;
+        allGoogleKeywords[kw] = (allGoogleKeywords[kw] || 0) + 1;
+      });
+    }
+    if (entry.bing_keywords) {
+      entry.bing_keywords.split(',').map((k: string) => k.trim()).filter(Boolean).forEach((kw: string) => {
+        allBingKeywords[kw] = (allBingKeywords[kw] || 0) + 1;
       });
     }
   });
+
+  const activeList = kwTab === 'google' ? googleList : bingList;
+  const activeNew = kwTab === 'google' ? newGoogleKeyword : newBingKeyword;
+  const setActiveNew = kwTab === 'google' ? setNewGoogleKeyword : setNewBingKeyword;
+  const addActive = kwTab === 'google' ? addGoogleKeyword : addBingKeyword;
+  const removeActive = kwTab === 'google' ? removeGoogleKeyword : removeBingKeyword;
+  const allActive = kwTab === 'google' ? allGoogleKeywords : allBingKeywords;
+  const accentColor = kwTab === 'google' ? '#ff6b35' : '#06b6d4';
+  const accentName = kwTab === 'google' ? 'Google' : 'Bing';
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="font-[family-name:var(--font-cinzel)] text-2xl font-bold text-[#ff6b35]">{t("Keywords Manager")}</h2>
-        <p className="text-sm text-muted-foreground">{t("Manage SEO keywords for each page")}</p>
+        <p className="text-sm text-muted-foreground">{t("Manage Google & Bing SEO keywords for each page")}</p>
+      </div>
+
+      {/* Google / Bing Tab Switcher */}
+      <div className="flex gap-1 p-1 rounded-xl bg-black/5 dark:bg-white/5 w-fit">
+        <button onClick={() => setKwTab('google')} className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${kwTab === 'google' ? 'bg-[#ff6b35] text-white shadow-lg' : isDark ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-gray-500 hover:text-gray-800 hover:bg-white'}`}>
+          <SearchIcon className="w-4 h-4" /> Google
+        </button>
+        <button onClick={() => setKwTab('bing')} className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${kwTab === 'bing' ? 'bg-cyan-500 text-white shadow-lg' : isDark ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-gray-500 hover:text-gray-800 hover:bg-white'}`}>
+          <Globe className="w-4 h-4" /> Bing
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Keyword Editor */}
-        <Card className={`lg:col-span-2 ${isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}`}>
+        <Card className={`lg:col-span-2 ${isDark ? 'bg-[#12121a]' : 'bg-white'}`} style={{ borderColor: `${accentColor}33` }}>
           <CardHeader>
-            <CardTitle className="text-[#ff6b35] flex items-center gap-2"><Tag className="w-5 h-5" /> {t("Edit Keywords")}</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle style={{ color: accentColor }} className="flex items-center gap-2"><Tag className="w-5 h-5" /> {t("Edit")} {accentName} {t("Keywords")}</CardTitle>
+              {kwTab === 'bing' && selectedPage && (
+                <Button type="button" variant="outline" size="sm" className="text-[10px] h-7 border-cyan-500/20 text-cyan-500 hover:bg-cyan-500/10" onClick={copyGoogleToBing}>
+                  <RefreshCw className="w-3 h-3 mr-1" /> {t("Copy from Google")}
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -3376,22 +3426,33 @@ function KeywordsManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
             {selectedPage && (
               <>
                 <div className="flex gap-2">
-                  <Input placeholder={t("Add a keyword...")} value={newKeyword} onChange={(e) => setNewKeyword(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addKeyword(); } }} className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'} />
-                  <Button type="button" onClick={addKeyword} className="bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white"><Plus className="w-4 h-4" /></Button>
+                  <Input placeholder={`${t("Add a")} ${accentName} ${t("keyword")}...`} value={activeNew} onChange={(e) => setActiveNew(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addActive(); } }} className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'} />
+                  <Button type="button" onClick={addActive} style={{ backgroundColor: accentColor }} className="text-white hover:opacity-90"><Plus className="w-4 h-4" /></Button>
                 </div>
 
-                <div className="flex flex-wrap gap-2 min-h-[60px] p-3 rounded-lg border border-dashed border-[#ff6b35]/20">
-                  {keywordList.length > 0 ? keywordList.map((kw, i) => (
-                    <span key={i} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#ff6b35]/10 text-[#ff6b35] text-xs font-bold">
+                <div className="flex flex-wrap gap-2 min-h-[60px] p-3 rounded-lg border border-dashed" style={{ borderColor: `${accentColor}40` }}>
+                  {activeList.length > 0 ? activeList.map((kw, i) => (
+                    <span key={i} className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold" style={{ backgroundColor: `${accentColor}15`, color: accentColor }}>
                       {kw}
-                      <button onClick={() => removeKeyword(kw)} className="ml-1 hover:text-red-500 transition-colors">&times;</button>
+                      <button onClick={() => removeActive(kw)} className="ml-1 hover:text-red-500 transition-colors">&times;</button>
                     </span>
-                  )) : <p className="text-xs text-muted-foreground italic">{t("No keywords yet. Add some above.")}</p>}
+                  )) : <p className="text-xs text-muted-foreground italic">{t("No")} {accentName} {t("keywords yet. Add some above.")}</p>}
                 </div>
 
-                <Button onClick={handleSaveKeywords} className="w-full bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white font-black h-12 rounded-xl" disabled={isActionLoading}>
+                {/* Keyword count comparison */}
+                <div className={`p-3 rounded-lg ${isDark ? 'bg-white/5' : 'bg-gray-50'} flex items-center justify-between`}>
+                  <div className="flex items-center gap-4">
+                    <span className="text-xs font-bold flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#ff6b35]"></span> Google: {googleList.length}</span>
+                    <span className="text-xs font-bold flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-cyan-500"></span> Bing: {bingList.length}</span>
+                  </div>
+                  {kwTab === 'bing' && bingList.length === 0 && googleList.length > 0 && (
+                    <span className="text-[10px] text-cyan-500 italic">{t("Tip: Copy Google keywords to Bing")}</span>
+                  )}
+                </div>
+
+                <Button onClick={handleSaveKeywords} style={{ backgroundColor: accentColor }} className="w-full text-white font-black h-12 rounded-xl hover:opacity-90" disabled={isActionLoading}>
                   {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
-                  {t("Save Keywords")}
+                  {t("Save Google & Bing Keywords")}
                 </Button>
               </>
             )}
@@ -3401,20 +3462,20 @@ function KeywordsManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
         {/* All Keywords Overview */}
         <Card className={isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}>
           <CardHeader>
-            <CardTitle className="text-[#ff6b35] flex items-center gap-2"><SearchIcon className="w-5 h-5" /> {t("All Keywords")}</CardTitle>
-            <CardDescription>{Object.keys(allKeywords).length} {t("unique keywords")}</CardDescription>
+            <CardTitle style={{ color: accentColor }} className="flex items-center gap-2"><SearchIcon className="w-5 h-5" /> {t("All")} {accentName} {t("Keywords")}</CardTitle>
+            <CardDescription>{Object.keys(allActive).length} {t("unique keywords")}</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
               <div className="py-10 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-[#ff6b35]" /></div>
-            ) : Object.keys(allKeywords).length === 0 ? (
-              <p className="text-sm text-muted-foreground italic py-4">{t("No keywords found")}</p>
+            ) : Object.keys(allActive).length === 0 ? (
+              <p className="text-sm text-muted-foreground italic py-4">{t("No")} {accentName} {t("keywords found")}</p>
             ) : (
               <div className="flex flex-wrap gap-2 max-h-[400px] overflow-y-auto">
-                {Object.entries(allKeywords).sort(([, a], [, b]) => b - a).map(([kw, count]) => (
-                  <span key={kw} className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold ${count > 1 ? 'bg-[#ff6b35]/20 text-[#ff6b35]' : isDark ? 'bg-white/10 text-white/70' : 'bg-gray-100 text-gray-600'}`}>
+                {Object.entries(allActive).sort(([, a], [, b]) => b - a).map(([kw, count]) => (
+                  <span key={kw} className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold`} style={{ backgroundColor: count > 1 ? `${accentColor}20` : undefined, color: count > 1 ? accentColor : undefined }}>
                     {kw}
-                    {count > 1 && <span className="bg-[#ff6b35] text-white rounded-full w-4 h-4 flex items-center justify-center text-[8px]">{count}</span>}
+                    {count > 1 && <span className="text-white rounded-full w-4 h-4 flex items-center justify-center text-[8px]" style={{ backgroundColor: accentColor }}>{count}</span>}
                   </span>
                 ))}
               </div>
@@ -3423,29 +3484,57 @@ function KeywordsManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
         </Card>
       </div>
 
-      {/* Per-page keyword summary */}
+      {/* Per-page keyword summary - Both Google & Bing */}
       <Card className={isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}>
         <CardHeader>
           <CardTitle className="text-[#ff6b35]">{t("Keywords by Page")}</CardTitle>
+          <CardDescription>{t("Google & Bing keywords for all configured pages")}</CardDescription>
         </CardHeader>
         <CardContent>
           {seoEntries.length === 0 ? (
             <p className="text-sm text-muted-foreground italic">{t("No SEO entries. Add pages in SEO Manager first.")}</p>
           ) : (
             <div className="space-y-3">
-              {seoEntries.map((entry) => (
-                <div key={entry.id} className={`p-3 rounded-lg border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-mono text-xs font-bold text-[#ff6b35]">{entry.page_path}</span>
-                    <span className="text-[10px] text-muted-foreground">{entry.meta_keywords ? entry.meta_keywords.split(',').filter((k: string) => k.trim()).length : 0} {t("keywords")}</span>
+              {seoEntries.map((entry) => {
+                const gKws = entry.meta_keywords ? entry.meta_keywords.split(',').map((k: string) => k.trim()).filter(Boolean) : [];
+                const bKws = entry.bing_keywords ? entry.bing_keywords.split(',').map((k: string) => k.trim()).filter(Boolean) : [];
+                return (
+                  <div key={entry.id} className={`p-4 rounded-lg border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="font-mono text-xs font-bold text-[#ff6b35]">{entry.page_path}</span>
+                      <div className="flex gap-2">
+                        <span className="text-[10px] text-muted-foreground flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#ff6b35]"></span> G: {gKws.length}</span>
+                        <span className="text-[10px] text-muted-foreground flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> B: {bKws.length}</span>
+                      </div>
+                    </div>
+                    {/* Google Keywords */}
+                    {gKws.length > 0 && (
+                      <div className="mb-2">
+                        <p className="text-[9px] uppercase font-bold tracking-widest text-[#ff6b35] mb-1">Google</p>
+                        <div className="flex flex-wrap gap-1">
+                          {gKws.map((kw: string, i: number) => (
+                            <span key={i} className="px-2 py-0.5 rounded bg-[#ff6b35]/10 text-[#ff6b35] text-[9px] font-bold">{kw}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* Bing Keywords */}
+                    {bKws.length > 0 && (
+                      <div>
+                        <p className="text-[9px] uppercase font-bold tracking-widest text-cyan-500 mb-1">Bing</p>
+                        <div className="flex flex-wrap gap-1">
+                          {bKws.map((kw: string, i: number) => (
+                            <span key={i} className="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-500 text-[9px] font-bold">{kw}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {gKws.length === 0 && bKws.length === 0 && (
+                      <span className="text-[10px] text-muted-foreground italic">{t("No keywords")}</span>
+                    )}
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    {entry.meta_keywords ? entry.meta_keywords.split(',').map((kw: string, i: number) => kw.trim()).filter(Boolean).map((kw: string, i: number) => (
-                      <span key={i} className="px-2 py-0.5 rounded bg-[#ff6b35]/10 text-[#ff6b35] text-[9px] font-bold">{kw}</span>
-                    )) : <span className="text-[10px] text-muted-foreground italic">{t("No keywords")}</span>}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
