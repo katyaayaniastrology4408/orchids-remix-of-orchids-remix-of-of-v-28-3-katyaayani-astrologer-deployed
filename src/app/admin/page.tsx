@@ -61,9 +61,10 @@ import {
           AlertCircle,
             Gauge,
     Palette,
-    Zap,
-    Shield,
-    Server,
+      Zap,
+      Shield,
+      Server,
+      Edit3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -619,8 +620,19 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
   const handleDeleteRecord = async (table: string, id: string) => {
     setIsActionLoading(true);
     try {
-      const { error } = await supabase.from(table).delete().eq('id', id);
-      if (error) throw error;
+      if (table === 'profiles') {
+        // Use comprehensive delete API for users
+        const res = await fetch('/api/admin/users/delete', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: id }),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+      } else {
+        const { error } = await supabase.from(table).delete().eq('id', id);
+        if (error) throw error;
+      }
       setSuccess(t("Record deleted successfully"));
       fetchData();
     } catch (err) {
@@ -1303,17 +1315,17 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
                         <div className="flex gap-2 pt-2">
                           <Button variant="outline" size="sm" className="flex-1 h-9 text-xs border-[#ff6b35]/20 text-[#ff6b35]" onClick={() => setSelectedUser(u)}>{t("Details")}</Button>
                           <Button variant="outline" size="icon" className="h-9 w-9 text-blue-500" onClick={() => handleResetUserPassword(u.email)}><KeyRound className="w-4 h-4" /></Button>
-                          <Button variant="outline" size="icon" className="h-9 w-9 text-red-500" onClick={() => handleDeleteRecord('profiles', u.id)}><Trash2 className="w-4 h-4" /></Button>
+            <Button variant="outline" size="icon" className="h-9 w-9 text-red-500" onClick={() => setDeleteConfirmation({ table: 'profiles', id: u.id })}><Trash2 className="w-4 h-4" /></Button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
 
-              </CardContent>
-            </Card>
-          )}
+                </CardContent>
+              </Card>
+            )}
 
-          {activeTab === "resets" && (
+            {activeTab === "resets" && (
             <Card className={isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div><CardTitle className="font-[family-name:var(--font-cinzel)] text-[#ff6b35]">{t("Reset Requests")}</CardTitle><CardDescription>{t("Manage password reset requests from users")}</CardDescription></div>
@@ -2265,85 +2277,183 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
         {/* Booking Details Modal */}
       <AnimatePresence>
         {selectedBooking && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedBooking(null)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            />
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className={`relative w-full max-w-2xl rounded-2xl shadow-2xl border overflow-hidden ${isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/20' : 'bg-white border-[#ff6b35]/20'}`}
-            >
-              <div className="p-4 md:p-6 border-b border-[#ff6b35]/10 flex justify-between items-center bg-[#ff6b35]/5">
-                <h2 className="text-lg md:text-xl font-bold font-[family-name:var(--font-cinzel)] text-[#ff6b35]">{t("Booking Details")}</h2>
-                <Button variant="ghost" size="icon" onClick={() => setSelectedBooking(null)}></Button>
-              </div>
-              <div className="p-4 md:p-6 overflow-y-auto max-h-[80vh] space-y-8 text-left">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">{t("Client Information")}</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3"><Users className="w-4 h-4 text-[#ff6b35]" /><span className="text-sm font-bold">{selectedBooking.full_name}</span></div>
-                      <div className="flex items-center gap-3"><Mail className="w-4 h-4 text-[#ff6b35]" /><span className="text-sm truncate">{selectedBooking.email}</span></div>
-                      <div className="flex items-center gap-3"><Phone className="w-4 h-4 text-[#ff6b35]" /><span className="text-sm">{selectedBooking.phone}</span></div>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">{t("Appointment Details")}</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3"><Star className="w-4 h-4 text-[#ff6b35]" /><span className="text-sm font-bold">{t(selectedBooking.service_type)}</span></div>
-                      <div className="flex items-center gap-3"><Calendar className="w-4 h-4 text-[#ff6b35]" /><span className="text-sm">{selectedBooking.booking_date}</span></div>
-                      <div className="flex items-center gap-3"><Clock className="w-4 h-4 text-[#ff6b35]" /><span className="text-sm">{selectedBooking.booking_time}</span></div>
-                    </div>
-                  </div>
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setSelectedBooking(null)}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              />
+              <motion.div 
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className={`relative w-full max-w-2xl rounded-2xl shadow-2xl border overflow-hidden ${isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/20' : 'bg-white border-[#ff6b35]/20'}`}
+              >
+                <div className="p-4 md:p-6 border-b border-[#ff6b35]/10 flex justify-between items-center bg-[#ff6b35]/5">
+                  <h2 className="text-lg md:text-xl font-bold font-[family-name:var(--font-cinzel)] text-[#ff6b35]">{t("Booking Details")}</h2>
+                  <Button variant="ghost" size="icon" onClick={() => setSelectedBooking(null)}></Button>
                 </div>
+                <div className="p-4 md:p-6 overflow-y-auto max-h-[80vh] space-y-8 text-left">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">{t("Client Information")}</h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3"><Users className="w-4 h-4 text-[#ff6b35]" /><span className="text-sm font-bold">{selectedBooking.full_name}</span></div>
+                        <div className="flex items-center gap-3"><Mail className="w-4 h-4 text-[#ff6b35]" /><span className="text-sm truncate">{selectedBooking.email}</span></div>
+                        <div className="flex items-center gap-3"><Phone className="w-4 h-4 text-[#ff6b35]" /><span className="text-sm">{selectedBooking.phone}</span></div>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">{t("Appointment Details")}</h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3"><Star className="w-4 h-4 text-[#ff6b35]" /><span className="text-sm font-bold">{t(selectedBooking.service_type)}</span></div>
+                        <div className="flex items-center gap-3"><Calendar className="w-4 h-4 text-[#ff6b35]" /><span className="text-sm">{selectedBooking.booking_date}</span></div>
+                        <div className="flex items-center gap-3"><Clock className="w-4 h-4 text-[#ff6b35]" /><span className="text-sm">{selectedBooking.booking_time}</span></div>
+                      </div>
+                    </div>
+                  </div>
 
-                <div className={`p-4 md:p-6 rounded-2xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#ff6b35]/5 border-[#ff6b35]/10'}`}>
-                  <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4">{t("Birth Chart Details")}</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="p-3 rounded-lg bg-background/50 border border-border">
-                      <p className="text-[10px] text-muted-foreground mb-1">{t("Date of Birth")}</p>
-                      <p className="font-bold text-sm">{selectedBooking.date_of_birth || t("Not provided")}</p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-background/50 border border-border">
-                      <p className="text-[10px] text-muted-foreground mb-1">{t("Time of Birth")}</p>
-                      <p className="font-bold text-sm">{selectedBooking.time_of_birth || t("Not provided")}</p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-background/50 border border-border">
-                      <p className="text-[10px] text-muted-foreground mb-1">{t("Place of Birth")}</p>
-                      <p className="font-bold text-sm">{selectedBooking.place_of_birth || t("Not provided")}</p>
+                  <div className={`p-4 md:p-6 rounded-2xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#ff6b35]/5 border-[#ff6b35]/10'}`}>
+                    <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4">{t("Birth Chart Details")}</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="p-3 rounded-lg bg-background/50 border border-border">
+                        <p className="text-[10px] text-muted-foreground mb-1">{t("Date of Birth")}</p>
+                        <p className="font-bold text-sm">{selectedBooking.date_of_birth || t("Not provided")}</p>
+                      </div>
+                      <div className="p-3 rounded-lg bg-background/50 border border-border">
+                        <p className="text-[10px] text-muted-foreground mb-1">{t("Time of Birth")}</p>
+                        <p className="font-bold text-sm">{selectedBooking.time_of_birth || t("Not provided")}</p>
+                      </div>
+                      <div className="p-3 rounded-lg bg-background/50 border border-border">
+                        <p className="text-[10px] text-muted-foreground mb-1">{t("Place of Birth")}</p>
+                        <p className="font-bold text-sm">{selectedBooking.place_of_birth || t("Not provided")}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1 p-4 rounded-xl border border-green-500/20 bg-green-500/5">
-                    <p className="text-[10px] text-green-500 font-bold uppercase mb-1">{t("Payment Status")}</p>
-                    <p className="text-lg font-black uppercase">{t(selectedBooking.payment_status)}</p>
+                  {/* Editable Status Section */}
+                  <div className={`p-4 md:p-6 rounded-2xl border-2 border-dashed ${isDark ? 'bg-purple-900/5 border-purple-500/20' : 'bg-purple-50 border-purple-200'}`}>
+                    <h3 className="text-xs font-black uppercase tracking-widest text-purple-500 mb-4 flex items-center gap-2">
+                      <Edit3 className="w-4 h-4" /> {t("Edit Booking")}
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-bold uppercase tracking-widest opacity-60">{t("Booking Status")}</Label>
+                        <select
+                          defaultValue={selectedBooking.status}
+                          onChange={async (e) => {
+                            const newStatus = e.target.value;
+                            setIsActionLoading(true);
+                            try {
+                              const { error } = await supabase.from('bookings').update({ status: newStatus }).eq('id', selectedBooking.id);
+                              if (error) throw error;
+                              setSuccess(t("Booking status updated"));
+                              setSelectedBooking({ ...selectedBooking, status: newStatus });
+                              fetchData();
+                            } catch { setError(t("Failed to update")); }
+                            finally { setIsActionLoading(false); }
+                          }}
+                          className={`w-full h-10 rounded-xl border px-3 text-sm ${isDark ? 'bg-[#0a0a12] border-purple-500/20 text-white' : 'bg-white border-purple-200'}`}
+                        >
+                          <option value="pending">{t("Pending")}</option>
+                          <option value="confirmed">{t("Confirmed")}</option>
+                          <option value="cancelled">{t("Cancelled")}</option>
+                          <option value="completed">{t("Completed")}</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-bold uppercase tracking-widest opacity-60">{t("Payment Status")}</Label>
+                        <select
+                          defaultValue={selectedBooking.payment_status}
+                          onChange={async (e) => {
+                            const newStatus = e.target.value;
+                            setIsActionLoading(true);
+                            try {
+                              const { error } = await supabase.from('bookings').update({ payment_status: newStatus }).eq('id', selectedBooking.id);
+                              if (error) throw error;
+                              setSuccess(t("Payment status updated"));
+                              setSelectedBooking({ ...selectedBooking, payment_status: newStatus });
+                              fetchData();
+                            } catch { setError(t("Failed to update")); }
+                            finally { setIsActionLoading(false); }
+                          }}
+                          className={`w-full h-10 rounded-xl border px-3 text-sm ${isDark ? 'bg-[#0a0a12] border-purple-500/20 text-white' : 'bg-white border-purple-200'}`}
+                        >
+                          <option value="pending">{t("Pending")}</option>
+                          <option value="completed">{t("Completed")}</option>
+                          <option value="failed">{t("Failed")}</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-bold uppercase tracking-widest opacity-60">{t("Booking Date")}</Label>
+                        <Input
+                          type="date"
+                          defaultValue={selectedBooking.booking_date}
+                          onBlur={async (e) => {
+                            if (e.target.value && e.target.value !== selectedBooking.booking_date) {
+                              setIsActionLoading(true);
+                              try {
+                                const { error } = await supabase.from('bookings').update({ booking_date: e.target.value }).eq('id', selectedBooking.id);
+                                if (error) throw error;
+                                setSuccess(t("Date updated"));
+                                setSelectedBooking({ ...selectedBooking, booking_date: e.target.value });
+                                fetchData();
+                              } catch { setError(t("Failed to update")); }
+                              finally { setIsActionLoading(false); }
+                            }
+                          }}
+                          className={`h-10 rounded-xl ${isDark ? 'bg-[#0a0a12] border-purple-500/20' : 'border-purple-200'}`}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-bold uppercase tracking-widest opacity-60">{t("Booking Time")}</Label>
+                        <Input
+                          type="time"
+                          defaultValue={selectedBooking.booking_time}
+                          onBlur={async (e) => {
+                            if (e.target.value && e.target.value !== selectedBooking.booking_time) {
+                              setIsActionLoading(true);
+                              try {
+                                const { error } = await supabase.from('bookings').update({ booking_time: e.target.value }).eq('id', selectedBooking.id);
+                                if (error) throw error;
+                                setSuccess(t("Time updated"));
+                                setSelectedBooking({ ...selectedBooking, booking_time: e.target.value });
+                                fetchData();
+                              } catch { setError(t("Failed to update")); }
+                              finally { setIsActionLoading(false); }
+                            }
+                          }}
+                          className={`h-10 rounded-xl ${isDark ? 'bg-[#0a0a12] border-purple-500/20' : 'border-purple-200'}`}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1 p-4 rounded-xl border border-[#ff6b35]/20 bg-[#ff6b35]/5">
-                    <p className="text-[10px] text-[#ff6b35] font-bold uppercase mb-1">{t("Amount")}</p>
-                    <p className="text-lg font-black">{selectedBooking.amount}</p>
-                  </div>
-                </div>
 
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Button className="flex-1 bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white font-bold h-12" onClick={() => handleSendRescheduleEmail(selectedBooking)}>
-                    <Mail className="w-4 h-4 mr-2" /> {t("Send Reschedule Template")}
-                  </Button>
-                  <Button variant="outline" className="h-12 border-[#ff6b35] text-[#ff6b35] hover:bg-[#ff6b35]/10 font-bold" onClick={() => setSelectedBooking(null)}>
-                    {t("Close")}
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex-1 p-4 rounded-xl border border-green-500/20 bg-green-500/5">
+                      <p className="text-[10px] text-green-500 font-bold uppercase mb-1">{t("Payment Status")}</p>
+                      <p className="text-lg font-black uppercase">{t(selectedBooking.payment_status)}</p>
+                    </div>
+                    <div className="flex-1 p-4 rounded-xl border border-[#ff6b35]/20 bg-[#ff6b35]/5">
+                      <p className="text-[10px] text-[#ff6b35] font-bold uppercase mb-1">{t("Amount")}</p>
+                      <p className="text-lg font-black">{selectedBooking.amount}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button className="flex-1 bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white font-bold h-12" onClick={() => handleSendRescheduleEmail(selectedBooking)}>
+                      <Mail className="w-4 h-4 mr-2" /> {t("Send Reschedule Template")}
+                    </Button>
+                    <Button variant="outline" className="h-12 border-[#ff6b35] text-[#ff6b35] hover:bg-[#ff6b35]/10 font-bold" onClick={() => setSelectedBooking(null)}>
+                      {t("Close")}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
+              </motion.div>
+            </div>
+          )}
       </AnimatePresence>
 
       {/* Enquiry Details Modal */}

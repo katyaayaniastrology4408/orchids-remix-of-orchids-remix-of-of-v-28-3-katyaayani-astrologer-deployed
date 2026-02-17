@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   User, Phone, Calendar, Shield, LogOut, Loader2, UserCircle, 
   Sparkles, MapPin, Globe, Clock, CalendarDays, CheckCircle2, 
-  XCircle, Edit3, Mail, Lock, ShieldCheck, Zap, CreditCard, AlertCircle
+  XCircle, Edit3, Mail, Lock, ShieldCheck, Zap, CreditCard, AlertCircle, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -229,6 +229,37 @@ export default function ProfilePage() {
     router.refresh();
   };
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== "DELETE") return;
+    setIsDeleting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch("/api/profile/delete", {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${session?.access_token}`,
+        },
+      });
+      const data = await res.json();
+      if (data.success) {
+        await supabase.auth.signOut();
+        toast.success(t("Account deleted successfully"));
+        router.push("/");
+        router.refresh();
+      } else {
+        toast.error(data.error || t("Failed to delete account"));
+      }
+    } catch {
+      toast.error(t("Something went wrong"));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-[#0a0a0f]' : 'bg-background'}`}>
@@ -297,21 +328,96 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="flex gap-2 sm:gap-3 mb-2 sm:mb-4">
-                <Button 
-                  onClick={() => setIsEditing(!isEditing)}
-                  className="bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-xl sm:rounded-2xl h-10 sm:h-12 px-4 sm:px-6 text-sm sm:text-base font-bold shadow-lg shadow-[#ff6b35]/20"
-                >
-                  {isEditing ? t("Cancel") : <><Edit3 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> {t("Edit")}</>}
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={handleSignOut}
-                  className="border-red-500/20 text-red-500 hover:bg-red-500/5 rounded-xl sm:rounded-2xl h-10 sm:h-12 px-4 sm:px-6 font-bold"
-                >
-                  <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
-                </Button>
-              </div>
+                <div className="flex gap-2 sm:gap-3 mb-2 sm:mb-4">
+                  <Button 
+                    onClick={() => setIsEditing(!isEditing)}
+                    className="bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-xl sm:rounded-2xl h-10 sm:h-12 px-4 sm:px-6 text-sm sm:text-base font-bold shadow-lg shadow-[#ff6b35]/20"
+                  >
+                    {isEditing ? t("Cancel") : <><Edit3 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> {t("Edit")}</>}
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={handleSignOut}
+                    className="border-red-500/20 text-red-500 hover:bg-red-500/5 rounded-xl sm:rounded-2xl h-10 sm:h-12 px-4 sm:px-6 font-bold"
+                  >
+                    <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="border-red-600/30 text-red-600 hover:bg-red-600/10 rounded-xl sm:rounded-2xl h-10 sm:h-12 px-4 sm:px-6 font-bold"
+                  >
+                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                  </Button>
+                </div>
+
+                {/* Delete Account Confirmation Modal */}
+                <AnimatePresence>
+                  {showDeleteConfirm && (
+                    <motion.div 
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                      onClick={() => setShowDeleteConfirm(false)}
+                    >
+                      <motion.div 
+                        initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+                        onClick={(e) => e.stopPropagation()}
+                        className={`w-full max-w-md rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl ${theme === 'dark' ? 'bg-[#12121a] border border-red-500/20' : 'bg-white border border-red-200'}`}
+                      >
+                        <div className="text-center mb-6">
+                          <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+                            <Trash2 className="w-8 h-8 text-red-500" />
+                          </div>
+                          <h3 className="text-xl sm:text-2xl font-[family-name:var(--font-cinzel)] font-bold text-red-500">
+                            {t("Delete Account")}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mt-2">
+                            {t("This will permanently delete your account, all bookings, enquiries, and personal data. This action cannot be undone.")}
+                          </p>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-xs font-bold opacity-60">
+                              {t("Type DELETE to confirm")}
+                            </Label>
+                            <Input
+                              value={deleteConfirmText}
+                              onChange={(e) => setDeleteConfirmText(e.target.value)}
+                              placeholder="DELETE"
+                              className={`mt-1 h-12 rounded-xl border-2 text-center font-mono font-bold text-lg tracking-widest ${
+                                deleteConfirmText === "DELETE" 
+                                  ? "border-red-500 text-red-500" 
+                                  : theme === 'dark' ? 'border-white/10' : 'border-gray-200'
+                              }`}
+                            />
+                          </div>
+                          
+                          <div className="flex gap-3">
+                            <Button
+                              variant="outline"
+                              onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(""); }}
+                              className="flex-1 h-12 rounded-xl font-bold"
+                            >
+                              {t("Cancel")}
+                            </Button>
+                            <Button
+                              onClick={handleDeleteAccount}
+                              disabled={deleteConfirmText !== "DELETE" || isDeleting}
+                              className="flex-1 h-12 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold disabled:opacity-40"
+                            >
+                              {isDeleting ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                              ) : (
+                                <><Trash2 className="w-4 h-4 mr-2" /> {t("Delete Forever")}</>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
             </div>
           </motion.div>
 
