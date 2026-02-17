@@ -24,7 +24,7 @@ const ORG_SCHEMA = {
   founder: {
     "@type": "Person",
     "@id": `${SITE_URL}/#founder`,
-    name: "Kumar Rishi G",
+    name: "Rudram Joshi",
     image: OG_IMAGE,
     jobTitle: "Founder & Chief Vedic Astrologer",
     worksFor: { "@id": `${SITE_URL}/#organization` },

@@ -46,7 +46,7 @@ export default function SocialPreviewPanel({ isDark, t, setSuccess, setError }: 
     twitterDescription: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
     twitterImage: `${SITE_URL}/opengraph-image`,
     schemaName: "Katyayani Vedic Astrology",
-    schemaFounder: "Kumar Rishi G",
+    schemaFounder: "Rudram Joshi",
     schemaLogo: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=256&height=256&resize=contain",
     schemaImage: `${SITE_URL}/opengraph-image`,
   });

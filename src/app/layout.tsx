@@ -1,9 +1,17 @@
 import type { Metadata } from "next";
+import { Open_Sans } from "next/font/google";
 import "./globals.css";
 import { VisualEditsMessenger } from "orchids-visual-edits";
 import ErrorReporter from "@/components/ErrorReporter";
 import Script from "next/script";
 import { Providers } from "@/components/Providers";
+
+const openSans = Open_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-open-sans-next",
+});
 import UnifiedLoginPopup from "@/components/auth/UnifiedLoginPopup";
 import EnquiryPopup from "@/components/EnquiryPopup";
 import FloatingEnquiry from "@/components/FloatingEnquiry";
@@ -78,7 +86,7 @@ export const metadata: Metadata = {
       url: OG_IMAGE,
             width: 1200,
             height: 630,
-            alt: "Founder Kumar Rishi in traditional attire - Katyaayani Astrologer",
+            alt: "Founder Rudram Joshi in traditional attire - Katyaayani Astrologer",
             type: "image/png",
         },
       ],
@@ -88,7 +96,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "A Journey Within - Katyayani Vedic Astrology",
     description: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
-    images: [{ url: OG_IMAGE, alt: "Founder Kumar Rishi in traditional attire - Katyaayani Astrologer" }],
+    images: [{ url: OG_IMAGE, alt: "Founder Rudram Joshi in traditional attire - Katyaayani Astrologer" }],
   },
   alternates: {
     canonical: SITE_URL,
@@ -205,15 +213,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html lang="en" className={openSans.variable} suppressHydrationWarning>
           <head>
-            {/* Non-render-blocking Google Fonts with preconnect */}
-            <link rel="preconnect" href="https://fonts.googleapis.com" />
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-            <link
-              rel="stylesheet"
-              href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap"
-            />
           </head>
           <body className="antialiased" suppressHydrationWarning>
         {/* Google Tag Manager (noscript) - GTM-MQDMP2SL */}
