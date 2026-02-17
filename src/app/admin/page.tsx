@@ -5127,13 +5127,35 @@ function AuditLogsViewer({ isDark, t }: { isDark: boolean; t: (key: string) => s
 }
 
 function BrandingManager({ isDark, t, setSuccess, setError }: { isDark: boolean; t: (k: string) => string; setSuccess: (s: string) => void; setError: (s: string) => void }) {
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [logoUrl, setLogoUrl] = useState("https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/LOGO/Gemini_Generated_Image_6u6muz6u6muz6u6m.ico");
-  const [faviconUrl, setFaviconUrl] = useState("https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/LOGO/Gemini_Generated_Image_6u6muz6u6muz6u6m.ico");
-  const [ogImageUrl, setOgImageUrl] = useState("https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/LOGO/Gemini_Generated_Image_6u6muz6u6muz6u6m.ico");
-  const [siteName, setSiteName] = useState("Katyaayani Astrologer");
-  const [siteTagline, setSiteTagline] = useState("Best Vedic Astrologer | Kundali, Horoscope & Jyotish");
+    const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [uploading, setUploading] = useState<string | null>(null);
+    const [logoUrl, setLogoUrl] = useState("https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/LOGO/Gemini_Generated_Image_6u6muz6u6muz6u6m.ico");
+    const [faviconUrl, setFaviconUrl] = useState("https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/LOGO/Gemini_Generated_Image_6u6muz6u6muz6u6m.ico");
+    const [ogImageUrl, setOgImageUrl] = useState("https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/LOGO/Gemini_Generated_Image_6u6muz6u6muz6u6m.ico");
+    const [siteName, setSiteName] = useState("Katyaayani Astrologer");
+    const [siteTagline, setSiteTagline] = useState("Best Vedic Astrologer | Kundali, Horoscope & Jyotish");
+
+    const handleUpload = async (file: File, type: "logo" | "favicon" | "og_image") => {
+      setUploading(type);
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("type", type);
+        const res = await fetch("/api/admin/branding/upload", { method: "POST", body: formData });
+        if (!res.ok) { const d = await res.json(); throw new Error(d.error || "Upload failed"); }
+        const data = await res.json();
+        if (data.url) {
+          if (type === "logo") setLogoUrl(data.url);
+          else if (type === "favicon") setFaviconUrl(data.url);
+          else setOgImageUrl(data.url);
+          setSuccess(`${type === "logo" ? "Logo" : type === "favicon" ? "Favicon" : "OG Image"} uploaded!`);
+        }
+      } catch (err: any) {
+        setError(err.message || "Upload failed");
+      }
+      setUploading(null);
+    };
 
   useEffect(() => {
     fetchBranding();
@@ -5142,8 +5164,9 @@ function BrandingManager({ isDark, t, setSuccess, setError }: { isDark: boolean;
   const fetchBranding = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/branding");
-      const data = await res.json();
+        const res = await fetch("/api/admin/branding");
+        if (!res.ok) throw new Error("Failed");
+        const data = await res.json();
       if (data.settings) {
         if (data.settings.logo_url) setLogoUrl(data.settings.logo_url);
         if (data.settings.favicon_url) setFaviconUrl(data.settings.favicon_url);
@@ -5195,38 +5218,79 @@ function BrandingManager({ isDark, t, setSuccess, setError }: { isDark: boolean;
           <CardDescription>{t("Manage your site logo, favicon, preview image and branding")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label className="text-sm font-bold">{t("Logo URL")}</Label>
-            <Input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://..." className={isDark ? "bg-white/5 border-white/10" : ""} />
-            {logoUrl && (
-              <div className={`p-4 rounded-xl border flex items-center gap-4 ${isDark ? "bg-white/5 border-white/10" : "bg-[#fcfaf7] border-[#ff6b35]/10"}`}>
-                <img src={logoUrl} alt="Logo Preview" className="w-16 h-16 object-contain rounded-lg" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                <span className="text-xs text-muted-foreground">{t("Logo Preview")}</span>
+            {/* Logo */}
+            <div className="space-y-2">
+              <Label className="text-sm font-bold">{t("Logo")}</Label>
+              <div className="flex gap-2">
+                <Input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://..." className={`flex-1 ${isDark ? "bg-white/5 border-white/10" : ""}`} />
+                <label className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-md cursor-pointer text-xs font-medium border transition-colors ${uploading === "logo" ? "opacity-50 pointer-events-none" : ""} ${isDark ? "bg-[#ff6b35]/10 border-[#ff6b35]/20 text-[#ff6b35] hover:bg-[#ff6b35]/20" : "bg-[#ff6b35]/5 border-[#ff6b35]/20 text-[#ff6b35] hover:bg-[#ff6b35]/10"}`}>
+                  {uploading === "logo" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                  {t("Upload")}
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f, "logo"); e.target.value = ""; }} />
+                </label>
               </div>
-            )}
-          </div>
+              {logoUrl && (
+                <div className={`p-4 rounded-xl border flex items-center gap-4 ${isDark ? "bg-white/5 border-white/10" : "bg-[#fcfaf7] border-[#ff6b35]/10"}`}>
+                  <img src={logoUrl} alt="Logo Preview" className="w-16 h-16 object-contain rounded-lg" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                  <span className="text-xs text-muted-foreground">{t("Logo Preview")}</span>
+                </div>
+              )}
+            </div>
 
-          <div className="space-y-2">
-            <Label className="text-sm font-bold">{t("Favicon URL")}</Label>
-            <Input value={faviconUrl} onChange={(e) => setFaviconUrl(e.target.value)} placeholder="https://..." className={isDark ? "bg-white/5 border-white/10" : ""} />
-            {faviconUrl && (
-              <div className={`p-4 rounded-xl border flex items-center gap-4 ${isDark ? "bg-white/5 border-white/10" : "bg-[#fcfaf7] border-[#ff6b35]/10"}`}>
-                <img src={faviconUrl} alt="Favicon Preview" className="w-8 h-8 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                <span className="text-xs text-muted-foreground">{t("Favicon Preview (shown in browser tab)")}</span>
+            {/* Favicon */}
+            <div className="space-y-2">
+              <Label className="text-sm font-bold">{t("Favicon")}</Label>
+              <div className="flex gap-2">
+                <Input value={faviconUrl} onChange={(e) => setFaviconUrl(e.target.value)} placeholder="https://..." className={`flex-1 ${isDark ? "bg-white/5 border-white/10" : ""}`} />
+                <label className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-md cursor-pointer text-xs font-medium border transition-colors ${uploading === "favicon" ? "opacity-50 pointer-events-none" : ""} ${isDark ? "bg-[#ff6b35]/10 border-[#ff6b35]/20 text-[#ff6b35] hover:bg-[#ff6b35]/20" : "bg-[#ff6b35]/5 border-[#ff6b35]/20 text-[#ff6b35] hover:bg-[#ff6b35]/10"}`}>
+                  {uploading === "favicon" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                  {t("Upload")}
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f, "favicon"); e.target.value = ""; }} />
+                </label>
               </div>
-            )}
-          </div>
+              {faviconUrl && (
+                <div className={`p-4 rounded-xl border flex items-center gap-4 ${isDark ? "bg-white/5 border-white/10" : "bg-[#fcfaf7] border-[#ff6b35]/10"}`}>
+                  <img src={faviconUrl} alt="Favicon Preview" className="w-8 h-8 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                  <span className="text-xs text-muted-foreground">{t("Favicon Preview (shown in browser tab)")}</span>
+                </div>
+              )}
+            </div>
 
-          <div className="space-y-2">
-            <Label className="text-sm font-bold">{t("Preview Image (OG Image)")}</Label>
-            <Input value={ogImageUrl} onChange={(e) => setOgImageUrl(e.target.value)} placeholder="https://..." className={isDark ? "bg-white/5 border-white/10" : ""} />
-            <p className="text-[10px] text-muted-foreground">{t("This image appears when your site is shared on social media (WhatsApp, Facebook, Twitter)")}</p>
-            {ogImageUrl && (
-              <div className={`p-4 rounded-xl border ${isDark ? "bg-white/5 border-white/10" : "bg-[#fcfaf7] border-[#ff6b35]/10"}`}>
-                <img src={ogImageUrl} alt="OG Image Preview" className="w-full max-w-[400px] h-auto rounded-lg" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+            {/* OG Image for WhatsApp/Social */}
+            <div className="space-y-2">
+              <Label className="text-sm font-bold flex items-center gap-2">
+                {t("WhatsApp/Social Preview Image (OG Image)")}
+                <span className={`text-[10px] px-2 py-0.5 rounded-full ${isDark ? "bg-green-500/10 text-green-400" : "bg-green-100 text-green-700"}`}>WhatsApp</span>
+              </Label>
+              <div className="flex gap-2">
+                <Input value={ogImageUrl} onChange={(e) => setOgImageUrl(e.target.value)} placeholder="https://..." className={`flex-1 ${isDark ? "bg-white/5 border-white/10" : ""}`} />
+                <label className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-md cursor-pointer text-xs font-medium border transition-colors ${uploading === "og_image" ? "opacity-50 pointer-events-none" : ""} ${isDark ? "bg-[#ff6b35]/10 border-[#ff6b35]/20 text-[#ff6b35] hover:bg-[#ff6b35]/20" : "bg-[#ff6b35]/5 border-[#ff6b35]/20 text-[#ff6b35] hover:bg-[#ff6b35]/10"}`}>
+                  {uploading === "og_image" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                  {t("Upload")}
+                  <input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f, "og_image"); e.target.value = ""; }} />
+                </label>
               </div>
-            )}
-          </div>
+              <div className={`p-3 rounded-lg text-[11px] space-y-1 ${isDark ? "bg-yellow-500/5 border border-yellow-500/10 text-yellow-300/80" : "bg-yellow-50 border border-yellow-200 text-yellow-800"}`}>
+                <p className="font-semibold">{t("WhatsApp Rules:")}</p>
+                <p>- {t("Best size: 1200 x 630 px")}</p>
+                <p>- {t("Format: JPG or PNG (no ICO/SVG)")}</p>
+                <p>- {t("Must be publicly accessible via HTTPS")}</p>
+                <p>- {t("If old preview shows, add ?v=2 to URL or wait 5-10 min")}</p>
+              </div>
+              {ogImageUrl && (
+                <div className={`p-4 rounded-xl border ${isDark ? "bg-white/5 border-white/10" : "bg-[#fcfaf7] border-[#ff6b35]/10"}`}>
+                  <p className="text-xs font-medium mb-2">{t("Preview (how it looks on WhatsApp):")}</p>
+                  <div className={`rounded-lg overflow-hidden border max-w-[400px] ${isDark ? "border-white/10" : "border-gray-200"}`}>
+                    <img src={ogImageUrl} alt="OG Image Preview" className="w-full h-auto aspect-[1200/630] object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                    <div className={`p-3 ${isDark ? "bg-[#1a1a2e]" : "bg-gray-50"}`}>
+                      <p className="text-[10px] text-muted-foreground uppercase">katyaayaniastrologer.com</p>
+                      <p className="text-xs font-semibold mt-0.5">{siteName || "Katyaayani Astrologer"}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{siteTagline || "Best Vedic Astrologer"}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
           <div className="space-y-2">
             <Label className="text-sm font-bold">{t("Site Name")}</Label>

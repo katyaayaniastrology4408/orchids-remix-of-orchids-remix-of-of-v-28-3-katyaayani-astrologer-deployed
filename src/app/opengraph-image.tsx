@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { createClient } from "@supabase/supabase-js";
 
 export const runtime = "edge";
 
@@ -6,9 +7,38 @@ export const alt = "Katyaayani Astrologer - Best Vedic Astrologer in India";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+async function getSettings() {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/site_settings?select=key,value`,
+      {
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+        },
+        next: { revalidate: 60 },
+      }
+    );
+    if (!res.ok) return {};
+    const data = await res.json();
+    const settings: Record<string, string> = {};
+    data?.forEach((row: { key: string; value: string }) => {
+      settings[row.key] = row.value;
+    });
+    return settings;
+  } catch {
+    return {};
+  }
+}
+
 export default async function Image() {
-  const logoUrl =
-    "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=200&height=200&resize=contain";
+  const settings = await getSettings();
+
+  const logoUrl = settings.logo_url || "https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/LOGO/Gemini_Generated_Image_6u6muz6u6muz6u6m.ico";
+  const siteName = settings.site_name || "Katyaayani Astrologer";
+  const tagline = settings.site_tagline || "Best Vedic Astrologer | Kundali | Horoscope | Jyotish";
 
   return new ImageResponse(
     (
@@ -81,7 +111,7 @@ export default async function Image() {
           alt="Logo"
         />
 
-        {/* Title */}
+        {/* Title - split siteName at space */}
         <div
           style={{
             fontSize: 52,
@@ -94,8 +124,8 @@ export default async function Image() {
             alignItems: "center",
           }}
         >
-          <span>Katyaayani</span>
-          <span style={{ color: "#ff6b00", marginTop: 4 }}>Astrologer</span>
+          <span>{siteName.split(" ")[0] || "Katyaayani"}</span>
+          <span style={{ color: "#ff6b00", marginTop: 4 }}>{siteName.split(" ").slice(1).join(" ") || "Astrologer"}</span>
         </div>
 
         {/* Tagline */}
@@ -108,7 +138,7 @@ export default async function Image() {
             display: "flex",
           }}
         >
-          Best Vedic Astrologer | Kundali | Horoscope | Jyotish
+          {tagline}
         </div>
 
         {/* Subtext */}
