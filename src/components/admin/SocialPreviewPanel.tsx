@@ -48,12 +48,47 @@ export default function SocialPreviewPanel({ isDark, t, setSuccess, setError }: 
     schemaName: "Katyayani Vedic Astrology",
     schemaFounder: "Rudram Joshi",
     schemaLogo: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=256&height=256&resize=contain",
-    schemaImage: `${SITE_URL}/opengraph-image`,
+    schemaImage: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=256&height=256&resize=contain",
   });
   const [liveCheck, setLiveCheck] = useState<any>(null);
   const [checking, setChecking] = useState(false);
   const [previewTab, setPreviewTab] = useState<"google" | "facebook" | "twitter" | "schema">("google");
   const [ogImageTs, setOgImageTs] = useState(Date.now());
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const handleFieldChange = (field: keyof OGData, value: string) => {
+    setOgData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      // Save to seo_settings table via API
+      const res = await fetch("/api/admin/seo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          page_path: "/",
+          og_title: ogData.ogTitle,
+          og_description: ogData.ogDescription,
+          og_image: ogData.ogImage,
+          meta_title: ogData.ogTitle,
+          meta_description: ogData.ogDescription,
+        }),
+      });
+      const data = await safeJson(res);
+      if (data.success) {
+        setSuccess("Social preview settings saved!");
+        setEditing(false);
+      } else {
+        setError(data.error || "Failed to save");
+      }
+    } catch {
+      setError("Failed to save social preview settings");
+    }
+    setSaving(false);
+  };
 
   // Fetch live meta tags from the site
   const fetchLiveMeta = async () => {
@@ -97,10 +132,16 @@ export default function SocialPreviewPanel({ isDark, t, setSuccess, setError }: 
             Preview how your website appears on Google, Facebook, Twitter/X and verify Schema markup
           </p>
         </div>
-        <Button onClick={fetchLiveMeta} disabled={checking} variant="outline" size="sm">
-          {checking ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-          Verify Live Tags
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setEditing(!editing)} variant={editing ? "default" : "outline"} size="sm" className={editing ? "bg-orange-500 hover:bg-orange-600 text-white" : ""}>
+            <Eye className="w-4 h-4 mr-2" />
+            {editing ? "Preview Mode" : "Edit Fields"}
+          </Button>
+          <Button onClick={fetchLiveMeta} disabled={checking} variant="outline" size="sm">
+            {checking ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+            Verify Live Tags
+          </Button>
+        </div>
       </div>
 
       {/* Status Cards */}
@@ -142,6 +183,62 @@ export default function SocialPreviewPanel({ isDark, t, setSuccess, setError }: 
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit Fields */}
+      {editing && (
+        <Card className={isDark ? "border-orange-800/50 bg-orange-950/10" : "border-orange-200 bg-orange-50/50"}>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Eye className="w-5 h-5 text-orange-500" />
+              Edit Social Preview Fields
+            </CardTitle>
+            <CardDescription>Changes here update the preview below. Click Save to persist.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">OG Title</label>
+                <Input value={ogData.ogTitle} onChange={e => handleFieldChange("ogTitle", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Twitter Title</label>
+                <Input value={ogData.twitterTitle} onChange={e => handleFieldChange("twitterTitle", e.target.value)} />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium">OG Description</label>
+                <Textarea value={ogData.ogDescription} onChange={e => handleFieldChange("ogDescription", e.target.value)} rows={3} />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium">Twitter Description</label>
+                <Textarea value={ogData.twitterDescription} onChange={e => handleFieldChange("twitterDescription", e.target.value)} rows={2} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Schema Organization Name</label>
+                <Input value={ogData.schemaName} onChange={e => handleFieldChange("schemaName", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Schema Founder Name</label>
+                <Input value={ogData.schemaFounder} onChange={e => handleFieldChange("schemaFounder", e.target.value)} />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium">Schema Logo URL</label>
+                <Input value={ogData.schemaLogo} onChange={e => handleFieldChange("schemaLogo", e.target.value)} />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium">Schema Image URL (shown in Google search right panel)</label>
+                <Input value={ogData.schemaImage} onChange={e => handleFieldChange("schemaImage", e.target.value)} />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" size="sm" onClick={() => setEditing(false)}>Cancel</Button>
+              <Button size="sm" onClick={handleSave} disabled={saving} className="bg-orange-500 hover:bg-orange-600 text-white">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                Save Changes
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Preview Tabs */}
       <div className="flex gap-2 flex-wrap">

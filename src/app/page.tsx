@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: `${SITE_URL}/opengraph-image`,
           width: 1200,
           height: 630,
-          alt: "Founder Rudram Joshi in traditional attire - Katyaayani Astrologer",
+            alt: "Katyaayani Astrologer Logo - Best Vedic Astrologer",
           type: "image/png",
         },
       ],
@@ -42,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title: "A Journey Within - Katyayani Vedic Astrology",
       description: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
-      images: [{ url: `${SITE_URL}/opengraph-image`, alt: "Founder Rudram Joshi in traditional attire - Katyaayani Astrologer" }],
+      images: [{ url: `${SITE_URL}/opengraph-image`, alt: "Katyaayani Astrologer Logo - Best Vedic Astrologer" }],
     },
     alternates: {
       canonical: SITE_URL,

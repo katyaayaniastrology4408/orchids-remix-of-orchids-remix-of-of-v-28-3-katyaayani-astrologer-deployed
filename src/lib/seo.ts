@@ -5,6 +5,8 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const SITE_URL = "https://www.katyaayaniastrologer.com";
 const SITE_NAME = "Katyaayani Astrologer";
+// Logo for Google/Bing search result thumbnail (right side image in search results)
+const LOGO_IMAGE = "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=256&height=256&resize=contain";
 
 function getSupabase() {
   return createClient(supabaseUrl, supabaseServiceKey, {
@@ -135,7 +137,8 @@ export function generateSchemaMarkup(pagePath: string, seoData?: { meta_title?: 
     name: SITE_NAME,
     alternateName: ["Katyaayani Jyotish", "કાત્યાયની જ્યોતિષ", "कात्यायनी ज्योतिष"],
     url: SITE_URL,
-    logo: `${SITE_URL}/logo.png`,
+    logo: LOGO_IMAGE,
+    image: LOGO_IMAGE,
     sameAs: [],
     contactPoint: {
       "@type": "ContactPoint",
@@ -164,11 +167,11 @@ export function generateSchemaMarkup(pagePath: string, seoData?: { meta_title?: 
         organization,
         {
           "@type": "ProfessionalService",
-          name: SITE_NAME,
-          alternateName: "Katyaayani Jyotish",
-          description,
-          url: SITE_URL,
-          image,
+            name: SITE_NAME,
+            alternateName: "Katyaayani Jyotish",
+            description,
+            url: SITE_URL,
+            image: LOGO_IMAGE,
           priceRange: "$$",
           serviceType: ["Vedic Astrology Consultation", "Kundali Analysis", "Horoscope Reading", "Vastu Shastra", "Marriage Matching"],
           areaServed: {
@@ -194,7 +197,7 @@ export function generateSchemaMarkup(pagePath: string, seoData?: { meta_title?: 
           alternateName: "Katyaayani Astrologer",
           jobTitle: "Vedic Astrologer",
           url: SITE_URL,
-          image,
+          image: LOGO_IMAGE,
           knowsAbout: ["Vedic Astrology", "Jyotish Shastra", "Kundali Analysis", "Vastu Shastra", "Horoscope Reading"],
           worksFor: organization,
         },
@@ -209,12 +212,12 @@ export function generateSchemaMarkup(pagePath: string, seoData?: { meta_title?: 
       name: title,
       description,
       url,
-      mainEntity: {
-        "@type": "Person",
-        name: "Katyaayani",
-        jobTitle: "Vedic Astrologer",
-        url: SITE_URL,
-        image,
+        mainEntity: {
+          "@type": "Person",
+          name: "Katyaayani",
+          jobTitle: "Vedic Astrologer",
+          url: SITE_URL,
+          image: LOGO_IMAGE,
       },
     };
   }

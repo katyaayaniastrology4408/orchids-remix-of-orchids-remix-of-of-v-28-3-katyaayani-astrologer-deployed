@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 export const runtime = "edge";
 
-export const alt = "Katyaayani Astrologer - Best Vedic Astrologer in India | Founder Rudram Joshi in traditional attire";
+export const alt = "Katyaayani Astrologer - Best Vedic Astrologer in India | Vedic Astrology Logo";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 const SITE_URL = "https://www.katyaayaniastrologer.com";
 const LOGO_URL = "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=256&height=256&resize=contain";
 const OG_IMAGE = "https://www.katyaayaniastrologer.com/opengraph-image";
+// Logo image for Google/Bing search result thumbnail (right side image)
+const SEARCH_THUMBNAIL = LOGO_URL;
 
 const ORG_SCHEMA = {
   "@type": "Organization",
@@ -18,14 +20,14 @@ const ORG_SCHEMA = {
     width: 256,
     height: 256,
   },
-  image: OG_IMAGE,
+  image: SEARCH_THUMBNAIL,
   description: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
   foundingDate: "2007",
   founder: {
     "@type": "Person",
     "@id": `${SITE_URL}/#founder`,
     name: "Rudram Joshi",
-    image: OG_IMAGE,
+    image: SEARCH_THUMBNAIL,
     jobTitle: "Founder & Chief Vedic Astrologer",
     worksFor: { "@id": `${SITE_URL}/#organization` },
   },

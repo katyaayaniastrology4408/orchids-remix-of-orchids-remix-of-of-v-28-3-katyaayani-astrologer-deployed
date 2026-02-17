@@ -86,7 +86,7 @@ export const metadata: Metadata = {
       url: OG_IMAGE,
             width: 1200,
             height: 630,
-            alt: "Founder Rudram Joshi in traditional attire - Katyaayani Astrologer",
+              alt: "Katyaayani Astrologer Logo - Best Vedic Astrologer",
             type: "image/png",
         },
       ],
@@ -96,7 +96,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "A Journey Within - Katyayani Vedic Astrology",
     description: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
-    images: [{ url: OG_IMAGE, alt: "Founder Rudram Joshi in traditional attire - Katyaayani Astrologer" }],
+    images: [{ url: OG_IMAGE, alt: "Katyaayani Astrologer Logo - Best Vedic Astrologer" }],
   },
   alternates: {
     canonical: SITE_URL,
