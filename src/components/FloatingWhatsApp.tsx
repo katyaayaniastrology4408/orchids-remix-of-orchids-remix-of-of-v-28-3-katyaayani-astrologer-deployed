@@ -40,6 +40,7 @@ export default function FloatingWhatsApp() {
           target="_blank"
           rel="noopener noreferrer"
           className="group relative"
+          aria-label="Chat with us on WhatsApp"
           >
           <div className="relative w-16 h-16 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 transform group-hover:scale-110 group-active:scale-95 border-[3px] border-white">
           <svg 

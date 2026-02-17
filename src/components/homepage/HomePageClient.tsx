@@ -9,11 +9,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
-import StarField from "@/components/homepage/StarField";
 import Navbar from "@/components/homepage/Navbar";
 const Footer = dynamic(() => import("@/components/homepage/Footer"), { ssr: false });
 const CosmicInsights = dynamic(() => import("@/components/homepage/CosmicInsights"), { ssr: false });
-import { nakshatraSymbols, testimonialsData, contentData } from "@/data/homepage";
+const StarField = dynamic(() => import("@/components/homepage/StarField"), { ssr: false });
+import { testimonialsData, contentData } from "@/data/homepage";
 import "@/styles/homepage.css";
 
 export default function HomePageClient() {
@@ -79,7 +79,28 @@ export default function HomePageClient() {
     return () => { clearInterval(intervalId); clearInterval(refreshId); };
   }, [language]);
 
-  if (!mounted) return null;
+  if (!mounted) {
+    // Render a minimal skeleton to avoid blank screen and improve LCP
+    return (
+      <div className="min-h-screen bg-[#fdfbf7]">
+        <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b bg-[#f5f0e8]/95 border-[#ff6b35]/20">
+          <div className="max-w-7xl mx-auto px-4 py-3 h-[64px]" />
+        </nav>
+        <section className="min-h-[60vh] flex items-center justify-center py-24">
+          <div className="text-center px-6 max-w-4xl">
+            <div className="flex justify-center gap-4 mb-6">
+              <Sun className="w-12 h-12 text-[#ff6b35]" />
+              <Moon className="w-12 h-12 text-[#ffa07a]" />
+              <Star className="w-12 h-12 text-[#ff6b35]" />
+            </div>
+            <h2 className="font-[family-name:var(--font-cinzel)] text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gradient-ancient">
+              Katyaayani Astrologer
+            </h2>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   const content = contentData[language];
   const testimonials = testimonialsData[language];
@@ -110,10 +131,10 @@ export default function HomePageClient() {
               <Moon className="w-12 h-12 text-[#ffa07a]" />
               <Star className="w-12 h-12 text-[#ff6b35]" />
             </div>
-            <h1 className="font-[family-name:var(--font-cinzel)] text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gradient-ancient">
+            <h2 className="font-[family-name:var(--font-cinzel)] text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gradient-ancient">
               {content.heroTitle}
-            </h1>
-            <p className={`text-lg md:text-xl lg:text-2xl mb-8 max-w-3xl mx-auto ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#75695e]'}`}>
+            </h2>
+            <p className={`text-lg md:text-xl lg:text-2xl mb-8 max-w-3xl mx-auto ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
               {content.heroDesc}
             </p>
 
@@ -239,10 +260,10 @@ export default function HomePageClient() {
           
           <Sparkles className="w-7 h-7 text-[#ff6b35] mx-auto mb-3" />
           
-          <h2 className="font-[family-name:var(--font-cinzel)] text-xl font-bold mb-2 text-gradient-ancient">
+          <h3 className="font-[family-name:var(--font-cinzel)] text-xl font-bold mb-2 text-gradient-ancient">
             Unlock Your Destiny
-          </h2>
-          <p className={`mb-4 text-sm leading-relaxed ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#75695e]'}`}>
+          </h3>
+          <p className={`mb-4 text-sm leading-relaxed ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
             Sign in for personalized horoscopes and premium cosmic insights.
           </p>
           <Button 
@@ -265,7 +286,7 @@ export default function HomePageClient() {
             <h2 className="font-[family-name:var(--font-cinzel)] text-4xl md:text-5xl font-bold mb-4 text-gradient-ancient">
               {content.servicesTitle}
             </h2>
-            <p className={`text-xl max-w-2xl mx-auto ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#75695e]'}`}>
+            <p className={`text-xl max-w-2xl mx-auto ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
               {content.servicesDesc}
             </p>
           </div>
@@ -283,7 +304,7 @@ export default function HomePageClient() {
                   <h3 className={`font-[family-name:var(--font-cinzel)] text-2xl font-semibold mb-4 ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
                     {content.homeConsultation}
                   </h3>
-                  <p className={`mb-6 ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#75695e]'}`}>
+                  <p className={`mb-6 ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
                     {content.homeConsultationDesc}
                   </p>
                 </CardContent>
@@ -307,7 +328,7 @@ export default function HomePageClient() {
                     <h3 className={`font-[family-name:var(--font-cinzel)] text-2xl font-semibold mb-4 ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
                       {content.onlineMeeting}
                     </h3>
-                    <p className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#75695e]'}`}>
+                    <p className={`${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
                       {content.onlineMeetingDesc}
                     </p>
                   </CardContent>
@@ -343,7 +364,7 @@ export default function HomePageClient() {
             <h2 className="font-[family-name:var(--font-cinzel)] text-4xl md:text-5xl font-bold mb-4 text-gradient-ancient">
               {content.testimonialsTitle}
             </h2>
-            <p className={`text-xl ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#75695e]'}`}>{content.testimonialsDesc}</p>
+            <p className={`text-xl ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>{content.testimonialsDesc}</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -363,7 +384,7 @@ export default function HomePageClient() {
                         </p>
                       </div>
                     </div>
-                    <p className={`mb-4 italic text-sm ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#75695e]'}`}>&ldquo;{testimonial.text}&rdquo;</p>
+                    <p className={`mb-4 italic text-sm ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>&ldquo;{testimonial.text}&rdquo;</p>
                   </CardContent>
                 </Card>
               </div>

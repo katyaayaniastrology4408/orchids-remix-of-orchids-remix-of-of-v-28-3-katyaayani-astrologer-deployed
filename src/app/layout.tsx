@@ -204,9 +204,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-      <html lang="en" suppressHydrationWarning>
-        <body className="antialiased" suppressHydrationWarning>
+    return (
+        <html lang="en" suppressHydrationWarning>
+          <head>
+            {/* Non-render-blocking Google Fonts with preconnect */}
+            <link rel="preconnect" href="https://fonts.googleapis.com" />
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+            <link
+              rel="stylesheet"
+              href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap"
+            />
+          </head>
+          <body className="antialiased" suppressHydrationWarning>
         {/* Google Tag Manager (noscript) - GTM-MQDMP2SL */}
         <noscript>
           <iframe
@@ -226,7 +235,7 @@ export default function RootLayout({
           />
         </noscript>
           {/* Google Tag Manager - GTM-MQDMP2SL */}
-          <Script id="gtm-mqdmp2sl" strategy="beforeInteractive">
+          <Script id="gtm-mqdmp2sl" strategy="afterInteractive">
             {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
@@ -234,7 +243,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-MQDMP2SL');`}
           </Script>
           {/* Google Tag Manager - GTM-PG9WBFK9 */}
-          <Script id="gtm-pg9wbfk9" strategy="beforeInteractive">
+          <Script id="gtm-pg9wbfk9" strategy="afterInteractive">
             {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
@@ -244,9 +253,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           {/* Google Analytics GA4 - G-ZB6X0EHGE0 */}
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=G-ZB6X0EHGE0"
-            strategy="beforeInteractive"
+            strategy="afterInteractive"
           />
-          <Script id="ga4-old" strategy="beforeInteractive">
+          <Script id="ga4-old" strategy="afterInteractive">
             {`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
@@ -255,9 +264,9 @@ gtag('config', 'G-ZB6X0EHGE0');`}
           {/* Google Analytics GA4 - G-D13ED7NS0T */}
           <Script
             src="https://www.googletagmanager.com/gtag/js?id=G-D13ED7NS0T"
-            strategy="beforeInteractive"
+            strategy="afterInteractive"
           />
-          <Script id="ga4-new" strategy="beforeInteractive">
+          <Script id="ga4-new" strategy="afterInteractive">
             {`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());

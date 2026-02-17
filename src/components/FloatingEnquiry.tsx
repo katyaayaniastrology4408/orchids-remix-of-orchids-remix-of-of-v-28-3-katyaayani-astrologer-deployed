@@ -23,6 +23,7 @@ export default function FloatingEnquiry() {
       whileTap={{ scale: 0.9 }}
       onClick={() => showEnquiryModal()}
       className="fixed bottom-8 right-8 z-50 p-4 rounded-full bg-[#ff6b35] text-white shadow-2xl shadow-[#ff6b35]/40 flex items-center gap-2 group hover:pr-6 transition-all duration-300 border-2 border-white/20"
+      aria-label="Enquire now"
     >
       <MessageSquareText className="w-6 h-6" />
       <span className="max-w-0 overflow-hidden group-hover:max-w-[100px] transition-all duration-300 font-bold whitespace-nowrap">

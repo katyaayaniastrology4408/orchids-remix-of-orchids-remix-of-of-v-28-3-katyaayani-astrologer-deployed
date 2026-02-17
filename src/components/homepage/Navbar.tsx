@@ -119,6 +119,7 @@ export default function Navbar() {
             size="icon"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="md:hidden text-[#ff6b35] h-8 w-8"
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           >
             {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
