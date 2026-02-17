@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { safeJson } from "@/lib/safe-json";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -34,7 +35,7 @@ export default function PerformancePanel({ isDark, t, setSuccess, setError }: Pr
     try {
       const res = await fetch("/api/admin/health-check");
       if (res.ok) {
-        const json = await res.json();
+        const json = await safeJson(res);
         if (json.success) { setData(json.data); }
       }
     } catch {}
@@ -45,7 +46,7 @@ export default function PerformancePanel({ isDark, t, setSuccess, setError }: Pr
     try {
       const res = await fetch("/api/admin/site-settings");
       if (res.ok) {
-        const json = await res.json();
+        const json = await safeJson(res);
         if (json.success && json.data) {
           setSettings(prev => ({
             ...prev,
@@ -69,7 +70,7 @@ export default function PerformancePanel({ isDark, t, setSuccess, setError }: Pr
         body: JSON.stringify({ settings }),
       });
       if (res.ok) {
-        const json = await res.json();
+        const json = await safeJson(res);
         if (json.success) setSuccess("Performance settings saved!");
         else setError("Failed to save settings");
       } else setError("Failed to save settings");

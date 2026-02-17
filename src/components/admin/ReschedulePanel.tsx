@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { safeJson } from "@/lib/safe-json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ export default function ReschedulePanel({ isDark, setSuccess, setError }: Props)
   const fetchRequests = async () => {
     try {
       const res = await fetch("/api/admin/reschedule");
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) setRequests(data.data || []);
     } catch {
       setError("Failed to fetch requests");
@@ -50,7 +51,7 @@ export default function ReschedulePanel({ isDark, setSuccess, setError }: Props)
           new_time: newTime[id] || null,
         }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         setSuccess(`Request ${status} successfully`);
         fetchRequests();

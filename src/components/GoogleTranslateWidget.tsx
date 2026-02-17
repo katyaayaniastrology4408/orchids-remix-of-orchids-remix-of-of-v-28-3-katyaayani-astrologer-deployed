@@ -2,6 +2,8 @@
 
 import { useEffect, useState, createContext, useContext } from "react";
 import { Languages, ChevronDown } from "lucide-react";
+import { DOMTranslator } from "@/components/DOMTranslator";
+import { translateText } from "@/lib/translations";
 
 type Language = "hi" | "gu" | "en";
 
@@ -417,21 +419,26 @@ export function TranslationProvider({
     localStorage.setItem("preferred-language", lang);
   };
 
-  const t = (key: string): string => {
-    if (!key) return "";
+    const t = (key: string): string => {
+      if (!key) return "";
       const lang = language || "en";
-    const langTranslations = translations[lang];
-    if (!langTranslations) return key;
-    return langTranslations[key] || key;
-  };
+      // Check inline translations first
+      const langTranslations = translations[lang];
+      if (langTranslations && langTranslations[key]) return langTranslations[key];
+      // Fallback to comprehensive dictionary
+      const dictResult = translateText(key, lang);
+      if (dictResult) return dictResult;
+      return key;
+    };
 
-  return (
-    <TranslationContext.Provider
-      value={{ language, setLanguage: handleSetLanguage, t }}
-    >
-      {children}
-    </TranslationContext.Provider>
-  );
+    return (
+      <TranslationContext.Provider
+        value={{ language, setLanguage: handleSetLanguage, t }}
+      >
+        <DOMTranslator language={language} />
+        {children}
+      </TranslationContext.Provider>
+    );
 }
 
 export default function GoogleTranslateWidget() {

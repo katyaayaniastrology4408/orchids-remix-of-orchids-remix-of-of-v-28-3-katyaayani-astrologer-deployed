@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { safeJson } from "@/lib/safe-json";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Download, Eye, Trash2, FileText, User, Mail, Phone, MapPin, IndianRupee, X } from "lucide-react";
 
@@ -61,7 +62,7 @@ export default function InvoicePanel({ isDark, setSuccess, setError }: Props) {
   const fetchInvoices = async () => {
     try {
       const res = await fetch("/api/admin/invoices");
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) setInvoices(data.data || []);
     } catch {
       setError("Failed to fetch invoices");
@@ -90,7 +91,7 @@ export default function InvoicePanel({ isDark, setSuccess, setError }: Props) {
             total_amount: amt,
           }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         setSuccess("Invoice created successfully!");
         setShowForm(false);
@@ -110,7 +111,7 @@ export default function InvoicePanel({ isDark, setSuccess, setError }: Props) {
     if (!confirm("Delete this invoice?")) return;
     try {
       const res = await fetch(`/api/admin/invoices?id=${id}`, { method: "DELETE" });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         setSuccess("Invoice deleted");
         fetchInvoices();
@@ -127,7 +128,7 @@ export default function InvoicePanel({ isDark, setSuccess, setError }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         setSuccess(`Invoice marked as ${status}`);
         fetchInvoices();

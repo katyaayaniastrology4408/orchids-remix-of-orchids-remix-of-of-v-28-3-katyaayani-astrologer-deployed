@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { safeJson } from "@/lib/safe-json";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Shield, Key, Lock, Database, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Download, Eye, EyeOff, Save } from "lucide-react";
@@ -33,7 +34,7 @@ export default function SecurityPanel({ isDark, t, setSuccess, setError }: Props
     try {
       const res = await fetch("/api/admin/backup", { method: "POST" });
       if (res.ok) {
-        const data = await res.json();
+        const data = await safeJson(res);
         if (data.success) { setBackupData(data); setSuccess("Backup created successfully!"); }
         else setError(data.error || "Backup failed");
       } else setError("Backup failed");
@@ -46,7 +47,7 @@ export default function SecurityPanel({ isDark, t, setSuccess, setError }: Props
     try {
       const res = await fetch("/api/admin/health-check");
       if (res.ok) {
-        const json = await res.json();
+        const json = await safeJson(res);
         if (json.success) setHealthData(json.data);
       }
     } catch {}
@@ -57,7 +58,7 @@ export default function SecurityPanel({ isDark, t, setSuccess, setError }: Props
     try {
       const res = await fetch("/api/admin/settings");
       if (res.ok) {
-        const json = await res.json();
+        const json = await safeJson(res);
         if (json.success && json.data) {
           setEmailForm({ email: json.data.admin_email || "" });
         }
@@ -82,7 +83,7 @@ export default function SecurityPanel({ isDark, t, setSuccess, setError }: Props
       // Verify current password first
       const verifyRes = await fetch("/api/admin/settings");
       if (verifyRes.ok) {
-        const verifyJson = await verifyRes.json();
+          const verifyJson = await safeJson(verifyRes);
         if (verifyJson.data?.admin_password !== passwordForm.current) {
           setError("Current password is incorrect");
           setPasswordLoading(false);

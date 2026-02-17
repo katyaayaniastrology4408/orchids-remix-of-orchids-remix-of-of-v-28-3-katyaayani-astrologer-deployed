@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { safeJson } from "@/lib/safe-json";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, BarChart3, Globe, CheckCircle2, XCircle, Users, Calendar, MessageSquare, FileText, RefreshCw } from "lucide-react";
@@ -20,7 +21,7 @@ export default function SeoMonitorPanel({ isDark, t, setSuccess, setError }: Pro
     setLoading(true);
     try {
       const res = await fetch("/api/admin/seo/monitor");
-      const json = await res.json();
+      const json = await safeJson(res);
       if (json.success) { setData(json.data); setSuccess("Monitor data refreshed!"); }
       else setError(json.error || "Failed to load");
     } catch { setError("Failed to fetch monitoring data"); }

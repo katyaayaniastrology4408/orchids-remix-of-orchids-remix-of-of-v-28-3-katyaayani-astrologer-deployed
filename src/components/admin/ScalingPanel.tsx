@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { safeJson } from "@/lib/safe-json";
 import { Loader2, Globe, Languages, BarChart3, Brain, RefreshCw, CheckCircle2, Lightbulb, Save, ExternalLink } from "lucide-react";
 
 interface Props {
@@ -41,7 +42,7 @@ export default function ScalingPanel({ isDark, t, setSuccess, setError }: Props)
     try {
       const res = await fetch("/api/admin/seo/advanced");
       if (res.ok) {
-        const json = await res.json();
+        const json = await safeJson(res);
         if (json.success) setSeoData(json.data);
       }
     } catch {}
@@ -52,7 +53,7 @@ export default function ScalingPanel({ isDark, t, setSuccess, setError }: Props)
     try {
       const res = await fetch("/api/admin/site-settings");
       if (res.ok) {
-        const json = await res.json();
+        const json = await safeJson(res);
         if (json.success && json.data) {
           setSettings(prev => ({
             ...prev,
@@ -76,7 +77,7 @@ export default function ScalingPanel({ isDark, t, setSuccess, setError }: Props)
         body: JSON.stringify({ settings }),
       });
       if (res.ok) {
-        const json = await res.json();
+        const json = await safeJson(res);
         if (json.success) setSuccess("Scaling settings saved!");
         else setError("Failed to save");
       } else setError("Failed to save");

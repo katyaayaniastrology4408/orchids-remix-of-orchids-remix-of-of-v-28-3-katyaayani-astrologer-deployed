@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { safeJson } from "@/lib/safe-json";
 import { Loader2, FileText, BarChart3, Download, RefreshCw, TrendingUp, Eye, Calendar, CheckCircle2 } from "lucide-react";
 
 interface Props {
@@ -25,7 +26,7 @@ export default function ReportsPanel({ isDark, t, setSuccess, setError }: Props)
     try {
       const res = await fetch("/api/admin/reports");
         if (!res.ok) throw new Error("Failed");
-        const json = await res.json();
+        const json = await safeJson(res);
         if (json.success) { setData(json.data); setSuccess("Reports loaded!"); }
         else setError(json.error || "Failed to load reports");
       } catch { setError("Failed to fetch reports"); }
@@ -37,7 +38,7 @@ export default function ReportsPanel({ isDark, t, setSuccess, setError }: Props)
     try {
       const res = await fetch("/api/admin/seo/validate");
         if (!res.ok) throw new Error("Failed");
-        const json = await res.json();
+        const json = await safeJson(res);
       if (json.success) setSeoData(json.data);
     } catch {}
     setSeoLoading(false);

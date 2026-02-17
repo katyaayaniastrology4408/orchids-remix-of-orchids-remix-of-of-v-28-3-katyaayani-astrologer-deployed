@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Loader2, Link2, Globe, Zap, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Code, Save } from "lucide-react";
+import { safeJson } from "@/lib/safe-json";
 
 interface Props {
   isDark: boolean;
@@ -33,7 +34,7 @@ export default function AutomationPanel({ isDark, t, setSuccess, setError }: Pro
     try {
       const res = await fetch("/api/admin/site-settings");
       if (res.ok) {
-        const json = await res.json();
+        const json = await safeJson(res);
         if (json.success && json.data) {
           setSettings(prev => ({
             ...prev,
@@ -57,7 +58,7 @@ export default function AutomationPanel({ isDark, t, setSuccess, setError }: Pro
         body: JSON.stringify({ settings }),
       });
       if (res.ok) {
-        const json = await res.json();
+        const json = await safeJson(res);
         if (json.success) setSuccess("Automation settings saved!");
         else setError("Failed to save");
       } else setError("Failed to save");
@@ -70,7 +71,7 @@ export default function AutomationPanel({ isDark, t, setSuccess, setError }: Pro
     try {
       const res = await fetch("/api/admin/seo/broken-links");
       if (res.ok) {
-        const data = await res.json();
+        const data = await safeJson(res);
         if (data.success) { setBrokenLinks(data.data); setSuccess(`Scan complete! Found ${data.data.brokenLinks?.length || 0} broken links`); }
         else setError(data.error || "Scan failed");
       } else setError("Scan failed");
@@ -83,7 +84,7 @@ export default function AutomationPanel({ isDark, t, setSuccess, setError }: Pro
     try {
       const res = await fetch("/api/admin/sitemap", { method: "POST" });
       if (res.ok) {
-        const data = await res.json();
+        const data = await safeJson(res);
         if (data.success) { setSitemapResult(data); setSuccess("Sitemap regenerated!"); }
         else setError(data.error || "Sitemap generation failed");
       } else setError("Sitemap generation failed");
@@ -96,7 +97,7 @@ export default function AutomationPanel({ isDark, t, setSuccess, setError }: Pro
     try {
       const res = await fetch("/api/admin/seo/advanced");
       if (res.ok) {
-        const data = await res.json();
+        const data = await safeJson(res);
         if (data.success) { setSchemaResult(data.data); setSuccess("Schema data generated!"); }
         else setError(data.error || "Schema generation failed");
       } else setError("Schema generation failed");

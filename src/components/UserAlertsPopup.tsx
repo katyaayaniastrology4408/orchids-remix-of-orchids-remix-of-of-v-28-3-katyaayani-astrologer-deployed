@@ -40,8 +40,9 @@ export default function UserAlertsPopup() {
         },
       });
         if (!response.ok) return;
-        const data = await response.json();
-        if (data.success && data.data) {
+          let data;
+          try { data = await response.json(); } catch { return; }
+          if (data.success && data.data) {
         const unreadAlerts = data.data.filter((a: Alert) => !a.is_read);
         setAlerts(unreadAlerts);
         if (unreadAlerts.length > 0) {

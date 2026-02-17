@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { safeJson } from "@/lib/safe-json";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Clock, Database, Bell, CheckCircle2, AlertTriangle, RefreshCw, Play, Calendar } from "lucide-react";
@@ -22,7 +23,7 @@ export default function SchedulingPanel({ isDark, t, setSuccess, setError }: Pro
     setBackupLoading(true);
     try {
       const res = await fetch("/api/admin/backup", { method: "POST" });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) setSuccess("Auto backup completed successfully!");
       else setError(data.error || "Backup failed");
     } catch { setError("Failed to run backup"); }
@@ -33,7 +34,7 @@ export default function SchedulingPanel({ isDark, t, setSuccess, setError }: Pro
     setSitemapLoading(true);
     try {
       const res = await fetch("/api/admin/sitemap", { method: "POST" });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) setSuccess("Sitemap regenerated successfully!");
       else setError(data.error || "Sitemap generation failed");
     } catch { setError("Failed to regenerate sitemap"); }

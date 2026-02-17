@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { safeJson } from "@/lib/safe-json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +25,7 @@ export default function SeoTestingPanel({ isDark, t, setSuccess, setError }: Pro
     setLoading(true);
     try {
       const res = await fetch("/api/admin/seo/validate");
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         setResults(data.data);
         setSuccess("SEO validation complete!");
@@ -42,7 +43,7 @@ export default function SeoTestingPanel({ isDark, t, setSuccess, setError }: Pro
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: singleUrl }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) setSingleResult(data.data);
       else setError(data.error || "Validation failed");
     } catch { setError("Failed to validate URL"); }

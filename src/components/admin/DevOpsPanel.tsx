@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { safeJson } from "@/lib/safe-json";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,7 +33,7 @@ export default function DevOpsPanel({ isDark, t, setSuccess, setError }: Props) 
     try {
       const res = await fetch("/api/admin/monitoring");
       if (res.ok) {
-        const json = await res.json();
+        const json = await safeJson(res);
         if (json.success) setData(json.data);
       }
     } catch {}
@@ -43,7 +44,7 @@ export default function DevOpsPanel({ isDark, t, setSuccess, setError }: Props) 
     try {
       const res = await fetch("/api/admin/site-settings");
       if (res.ok) {
-        const json = await res.json();
+        const json = await safeJson(res);
         if (json.success && json.data) {
           setSettings(prev => ({
             ...prev,
@@ -67,7 +68,7 @@ export default function DevOpsPanel({ isDark, t, setSuccess, setError }: Props) 
         body: JSON.stringify({ settings }),
       });
       if (res.ok) {
-        const json = await res.json();
+        const json = await safeJson(res);
         if (json.success) setSuccess("DevOps settings saved!");
         else setError("Failed to save");
       } else setError("Failed to save");
