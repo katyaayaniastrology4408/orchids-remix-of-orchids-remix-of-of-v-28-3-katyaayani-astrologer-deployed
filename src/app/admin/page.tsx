@@ -61,10 +61,11 @@ import {
           AlertCircle,
             Gauge,
     Palette,
-      Zap,
-      Shield,
-      Server,
-      Edit3,
+        Zap,
+        Shield,
+        Server,
+        Edit3,
+        Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -2537,21 +2538,25 @@ function SeoManager({ isDark, t, isActionLoading, setIsActionLoading, setSuccess
   setError: (v: string) => void;
 }) {
   const [seoEntries, setSeoEntries] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [editingEntry, setEditingEntry] = useState<any>(null);
-  const [seoForm, setSeoForm] = useState({
-    page_path: '',
-    meta_title: '',
-    meta_description: '',
-    meta_keywords: '',
-    og_title: '',
-    og_description: '',
-    og_image: '',
-    canonical_url: '',
-    robots: 'index, follow',
-    schema_markup: '',
-  });
+    const [loading, setLoading] = useState(false);
+    const [showForm, setShowForm] = useState(false);
+    const [editingEntry, setEditingEntry] = useState<any>(null);
+    const [seoTab, setSeoTab] = useState<"google" | "bing">("google");
+    const [seoForm, setSeoForm] = useState({
+      page_path: '',
+      meta_title: '',
+      meta_description: '',
+      meta_keywords: '',
+      bing_meta_title: '',
+      bing_meta_description: '',
+      bing_keywords: '',
+      og_title: '',
+      og_description: '',
+      og_image: '',
+      canonical_url: '',
+      robots: 'index, follow',
+      schema_markup: '',
+    });
 
   const PAGE_OPTIONS = [
     { value: '/', label: 'Home' },
@@ -2592,38 +2597,41 @@ function SeoManager({ isDark, t, isActionLoading, setIsActionLoading, setSuccess
       if (seoForm.schema_markup) {
         try { schemaMarkup = JSON.parse(seoForm.schema_markup); } catch { setError(t("Invalid JSON in schema markup")); setIsActionLoading(false); return; }
       }
-      const res = await fetch('/api/admin/seo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...seoForm, schema_markup: schemaMarkup }),
-      });
-      const data = await safeJson(res);
-      if (data.success) {
-        setSuccess(editingEntry ? t("SEO settings updated!") : t("SEO settings saved!"));
-        setShowForm(false); setEditingEntry(null);
-        setSeoForm({ page_path: '', meta_title: '', meta_description: '', meta_keywords: '', og_title: '', og_description: '', og_image: '', canonical_url: '', robots: 'index, follow', schema_markup: '' });
+        const res = await fetch('/api/admin/seo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...seoForm, schema_markup: schemaMarkup }),
+        });
+        const data = await safeJson(res);
+        if (data.success) {
+          setSuccess(editingEntry ? t("SEO settings updated!") : t("SEO settings saved!"));
+          setShowForm(false); setEditingEntry(null);
+          setSeoForm({ page_path: '', meta_title: '', meta_description: '', meta_keywords: '', bing_meta_title: '', bing_meta_description: '', bing_keywords: '', og_title: '', og_description: '', og_image: '', canonical_url: '', robots: 'index, follow', schema_markup: '' });
         fetchSeoEntries();
       } else { setError(data.error || t("Failed to save")); }
     } catch (err) { setError(t("An error occurred")); }
     finally { setIsActionLoading(false); }
   };
 
-  const handleEdit = (entry: any) => {
-    setEditingEntry(entry);
-    setSeoForm({
-      page_path: entry.page_path || '',
-      meta_title: entry.meta_title || '',
-      meta_description: entry.meta_description || '',
-      meta_keywords: entry.meta_keywords || '',
-      og_title: entry.og_title || '',
-      og_description: entry.og_description || '',
-      og_image: entry.og_image || '',
-      canonical_url: entry.canonical_url || '',
-      robots: entry.robots || 'index, follow',
-      schema_markup: entry.schema_markup ? JSON.stringify(entry.schema_markup, null, 2) : '',
-    });
-    setShowForm(true);
-  };
+    const handleEdit = (entry: any) => {
+      setEditingEntry(entry);
+      setSeoForm({
+        page_path: entry.page_path || '',
+        meta_title: entry.meta_title || '',
+        meta_description: entry.meta_description || '',
+        meta_keywords: entry.meta_keywords || '',
+        bing_meta_title: entry.bing_meta_title || '',
+        bing_meta_description: entry.bing_meta_description || '',
+        bing_keywords: entry.bing_keywords || '',
+        og_title: entry.og_title || '',
+        og_description: entry.og_description || '',
+        og_image: entry.og_image || '',
+        canonical_url: entry.canonical_url || '',
+        robots: entry.robots || 'index, follow',
+        schema_markup: entry.schema_markup ? JSON.stringify(entry.schema_markup, null, 2) : '',
+      });
+      setShowForm(true);
+    };
 
   const handleDelete = async (id: string) => {
     if (!confirm(t("Delete this SEO entry?"))) return;
@@ -2644,7 +2652,7 @@ function SeoManager({ isDark, t, isActionLoading, setIsActionLoading, setSuccess
           <h2 className="font-[family-name:var(--font-cinzel)] text-2xl font-bold text-[#ff6b35]">{t("SEO Manager")}</h2>
           <p className="text-sm text-muted-foreground">{t("Manage meta tags, Open Graph, and schema markup for each page")}</p>
         </div>
-        <Button onClick={() => { setShowForm(!showForm); if (showForm) { setEditingEntry(null); setSeoForm({ page_path: '', meta_title: '', meta_description: '', meta_keywords: '', og_title: '', og_description: '', og_image: '', canonical_url: '', robots: 'index, follow', schema_markup: '' }); } }} className="bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white">
+        <Button onClick={() => { setShowForm(!showForm); if (showForm) { setEditingEntry(null); setSeoForm({ page_path: '', meta_title: '', meta_description: '', meta_keywords: '', bing_meta_title: '', bing_meta_description: '', bing_keywords: '', og_title: '', og_description: '', og_image: '', canonical_url: '', robots: 'index, follow', schema_markup: '' }); } }} className="bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white">
           {showForm ? <><ChevronRight className="w-4 h-4 mr-2 rotate-90" /> {t("Close Form")}</> : <><Plus className="w-4 h-4 mr-2" /> {t("Add SEO Entry")}</>}
         </Button>
       </div>
@@ -2675,25 +2683,106 @@ function SeoManager({ isDark, t, isActionLoading, setIsActionLoading, setSuccess
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <h3 className="font-bold text-sm uppercase tracking-widest text-muted-foreground border-b border-[#ff6b35]/10 pb-2">{t("Meta Tags")}</h3>
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="space-y-2">
-                    <Label>{t("Meta Title")}</Label>
-                    <Input placeholder="Page title for search engines..." value={seoForm.meta_title} onChange={(e) => setSeoForm({ ...seoForm, meta_title: e.target.value })} className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'} />
-                    <p className="text-[10px] text-muted-foreground">{seoForm.meta_title.length}/60 {t("characters")}</p>
+                <div className="space-y-4">
+                  {/* Google / Bing Toggle Tabs */}
+                  <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/50 w-fit">
+                    <button type="button" onClick={() => setSeoTab("google")} className={`px-4 py-2 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${seoTab === "google" ? "bg-blue-500 text-white shadow-md" : "text-muted-foreground hover:text-blue-500"}`}>
+                      <SearchIcon className="w-4 h-4" /> Google SEO
+                    </button>
+                    <button type="button" onClick={() => setSeoTab("bing")} className={`px-4 py-2 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${seoTab === "bing" ? "bg-cyan-500 text-white shadow-md" : "text-muted-foreground hover:text-cyan-500"}`}>
+                      <Globe className="w-4 h-4" /> Bing SEO
+                    </button>
                   </div>
-                  <div className="space-y-2">
-                    <Label>{t("Meta Description")}</Label>
-                    <Textarea placeholder="Brief description for search results..." value={seoForm.meta_description} onChange={(e) => setSeoForm({ ...seoForm, meta_description: e.target.value })} className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'} />
-                    <p className="text-[10px] text-muted-foreground">{seoForm.meta_description.length}/160 {t("characters")}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t("Meta Keywords")}</Label>
-                    <Input placeholder="keyword1, keyword2, keyword3..." value={seoForm.meta_keywords} onChange={(e) => setSeoForm({ ...seoForm, meta_keywords: e.target.value })} className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'} />
-                  </div>
+
+                  {/* GOOGLE SEO Tab */}
+                  {seoTab === "google" && (
+                    <div className={`space-y-4 p-4 rounded-xl border-2 border-blue-500/20 ${isDark ? 'bg-blue-900/5' : 'bg-blue-50/50'}`}>
+                      <h3 className="font-bold text-sm uppercase tracking-widest text-blue-500 flex items-center gap-2">
+                        <SearchIcon className="w-4 h-4" /> {t("Google Meta Tags & Keywords")}
+                      </h3>
+                      <div className="grid grid-cols-1 gap-4">
+                        <div className="space-y-2">
+                          <Label>{t("Google Meta Title")}</Label>
+                          <Input placeholder="Page title for Google search..." value={seoForm.meta_title} onChange={(e) => setSeoForm({ ...seoForm, meta_title: e.target.value })} className={isDark ? 'bg-[#1a1a2e] border-blue-500/20' : 'bg-white border-blue-500/20'} />
+                          <p className="text-[10px] text-muted-foreground">{seoForm.meta_title.length}/60 {t("characters")} - {t("This title appears in Google search results")}</p>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>{t("Google Meta Description")}</Label>
+                          <Textarea placeholder="Brief description for Google search results..." value={seoForm.meta_description} onChange={(e) => setSeoForm({ ...seoForm, meta_description: e.target.value })} className={isDark ? 'bg-[#1a1a2e] border-blue-500/20' : 'bg-white border-blue-500/20'} />
+                          <p className="text-[10px] text-muted-foreground">{seoForm.meta_description.length}/160 {t("characters")}</p>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>{t("Google Keywords")}</Label>
+                          <Textarea placeholder="keyword1, keyword2, keyword3... (comma separated)" value={seoForm.meta_keywords} onChange={(e) => setSeoForm({ ...seoForm, meta_keywords: e.target.value })} className={`min-h-[80px] ${isDark ? 'bg-[#1a1a2e] border-blue-500/20' : 'bg-white border-blue-500/20'}`} />
+                          <p className="text-[10px] text-muted-foreground">{(seoForm.meta_keywords || '').split(',').filter(Boolean).length} {t("keywords")} - {t("Used for Google ranking signals")}</p>
+                        </div>
+                      </div>
+                      {/* Google Search Preview */}
+                      {seoForm.meta_title && (
+                        <div className={`p-4 rounded-lg border ${isDark ? 'bg-white/5 border-blue-500/10' : 'bg-white border-blue-200'}`}>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-2">{t("Google Search Preview")}</p>
+                          <p className="text-blue-600 text-lg hover:underline cursor-pointer font-medium truncate">{seoForm.meta_title}</p>
+                          <p className="text-green-700 text-xs truncate">{seoForm.canonical_url || `https://katyaayaniastrologer.com${seoForm.page_path}`}</p>
+                          <p className="text-sm text-gray-600 line-clamp-2 mt-1">{seoForm.meta_description || t("No description...")}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* BING SEO Tab */}
+                  {seoTab === "bing" && (
+                    <div className={`space-y-4 p-4 rounded-xl border-2 border-cyan-500/20 ${isDark ? 'bg-cyan-900/5' : 'bg-cyan-50/50'}`}>
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-bold text-sm uppercase tracking-widest text-cyan-500 flex items-center gap-2">
+                          <Globe className="w-4 h-4" /> {t("Bing Meta Tags & Keywords")}
+                        </h3>
+                        <button type="button" onClick={() => {
+                          setSeoForm(prev => ({
+                            ...prev,
+                            bing_meta_title: prev.meta_title,
+                            bing_meta_description: prev.meta_description,
+                            bing_keywords: prev.meta_keywords,
+                          }));
+                          setSuccess(t("Copied Google data to Bing fields!"));
+                        }} className="text-[10px] font-bold text-cyan-500 hover:text-cyan-400 flex items-center gap-1 px-2 py-1 rounded border border-cyan-500/20 hover:bg-cyan-500/10 transition-all">
+                          <Copy className="w-3 h-3" /> {t("Copy from Google")}
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 gap-4">
+                        <div className="space-y-2">
+                          <Label>{t("Bing Meta Title")}</Label>
+                          <Input placeholder="Page title for Bing search (or leave empty to use Google title)..." value={seoForm.bing_meta_title} onChange={(e) => setSeoForm({ ...seoForm, bing_meta_title: e.target.value })} className={isDark ? 'bg-[#1a1a2e] border-cyan-500/20' : 'bg-white border-cyan-500/20'} />
+                          <p className="text-[10px] text-muted-foreground">{seoForm.bing_meta_title.length}/60 {t("characters")} - {t("Leave empty to use Google title for Bing too")}</p>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>{t("Bing Meta Description")}</Label>
+                          <Textarea placeholder="Brief description for Bing search results (or leave empty)..." value={seoForm.bing_meta_description} onChange={(e) => setSeoForm({ ...seoForm, bing_meta_description: e.target.value })} className={isDark ? 'bg-[#1a1a2e] border-cyan-500/20' : 'bg-white border-cyan-500/20'} />
+                          <p className="text-[10px] text-muted-foreground">{seoForm.bing_meta_description.length}/160 {t("characters")}</p>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>{t("Bing Keywords")}</Label>
+                          <Textarea placeholder="bing-keyword1, bing-keyword2... (comma separated, can differ from Google)" value={seoForm.bing_keywords} onChange={(e) => setSeoForm({ ...seoForm, bing_keywords: e.target.value })} className={`min-h-[80px] ${isDark ? 'bg-[#1a1a2e] border-cyan-500/20' : 'bg-white border-cyan-500/20'}`} />
+                          <p className="text-[10px] text-muted-foreground">{(seoForm.bing_keywords || '').split(',').filter(Boolean).length} {t("keywords")} - {t("Bing still uses meta keywords for ranking")}</p>
+                        </div>
+                      </div>
+                      {/* Bing Search Preview */}
+                      {(seoForm.bing_meta_title || seoForm.meta_title) && (
+                        <div className={`p-4 rounded-lg border ${isDark ? 'bg-white/5 border-cyan-500/10' : 'bg-white border-cyan-200'}`}>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-cyan-500 mb-2">{t("Bing Search Preview")}</p>
+                          <p className="text-[#001ba0] text-lg hover:underline cursor-pointer font-medium truncate">{seoForm.bing_meta_title || seoForm.meta_title}</p>
+                          <p className="text-[#006d21] text-xs truncate">{seoForm.canonical_url || `https://katyaayaniastrologer.com${seoForm.page_path}`}</p>
+                          <p className="text-sm text-gray-600 line-clamp-2 mt-1">{seoForm.bing_meta_description || seoForm.meta_description || t("No description...")}</p>
+                        </div>
+                      )}
+                      {/* Bing tip */}
+                      <div className={`p-3 rounded-lg border ${isDark ? 'bg-cyan-900/10 border-cyan-500/10' : 'bg-cyan-50 border-cyan-200'}`}>
+                        <p className="text-[10px] text-cyan-600 font-medium">
+                          {t("Tip: Bing gives more weight to meta keywords than Google. Add relevant Bing-specific keywords for better Bing ranking. If Bing fields are empty, Google values will be used.")}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
 
                 <div className="space-y-4">
                   <h3 className="font-bold text-sm uppercase tracking-widest text-muted-foreground border-b border-[#ff6b35]/10 pb-2">{t("Open Graph & Social Sharing")}</h3>
@@ -2832,12 +2921,14 @@ function SeoManager({ isDark, t, isActionLoading, setIsActionLoading, setSuccess
                         <span className="px-2 py-0.5 rounded bg-[#ff6b35]/10 text-[#ff6b35] text-xs font-bold font-mono">{entry.page_path}</span>
                         <span className="px-2 py-0.5 rounded bg-green-500/10 text-green-500 text-[8px] font-bold uppercase">{entry.robots || 'index, follow'}</span>
                         {entry.og_title && <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-500 text-[8px] font-bold uppercase">OG</span>}
-                        {entry.og_image && <span className="px-2 py-0.5 rounded bg-purple-500/10 text-purple-500 text-[8px] font-bold uppercase flex items-center gap-0.5"><ImageIcon className="w-2.5 h-2.5" /> IMG</span>}
+                          {entry.og_image && <span className="px-2 py-0.5 rounded bg-purple-500/10 text-purple-500 text-[8px] font-bold uppercase flex items-center gap-0.5"><ImageIcon className="w-2.5 h-2.5" /> IMG</span>}
+                          {entry.bing_keywords && <span className="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-500 text-[8px] font-bold uppercase">BING</span>}
                       </div>
                       <p className="text-sm font-bold truncate">{entry.meta_title || t("No title set")}</p>
                       <p className="text-xs text-muted-foreground truncate">{entry.meta_description || t("No description set")}</p>
                       {entry.og_title && entry.og_title !== entry.meta_title && <p className="text-[10px] text-blue-400 mt-0.5 truncate">OG: {entry.og_title}</p>}
-                      {entry.meta_keywords && <p className="text-[10px] text-muted-foreground mt-1"><Tag className="w-3 h-3 inline mr-1" />{entry.meta_keywords}</p>}
+                        {entry.meta_keywords && <p className="text-[10px] text-muted-foreground mt-1"><Tag className="w-3 h-3 inline mr-1" /><span className="text-blue-500 font-medium">G:</span> {entry.meta_keywords.substring(0, 80)}{entry.meta_keywords.length > 80 ? '...' : ''}</p>}
+                        {entry.bing_keywords && <p className="text-[10px] text-muted-foreground mt-0.5"><Tag className="w-3 h-3 inline mr-1" /><span className="text-cyan-500 font-medium">B:</span> {entry.bing_keywords.substring(0, 80)}{entry.bing_keywords.length > 80 ? '...' : ''}</p>}
                     </div>
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm" className="h-8 text-xs border-[#ff6b35]/20 text-[#ff6b35]" onClick={() => handleEdit(entry)}><Eye className="w-3 h-3 mr-1" /> {t("Edit")}</Button>

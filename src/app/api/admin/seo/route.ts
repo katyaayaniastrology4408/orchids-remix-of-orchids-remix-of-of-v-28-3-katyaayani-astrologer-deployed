@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   try {
     const supabase = getSupabase();
     const body = await req.json();
-    const { page_path, meta_title, meta_description, meta_keywords, og_title, og_description, og_image, canonical_url, robots, schema_markup } = body;
+    const { page_path, meta_title, meta_description, meta_keywords, og_title, og_description, og_image, canonical_url, robots, schema_markup, bing_keywords, bing_meta_title, bing_meta_description } = body;
 
     if (!page_path) {
       return NextResponse.json({ success: false, error: "page_path is required" }, { status: 400 });
@@ -62,6 +62,9 @@ export async function POST(req: NextRequest) {
           canonical_url,
           robots,
           schema_markup,
+          bing_keywords,
+          bing_meta_title,
+          bing_meta_description,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "page_path" }
