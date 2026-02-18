@@ -107,6 +107,16 @@ const PAGE_DEFAULTS: Record<string, { title: string; description: string; keywor
     description: "Read the disclaimer for Katyaayani Astrologer's services. Understand the nature of astrological guidance and the limitations of our predictions and remedies.",
     keywords: "disclaimer, katyaayani astrologer disclaimer, astrology disclaimer, vedic astrology guidance",
   },
+  "/contact": {
+    title: "Contact Katyaayani Astrologer | Vedic Astrology Consultation Enquiry",
+    description: "Contact Katyaayani Astrologer (Rudram Joshi) for Vedic astrology consultations, kundali analysis, horoscope readings & enquiries. Located in Vastral, Ahmedabad. Available online worldwide.",
+    keywords: "contact katyaayani astrologer, astrologer contact, rudram joshi contact, astrology enquiry, book astrologer, katyaayani contact ahmedabad",
+  },
+  "/kundli": {
+    title: "Kundali Analysis - Janam Kundali, Kundali Matching & Birth Chart | Katyaayani Astrologer",
+    description: "Get expert Vedic Kundali (birth chart) analysis by Katyaayani Astrologer. Services include Janam Kundali reading, Kundali Matching for marriage, Dasha analysis & personalized remedies since 2007.",
+    keywords: "kundali analysis, janam kundali, kundali matching, birth chart reading, vedic kundali, kundali milan, kundali online, katyaayani kundali, horoscope chart, dasha analysis, કુંડળી, कुंडली विश्लेषण",
+  },
   "/signin": {
     title: "Sign In to Your Account | Katyaayani Astrologer",
     description: "Sign in to your Katyaayani Astrologer account to access personalized horoscope readings, booking history, and exclusive astrology consultations.",
