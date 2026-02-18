@@ -1,15 +1,36 @@
 import { ImageResponse } from "next/og";
+import { createClient } from "@supabase/supabase-js";
 
 export const runtime = "edge";
-
 export const alt = "Katyaayani Astrologer - Best Vedic Astrologer in India";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+export const revalidate = 3600;
 
-const COVER_IMAGE_URL =
-  "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/82257351-6e7a-48cd-a2d1-b2ac49e135b9/coverimage-1771354510444.png?width=1200&height=630&resize=cover";
+const DEFAULT_COVER =
+  "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/82257351-6e7a-48cd-a2d1-b2ac49e135b9/coverimage-1771354510444.png";
+
+async function getCoverImageUrl(): Promise<string> {
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+    const { data } = await supabase
+      .from("admin_settings")
+      .select("value")
+      .eq("key", "search_thumbnail_image")
+      .maybeSingle();
+    return data?.value || DEFAULT_COVER;
+  } catch {
+    return DEFAULT_COVER;
+  }
+}
 
 export default async function Image() {
+  const coverUrl = await getCoverImageUrl();
+
   return new ImageResponse(
     (
       <div
@@ -24,7 +45,7 @@ export default async function Image() {
       >
         {/* Cover image as full background */}
         <img
-          src={COVER_IMAGE_URL}
+          src={coverUrl}
           style={{
             position: "absolute",
             top: 0,

@@ -58,6 +58,12 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
   const [editingOg, setEditingOg] = useState<any>(null);
   const [ogForm, setOgForm] = useState({ og_title: "", og_description: "", og_image: "" });
 
+  // Search Thumbnail (main OG image shown in Google/Bing)
+  const [searchThumbnail, setSearchThumbnail] = useState<string>("");
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
+  const [thumbnailSaving, setThumbnailSaving] = useState(false);
+  const [thumbnailInput, setThumbnailInput] = useState("");
+
   const siteUrl = "https://www.katyaayaniastrologer.com";
 
   useEffect(() => {
@@ -66,7 +72,63 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
     checkSitemap();
     fetchOgEntries();
     runVerificationCheck();
+    fetchSearchThumbnail();
   }, []);
+
+  const fetchSearchThumbnail = async () => {
+    try {
+      const res = await fetch("/api/admin/seo/bulk-og-image");
+      const data = await res.json();
+      if (data.success && data.url) {
+        setSearchThumbnail(data.url);
+        setThumbnailInput(data.url);
+      }
+    } catch {}
+  };
+
+  const handleThumbnailSave = async (imageUrl: string) => {
+    setThumbnailSaving(true);
+    try {
+      const res = await fetch("/api/admin/seo/bulk-og-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ og_image: imageUrl }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSearchThumbnail(imageUrl);
+        setThumbnailInput(imageUrl);
+        setSuccess(t(`Search thumbnail saved! Applied to all ${data.updated} pages.`));
+        fetchOgEntries();
+      } else {
+        setError(data.error || t("Failed to save"));
+      }
+    } catch {
+      setError(t("Error saving thumbnail"));
+    }
+    setThumbnailSaving(false);
+  };
+
+  const handleThumbnailUpload = async (file: File) => {
+    if (file.size > 5 * 1024 * 1024) { setError(t("Image must be under 5MB")); return; }
+    setThumbnailUploading(true);
+    try {
+      const { createClient } = await import("@supabase/supabase-js");
+      const sb = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const ext = file.name.split(".").pop();
+      const fileName = `search-thumbnail-${Date.now()}.${ext}`;
+      const { error: uploadErr } = await sb.storage.from("blog-images").upload(`og/${fileName}`, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+      const { data: urlData } = sb.storage.from("blog-images").getPublicUrl(`og/${fileName}`);
+      await handleThumbnailSave(urlData.publicUrl);
+    } catch (err: any) {
+      setError(err.message || t("Upload failed"));
+    }
+    setThumbnailUploading(false);
+  };
 
   // Load verification codes from DB (admin_settings table)
   const loadVerificationCodes = async () => {
@@ -1181,6 +1243,159 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
               ))}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* =================== SEARCH RESULT THUMBNAIL (GOOGLE & BING) =================== */}
+      <Card className={`${cardClass} ring-2 ring-[#ff6b35]/40`}>
+        <CardHeader>
+          <CardTitle className="text-[#ff6b35] flex items-center gap-2">
+            <ImageIcon className="w-5 h-5" /> {t("Search Result Thumbnail Image")}
+            <Badge className="bg-[#ff6b35]/10 text-[#ff6b35] text-[10px] ml-2">GOOGLE &amp; BING</Badge>
+          </CardTitle>
+          <CardDescription>{t("Jyare koi Google ya Bing ma website search kare, tyare link ni bajuma aa photo aave che. Niche upload karo.")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+
+          {/* Live Google/Bing Search Result Preview */}
+          <div className="space-y-3">
+            <p className="text-sm font-bold text-[#ff6b35]">{t("Search Result Preview (Google / Bing)")}</p>
+
+            {/* Google Search Result Mockup */}
+            <div className={`p-4 rounded-xl border ${isDark ? "bg-[#202124] border-[#3c4043]" : "bg-white border-gray-200"} space-y-1`}>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Google Search Result</p>
+              <div className="flex items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className={`text-xs ${isDark ? "text-[#bdc1c6]" : "text-[#4d5156]"}`}>katyaayaniastrologer.com</p>
+                  <p className={`text-base font-medium ${isDark ? "text-[#8ab4f8]" : "text-[#1a0dab]"} truncate`}>
+                    Katyaayani Astrologer - Best Vedic Astrologer
+                  </p>
+                  <p className={`text-xs ${isDark ? "text-[#bdc1c6]" : "text-[#4d5156]"} line-clamp-2`}>
+                    Katyaayani Astrologer connects modern times with ancient astrology. Expert Vedic consultations, kundali analysis, horoscope readings since 2007.
+                  </p>
+                </div>
+                {/* Thumbnail on the right */}
+                <div className="shrink-0">
+                  {searchThumbnail ? (
+                    <img
+                      src={searchThumbnail}
+                      alt="Search thumbnail"
+                      className="w-24 h-16 rounded-lg object-cover border"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                    />
+                  ) : (
+                    <div className={`w-24 h-16 rounded-lg flex items-center justify-center ${isDark ? "bg-white/10" : "bg-gray-100"} border`}>
+                      <ImageIcon className="w-6 h-6 text-muted-foreground/30" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Bing Search Result Mockup */}
+            <div className={`p-4 rounded-xl border ${isDark ? "bg-[#1b1b1b] border-[#3c4043]" : "bg-[#f8f8f8] border-gray-200"} space-y-1`}>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Bing Search Result</p>
+              <div className="flex items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className={`text-xs ${isDark ? "text-[#aaa]" : "text-[#767676]"}`}>https://katyaayaniastrologer.com</p>
+                  <p className={`text-base font-medium ${isDark ? "text-[#74b5fb]" : "text-[#1b64d8]"} truncate`}>
+                    Katyaayani Astrologer - Best Vedic Astrologer
+                  </p>
+                  <p className={`text-xs ${isDark ? "text-[#aaa]" : "text-[#767676]"} line-clamp-2`}>
+                    Expert Vedic astrology consultations, kundali analysis, horoscope readings, vastu shastra since 2007.
+                  </p>
+                </div>
+                <div className="shrink-0">
+                  {searchThumbnail ? (
+                    <img
+                      src={searchThumbnail}
+                      alt="Search thumbnail"
+                      className="w-24 h-16 rounded-lg object-cover border"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                    />
+                  ) : (
+                    <div className={`w-24 h-16 rounded-lg flex items-center justify-center ${isDark ? "bg-white/10" : "bg-gray-100"} border`}>
+                      <ImageIcon className="w-6 h-6 text-muted-foreground/30" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Current thumbnail + change options */}
+          <div className={`p-4 rounded-xl border-2 border-dashed ${isDark ? "border-[#ff6b35]/30 bg-[#ff6b35]/5" : "border-[#ff6b35]/30 bg-[#fff8f5]"} space-y-4`}>
+            <p className="text-sm font-bold text-[#ff6b35] flex items-center gap-2">
+              <Upload className="w-4 h-4" /> {t("Change Search Thumbnail")}
+            </p>
+
+            {/* Current image */}
+            {searchThumbnail && (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground font-semibold">{t("Current Image:")}</p>
+                <img
+                  src={searchThumbnail}
+                  alt="Current thumbnail"
+                  className="w-full max-w-sm h-auto rounded-lg border border-[#ff6b35]/20 object-cover"
+                  style={{ maxHeight: 160 }}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
+              </div>
+            )}
+
+            {/* Upload new image */}
+            <label className={`flex flex-col items-center justify-center gap-2 p-5 rounded-xl border-2 border-dashed cursor-pointer transition-all hover:border-[#ff6b35]/60 ${isDark ? "border-[#ff6b35]/20 bg-white/5 hover:bg-[#ff6b35]/10" : "border-[#ff6b35]/20 bg-white hover:bg-[#fff8f5]"}`}>
+              {thumbnailUploading ? (
+                <Loader2 className="w-8 h-8 animate-spin text-[#ff6b35]" />
+              ) : (
+                <>
+                  <Upload className="w-8 h-8 text-[#ff6b35]/60" />
+                  <span className="text-sm font-semibold text-[#ff6b35]">{t("Upload New Thumbnail")}</span>
+                  <span className="text-[10px] text-muted-foreground">{t("Best size: 1200x630px — JPG, PNG, WEBP — max 5MB")}</span>
+                </>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={thumbnailUploading}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleThumbnailUpload(file);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+
+            {/* Or enter URL */}
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground">{t("Or paste image URL:")}</p>
+              <div className="flex gap-2">
+                <Input
+                  value={thumbnailInput}
+                  onChange={(e) => setThumbnailInput(e.target.value)}
+                  placeholder="https://..."
+                  className={`flex-1 ${inputClass} text-xs`}
+                />
+                <Button
+                  size="sm"
+                  onClick={() => { if (thumbnailInput.trim()) handleThumbnailSave(thumbnailInput.trim()); }}
+                  disabled={thumbnailSaving || !thumbnailInput.trim()}
+                  className="bg-[#ff6b35] hover:bg-[#e55a2b] text-white shrink-0"
+                >
+                  {thumbnailSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <div className={`p-3 rounded-lg ${isDark ? "bg-blue-900/10 border border-blue-500/20" : "bg-blue-50 border border-blue-200"}`}>
+              <p className="text-[11px] text-blue-500">
+                <strong>{t("Aa image Google ane Bing search result ma link ni bajuma aave che.")}</strong>
+                {" "}{t("Save karti vakhte badha pages par apply thai jashe. Deploy kya pachi 1-2 din ma Google/Bing update thase.")}
+              </p>
+            </div>
+          </div>
+
         </CardContent>
       </Card>
 
