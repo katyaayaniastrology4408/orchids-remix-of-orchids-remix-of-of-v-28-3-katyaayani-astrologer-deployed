@@ -257,15 +257,15 @@ export default function AdminDashboard() {
     todayFailed: 0,
     monthSent: 0,
     gmailSent: 0,
-    brevoSent: 0,
+    resendSent: 0,
     gmailDailyLimit: 500,
     gmailTodayUsed: 0,
     gmailRemaining: 500,
     gmailTodayFailed: 0,
-    brevoDailyLimit: 300,
-    brevoTodayUsed: 0,
-    brevoRemaining: 300,
-    brevoTodayFailed: 0,
+    resendDailyLimit: 100,
+    resendTodayUsed: 0,
+    resendRemaining: 100,
+    resendTodayFailed: 0,
   });
   const [recentEmails, setRecentEmails] = useState<any[]>([]);
   const [emailStatsLoading, setEmailStatsLoading] = useState(false);
@@ -1890,34 +1890,34 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
                         </div>
                       </div>
 
-                      {/* Brevo Daily Limit */}
-                      <div className={`p-4 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#ff6b35]/5 border-[#ff6b35]/10'}`}>
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-sm font-bold flex items-center gap-2"><Gauge className="w-4 h-4 text-green-500" /> Brevo SMTP</p>
-                          <span className="text-xs font-bold text-muted-foreground">{emailStats.brevoTodayUsed} / {emailStats.brevoDailyLimit}</span>
+                        {/* Resend Daily Limit */}
+                        <div className={`p-4 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#ff6b35]/5 border-[#ff6b35]/10'}`}>
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-sm font-bold flex items-center gap-2"><Gauge className="w-4 h-4 text-[#ff6b35]" /> Resend</p>
+                            <span className="text-xs font-bold text-muted-foreground">{emailStats.resendTodayUsed} / {emailStats.resendDailyLimit}</span>
+                          </div>
+                          <div className={`w-full h-3 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
+                            <div 
+                              className={`h-3 rounded-full transition-all duration-500 ${
+                                (emailStats.resendTodayUsed / emailStats.resendDailyLimit) > 0.9 ? 'bg-red-500' :
+                                (emailStats.resendTodayUsed / emailStats.resendDailyLimit) > 0.7 ? 'bg-amber-500' :
+                                'bg-[#ff6b35]'
+                              }`}
+                              style={{ width: `${Math.min((emailStats.resendTodayUsed / emailStats.resendDailyLimit) * 100, 100)}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between mt-2">
+                            <span className={`text-xs font-bold ${
+                              emailStats.resendRemaining < 10 ? 'text-red-500' : 
+                              emailStats.resendRemaining < 30 ? 'text-amber-500' : 'text-green-500'
+                            }`}>
+                              {emailStats.resendRemaining} {t("remaining")}
+                            </span>
+                            {emailStats.resendTodayFailed > 0 && (
+                              <span className="text-[10px] text-red-500 font-bold">{emailStats.resendTodayFailed} {t("failed today")}</span>
+                            )}
+                          </div>
                         </div>
-                        <div className={`w-full h-3 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
-                          <div 
-                            className={`h-3 rounded-full transition-all duration-500 ${
-                              (emailStats.brevoTodayUsed / emailStats.brevoDailyLimit) > 0.9 ? 'bg-red-500' :
-                              (emailStats.brevoTodayUsed / emailStats.brevoDailyLimit) > 0.7 ? 'bg-amber-500' :
-                              'bg-green-500'
-                            }`}
-                            style={{ width: `${Math.min((emailStats.brevoTodayUsed / emailStats.brevoDailyLimit) * 100, 100)}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between mt-2">
-                          <span className={`text-xs font-bold ${
-                            emailStats.brevoRemaining < 30 ? 'text-red-500' : 
-                            emailStats.brevoRemaining < 100 ? 'text-amber-500' : 'text-green-500'
-                          }`}>
-                            {emailStats.brevoRemaining} {t("remaining")}
-                          </span>
-                          {emailStats.brevoTodayFailed > 0 && (
-                            <span className="text-[10px] text-red-500 font-bold">{emailStats.brevoTodayFailed} {t("failed today")}</span>
-                          )}
-                        </div>
-                      </div>
                     </div>
 
                     <p className="text-[10px] text-muted-foreground text-center">{t("Limits reset daily at midnight")}</p>
@@ -1953,9 +1953,9 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
                         <div className="flex items-center gap-4 flex-wrap">
                           <span className="text-xs font-bold text-green-500">{emailStats.todaySent} {t("sent")}</span>
                           <span className="text-xs font-bold text-red-500">{emailStats.todayFailed} {t("failed")}</span>
-                          <span className="text-[10px] text-muted-foreground">
-                            ({t("Gmail")}: {emailStats.gmailTodayUsed} {t("sent")} / {emailStats.gmailTodayFailed} {t("failed")} | Brevo: {emailStats.brevoTodayUsed} {t("sent")} / {emailStats.brevoTodayFailed} {t("failed")})
-                          </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              ({t("Gmail")}: {emailStats.gmailTodayUsed} {t("sent")} / {emailStats.gmailTodayFailed} {t("failed")} | Resend: {emailStats.resendTodayUsed} {t("sent")} / {emailStats.resendTodayFailed} {t("failed")})
+                            </span>
                         </div>
                       </div>
                     )}
@@ -1963,22 +1963,22 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
                     {/* Provider Breakdown */}
                       <div className={`p-4 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
                         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">{t("Provider Breakdown (All Time)")}</p>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                            <div>
-                              <p className="text-sm font-bold">Gmail SMTP</p>
-                              <p className="text-xs text-muted-foreground">{emailStats.gmailSent} {t("emails sent")}</p>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                              <div>
+                                <p className="text-sm font-bold">Gmail SMTP</p>
+                                <p className="text-xs text-muted-foreground">{emailStats.gmailSent} {t("emails sent")}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="w-3 h-3 rounded-full bg-[#ff6b35]"></div>
+                              <div>
+                                <p className="text-sm font-bold">Resend</p>
+                                <p className="text-xs text-muted-foreground">{emailStats.resendSent} {t("emails sent")}</p>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                            <div>
-                              <p className="text-sm font-bold">Brevo SMTP</p>
-                              <p className="text-xs text-muted-foreground">{emailStats.brevoSent} {t("emails sent")}</p>
-                            </div>
-                          </div>
-                        </div>
                       </div>
 
                     {/* Recent Emails */}
@@ -1996,10 +1996,10 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
                               {email.error_message && <p className="text-[9px] text-red-500 truncate pl-4">{email.error_message}</p>}
                             </div>
                             <div className="text-right flex-shrink-0">
-                              <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                                  email.provider === 'gmail' ? 'bg-blue-500/10 text-blue-500' : 
-                                  'bg-green-500/10 text-green-500'
-                                }`}>{email.provider}</span>
+                                <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                                    email.provider === 'gmail' ? 'bg-blue-500/10 text-blue-500' : 
+                                    'bg-[#ff6b35]/10 text-[#ff6b35]'
+                                  }`}>{email.provider}</span>
                               <p className="text-[9px] text-muted-foreground mt-1">{new Date(email.created_at).toLocaleString()}</p>
                             </div>
                           </div>

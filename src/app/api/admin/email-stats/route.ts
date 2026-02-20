@@ -16,11 +16,11 @@ export async function GET() {
       { count: todaySent },
       { count: monthSent },
       { count: gmailSent },
-      { count: brevoSent },
+      { count: resendSent },
       { count: gmailTodaySent },
-      { count: brevoTodaySent },
+      { count: resendTodaySent },
       { count: gmailTodayFailed },
-      { count: brevoTodayFailed },
+      { count: resendTodayFailed },
       { count: todayFailed },
       { data: recentEmails },
     ] = await Promise.all([
@@ -29,19 +29,19 @@ export async function GET() {
       supabase.from('email_logs').select('*', { count: 'exact', head: true }).eq('status', 'sent').gte('created_at', todayStart.toISOString()),
       supabase.from('email_logs').select('*', { count: 'exact', head: true }).eq('status', 'sent').gte('created_at', monthStart.toISOString()),
       supabase.from('email_logs').select('*', { count: 'exact', head: true }).eq('status', 'sent').eq('provider', 'gmail'),
-      supabase.from('email_logs').select('*', { count: 'exact', head: true }).eq('status', 'sent').eq('provider', 'brevo'),
+      supabase.from('email_logs').select('*', { count: 'exact', head: true }).eq('status', 'sent').eq('provider', 'resend'),
       supabase.from('email_logs').select('*', { count: 'exact', head: true }).eq('status', 'sent').eq('provider', 'gmail').gte('created_at', todayStart.toISOString()),
-      supabase.from('email_logs').select('*', { count: 'exact', head: true }).eq('status', 'sent').eq('provider', 'brevo').gte('created_at', todayStart.toISOString()),
+      supabase.from('email_logs').select('*', { count: 'exact', head: true }).eq('status', 'sent').eq('provider', 'resend').gte('created_at', todayStart.toISOString()),
       supabase.from('email_logs').select('*', { count: 'exact', head: true }).eq('status', 'failed').eq('provider', 'gmail').gte('created_at', todayStart.toISOString()),
-      supabase.from('email_logs').select('*', { count: 'exact', head: true }).eq('status', 'failed').eq('provider', 'brevo').gte('created_at', todayStart.toISOString()),
+      supabase.from('email_logs').select('*', { count: 'exact', head: true }).eq('status', 'failed').eq('provider', 'resend').gte('created_at', todayStart.toISOString()),
       supabase.from('email_logs').select('*', { count: 'exact', head: true }).eq('status', 'failed').gte('created_at', todayStart.toISOString()),
       supabase.from('email_logs').select('*').order('created_at', { ascending: false }).limit(50),
     ]);
 
     // Gmail: 500/day for workspace
     const gmailDailyLimit = 500;
-    // Brevo free plan: 300 emails/day
-    const brevoDailyLimit = 300;
+    // Resend free plan: 100 emails/day, paid: 1000+
+    const resendDailyLimit = 100;
 
     return NextResponse.json({
       success: true,
@@ -52,15 +52,15 @@ export async function GET() {
         todayFailed: todayFailed || 0,
         monthSent: monthSent || 0,
         gmailSent: gmailSent || 0,
-        brevoSent: brevoSent || 0,
+        resendSent: resendSent || 0,
         gmailDailyLimit,
         gmailTodayUsed: gmailTodaySent || 0,
         gmailRemaining: gmailDailyLimit - (gmailTodaySent || 0),
         gmailTodayFailed: gmailTodayFailed || 0,
-        brevoDailyLimit,
-        brevoTodayUsed: brevoTodaySent || 0,
-        brevoRemaining: brevoDailyLimit - (brevoTodaySent || 0),
-        brevoTodayFailed: brevoTodayFailed || 0,
+        resendDailyLimit,
+        resendTodayUsed: resendTodaySent || 0,
+        resendRemaining: resendDailyLimit - (resendTodaySent || 0),
+        resendTodayFailed: resendTodayFailed || 0,
       },
       recentEmails: recentEmails || [],
     });

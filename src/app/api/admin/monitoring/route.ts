@@ -72,7 +72,7 @@ export async function GET() {
     const envVars = [
       "NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY",
       "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "ADMIN_EMAIL", "GMAIL_USER", "GMAIL_APP_PASSWORD",
-      "NEXT_PUBLIC_GTM_ID", "BREVO_API_KEY",
+      "NEXT_PUBLIC_GTM_ID", "RESEND_API_KEY",
     ];
     const envStatus = envVars.map(v => ({ name: v, set: !!process.env[v] }));
     const missingEnvs = envStatus.filter(e => !e.set).map(e => e.name);
