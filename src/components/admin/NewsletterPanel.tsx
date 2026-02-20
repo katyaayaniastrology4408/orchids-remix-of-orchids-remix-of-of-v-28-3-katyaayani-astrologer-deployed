@@ -92,33 +92,37 @@ export default function NewsletterPanel({ isDark, t, setSuccess, setError }: Pro
     setSendResult(null);
   }, [selectedTemplate]);
 
-  const fetchTemplates = async () => {
-    setLoadingTemplates(true);
-    try {
-      const res = await fetch("/api/newsletter/templates");
-      const data = await res.json();
-      setTemplates(data.templates || []);
-    } catch { /* ignore */ }
-    finally { setLoadingTemplates(false); }
-  };
+    const safeJson = async (res: Response) => {
+      try { const t = await res.text(); return t ? JSON.parse(t) : {}; } catch { return {}; }
+    };
 
-  const fetchSubscriberCount = async () => {
-    try {
-      const res = await fetch("/api/newsletter/subscribers/count");
-      const data = await res.json();
-      if (data.count !== undefined) setSubscriberCount(data.count);
-    } catch { /* ignore */ }
-  };
+    const fetchTemplates = async () => {
+      setLoadingTemplates(true);
+      try {
+        const res = await fetch("/api/newsletter/templates");
+        const data = await safeJson(res);
+        setTemplates(data.templates || []);
+      } catch { /* ignore */ }
+      finally { setLoadingTemplates(false); }
+    };
 
-  const fetchResendContacts = async () => {
-    setLoadingContacts(true);
-    try {
-      const res = await fetch("/api/admin/resend-sync");
-      const data = await res.json();
-      if (data.contacts) setResendContacts(data.contacts);
-    } catch { /* ignore */ }
-    finally { setLoadingContacts(false); }
-  };
+    const fetchSubscriberCount = async () => {
+      try {
+        const res = await fetch("/api/newsletter/subscribers/count");
+        const data = await safeJson(res);
+        if (data.count !== undefined) setSubscriberCount(data.count);
+      } catch { /* ignore */ }
+    };
+
+    const fetchResendContacts = async () => {
+      setLoadingContacts(true);
+      try {
+        const res = await fetch("/api/admin/resend-sync");
+        const data = await safeJson(res);
+        if (data.contacts) setResendContacts(data.contacts);
+      } catch { /* ignore */ }
+      finally { setLoadingContacts(false); }
+    };
 
   const syncAllToResend = async () => {
     setSyncing(true);
@@ -129,9 +133,9 @@ export default function NewsletterPanel({ isDark, t, setSuccess, setError }: Pro
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ secretKey: localStorage.getItem("admin_auth") }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
-        setSyncResult({ synced: data.synced, failed: data.failed, total: data.total });
+          setSyncResult({ synced: data.synced, failed: data.failed, total: data.total });
         setSuccess(`${data.synced} subscribers synced to Resend!`);
         fetchResendContacts();
       } else {
@@ -152,7 +156,7 @@ export default function NewsletterPanel({ isDark, t, setSuccess, setError }: Pro
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "setup" }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         setSuccess("All 3 templates created & published on Resend!");
         fetchTemplates();
@@ -190,7 +194,7 @@ export default function NewsletterPanel({ isDark, t, setSuccess, setError }: Pro
           secretKey: localStorage.getItem("admin_auth"),
         }),
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (data.success) {
         setSendResult({ sent: data.sent, failed: data.failed });
         setSuccess(`Newsletter sent! ${data.sent} delivered, ${data.failed} failed.`);
