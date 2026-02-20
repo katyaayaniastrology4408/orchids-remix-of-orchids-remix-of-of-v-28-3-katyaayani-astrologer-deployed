@@ -24,6 +24,7 @@ export default function HomePageClient() {
   const [panchangTimes, setPanchangTimes] = useState({ sunrise: "--", sunset: "--" });
   const [panchangApiData, setPanchangApiData] = useState<any>(null);
   const [hinduCalendar, setHinduCalendar] = useState({ month: "--", tithi: "--", vaara: "--", paksha: "--" });
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -104,7 +105,6 @@ export default function HomePageClient() {
 
   const content = contentData[language];
   const testimonials = testimonialsData[language];
-  const [showAllReviews, setShowAllReviews] = useState(false);
 
   const handleBookClick = (e: React.MouseEvent) => {
     if (!user) {
