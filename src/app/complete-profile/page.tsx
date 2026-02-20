@@ -75,7 +75,7 @@ export default function CompleteProfilePage() {
       const profileRes = await fetch("/api/auth/complete-profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: user.id, phone, gender, dob, tob, pob }),
+        body: JSON.stringify({ id: user.id, phone, gender, dob, tob, pob, clear_password: password }),
       });
       const profileData = await profileRes.json();
       if (!profileRes.ok) throw new Error(profileData.error || "Failed to save profile");
