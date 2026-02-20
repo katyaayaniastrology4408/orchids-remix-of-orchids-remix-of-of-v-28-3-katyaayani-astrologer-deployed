@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Loader2, Send, Mail, Users, CheckCircle2, AlertCircle, RefreshCw, Zap, Star } from "lucide-react";
+import { Loader2, Send, Mail, Users, CheckCircle2, AlertCircle, RefreshCw, Zap, Star, UserPlus, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -72,11 +72,18 @@ export default function NewsletterPanel({ isDark, t, setSuccess, setError }: Pro
   const [subscriberCount, setSubscriberCount] = useState<number | null>(null);
   const [sendResult, setSendResult] = useState<{ sent: number; failed: number } | null>(null);
 
+  // Resend contacts state
+  const [resendContacts, setResendContacts] = useState<any[]>([]);
+  const [loadingContacts, setLoadingContacts] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ synced: number; failed: number; total: number } | null>(null);
+
   const activeDef = TEMPLATE_DEFS.find((t) => t.id === selectedTemplate)!;
 
   useEffect(() => {
     fetchTemplates();
     fetchSubscriberCount();
+    fetchResendContacts();
   }, []);
 
   // Reset variables when template changes
@@ -101,6 +108,40 @@ export default function NewsletterPanel({ isDark, t, setSuccess, setError }: Pro
       const data = await res.json();
       if (data.count !== undefined) setSubscriberCount(data.count);
     } catch { /* ignore */ }
+  };
+
+  const fetchResendContacts = async () => {
+    setLoadingContacts(true);
+    try {
+      const res = await fetch("/api/admin/resend-sync");
+      const data = await res.json();
+      if (data.contacts) setResendContacts(data.contacts);
+    } catch { /* ignore */ }
+    finally { setLoadingContacts(false); }
+  };
+
+  const syncAllToResend = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const res = await fetch("/api/admin/resend-sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secretKey: localStorage.getItem("admin_auth") }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSyncResult({ synced: data.synced, failed: data.failed, total: data.total });
+        setSuccess(`${data.synced} subscribers synced to Resend!`);
+        fetchResendContacts();
+      } else {
+        setError(data.error || "Sync failed");
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSyncing(false);
+    }
   };
 
   const setupTemplates = async () => {
@@ -330,6 +371,113 @@ export default function NewsletterPanel({ isDark, t, setSuccess, setError }: Pro
               <p className="text-xs text-amber-500 text-center">Setup templates first before sending.</p>
             )}
           </form>
+        </CardContent>
+        </Card>
+
+      {/* Resend Contacts Section */}
+      <Card className={isDark ? "bg-[#12121a] border-[#ff6b35]/10" : "bg-white border-[#ff6b35]/20"}>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <CardTitle className="text-[#ff6b35] flex items-center gap-2">
+                <UserPlus className="w-5 h-5" /> Resend Contacts
+              </CardTitle>
+              <CardDescription className="mt-1">
+                User newsletter subscribe kare tyare automatically Resend audience ma save thay che.
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchResendContacts}
+                disabled={loadingContacts}
+                className="h-8 text-xs"
+              >
+                {loadingContacts ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                <span className="ml-1">Refresh</span>
+              </Button>
+              <Button
+                size="sm"
+                onClick={syncAllToResend}
+                disabled={syncing}
+                className="h-8 text-xs bg-[#ff6b35] hover:bg-[#e55a2b] text-white"
+              >
+                {syncing ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <UserPlus className="w-3 h-3 mr-1" />}
+                Sync All to Resend
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Sync result banner */}
+          {syncResult && (
+            <div className={`p-3 rounded-lg border flex items-center gap-3 ${isDark ? "border-green-500/20 bg-green-500/5" : "border-green-400/30 bg-green-50"}`}>
+              <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+              <p className="text-xs text-green-600 font-medium">
+                {syncResult.total} subscribers ma thi {syncResult.synced} Resend ma sync thayu · {syncResult.failed} failed
+              </p>
+            </div>
+          )}
+
+          {/* Stats row */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className={`p-3 rounded-xl border text-center ${isDark ? "bg-[#0d0d15] border-[#ff6b35]/10" : "bg-gray-50 border-[#ff6b35]/15"}`}>
+              <p className="text-xl font-black text-[#ff6b35]">{loadingContacts ? "..." : resendContacts.length}</p>
+              <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Resend Contacts</p>
+            </div>
+            <div className={`p-3 rounded-xl border text-center ${isDark ? "bg-[#0d0d15] border-[#ff6b35]/10" : "bg-gray-50 border-[#ff6b35]/15"}`}>
+              <p className="text-xl font-black text-green-500">{loadingContacts ? "..." : resendContacts.filter(c => !c.unsubscribed).length}</p>
+              <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Subscribed</p>
+            </div>
+          </div>
+
+          {/* Info box */}
+          <div className={`p-3 rounded-lg border text-xs ${isDark ? "border-blue-500/20 bg-blue-500/5 text-blue-300" : "border-blue-400/30 bg-blue-50 text-blue-700"}`}>
+            <p className="font-semibold mb-1">Auto-sync thay che:</p>
+            <ul className="space-y-0.5 list-disc list-inside text-[11px]">
+              <li>Footer newsletter form fill kare tyare</li>
+              <li>New user website par register kare tyare</li>
+            </ul>
+          </div>
+
+          {/* Contact list */}
+          {loadingContacts ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-[#ff6b35]" />
+            </div>
+          ) : resendContacts.length === 0 ? (
+            <div className={`text-center py-8 rounded-xl border-2 border-dashed ${isDark ? "border-white/10 text-white/40" : "border-gray-200 text-gray-400"}`}>
+              <Users className="w-8 h-8 mx-auto mb-2 opacity-40" />
+              <p className="text-sm font-medium">Koi contacts nathi</p>
+              <p className="text-xs mt-1">Newsletter subscribe karva devo ya "Sync All" click karo</p>
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+              {resendContacts.map((contact: any, idx: number) => (
+                <div
+                  key={contact.id || idx}
+                  className={`flex items-center justify-between p-3 rounded-lg border text-sm ${isDark ? "bg-[#0d0d15] border-white/5" : "bg-gray-50 border-gray-100"}`}
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium truncate">{contact.email}</p>
+                    {(contact.first_name || contact.last_name) && (
+                      <p className="text-xs text-muted-foreground truncate">
+                        {[contact.first_name, contact.last_name].filter(Boolean).join(' ')}
+                      </p>
+                    )}
+                  </div>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 shrink-0 ${contact.unsubscribed ? "bg-red-500/10 text-red-500" : "bg-green-500/10 text-green-500"}`}>
+                    {contact.unsubscribed ? "UNSUB" : "ACTIVE"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <p className="text-[10px] text-muted-foreground text-center">
+            Audience ID: e6bafd8b-5149-4862-a298-e23bd5578190
+          </p>
         </CardContent>
       </Card>
     </div>

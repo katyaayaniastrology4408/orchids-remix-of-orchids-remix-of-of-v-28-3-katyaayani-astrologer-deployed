@@ -2,7 +2,10 @@ import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { sendWelcomeEmail } from "@/lib/email";
 import bcrypt from 'bcryptjs';
-export const dynamic = 'force-dynamic' ; 
+import { Resend } from 'resend';
+export const dynamic = 'force-dynamic';
+
+const RESEND_AUDIENCE_ID = 'e6bafd8b-5149-4862-a298-e23bd5578190';
 
 export async function POST(req: Request) {
   try {
@@ -60,13 +63,30 @@ export async function POST(req: Request) {
 
       if (profileError) console.error("Error updating profile:", profileError);
 
-        // 5. Send Welcome Email
-        try {
-          await sendWelcomeEmail({ email, name: fullName });
-        } catch (e) {
-          console.error("Error in post-signup operations:", e);
-        }
-    }
+          // 5. Send Welcome Email
+          try {
+            await sendWelcomeEmail({ email, name: fullName });
+          } catch (e) {
+            console.error("Error in post-signup operations:", e);
+          }
+
+          // 6. Add to Resend audience (newsletter contacts)
+          if (process.env.RESEND_API_KEY) {
+            try {
+              const resend = new Resend(process.env.RESEND_API_KEY);
+              const nameParts = (fullName || '').trim().split(' ');
+              await resend.contacts.create({
+                audienceId: RESEND_AUDIENCE_ID,
+                email,
+                firstName: nameParts[0] || undefined,
+                lastName: nameParts.slice(1).join(' ') || undefined,
+                unsubscribed: false,
+              });
+            } catch (resendErr) {
+              console.error('Resend contact add error (signup):', resendErr);
+            }
+          }
+      }
 
     return NextResponse.json({ success: true, user });
   } catch (error: any) {
