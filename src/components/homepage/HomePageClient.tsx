@@ -417,7 +417,7 @@ export default function HomePageClient() {
           {!showAllReviews ? (
             <div className="relative">
               {/* Blurred preview of next 3 */}
-                <div className="grid md:grid-cols-3 gap-8 blur-[2px] pointer-events-none select-none">
+                <div className="grid md:grid-cols-3 gap-8 blur-[1px] pointer-events-none select-none">
                 {testimonials.slice(3, 6).map((testimonial) => (
                   <div key={testimonial.name}>
                     <Card className={`${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20' : 'bg-[#f8f4ee] border-[#ff6b35]/30'} h-full`}>
