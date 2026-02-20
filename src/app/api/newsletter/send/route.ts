@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { sendEmailViaSMTP } from '@/lib/nodemailer';
+import { Resend } from 'resend';
 export const dynamic = 'force-dynamic';
+
+const RESEND_AUDIENCE_ID = 'e6bafd8b-5149-4862-a298-e23bd5578190';
 
 export async function POST(request: NextRequest) {
   try {
     const { subject, html, secretKey } = await request.json();
 
-    // Simple auth check
     if (secretKey !== process.env.ADMIN_PASSWORD) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -16,7 +17,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Subject and html are required' }, { status: 400 });
     }
 
-    // Get all active subscribers
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+      return NextResponse.json({ error: 'Resend API key not configured' }, { status: 500 });
+    }
+
+    // Get all active subscribers from Supabase
     const { data: subscribers, error } = await supabaseAdmin
       .from('newsletter_subscribers')
       .select('email')
@@ -26,21 +32,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch subscribers' }, { status: 500 });
     }
 
+    if (!subscribers || subscribers.length === 0) {
+      return NextResponse.json({ success: true, total: 0, sent: 0, failed: 0, results: [] });
+    }
+
+    const resend = new Resend(resendApiKey);
     const results: { email: string; success: boolean; error?: string }[] = [];
 
-    // Send one by one with small delay to avoid Gmail rate limits
-    for (const sub of subscribers || []) {
+    // Resend allows batch — send in batches of 100 (daily limit is 100)
+    const BATCH_SIZE = 50;
+    for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
+      const batch = subscribers.slice(i, i + BATCH_SIZE);
+      const emails = batch.map(sub => ({
+        from: 'Katyaayani Astrologer <newsletter@katyaayaniastrologer.com>',
+        to: sub.email,
+        subject,
+        html,
+      }));
+
       try {
-        const result = await sendEmailViaSMTP({
-          to: sub.email,
-          subject,
-          html,
-        });
-        results.push({ email: sub.email, success: result.success, error: result.error });
-        // 1 second delay between emails
-        await new Promise(r => setTimeout(r, 1000));
+        const { data: batchData, error: batchError } = await resend.batch.send(emails);
+        if (batchError) {
+          batch.forEach(sub => results.push({ email: sub.email, success: false, error: String(batchError) }));
+        } else {
+          batch.forEach(sub => results.push({ email: sub.email, success: true }));
+        }
       } catch (err: any) {
-        results.push({ email: sub.email, success: false, error: err.message });
+        batch.forEach(sub => results.push({ email: sub.email, success: false, error: err.message }));
+      }
+
+      // Small delay between batches
+      if (i + BATCH_SIZE < subscribers.length) {
+        await new Promise(r => setTimeout(r, 500));
       }
     }
 

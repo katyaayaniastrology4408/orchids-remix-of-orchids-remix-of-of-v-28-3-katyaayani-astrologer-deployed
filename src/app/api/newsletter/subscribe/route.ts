@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-export const dynamic = 'force-dynamic' ; 
+import { Resend } from 'resend';
+export const dynamic = 'force-dynamic';
+
+const RESEND_AUDIENCE_ID = 'e6bafd8b-5149-4862-a298-e23bd5578190';
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,20 +33,21 @@ export async function POST(request: NextRequest) {
       console.error('Supabase newsletter error:', dbError);
     }
 
-    // Try Brevo if API key is configured
-    const brevoApiKey = process.env.BREVO_API_KEY;
-    if (brevoApiKey && brevoApiKey !== 'YOUR_BREVO_API_KEY') {
+    // Save contact to Resend audience
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (resendApiKey) {
       try {
-        const { addContactToList } = await import('@/lib/brevo');
-        await addContactToList({
+        const resend = new Resend(resendApiKey);
+        await resend.contacts.create({
+          audienceId: RESEND_AUDIENCE_ID,
           email,
-          firstName,
-          lastName,
-          listIds: [2],
+          firstName: firstName || undefined,
+          lastName: lastName || undefined,
+          unsubscribed: false,
         });
-      } catch (brevoError) {
-        console.error('Brevo newsletter error:', brevoError);
-        // Don't fail if Brevo fails - we still saved to Supabase
+      } catch (resendError) {
+        console.error('Resend contact add error:', resendError);
+        // Don't fail — Supabase save already done
       }
     }
 
