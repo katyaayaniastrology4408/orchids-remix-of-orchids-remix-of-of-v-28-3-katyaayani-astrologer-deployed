@@ -90,72 +90,72 @@ function rashifalHtml() {
 </html>`;
 }
 
-function festivalHtml() {
+function blogUpdateHtml() {
   return `<!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Festival Muhurat</title></head>
-<body style="margin:0;padding:0;background:#0a0a1a;font-family:'Georgia',serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a1a;">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>New Blog Post</title></head>
+<body style="margin:0;padding:0;background:#0d0800;font-family:'Georgia',serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0800;">
     <tr><td align="center" style="padding:32px 16px;">
-      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#12122a;border-radius:16px;overflow:hidden;border:1px solid #4a3080;">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#1a1000;border-radius:16px;overflow:hidden;border:1px solid #8b1a00;">
         <!-- Header -->
         <tr>
-          <td style="background:linear-gradient(135deg,#2d1b69,#7c3aed);padding:32px 24px;text-align:center;">
-            <div style="font-size:44px;margin-bottom:8px;">{{{FESTIVAL_EMOJI}}}</div>
-            <h1 style="margin:0;color:#ffd700;font-size:24px;letter-spacing:2px;">Katyaayani Astrologer</h1>
-            <p style="margin:8px 0 0;color:#c4b5fd;font-size:13px;letter-spacing:4px;text-transform:uppercase;">Festival &amp; Muhurat Guide</p>
+          <td style="background:linear-gradient(135deg,#8b1a00,#c45200);padding:28px 24px;text-align:center;">
+            <div style="font-size:36px;margin-bottom:8px;">📖</div>
+            <h1 style="margin:0;color:#ffd700;font-size:22px;letter-spacing:2px;font-family:'Georgia',serif;">Katyaayani Astrologer</h1>
+            <p style="margin:8px 0 0;color:#ffb347;font-size:12px;letter-spacing:4px;text-transform:uppercase;">New Blog Post</p>
           </td>
         </tr>
-        <!-- Festival Name -->
+        <!-- Greeting -->
         <tr>
           <td style="padding:28px 32px 0;text-align:center;">
-            <h2 style="color:#ffd700;font-size:28px;margin:0;">{{{FESTIVAL_NAME}}}</h2>
-            <p style="color:#a78bfa;font-size:14px;margin:10px 0 0;">{{{FESTIVAL_DATE}}}</p>
+            <p style="color:#ffd700;font-size:17px;margin:0;">Namaste {{{NAME}}} 🙏</p>
+            <p style="color:#d4a574;font-size:13px;margin:10px 0 0;">A new article has been published for you</p>
             <div style="width:60px;height:2px;background:linear-gradient(90deg,transparent,#ffd700,transparent);margin:16px auto 0;"></div>
           </td>
         </tr>
-        <!-- Main Content -->
+        <!-- Category Badge -->
         <tr>
-          <td style="padding:24px 32px;">
-            <div style="background:#1e1b4b;border:1px solid #4a3080;border-radius:12px;padding:24px;">
-              <p style="color:#e2d9ff;font-size:15px;line-height:1.8;margin:0;">{{{FESTIVAL_DESCRIPTION}}}</p>
+          <td style="padding:20px 32px 0;text-align:center;">
+            <span style="display:inline-block;background:#8b1a00;color:#ffd700;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:50px;">{{{CATEGORY}}}</span>
+          </td>
+        </tr>
+        <!-- Blog Title -->
+        <tr>
+          <td style="padding:16px 32px 0;text-align:center;">
+            <h2 style="color:#ffd700;font-size:22px;margin:0;line-height:1.4;">{{{BLOG_TITLE}}}</h2>
+          </td>
+        </tr>
+        <!-- Blog Excerpt -->
+        <tr>
+          <td style="padding:20px 32px;">
+            <div style="background:#2d1208;border:1px solid #8b3a0f;border-radius:12px;padding:22px 24px;">
+              <p style="color:#e8d5b7;font-size:15px;line-height:1.9;margin:0;">{{{BLOG_EXCERPT}}}</p>
             </div>
           </td>
         </tr>
-        <!-- Muhurat -->
+        <!-- Key Takeaway -->
         <tr>
-          <td style="padding:0 32px 16px;">
-            <table width="100%" cellpadding="0" cellspacing="0">
-              <tr>
-                <td style="background:#1e1b4b;border:1px solid #7c3aed;border-radius:12px;padding:20px 24px;">
-                  <p style="color:#a78bfa;font-size:12px;text-transform:uppercase;letter-spacing:3px;margin:0 0 12px;">✨ Shubh Muhurat</p>
-                  <p style="color:#ffd700;font-size:18px;font-weight:bold;margin:0 0 6px;">{{{MUHURAT_TIME}}}</p>
-                  <p style="color:#c4b5fd;font-size:13px;margin:0;">{{{MUHURAT_DETAILS}}}</p>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-        <!-- Remedy -->
-        <tr>
-          <td style="padding:0 32px 28px;">
-            <div style="background:#0f172a;border-left:3px solid #ffd700;border-radius:0 8px 8px 0;padding:16px 20px;">
-              <p style="color:#ffd700;font-size:11px;text-transform:uppercase;letter-spacing:2px;margin:0 0 8px;">Puja Vidhi &amp; Upay</p>
-              <p style="color:#cbd5e1;font-size:14px;line-height:1.7;margin:0;">{{{REMEDY}}}</p>
+          <td style="padding:0 32px 24px;">
+            <div style="background:#0d0600;border-left:3px solid #ffd700;border-radius:0 8px 8px 0;padding:16px 20px;">
+              <p style="color:#ffd700;font-size:11px;text-transform:uppercase;letter-spacing:2px;margin:0 0 8px;">Key Takeaway</p>
+              <p style="color:#d4a574;font-size:14px;line-height:1.7;margin:0;">{{{KEY_TAKEAWAY}}}</p>
             </div>
           </td>
         </tr>
         <!-- CTA -->
         <tr>
           <td style="padding:0 32px 32px;text-align:center;">
-            <a href="https://www.katyaayaniastrologer.com/booking" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#9f67ff);color:#fff;text-decoration:none;padding:14px 32px;border-radius:50px;font-size:14px;font-weight:bold;letter-spacing:1px;">Get Personal Muhurat Reading</a>
+            <a href="{{{BLOG_URL}}}" style="display:inline-block;background:linear-gradient(135deg,#c45200,#ff6b35);color:#fff;text-decoration:none;padding:14px 36px;border-radius:50px;font-size:14px;font-weight:bold;letter-spacing:1px;">Read Full Article</a>
+            <br/><br/>
+            <a href="https://www.katyaayaniastrologer.com/booking" style="display:inline-block;background:transparent;border:1px solid #8b3a0f;color:#ffb347;text-decoration:none;padding:10px 24px;border-radius:50px;font-size:13px;">Book Personal Consultation</a>
           </td>
         </tr>
         <!-- Footer -->
         <tr>
-          <td style="background:#050510;padding:20px 32px;text-align:center;border-top:1px solid #4a3080;">
-            <p style="color:#4a3080;font-size:11px;margin:0 0 6px;">Katyaayani Astrologer | Vedic Astrology &amp; Spiritual Guidance</p>
-            <p style="color:#2d1b69;font-size:10px;margin:0;"><a href="https://www.katyaayaniastrologer.com" style="color:#4a3080;text-decoration:none;">katyaayaniastrologer.com</a> &nbsp;|&nbsp; <a href="{{{UNSUBSCRIBE_URL}}}" style="color:#4a3080;text-decoration:none;">Unsubscribe</a></p>
+          <td style="background:#080500;padding:20px 32px;text-align:center;border-top:1px solid #8b1a00;">
+            <p style="color:#6b3a1a;font-size:11px;margin:0 0 6px;">Katyaayani Astrologer | Vedic Astrology &amp; Spiritual Guidance</p>
+            <p style="color:#4a2a10;font-size:10px;margin:0;"><a href="https://www.katyaayaniastrologer.com" style="color:#6b3a1a;text-decoration:none;">katyaayaniastrologer.com</a> &nbsp;|&nbsp; <a href="{{{UNSUBSCRIBE_URL}}}" style="color:#6b3a1a;text-decoration:none;">Unsubscribe</a></p>
           </td>
         </tr>
       </table>
@@ -277,19 +277,18 @@ export async function POST(request: NextRequest) {
           ],
         },
         {
-          name: 'katyaayani-festival',
-          html: festivalHtml(),
-          variables: [
-            { key: 'FESTIVAL_EMOJI', type: 'string', fallbackValue: '🪔' },
-            { key: 'FESTIVAL_NAME', type: 'string', fallbackValue: 'Upcoming Festival' },
-            { key: 'FESTIVAL_DATE', type: 'string', fallbackValue: 'Coming Soon' },
-            { key: 'FESTIVAL_DESCRIPTION', type: 'string', fallbackValue: 'Celebrate this auspicious occasion with devotion and joy.' },
-            { key: 'MUHURAT_TIME', type: 'string', fallbackValue: '6:00 AM - 8:00 AM' },
-            { key: 'MUHURAT_DETAILS', type: 'string', fallbackValue: 'Most auspicious time for puja and new beginnings.' },
-            { key: 'REMEDY', type: 'string', fallbackValue: 'Light a diya, chant the mantra with devotion.' },
-            { key: 'UNSUBSCRIBE_URL', type: 'string', fallbackValue: 'https://www.katyaayaniastrologer.com/unsubscribe' },
-          ],
-        },
+            name: 'katyaayani-blog-update',
+            html: blogUpdateHtml(),
+            variables: [
+              { key: 'NAME', type: 'string', fallbackValue: 'Devotee' },
+              { key: 'CATEGORY', type: 'string', fallbackValue: 'Vedic Astrology' },
+              { key: 'BLOG_TITLE', type: 'string', fallbackValue: 'New Article Published' },
+              { key: 'BLOG_EXCERPT', type: 'string', fallbackValue: 'Read our latest article on astrology and spiritual guidance.' },
+              { key: 'KEY_TAKEAWAY', type: 'string', fallbackValue: 'Key insight from this article.' },
+              { key: 'BLOG_URL', type: 'string', fallbackValue: 'https://www.katyaayaniastrologer.com/blog' },
+              { key: 'UNSUBSCRIBE_URL', type: 'string', fallbackValue: 'https://www.katyaayaniastrologer.com/unsubscribe' },
+            ],
+          },
         {
           name: 'katyaayani-astro-tips',
           html: tipsHtml(),
