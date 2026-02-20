@@ -1,5 +1,7 @@
-import { sendEmailViaSMTP } from './nodemailer';
+import { Resend } from 'resend';
 import { supabase } from './supabase';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 type EmailResult = { success: boolean; messageId?: string; error?: string };
 
@@ -18,14 +20,27 @@ const logEmail = async (recipient: string, subject: string, status: 'sent' | 'fa
   }
 };
 
-// All transactional emails via Gmail SMTP only
+// All transactional emails via Resend
 export const sendEmail = async ({ to, subject, html }: { to: string; subject: string; html: string }): Promise<EmailResult> => {
-  const smtpResult = await sendEmailViaSMTP({ to, subject, html });
-  if (smtpResult.success) {
-    await logEmail(to, subject, 'sent', 'gmail');
-    return smtpResult;
+  try {
+    const { data, error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || 'Katyaayani Astrologer <onboarding@resend.dev>',
+      to,
+      subject,
+      html,
+    });
+
+    if (error) {
+      await logEmail(to, subject, 'failed', 'resend', error.message);
+      console.error('Resend error:', error);
+      return { success: false, error: error.message };
+    }
+
+    await logEmail(to, subject, 'sent', 'resend');
+    return { success: true, messageId: data?.id };
+  } catch (err: any) {
+    await logEmail(to, subject, 'failed', 'resend', err.message);
+    console.error('Resend exception:', err);
+    return { success: false, error: err.message };
   }
-  await logEmail(to, subject, 'failed', 'gmail', smtpResult.error);
-  console.error('Gmail SMTP failed:', smtpResult.error);
-  return smtpResult;
 };

@@ -13,6 +13,8 @@ import Navbar from "@/components/homepage/Navbar";
 const Footer = dynamic(() => import("@/components/homepage/Footer"), { ssr: false });
 const CosmicInsights = dynamic(() => import("@/components/homepage/CosmicInsights"), { ssr: false });
 const StarField = dynamic(() => import("@/components/homepage/StarField"), { ssr: false });
+const RashifalSection = dynamic(() => import("@/components/homepage/RashifalSection"), { ssr: false });
+const AstrologerTip = dynamic(() => import("@/components/homepage/AstrologerTip"), { ssr: false });
 import { testimonialsData, contentData } from "@/data/homepage";
 import "@/styles/homepage.css";
 
@@ -371,6 +373,10 @@ export default function HomePageClient() {
       </section>
 
       <CosmicInsights panchangApiData={panchangApiData} />
+
+      <RashifalSection />
+
+      <AstrologerTip />
 
       <section className={`py-24 px-6 ${theme === 'dark' ? 'bg-[#12121a]' : 'bg-[#fffdf9]'}`}>
         <div className="max-w-7xl mx-auto">
