@@ -448,7 +448,7 @@ export default function HomePageClient() {
                   className="cursor-pointer bg-[#ff6b35] hover:bg-[#ff8c5e] text-white font-semibold px-8 py-5 shadow-lg shadow-[#ff6b35]/20"
                 >
                   <Star className="w-4 h-4 mr-2 fill-white" />
-                  {language === 'gu' ? `બધી ${testimonials.length} સમીક્ષાઓ જુઓ` : language === 'hi' ? `सभी ${testimonials.length} समीक्षाएं देखें` : `Read All ${testimonials.length} Reviews`}
+                    {language === 'gu' ? 'બધી સમીક્ષાઓ વાંચો' : language === 'hi' ? 'सभी समीक्षाएं पढ़ें' : 'Read All Reviews'}
                   <ChevronDown className="w-4 h-4 ml-2" />
                 </Button>
               </div>
