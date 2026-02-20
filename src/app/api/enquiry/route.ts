@@ -1,16 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from "@supabase/supabase-js";
 import { sendEmail } from '@/lib/email.config';
+import { sanitizeString, sanitizeEmail, sanitizePhone } from '@/lib/sanitize';
+import { verifyAdminJWT } from '@/lib/jwt';
 export const dynamic = 'force-dynamic' ; 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+async function requireAdmin(req: NextRequest): Promise<boolean> {
+  const token = req.cookies.get("admin-jwt")?.value;
+  if (!token) return false;
+  const payload = await verifyAdminJWT(token);
+  return payload?.role === "admin";
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, phone, subject, message } = body;
+    const name     = sanitizeString(body.name, 100);
+    const email    = sanitizeEmail(body.email);
+    const phone    = sanitizePhone(body.phone);
+    const subject  = sanitizeString(body.subject, 200);
+    const message  = sanitizeString(body.message, 2000);
+
+    if (!name || !message) {
+      return NextResponse.json({ error: 'Name and message are required' }, { status: 400 });
+    }
 
     // 1. Save to Supabase
     const { data: dbData, error: dbError } = await supabase
@@ -126,6 +143,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  if (!(await requireAdmin(req))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const { data, error } = await supabase
       .from('enquiries')
@@ -142,6 +162,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  if (!(await requireAdmin(req))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');

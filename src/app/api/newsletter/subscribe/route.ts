@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
+import { sanitizeString, sanitizeEmail } from '@/lib/sanitize';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, firstName, lastName } = await request.json();
+    const body = await request.json();
+    const email     = sanitizeEmail(body.email);
+    const firstName = sanitizeString(body.firstName, 50);
+    const lastName  = sanitizeString(body.lastName, 50);
 
-    if (!email || !email.includes('@')) {
+    if (!email) {
       return NextResponse.json(
         { error: 'Valid email is required' },
         { status: 400 }

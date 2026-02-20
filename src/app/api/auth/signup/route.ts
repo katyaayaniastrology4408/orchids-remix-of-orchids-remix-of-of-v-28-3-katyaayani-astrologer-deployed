@@ -3,13 +3,26 @@ import { NextResponse } from "next/server";
 import { sendWelcomeEmail } from "@/lib/email";
 import bcrypt from 'bcryptjs';
 import { Resend } from 'resend';
+import { sanitizeString, sanitizeEmail, sanitizePhone } from '@/lib/sanitize';
 export const dynamic = 'force-dynamic';
 
 const RESEND_AUDIENCE_ID = 'e6bafd8b-5149-4862-a298-e23bd5578190';
 
 export async function POST(req: Request) {
   try {
-    const { email, password, fullName, phone, gender, dob, tob, pob } = await req.json();
+    const body = await req.json();
+    const email    = sanitizeEmail(body.email);
+    const password = typeof body.password === 'string' ? body.password.slice(0, 128) : '';
+    const fullName = sanitizeString(body.fullName, 100);
+    const phone    = sanitizePhone(body.phone);
+    const gender   = sanitizeString(body.gender, 20);
+    const dob      = sanitizeString(body.dob, 20);
+    const tob      = sanitizeString(body.tob, 20);
+    const pob      = sanitizeString(body.pob, 200);
+
+    if (!email || !password) {
+      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
+    }
 
     const supabaseAdmin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

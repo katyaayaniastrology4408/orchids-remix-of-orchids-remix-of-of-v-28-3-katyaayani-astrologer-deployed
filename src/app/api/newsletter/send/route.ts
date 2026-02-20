@@ -1,18 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
+import { verifyAdminJWT } from '@/lib/jwt';
 export const dynamic = 'force-dynamic';
 
 const RESEND_AUDIENCE_ID = 'e6bafd8b-5149-4862-a298-e23bd5578190';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { subject, html, templateName, variables, secretKey } = body;
-
-    if (secretKey !== process.env.ADMIN_PASSWORD) {
+    // Require valid admin JWT cookie
+    const token = request.cookies.get("admin-jwt")?.value;
+    if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const payload = await verifyAdminJWT(token);
+    if (!payload || payload.role !== "admin") {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { subject, html, templateName, variables } = body;
 
     if (!subject) {
       return NextResponse.json({ error: 'Subject is required' }, { status: 400 });

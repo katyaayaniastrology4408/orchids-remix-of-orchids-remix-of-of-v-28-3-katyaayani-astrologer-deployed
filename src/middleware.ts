@@ -7,11 +7,19 @@ const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX_API = 60; // 60 requests/min for API
 const RATE_LIMIT_MAX_PAGE = 120; // 120 requests/min for pages
 
-function checkRateLimit(ip: string, max: number): boolean {
+// Strict auth rate limits
+const AUTH_RATE_LIMITS: Record<string, { max: number; windowMs: number }> = {
+  "/api/admin/auth/send-otp":   { max: 3,  windowMs: 10 * 60 * 1000 }, // 3 per 10 min
+  "/api/admin/auth/verify-otp": { max: 10, windowMs: 10 * 60 * 1000 }, // 10 per 10 min
+  "/api/auth/signup":           { max: 5,  windowMs: 60 * 60 * 1000 }, // 5 per hour
+};
+
+function checkRateLimit(ip: string, max: number, windowMs: number = RATE_LIMIT_WINDOW): boolean {
   const now = Date.now();
-  const entry = rateLimitMap.get(ip);
+  const key = `${ip}:${windowMs}`;
+  const entry = rateLimitMap.get(key);
   if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
+    rateLimitMap.set(key, { count: 1, resetAt: now + windowMs });
     return true;
   }
   entry.count++;
@@ -42,13 +50,45 @@ async function verifyAdminJWT(token: string): Promise<boolean> {
   }
 }
 
-// --- Security Headers ---
+// --- Security Headers (including CSP) ---
 function addSecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "SAMEORIGIN");
   response.headers.set("X-XSS-Protection", "1; mode=block");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  response.headers.set(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data: blob: https:",
+      "connect-src 'self' https://*.supabase.co https://api.resend.com https://api.telegram.org https://www.google-analytics.com",
+      "frame-ancestors 'self'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; ")
+  );
   return response;
+}
+
+// --- CSRF check for public-facing POST endpoints ---
+function checkCsrf(req: NextRequest): boolean {
+  const origin = req.headers.get("origin");
+  const referer = req.headers.get("referer");
+  const host = req.headers.get("host");
+  if (!origin && !referer) return false; // block requests with no origin at all
+  const allowed = [
+    `https://${host}`,
+    `http://${host}`,
+    "https://www.katyaayaniastrologer.com",
+    "https://katyaayaniastrologer.com",
+    "http://localhost:3000",
+  ];
+  const source = origin || referer || "";
+  return allowed.some((a) => source.startsWith(a));
 }
 
 export async function middleware(req: NextRequest) {
@@ -76,7 +116,30 @@ export async function middleware(req: NextRequest) {
 
   // --- Rate limiting for API routes ---
   if (pathname.startsWith("/api")) {
-    if (!checkRateLimit(`api:${ip}`, RATE_LIMIT_MAX_API)) {
+    // CSRF check for public POST endpoints (enquiry, newsletter, booking, auth)
+    const csrfProtectedPosts = [
+      "/api/enquiry",
+      "/api/newsletter/subscribe",
+      "/api/bookings",
+      "/api/auth/signup",
+      "/api/auth/login",
+    ];
+    if (req.method === "POST" && csrfProtectedPosts.some((p) => pathname.startsWith(p))) {
+      if (!checkCsrf(req)) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
+
+    // Strict per-route auth rate limits
+    const authLimit = AUTH_RATE_LIMITS[pathname];
+    if (authLimit) {
+      if (!checkRateLimit(`auth:${ip}:${pathname}`, authLimit.max, authLimit.windowMs)) {
+        return NextResponse.json(
+          { error: "Too many requests. Please try again later." },
+          { status: 429, headers: { "Retry-After": String(authLimit.windowMs / 1000) } }
+        );
+      }
+    } else if (!checkRateLimit(`api:${ip}:${RATE_LIMIT_WINDOW}`, RATE_LIMIT_MAX_API)) {
       return NextResponse.json(
         { error: "Too many requests. Please try again later." },
         { status: 429, headers: { "Retry-After": "60" } }
