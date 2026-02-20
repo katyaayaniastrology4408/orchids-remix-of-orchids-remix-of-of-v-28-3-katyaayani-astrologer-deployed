@@ -435,7 +435,7 @@ export const forgotPasswordRequestTemplate = (name: string = 'Seeker', email: st
 };
 
 // Password Reset Complete Template
-export const passwordResetCompleteTemplate = (name: string = 'Seeker', newPassword: string) => {
+export const passwordResetCompleteTemplate = (name: string = 'Seeker') => {
   const content = `
     <tr>
       <td style="padding: 40px 35px 20px;">
@@ -449,7 +449,7 @@ export const passwordResetCompleteTemplate = (name: string = 'Seeker', newPasswo
           </tr>
           <tr>
             <td style="text-align: center; padding-top: 25px;">
-              <h1 style="color: #ffffff; font-size: 26px; font-weight: 600; margin: 0;">Your New Password</h1>
+              <h1 style="color: #ffffff; font-size: 26px; font-weight: 600; margin: 0;">Password Has Been Reset</h1>
             </td>
           </tr>
         </table>
@@ -459,31 +459,31 @@ export const passwordResetCompleteTemplate = (name: string = 'Seeker', newPasswo
       <td style="padding: 20px 35px;">
         <p style="color: #e8dcc8; font-size: 16px; margin-bottom: 15px;">Namaste <strong style="color: #ff6b35;">${name}</strong>,</p>
         <p style="color: #b8a896; font-size: 15px; line-height: 1.7;">
-          Your password has been successfully reset by our admin team. You can now log in with your new credentials below.
+          Your account password has been successfully reset by our support team. You can now log in to your account using your new password.
         </p>
       </td>
     </tr>
     <tr>
-      <td style="padding: 15px 35px 30px;">
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <td style="padding: 15px 35px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background: rgba(34, 197, 94, 0.08); border-radius: 12px; border: 1px solid rgba(34, 197, 94, 0.2);">
           <tr>
-            <td style="text-align: center;">
-              <div style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); border-radius: 16px; padding: 25px 40px; display: inline-block; box-shadow: 0 10px 40px rgba(34, 197, 94, 0.3);">
-                <p style="color: rgba(255,255,255,0.8); font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 1px;">New Password</p>
-                <span style="font-size: 24px; font-weight: bold; letter-spacing: 3px; color: #ffffff; font-family: 'Courier New', monospace;">${newPassword}</span>
-              </div>
+            <td style="padding: 20px; text-align: center;">
+              <p style="color: #22c55e; font-size: 14px; margin: 0; font-weight: 600;">✅ Your password has been updated</p>
+              <p style="color: #b8a896; font-size: 13px; margin-top: 10px; line-height: 1.6;">
+                Our team has shared your new password with you separately. Please use it to login and change it immediately from your profile settings for security.
+              </p>
             </td>
           </tr>
         </table>
       </td>
     </tr>
     <tr>
-      <td style="padding: 0 35px;">
+      <td style="padding: 0 35px 15px;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background: rgba(239, 68, 68, 0.08); border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.2);">
           <tr>
             <td style="padding: 15px 20px; text-align: center;">
               <p style="color: #ef4444; font-size: 13px; margin: 0; font-weight: 600;">⚠️ Important Security Notice</p>
-              <p style="color: #b8a896; font-size: 12px; margin-top: 5px;">Please change this password after logging in for your security.</p>
+              <p style="color: #b8a896; font-size: 12px; margin-top: 5px;">If you did not request a password reset, please contact us immediately.</p>
             </td>
           </tr>
         </table>
@@ -494,6 +494,7 @@ export const passwordResetCompleteTemplate = (name: string = 'Seeker', newPasswo
         <a href="${BASE_URL}" style="display: inline-block; padding: 14px 35px; background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%); color: #ffffff; text-decoration: none; border-radius: 30px; font-weight: 600; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);">
           Login Now
         </a>
+        <p style="color: #888; font-size: 12px; margin-top: 15px;">After logging in, please update your password from Profile → Settings</p>
       </td>
     </tr>
   `;

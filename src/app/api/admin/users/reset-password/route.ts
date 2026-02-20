@@ -80,7 +80,7 @@ export async function POST(req: Request) {
     await sendEmail({
       to: email,
       subject: 'Your Password Has Been Reset - Katyaayani Astrologer',
-      html: passwordResetCompleteTemplate(profile.name || 'Seeker', newPassword),
+        html: passwordResetCompleteTemplate(profile.name || 'Seeker'),
     });
 
     return NextResponse.json({ 
