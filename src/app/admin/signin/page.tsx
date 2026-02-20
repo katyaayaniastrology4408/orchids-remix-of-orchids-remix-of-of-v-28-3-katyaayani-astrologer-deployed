@@ -89,7 +89,9 @@ export default function AdminSignInPage() {
       });
       const data = await res.json();
       if (res.ok) {
+        // JWT cookie is set by server; store client-side flag for UI checks
         localStorage.setItem("admin_auth", "true");
+        if (data.token) localStorage.setItem("admin_jwt", data.token);
         router.push("/admin");
         router.refresh();
       } else {

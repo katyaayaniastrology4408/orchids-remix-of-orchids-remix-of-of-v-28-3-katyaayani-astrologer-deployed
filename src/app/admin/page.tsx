@@ -594,8 +594,12 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/auth/logout", { method: "POST" });
+    } catch { /* ignore */ }
     localStorage.removeItem("admin_auth");
+    localStorage.removeItem("admin_jwt");
     router.push("/admin/signin");
   };
 

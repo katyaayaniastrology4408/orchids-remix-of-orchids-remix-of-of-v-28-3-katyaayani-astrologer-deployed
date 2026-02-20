@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { jwtVerify } from "jose";
 
 // --- Rate Limiting (in-memory, per IP) ---
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -18,7 +18,6 @@ function checkRateLimit(ip: string, max: number): boolean {
   return entry.count <= max;
 }
 
-// Clean up expired entries inline (every 100th check)
 let cleanupCounter = 0;
 function maybeCleanup() {
   cleanupCounter++;
@@ -30,29 +29,14 @@ function maybeCleanup() {
   }
 }
 
-// --- Admin API Authentication ---
-async function verifyAdminAuth(req: NextRequest): Promise<boolean> {
-  const authHeader = req.headers.get("authorization");
-  const cookieToken = req.cookies.get("admin-token")?.value;
-  const token = authHeader?.replace("Bearer ", "") || cookieToken;
-
-  if (!token) return false;
-
+// --- JWT Verification (Edge-compatible) ---
+async function verifyAdminJWT(token: string): Promise<boolean> {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!supabaseUrl || !supabaseKey) return false;
-
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
-
-    const { data: { user } } = await supabase.auth.getUser(token);
-    if (!user) return false;
-
-    // Check if user email matches admin
-    const adminEmail = process.env.ADMIN_EMAIL;
-    return user.email === adminEmail;
+    const secret = new TextEncoder().encode(
+      process.env.JWT_SECRET || "katyaayani-admin-jwt-secret-2026-xK9pQmRz7nVwYeHsLdBcFgJtNuAiOv"
+    );
+    const { payload } = await jwtVerify(token, secret);
+    return payload.role === "admin";
   } catch {
     return false;
   }
@@ -81,6 +65,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // --- Admin page protection (non-API) ---
+  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/signin")) {
+    const jwtCookie = req.cookies.get("admin-jwt")?.value;
+    if (!jwtCookie || !(await verifyAdminJWT(jwtCookie))) {
+      const signinUrl = new URL("/admin/signin", req.url);
+      return NextResponse.redirect(signinUrl);
+    }
+  }
+
   // --- Rate limiting for API routes ---
   if (pathname.startsWith("/api")) {
     if (!checkRateLimit(`api:${ip}`, RATE_LIMIT_MAX_API)) {
@@ -90,25 +83,22 @@ export async function middleware(req: NextRequest) {
       );
     }
 
-    // Admin API protection - require auth for admin endpoints
+    // Admin API protection
     if (pathname.startsWith("/api/admin")) {
-      // Allow health-check without auth (for external monitoring)
-      if (pathname === "/api/admin/health-check") {
-        return addSecurityHeaders(NextResponse.next());
-      }
+      // Always allow these without JWT (they are part of the login flow)
+      const publicAdminRoutes = [
+        "/api/admin/health-check",
+        "/api/admin/auth/send-otp",
+        "/api/admin/auth/verify-otp",
+        "/api/admin/auth/forgot-password",
+        "/api/admin/auth/logout",
+      ];
+      if (!publicAdminRoutes.includes(pathname)) {
+        const jwtCookie = req.cookies.get("admin-jwt")?.value;
+        const isValid = jwtCookie ? await verifyAdminJWT(jwtCookie) : false;
 
-      const isAdmin = await verifyAdminAuth(req);
-      if (!isAdmin) {
-        // Fallback: check basic auth header (email:password)
-        const basicAuth = req.headers.get("x-admin-key");
-        const expectedKey = `${process.env.ADMIN_EMAIL}:${process.env.ADMIN_PASSWORD}`;
-        if (basicAuth !== expectedKey) {
-          // Allow if request comes from same origin (browser admin panel)
-          const origin = req.headers.get("origin") || req.headers.get("referer") || "";
-          const isLocalRequest = origin.includes("localhost") || origin.includes("katyaayaniastrologer.com");
-          if (!isLocalRequest) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-          }
+        if (!isValid) {
+          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
       }
     }
@@ -130,6 +120,8 @@ export async function middleware(req: NextRequest) {
       return addSecurityHeaders(NextResponse.next());
     }
 
+    // Dynamically import to avoid Edge runtime issues
+    const { createClient } = await import("@supabase/supabase-js");
     const supabase = createClient(supabaseUrl, supabaseKey, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
