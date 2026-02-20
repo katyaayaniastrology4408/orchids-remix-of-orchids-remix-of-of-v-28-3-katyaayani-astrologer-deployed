@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
           finalHtml = finalHtml.split(`{{{${key}}}}`).join(String(val));
         }
         return {
-          from: 'Katyaayani Astrologer <newsletter@katyaayaniastrologer.com>',
+          from: process.env.RESEND_FROM_EMAIL || 'Katyaayani Astrologer <noreply@katyaayaniastrologer.com>',
           to: sub.email,
           subject,
           html: finalHtml,
