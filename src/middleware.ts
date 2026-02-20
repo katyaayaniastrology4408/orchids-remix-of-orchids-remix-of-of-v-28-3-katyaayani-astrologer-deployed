@@ -61,11 +61,11 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
       "Content-Security-Policy",
       [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://*.supabase.co https://consent.cookiebot.com https://consentcdn.cookiebot.com",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://*.supabase.co https://consent.cookiebot.com https://consentcdn.cookiebot.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' data: https://fonts.gstatic.com",
         "img-src 'self' data: blob: https:",
-        "connect-src 'self' https://*.supabase.co https://api.resend.com https://api.telegram.org https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://region1.google-analytics.com https://consentcdn.cookiebot.com https://consent.cookiebot.com",
+        "connect-src 'self' https://*.supabase.co https://api.resend.com https://api.telegram.org https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://region1.google-analytics.com https://consentcdn.cookiebot.com https://consent.cookiebot.com https://www.google.com https://googleads.g.doubleclick.net",
         "frame-src 'self' https://www.googletagmanager.com https://consent.cookiebot.com https://consentcdn.cookiebot.com",
         "frame-ancestors 'self'",
         "base-uri 'self'",
