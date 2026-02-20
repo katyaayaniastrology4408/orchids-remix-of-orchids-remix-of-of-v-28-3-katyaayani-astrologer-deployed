@@ -9,6 +9,7 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     const handleCallback = async () => {
+      // Wait for Supabase to exchange the code for a session
       const { data: { session }, error } = await supabase.auth.getSession();
 
       if (error || !session) {
@@ -20,16 +21,7 @@ export default function AuthCallbackPage() {
       const provider = user.app_metadata?.provider;
 
       if (provider === "google") {
-        // Check if profile already has dob/pob filled
-        const { data: profile } = await (supabase as any)
-          .from("profiles")
-          .select("dob, tob, pob")
-          .eq("id", user.id)
-          .single();
-
-        const isComplete = profile?.dob && profile?.pob;
-
-        // Notify backend to handle Google login (save profile + send email)
+        // Step 1: Ensure profile row exists (insert if new user)
         await fetch("/api/auth/google-login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -38,16 +30,28 @@ export default function AuthCallbackPage() {
             email: user.email,
             name: user.user_metadata?.full_name || user.user_metadata?.name || "",
             avatar: user.user_metadata?.avatar_url || "",
-            isNew: !isComplete,
           }),
         });
 
+        // Step 2: Check if profile is complete (has dob + pob filled)
+        const { data: profile } = await (supabase as any)
+          .from("profiles")
+          .select("dob, pob, phone, gender, tob")
+          .eq("id", user.id)
+          .single();
+
+        const isComplete =
+          profile?.dob && profile?.pob && profile?.phone && profile?.gender;
+
         if (!isComplete) {
+          // New user or incomplete profile — go fill details
           router.replace("/complete-profile");
         } else {
+          // Returning user — go straight to profile
           router.replace("/profile");
         }
       } else {
+        // Email/password login — go to profile
         router.replace("/profile");
       }
     };
