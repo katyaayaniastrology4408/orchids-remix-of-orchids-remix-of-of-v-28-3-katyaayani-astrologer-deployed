@@ -6,7 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const INDEXNOW_KEY = process.env.INDEXNOW_API_KEY || "4dc380408a8140fd8b67450af7964725";
+const INDEXNOW_KEY = process.env.INDEXNOW_API_KEY || "a889b4f2a770404297f5fe6867c814f5";
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.katyaayaniastrologer.com";
 const HOST = new URL(SITE_URL).hostname;
 

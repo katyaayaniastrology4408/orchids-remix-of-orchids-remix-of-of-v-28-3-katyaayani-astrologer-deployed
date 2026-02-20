@@ -205,7 +205,7 @@ export const metadata: Metadata = {
     google: ["2Edo_sTI7Jp85F7z7xr0yG6MTSrSsm5WO0jY4HsAqmM", "JC618JFaR6PWY6n1KlEKLwBnTB2Qekmi-2rjnke5S5M"],
     yandex: "yandex-verification-code",
     other: {
-      "msvalidate.01": process.env.NEXT_PUBLIC_BING_VERIFICATION || "4dc380408a8140fd8b67450af7964725",
+      "msvalidate.01": process.env.NEXT_PUBLIC_BING_VERIFICATION || "a889b4f2a770404297f5fe6867c814f5",
     },
   },
   manifest: "/manifest.json",

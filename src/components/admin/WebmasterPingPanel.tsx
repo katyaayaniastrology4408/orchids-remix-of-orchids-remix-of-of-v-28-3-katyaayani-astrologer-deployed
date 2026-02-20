@@ -40,7 +40,7 @@ export default function WebmasterPingPanel({ isDark, t, setSuccess, setError }: 
   // IndexNow states
   const [indexNowUrls, setIndexNowUrls] = useState("");
   const [indexNowSubmitting, setIndexNowSubmitting] = useState(false);
-  const [indexNowKey] = useState("4dc380408a8140fd8b67450af7964725");
+  const [indexNowKey] = useState("a889b4f2a770404297f5fe6867c814f5");
   const [lastIndexNowResult, setLastIndexNowResult] = useState<any>(null);
 
   // Live verification check
