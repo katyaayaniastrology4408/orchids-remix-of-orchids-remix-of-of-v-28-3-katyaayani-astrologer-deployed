@@ -7,14 +7,15 @@ const RESEND_AUDIENCE_ID = 'e6bafd8b-5149-4862-a298-e23bd5578190';
 
 export async function POST(request: NextRequest) {
   try {
-    const { subject, html, secretKey } = await request.json();
+    const body = await request.json();
+    const { subject, html, templateName, variables, secretKey } = body;
 
     if (secretKey !== process.env.ADMIN_PASSWORD) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (!subject || !html) {
-      return NextResponse.json({ error: 'Subject and html are required' }, { status: 400 });
+    if (!subject) {
+      return NextResponse.json({ error: 'Subject is required' }, { status: 400 });
     }
 
     const resendApiKey = process.env.RESEND_API_KEY;
@@ -22,10 +23,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Resend API key not configured' }, { status: 500 });
     }
 
-    // Get all active subscribers from Supabase
+    // Get all active subscribers
     const { data: subscribers, error } = await supabaseAdmin
       .from('newsletter_subscribers')
-      .select('email')
+      .select('email, first_name, last_name')
       .eq('is_active', true);
 
     if (error) {
@@ -39,44 +40,69 @@ export async function POST(request: NextRequest) {
     const resend = new Resend(resendApiKey);
     const results: { email: string; success: boolean; error?: string }[] = [];
 
-    // Resend allows batch — send in batches of 100 (daily limit is 100)
+    // If templateName provided, fetch the Resend template and replace variables in HTML
+    let emailHtml = html || '';
+    if (templateName && !html) {
+      // Fetch templates list to get the template
+      const tmplRes = await fetch('https://api.resend.com/templates', {
+        headers: { Authorization: `Bearer ${resendApiKey}` },
+      });
+      const tmplData = await tmplRes.json();
+      const found = (tmplData.data || []).find((t: any) => t.name === templateName);
+      if (!found) {
+        return NextResponse.json({ error: `Template "${templateName}" not found on Resend. Please run Setup Templates first.` }, { status: 400 });
+      }
+      emailHtml = found.html || '';
+    }
+
+    if (!emailHtml) {
+      return NextResponse.json({ error: 'No email content (html or templateName) provided.' }, { status: 400 });
+    }
+
+    // Send in batches of 50
     const BATCH_SIZE = 50;
     for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
       const batch = subscribers.slice(i, i + BATCH_SIZE);
-      const emails = batch.map(sub => ({
-        from: 'Katyaayani Astrologer <newsletter@katyaayaniastrologer.com>',
-        to: sub.email,
-        subject,
-        html,
-      }));
+      const emails = batch.map((sub) => {
+        // Replace template variables — merge global vars with per-subscriber NAME
+        const vars: Record<string, string> = {
+          UNSUBSCRIBE_URL: 'https://www.katyaayaniastrologer.com/unsubscribe',
+          ...variables,
+          NAME: sub.first_name || variables?.NAME || 'Devotee',
+        };
+        // Replace {{{VAR}}} patterns
+        let finalHtml = emailHtml;
+        for (const [key, val] of Object.entries(vars)) {
+          finalHtml = finalHtml.split(`{{{${key}}}}`).join(String(val));
+        }
+        return {
+          from: 'Katyaayani Astrologer <newsletter@katyaayaniastrologer.com>',
+          to: sub.email,
+          subject,
+          html: finalHtml,
+        };
+      });
 
       try {
         const { data: batchData, error: batchError } = await resend.batch.send(emails);
         if (batchError) {
-          batch.forEach(sub => results.push({ email: sub.email, success: false, error: String(batchError) }));
+          batch.forEach((sub) => results.push({ email: sub.email, success: false, error: String(batchError) }));
         } else {
-          batch.forEach(sub => results.push({ email: sub.email, success: true }));
+          batch.forEach((sub) => results.push({ email: sub.email, success: true }));
         }
       } catch (err: any) {
-        batch.forEach(sub => results.push({ email: sub.email, success: false, error: err.message }));
+        batch.forEach((sub) => results.push({ email: sub.email, success: false, error: err.message }));
       }
 
-      // Small delay between batches
       if (i + BATCH_SIZE < subscribers.length) {
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise((r) => setTimeout(r, 500));
       }
     }
 
-    const sent = results.filter(r => r.success).length;
-    const failed = results.filter(r => !r.success).length;
+    const sent = results.filter((r) => r.success).length;
+    const failed = results.filter((r) => !r.success).length;
 
-    return NextResponse.json({
-      success: true,
-      total: results.length,
-      sent,
-      failed,
-      results,
-    });
+    return NextResponse.json({ success: true, total: results.length, sent, failed, results });
   } catch (error: any) {
     console.error('Newsletter send error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
