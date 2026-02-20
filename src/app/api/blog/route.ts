@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '@/lib/email.config';
 import { newBlogPostTemplate } from '@/lib/email-templates';
+import { Resend } from 'resend';
 export const dynamic = 'force-dynamic' ; 
 
 const supabase = createClient(
@@ -9,30 +10,81 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+const BASE_URL = 'https://www.katyaayaniastrologer.com';
+
+function buildBlogEmailHtml(post: { title: string; excerpt?: string; slug: string; category?: string }, name: string): string {
+  const blogUrl = `${BASE_URL}/blog/${post.slug}`;
+  return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>New Blog Post</title></head>
+<body style="margin:0;padding:0;background:#0d0800;font-family:'Georgia',serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0800;">
+    <tr><td align="center" style="padding:32px 16px;">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#1a1000;border-radius:16px;overflow:hidden;border:1px solid #8b1a00;">
+        <tr><td style="background:linear-gradient(135deg,#8b1a00,#c45200);padding:28px 24px;text-align:center;">
+          <div style="font-size:36px;margin-bottom:8px;">📖</div>
+          <h1 style="margin:0;color:#ffd700;font-size:22px;letter-spacing:2px;font-family:Georgia,serif;">Katyaayani Astrologer</h1>
+          <p style="margin:8px 0 0;color:#ffb347;font-size:12px;letter-spacing:4px;text-transform:uppercase;">New Blog Post</p>
+        </td></tr>
+        <tr><td style="padding:28px 32px 0;text-align:center;">
+          <p style="color:#ffd700;font-size:17px;margin:0;">Namaste ${name} 🙏</p>
+          <p style="color:#d4a574;font-size:13px;margin:10px 0 0;">A new article has been published for you</p>
+          <div style="width:60px;height:2px;background:linear-gradient(90deg,transparent,#ffd700,transparent);margin:16px auto 0;"></div>
+        </td></tr>
+        <tr><td style="padding:20px 32px 0;text-align:center;">
+          <span style="display:inline-block;background:#8b1a00;color:#ffd700;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:50px;">${post.category || 'Vedic Astrology'}</span>
+        </td></tr>
+        <tr><td style="padding:16px 32px 0;text-align:center;">
+          <h2 style="color:#ffd700;font-size:22px;margin:0;line-height:1.4;">${post.title}</h2>
+        </td></tr>
+        <tr><td style="padding:20px 32px;">
+          <div style="background:#2d1208;border:1px solid #8b3a0f;border-radius:12px;padding:22px 24px;">
+            <p style="color:#e8d5b7;font-size:15px;line-height:1.9;margin:0;">${post.excerpt || 'Read our latest article on Vedic astrology and cosmic wisdom.'}</p>
+          </div>
+        </td></tr>
+        <tr><td style="padding:0 32px 32px;text-align:center;">
+          <a href="${blogUrl}" style="display:inline-block;background:linear-gradient(135deg,#c45200,#ff6b35);color:#fff;text-decoration:none;padding:14px 36px;border-radius:50px;font-size:14px;font-weight:bold;letter-spacing:1px;">Read Full Article</a>
+        </td></tr>
+        <tr><td style="background:#080500;padding:20px 32px;text-align:center;border-top:1px solid #8b1a00;">
+          <p style="color:#6b3a1a;font-size:11px;margin:0 0 6px;">Katyaayani Astrologer | Vedic Astrology &amp; Spiritual Guidance</p>
+          <p style="color:#4a2a10;font-size:10px;margin:0;"><a href="${BASE_URL}" style="color:#6b3a1a;text-decoration:none;">katyaayaniastrologer.com</a></p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+}
+
 async function sendBlogNotificationToAllUsers(post: { title: string; excerpt?: string; slug: string; category?: string; featured_image?: string }) {
   try {
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('email, name');
+    const { data: profiles, error } = await supabase
+      .from('profiles')
+      .select('email, name');
 
-      if (error || !profiles || profiles.length === 0) {
-        console.warn('No users found for blog notification');
-        return;
+    if (error || !profiles || profiles.length === 0) {
+      console.warn('No users found for blog notification');
+      return;
+    }
+
+    const resend = new Resend(process.env.RESEND_API_KEY!);
+    const BATCH_SIZE = 50;
+
+    for (let i = 0; i < profiles.length; i += BATCH_SIZE) {
+      const batch = profiles.slice(i, i + BATCH_SIZE);
+      const emails = batch.map((user) => ({
+        from: 'Katyaayani Astrologer <newsletter@katyaayaniastrologer.com>',
+        to: user.email,
+        subject: `New Blog Post: ${post.title} - Katyaayani Astrologer`,
+        html: buildBlogEmailHtml(post, user.name || 'Seeker'),
+      }));
+      try {
+        await resend.batch.send(emails);
+      } catch (err) {
+        console.error('Batch blog email error:', err);
       }
+      if (i + BATCH_SIZE < profiles.length) await new Promise(r => setTimeout(r, 500));
+    }
 
-      const results = await Promise.allSettled(
-        profiles.map(user => {
-          const userName = user.name || 'Seeker';
-        return sendEmail({
-          to: user.email,
-          subject: `New Blog Post: ${post.title} - Katyaayani Astrologer`,
-          html: newBlogPostTemplate(post, userName),
-        });
-      })
-    );
-
-    const successCount = results.filter(r => r.status === 'fulfilled' && (r as any).value?.success).length;
-    console.log(`Blog notification emails sent: ${successCount}/${profiles.length}`);
+    console.log(`Blog notification sent via Resend to ${profiles.length} users`);
   } catch (err) {
     console.error('Error sending blog notification emails:', err);
   }
