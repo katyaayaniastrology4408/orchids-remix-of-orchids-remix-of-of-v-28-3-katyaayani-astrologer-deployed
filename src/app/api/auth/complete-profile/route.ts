@@ -22,6 +22,7 @@ export async function POST(req: Request) {
         dob: dob || null,
         tob: tob || null,
         pob: pob || null,
+        email_verified: true,
       })
       .eq("id", id);
 
