@@ -3,7 +3,37 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
 export const dynamic = 'force-dynamic';
 
-const RESEND_AUDIENCE_ID = 'e6bafd8b-5149-4862-a298-e23bd5578190';
+// Will be resolved at runtime from env or created if not exists
+let cachedAudienceId: string | null = process.env.RESEND_AUDIENCE_ID || null;
+
+async function getOrCreateAudienceId(resend: Resend): Promise<string | null> {
+  if (cachedAudienceId) return cachedAudienceId;
+  try {
+    // List existing audiences
+    const listResult = await resend.audiences.list();
+    const audienceList: any[] = (listResult?.data as any)?.data ?? listResult?.data ?? [];
+    if (audienceList.length > 0) {
+      cachedAudienceId = audienceList[0].id;
+      console.log('Using existing Resend audience:', cachedAudienceId);
+      return cachedAudienceId;
+    }
+    // Create a new audience
+    const createResult = await resend.audiences.create({
+      name: 'Katyaayani Astrologer Newsletter',
+    });
+    const newAudience: any = createResult?.data;
+    if (newAudience?.id) {
+      cachedAudienceId = newAudience.id;
+      console.log('Created new Resend audience:', cachedAudienceId);
+      return cachedAudienceId;
+    }
+    console.error('Could not get/create Resend audience:', createResult?.error);
+    return null;
+  } catch (e) {
+    console.error('Error resolving Resend audience:', e);
+    return null;
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,23 +63,31 @@ export async function POST(request: NextRequest) {
       console.error('Supabase newsletter error:', dbError);
     }
 
-    // Save contact to Resend audience
-    const resendApiKey = process.env.RESEND_API_KEY;
-    if (resendApiKey) {
-      try {
-        const resend = new Resend(resendApiKey);
-        await resend.contacts.create({
-          audienceId: RESEND_AUDIENCE_ID,
-          email,
-          firstName: firstName || undefined,
-          lastName: lastName || undefined,
-          unsubscribed: false,
-        });
-      } catch (resendError) {
-        console.error('Resend contact add error:', resendError);
-        // Don't fail — Supabase save already done
+      // Save contact to Resend audience
+      const resendApiKey = process.env.RESEND_API_KEY;
+      if (resendApiKey) {
+        try {
+          const resend = new Resend(resendApiKey);
+          const audienceId = await getOrCreateAudienceId(resend);
+          if (audienceId) {
+            const { error: resendContactError } = await resend.contacts.create({
+              audienceId,
+              email,
+              firstName: firstName || undefined,
+              lastName: lastName || undefined,
+              unsubscribed: false,
+            });
+            if (resendContactError) {
+              console.error('Resend contact create error:', resendContactError);
+            } else {
+              console.log('Contact added to Resend audience:', audienceId, email);
+            }
+          }
+        } catch (resendError) {
+          console.error('Resend contact add error:', resendError);
+          // Don't fail — Supabase save already done
+        }
       }
-    }
 
     return NextResponse.json({
       success: true,
