@@ -65,6 +65,7 @@ import {
       Shield,
       Server,
       Edit3,
+      IndianRupee,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -97,6 +98,8 @@ import ReschedulePanel from "@/components/admin/ReschedulePanel";
 import InvoicePanel from "@/components/admin/InvoicePanel";
 import NewsletterPanel from "@/components/admin/NewsletterPanel";
 import EmailConfigPanel from "@/components/admin/EmailConfigPanel";
+import EmailTemplatesPanel from "@/components/admin/EmailTemplatesPanel";
+import PricingPanel from "@/components/admin/PricingPanel";
 
 // Safe JSON parse helper - prevents "Unexpected end of JSON input" errors
 async function safeJson(res: Response) {
@@ -1829,9 +1832,17 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
                           <NewsletterPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
                         )}
 
-                        {activeTab === "email-config" && (
-                          <EmailConfigPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
-                        )}
+                          {activeTab === "email-config" && (
+                            <EmailConfigPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                          )}
+
+                          {activeTab === "email-templates" && (
+                            <EmailTemplatesPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                          )}
+
+                          {activeTab === "pricing" && (
+                            <PricingPanel isDark={isDark} t={t} setSuccess={setSuccess} setError={setError} />
+                          )}
 
                       {activeTab === "settings" && (
 
@@ -3699,8 +3710,10 @@ function SidebarContent({ activeTab, setActiveTab, handleLogout, isDark, t }: {
           <NavItem icon={<KeyRound className="w-4 h-4" />} label={t("Resets")} active={activeTab === "resets"} onClick={() => setActiveTab("resets")} isDark={isDark} />
             <NavItem icon={<Star className="w-4 h-4" />} label={t("Feedback")} active={activeTab === "feedback"} onClick={() => setActiveTab("feedback")} isDark={isDark} />
               <NavItem icon={<Bell className="w-4 h-4" />} label={t("Broadcast")} active={activeTab === "broadcast"} onClick={() => setActiveTab("broadcast")} isDark={isDark} />
-                <NavItem icon={<Mail className="w-4 h-4" />} label={t("Newsletter")} active={activeTab === "newsletter"} onClick={() => setActiveTab("newsletter")} isDark={isDark} />
-                <NavItem icon={<Server className="w-4 h-4" />} label={t("Email Config")} active={activeTab === "email-config"} onClick={() => setActiveTab("email-config")} isDark={isDark} />
+                  <NavItem icon={<Mail className="w-4 h-4" />} label={t("Newsletter")} active={activeTab === "newsletter"} onClick={() => setActiveTab("newsletter")} isDark={isDark} />
+                  <NavItem icon={<Server className="w-4 h-4" />} label={t("Email Config")} active={activeTab === "email-config"} onClick={() => setActiveTab("email-config")} isDark={isDark} />
+                  <NavItem icon={<Palette className="w-4 h-4" />} label={t("Email Templates")} active={activeTab === "email-templates"} onClick={() => setActiveTab("email-templates")} isDark={isDark} />
+                  <NavItem icon={<IndianRupee className="w-4 h-4" />} label={t("Pricing")} active={activeTab === "pricing"} onClick={() => setActiveTab("pricing")} isDark={isDark} />
                   <NavItem icon={<Sun className="w-4 h-4" />} label={t("Daily Rashifal")} active={activeTab === "rashifal"} onClick={() => setActiveTab("rashifal")} isDark={isDark} />
                 <NavItem icon={<Calendar className="w-4 h-4" />} label={t("Weekly Rashifal")} active={activeTab === "weekly-rashifal"} onClick={() => setActiveTab("weekly-rashifal")} isDark={isDark} />
             <NavItem icon={<FileText className="w-4 h-4" />} label={t("Blog")} active={activeTab === "blog"} onClick={() => setActiveTab("blog")} isDark={isDark} />

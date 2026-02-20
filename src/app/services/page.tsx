@@ -292,6 +292,41 @@ export default function ServicesPage() {
   const { user, showAuthModal } = useAuth();
   const router = useRouter();
 
+  // Dynamic prices from DB
+  const [dbPrices, setDbPrices] = useState<Record<string, { price_display: string; duration: string }>>({});
+  useEffect(() => {
+    fetch("/api/admin/pricing")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.prices) {
+          const map: Record<string, { price_display: string; duration: string }> = {};
+          data.prices.forEach((p: any) => { map[p.id] = { price_display: p.price_display, duration: p.duration }; });
+          setDbPrices(map);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const getServicePrice = (service: typeof services[0]) => {
+    const idMap: Record<string, string> = {
+      "Home Consultation (Outside 6.5km)": "home-outside",
+      "Home Consultation (Within 6.5km)": "home-within",
+      "Online Consultation": "online",
+    };
+    const id = idMap[service.title];
+    return id && dbPrices[id] ? dbPrices[id].price_display : `₹ ${service.price}`;
+  };
+
+  const getServiceDurationDynamic = (service: typeof services[0]) => {
+    const idMap: Record<string, string> = {
+      "Home Consultation (Outside 6.5km)": "home-outside",
+      "Home Consultation (Within 6.5km)": "home-within",
+      "Online Consultation": "online",
+    };
+    const id = idMap[service.title];
+    return id && dbPrices[id] ? dbPrices[id].duration : getServiceDuration(service);
+  };
+
   const handleBookNow = (e: React.MouseEvent) => {
     if (!user) {
       e.preventDefault();
@@ -391,16 +426,16 @@ export default function ServicesPage() {
                           {getServiceDescription(service)}
                         </p>
                         
-                        <div className="flex items-center gap-6 mb-6">
-                          <div className="flex items-center gap-2">
-                            <IndianRupee className="w-5 h-5 text-[#ff6b35]" />
-                              <span className="text-[#ff6b35] font-semibold text-2xl">{formatCurrency(service.price)}</span>
+                          <div className="flex items-center gap-6 mb-6">
+                            <div className="flex items-center gap-2">
+                              <IndianRupee className="w-5 h-5 text-[#ff6b35]" />
+                                <span className="text-[#ff6b35] font-semibold text-2xl">{getServicePrice(service)}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-5 h-5 text-[#ff6b35]" />
+                              <span className={`font-semibold ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'}`}>{getServiceDurationDynamic(service)}</span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-5 h-5 text-[#ff6b35]" />
-                            <span className={`font-semibold ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'}`}>{getServiceDuration(service)}</span>
-                          </div>
-                        </div>
 
                           <Link href="/booking">
                             <Button 

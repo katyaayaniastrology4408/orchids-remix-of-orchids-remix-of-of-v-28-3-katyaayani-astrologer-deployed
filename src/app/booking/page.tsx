@@ -33,7 +33,7 @@ import Script from "next/script";
 
 const CrispChat = dynamic(() => import("@/components/CrispChat"), { ssr: false });
 
-const consultationTypes = [
+const DEFAULT_CONSULTATION_TYPES = [
   {
     id: "home-outside",
     icon: Home,
@@ -87,6 +87,7 @@ export default function BookingPage() {
   const { theme, toggleTheme } = useTheme();
   const { language, t } = useTranslation();
   
+  const [consultationTypes, setConsultationTypes] = useState(DEFAULT_CONSULTATION_TYPES);
   const [step, setStep] = useState(1);
   const [userGender, setUserGender] = useState<string>("male");
   const [selectedType, setSelectedType] = useState<string | null>(null);
@@ -121,6 +122,33 @@ export default function BookingPage() {
     birthPlace: "",
     questions: "",
   });
+
+  // Fetch prices from DB (admin can update them)
+  useEffect(() => {
+    fetch("/api/admin/pricing")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.prices && data.prices.length > 0) {
+          setConsultationTypes((prev) =>
+            prev.map((ct) => {
+              const dbPrice = data.prices.find((p: any) => p.id === ct.id);
+              if (!dbPrice) return ct;
+              return {
+                ...ct,
+                price: dbPrice.price,
+                priceDisplay: dbPrice.price_display,
+                duration: {
+                  en: dbPrice.duration,
+                  hi: dbPrice.duration,
+                  gu: dbPrice.duration,
+                },
+              };
+            })
+          );
+        }
+      })
+      .catch(() => {/* use defaults */});
+  }, []);
 
   const selectedConsultation = consultationTypes.find(type => type.id === selectedType);
   const getCurrentPrice = () => selectedConsultation ? selectedConsultation.price : 0;
