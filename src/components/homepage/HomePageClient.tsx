@@ -382,8 +382,8 @@ export default function HomePageClient() {
             {/* Review count badge */}
             <div className="flex justify-center mt-4">
               <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold border ${theme === 'dark' ? 'bg-[#ff6b35]/10 border-[#ff6b35]/30 text-[#ff8c5e]' : 'bg-[#ff6b35]/10 border-[#ff6b35]/30 text-[#ff6b35]'}`}>
-                <Star className="w-3.5 h-3.5 fill-current" />
-                {testimonials.length}+ {language === 'gu' ? 'સમીક્ષાઓ' : language === 'hi' ? 'समीक्षाएं' : 'Reviews'}
+                  <Star className="w-3.5 h-3.5 fill-current" />
+                  {language === 'gu' ? 'સમીક્ષાઓ' : language === 'hi' ? 'समीक्षाएं' : 'Reviews'}
               </span>
             </div>
           </div>
@@ -417,7 +417,7 @@ export default function HomePageClient() {
           {!showAllReviews ? (
             <div className="relative">
               {/* Blurred preview of next 3 */}
-              <div className="grid md:grid-cols-3 gap-8 blur-sm pointer-events-none select-none">
+                <div className="grid md:grid-cols-3 gap-8 blur-[2px] pointer-events-none select-none">
                 {testimonials.slice(3, 6).map((testimonial) => (
                   <div key={testimonial.name}>
                     <Card className={`${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20' : 'bg-[#f8f4ee] border-[#ff6b35]/30'} h-full`}>
