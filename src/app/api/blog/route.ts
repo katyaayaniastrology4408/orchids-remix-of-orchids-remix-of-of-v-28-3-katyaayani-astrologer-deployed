@@ -1,40 +1,74 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { sendEmail } from '@/lib/email.config';
+import { Resend } from 'resend';
 import { newBlogPostTemplate } from '@/lib/email-templates';
-export const dynamic = 'force-dynamic' ; 
+export const dynamic = 'force-dynamic';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-async function sendBlogNotificationToAllUsers(post: { title: string; excerpt?: string; slug: string; category?: string; featured_image?: string }) {
+// Blog/Rashifal notifications → Resend (bulk newsletter-style)
+async function sendBlogNotificationViaResend(post: {
+  title: string;
+  excerpt?: string;
+  slug: string;
+  category?: string;
+  featured_image?: string;
+}) {
   try {
-      const { data: profiles, error } = await supabase
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) return;
+
+    const resend = new Resend(resendApiKey);
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'Katyaayani Astrologer <noreply@katyaayaniastrologer.com>';
+
+    // Get all newsletter subscribers (active)
+    const { data: subscribers } = await supabase
+      .from('newsletter_subscribers')
+      .select('email, first_name')
+      .eq('is_active', true);
+
+    if (!subscribers || subscribers.length === 0) {
+      // Fallback: notify all registered users
+      const { data: profiles } = await supabase
         .from('profiles')
         .select('email, name');
 
-      if (error || !profiles || profiles.length === 0) {
-        console.warn('No users found for blog notification');
-        return;
-      }
+      if (!profiles || profiles.length === 0) return;
 
-      const results = await Promise.allSettled(
-        profiles.map(user => {
-          const userName = user.name || 'Seeker';
-        return sendEmail({
+      const BATCH_SIZE = 50;
+      for (let i = 0; i < profiles.length; i += BATCH_SIZE) {
+        const batch = profiles.slice(i, i + BATCH_SIZE);
+        const emails = batch.map((user) => ({
+          from: fromEmail,
           to: user.email,
           subject: `New Blog Post: ${post.title} - Katyaayani Astrologer`,
-          html: newBlogPostTemplate(post, userName),
-        });
-      })
-    );
+          html: newBlogPostTemplate(post, user.name || 'Seeker'),
+        }));
+        await resend.batch.send(emails).catch((e) => console.error('Resend batch error:', e));
+        if (i + BATCH_SIZE < profiles.length) await new Promise((r) => setTimeout(r, 300));
+      }
+      return;
+    }
 
-    const successCount = results.filter(r => r.status === 'fulfilled' && (r as any).value?.success).length;
-    console.log(`Blog notification emails sent: ${successCount}/${profiles.length}`);
+    const BATCH_SIZE = 50;
+    for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
+      const batch = subscribers.slice(i, i + BATCH_SIZE);
+      const emails = batch.map((sub) => ({
+        from: fromEmail,
+        to: sub.email,
+        subject: `New Blog Post: ${post.title} - Katyaayani Astrologer`,
+        html: newBlogPostTemplate(post, sub.first_name || 'Devotee'),
+      }));
+      await resend.batch.send(emails).catch((e) => console.error('Resend batch error:', e));
+      if (i + BATCH_SIZE < subscribers.length) await new Promise((r) => setTimeout(r, 300));
+    }
+
+    console.log(`Blog notification sent via Resend to ${subscribers.length} subscribers`);
   } catch (err) {
-    console.error('Error sending blog notification emails:', err);
+    console.error('Error sending blog notification via Resend:', err);
   }
 }
 
@@ -99,7 +133,6 @@ export async function POST(request: NextRequest) {
       is_published 
     } = body;
     
-    // Generate slug from title if not provided
     const finalSlug = slug || title
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, '')
@@ -131,38 +164,25 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
     
-      if (error) throw error;
+    if (error) throw error;
 
-      // Send admin notification email
-      const adminEmail = process.env.ADMIN_EMAIL;
-      if (adminEmail && data) {
-        sendEmail({
-          to: adminEmail,
-          subject: `Blog ${is_published ? 'Published' : 'Draft Created'}: ${data.title}`,
-          html: newBlogPostTemplate(
-            { title: data.title, excerpt: data.excerpt, slug: data.slug, category: data.category, featured_image: data.featured_image },
-            'Admin'
-          ),
-        }).catch(err => console.error('Failed to send admin blog notification:', err));
-      }
-
-      // Send email notification to all users if blog is published
-      if (is_published && data) {
-        sendBlogNotificationToAllUsers({
-          title: data.title,
-          excerpt: data.excerpt,
-          slug: data.slug,
-          category: data.category,
-          featured_image: data.featured_image,
-        });
-      }
-      
-      return NextResponse.json({ success: true, data });
-    } catch (error) {
-      console.error('Error creating blog post:', error);
-      return NextResponse.json(
-        { error: 'Failed to create blog post' },
-        { status: 500 }
-      );
+    // Send notification via Resend if published
+    if (is_published && data) {
+      sendBlogNotificationViaResend({
+        title: data.title,
+        excerpt: data.excerpt,
+        slug: data.slug,
+        category: data.category,
+        featured_image: data.featured_image,
+      });
     }
+    
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
+    console.error('Error creating blog post:', error);
+    return NextResponse.json(
+      { error: 'Failed to create blog post' },
+      { status: 500 }
+    );
   }
+}
