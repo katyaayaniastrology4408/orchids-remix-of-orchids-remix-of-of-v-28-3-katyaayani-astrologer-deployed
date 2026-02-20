@@ -34,15 +34,19 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const isAdmin = searchParams.get('admin') === 'true';
 
-    const query = supabase.from('feedback').select('*');
-    
-    if (!isAdmin) {
-      query.eq('is_approved', true);
-    }
-    
-    query.order('created_at', { ascending: false });
+      const minRating = searchParams.get('minRating');
 
-    const { data, error } = await query;
+      let query = supabase.from('feedback').select('*');
+      
+      if (!isAdmin) {
+        query = query.eq('is_approved', true);
+      }
+
+      if (minRating) {
+        query = query.gte('rating', parseInt(minRating));
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) {
       console.error('Supabase error:', error);

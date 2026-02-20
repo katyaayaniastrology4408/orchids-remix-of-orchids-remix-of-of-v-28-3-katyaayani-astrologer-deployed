@@ -25,9 +25,20 @@ export default function HomePageClient() {
   const [panchangApiData, setPanchangApiData] = useState<any>(null);
   const [hinduCalendar, setHinduCalendar] = useState({ month: "--", tithi: "--", vaara: "--", paksha: "--" });
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [dbReviews, setDbReviews] = useState<{ name: string; text: string; rating: number }[]>([]);
 
   useEffect(() => {
     setMounted(true);
+
+    // Fetch approved DB reviews (3+ stars)
+    fetch('/api/feedback?minRating=3')
+      .then(r => r.json())
+      .then(json => {
+        if (json.success && Array.isArray(json.data)) {
+          setDbReviews(json.data.map((f: any) => ({ name: f.name, text: f.comment, rating: f.rating })));
+        }
+      })
+      .catch(() => {});
     
     let lastFetchDate = '';
 
@@ -104,7 +115,9 @@ export default function HomePageClient() {
   }
 
   const content = contentData[language];
-  const testimonials = testimonialsData[language];
+  const staticTestimonials = testimonialsData[language];
+  // Merge DB reviews (approved, 3-5 stars) with static ones — DB reviews appear first
+  const testimonials = [...dbReviews, ...staticTestimonials];
 
   const handleBookClick = (e: React.MouseEvent) => {
     if (!user) {
