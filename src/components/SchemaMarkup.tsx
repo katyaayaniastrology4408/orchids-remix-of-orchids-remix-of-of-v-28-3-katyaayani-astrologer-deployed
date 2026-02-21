@@ -3,36 +3,44 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 const SITE_URL = "https://www.katyaayaniastrologer.com";
-const LOGO_URL = "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=256&height=256&resize=contain";
-const OG_IMAGE = "https://www.katyaayaniastrologer.com/opengraph-image";
-// Logo image for Google/Bing search result thumbnail (right side image)
+// Square logo - used for Bing/Google Knowledge Panel logo (must be publicly accessible, no transforms)
+const LOGO_URL = "https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/blog-images/og/og-home-1771646111561.png";
+const OG_IMAGE = "https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/blog-images/og/og-home-1771646111561.png";
 const SEARCH_THUMBNAIL = LOGO_URL;
 
 const ORG_SCHEMA = {
   "@type": "Organization",
   "@id": `${SITE_URL}/#organization`,
-  name: "Katyayani Vedic Astrology",
-  alternateName: "Katyaayani Astrologer",
+  name: "Katyaayani Astrologer",
+  alternateName: ["Katyaayani Jyotish", "Katyayani Ancient Astrology", "KVA"],
   url: SITE_URL,
   logo: {
     "@type": "ImageObject",
+    "@id": `${SITE_URL}/#logo`,
     url: LOGO_URL,
-    width: 256,
-    height: 256,
+    contentUrl: LOGO_URL,
+    width: 1200,
+    height: 630,
+    caption: "Katyaayani Astrologer",
   },
-  image: SEARCH_THUMBNAIL,
-  description: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
+  image: {
+    "@type": "ImageObject",
+    url: LOGO_URL,
+    width: 1200,
+    height: 630,
+  },
+  description: "Step into the timeless legacy of Katyayani Ancient Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
   foundingDate: "2007",
   founder: {
     "@type": "Person",
     "@id": `${SITE_URL}/#founder`,
     name: "Rudram Joshi",
-    image: SEARCH_THUMBNAIL,
-    jobTitle: "Founder & Chief Vedic Astrologer",
+    image: LOGO_URL,
+    jobTitle: "Founder & Chief Ancient Astrologer",
     worksFor: { "@id": `${SITE_URL}/#organization` },
   },
   areaServed: { "@type": "Country", name: "India" },
-  serviceType: ["Vedic Astrology", "Kundali Analysis", "Horoscope Reading", "Vastu Shastra", "Marriage Matching"],
+  serviceType: ["Ancient Astrology", "Kundali Analysis", "Horoscope Reading", "Vastu Shastra", "Marriage Matching"],
   sameAs: [],
   contactPoint: {
     "@type": "ContactPoint",
@@ -49,10 +57,10 @@ const SCHEMA_DEFAULTS: Record<string, Record<string, unknown>> = {
         {
           "@type": "WebSite",
           "@id": `${SITE_URL}/#website`,
-          name: "Katyayani Vedic Astrology",
-          alternateName: "Katyaayani Astrologer",
+          name: "Katyaayani Astrologer",
+          alternateName: ["Katyaayani Jyotish", "Katyayani Ancient Astrology"],
           url: SITE_URL,
-          description: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
+          description: "Step into the timeless legacy of Katyayani Ancient Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
           publisher: { "@id": `${SITE_URL}/#organization` },
         potentialAction: {
           "@type": "SearchAction",
@@ -65,12 +73,12 @@ const SCHEMA_DEFAULTS: Record<string, Record<string, unknown>> = {
         {
           "@type": "ProfessionalService",
           "@id": `${SITE_URL}/#service`,
-          name: "Katyayani Vedic Astrology",
+          name: "Katyaayani Astrologer",
           url: SITE_URL,
           image: OG_IMAGE,
           logo: LOGO_URL,
-          description: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
-        serviceType: "Vedic Astrology Consultation",
+          description: "Step into the timeless legacy of Katyayani Ancient Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
+          serviceType: "Ancient Astrology Consultation",
         areaServed: { "@type": "Country", name: "India" },
         hasOfferCatalog: {
           "@type": "OfferCatalog",
@@ -118,7 +126,7 @@ const SCHEMA_DEFAULTS: Record<string, Record<string, unknown>> = {
     "@type": "Blog",
     name: "Katyaayani Astrologer Blog",
     url: `${SITE_URL}/blog`,
-    description: "Vedic astrology articles, horoscope insights, kundali tips & spiritual guidance.",
+      description: "Ancient astrology articles, horoscope insights, kundali tips & spiritual guidance.",
     publisher: ORG_SCHEMA,
   },
   "/rashifal": {
@@ -141,7 +149,7 @@ const SCHEMA_DEFAULTS: Record<string, Record<string, unknown>> = {
     name: "Online Astrology Consultation",
     url: `${SITE_URL}/online-consulting`,
     provider: ORG_SCHEMA,
-    serviceType: "Online Vedic Astrology Consultation",
+      serviceType: "Online Ancient Astrology Consultation",
     areaServed: { "@type": "Country", name: "India" },
   },
   "/booking": {
