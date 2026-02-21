@@ -14,6 +14,12 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 import Navbar from "@/components/homepage/Navbar";
 import Footer from "@/components/homepage/Footer";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 const RASHI_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   aries: GiRam,
@@ -96,11 +102,12 @@ function RashifalPageContent() {
   const fetchDailyRashifal = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/rashifal?date=${selectedDate}`);
-      const data = await res.json();
-      if (data.success) {
-        setRashifalData(data.data || []);
-      }
+      const { data, error } = await supabase
+        .from('daily_rashifal')
+        .select('*')
+        .eq('date', selectedDate)
+        .order('rashi');
+      if (!error) setRashifalData(data || []);
     } catch (error) {
       console.error('Failed to fetch rashifal:', error);
     } finally {
@@ -111,11 +118,12 @@ function RashifalPageContent() {
   const fetchWeeklyRashifal = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/weekly-rashifal?week_start=${selectedWeekStart}`);
-      const data = await res.json();
-      if (data.success) {
-        setRashifalData(data.data || []);
-      }
+      const { data, error } = await supabase
+        .from('weekly_rashifal')
+        .select('*')
+        .eq('week_start', selectedWeekStart)
+        .order('rashi');
+      if (!error) setRashifalData(data || []);
     } catch (error) {
       console.error('Failed to fetch weekly rashifal:', error);
     } finally {
