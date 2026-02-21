@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Sparkles, X } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
@@ -68,25 +69,42 @@ const rashiData = {
 };
 
 type Rashi = { name: string; symbol: string; color: string; tip: string; lucky: string; number: string };
-// lucky and number kept in data but not rendered in UI
 
 function RashiModal({ rashi, isDark, onClose }: { rashi: Rashi; isDark: boolean; onClose: () => void }) {
-  return (
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  if (!mounted) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{ zIndex: 99999 }}
       onClick={onClose}
     >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
-      {/* Modal */}
+      {/* Modal box */}
       <div
-        className={`relative z-10 w-full max-w-sm rounded-2xl shadow-2xl p-6 ${
+        className={`relative w-full max-w-sm rounded-2xl shadow-2xl p-6 ${
           isDark ? "bg-[#0d0b1a] border border-white/10" : "bg-white border border-orange-100"
         }`}
+        style={{ zIndex: 100000 }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Close button */}
+        {/* Close */}
         <button
           onClick={onClose}
           className={`absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
@@ -105,22 +123,23 @@ function RashiModal({ rashi, isDark, onClose }: { rashi: Rashi; isDark: boolean;
         </div>
 
         {/* Name */}
-          <h3
-            className="text-center text-xl font-bold font-[family-name:var(--font-cinzel)] mb-5"
-            style={{ color: rashi.color }}
-          >
-            {rashi.name}
-          </h3>
+        <h3
+          className="text-center text-xl font-bold font-[family-name:var(--font-cinzel)] mb-5"
+          style={{ color: rashi.color }}
+        >
+          {rashi.name}
+        </h3>
 
-          {/* Divider */}
-          <div className="h-px mb-5" style={{ background: rashi.color + "30" }} />
+        {/* Divider */}
+        <div className="h-px mb-5" style={{ background: rashi.color + "30" }} />
 
-          {/* Tip */}
-          <p className={`text-sm leading-relaxed text-center ${isDark ? "text-white/70" : "text-black/60"}`}>
-            {rashi.tip}
-          </p>
+        {/* Prediction */}
+        <p className={`text-sm leading-relaxed text-center ${isDark ? "text-white/70" : "text-black/60"}`}>
+          {rashi.tip}
+        </p>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
