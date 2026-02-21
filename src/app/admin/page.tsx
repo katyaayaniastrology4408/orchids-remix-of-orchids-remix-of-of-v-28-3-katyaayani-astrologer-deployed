@@ -64,8 +64,9 @@ import {
       Zap,
       Shield,
       Server,
-      Edit3,
-      IndianRupee,
+        Edit3,
+        IndianRupee,
+        Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -340,19 +341,19 @@ export default function AdminDashboard() {
       const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000)).toISOString();
       const sixtyDaysAgo = new Date(now.getTime() - (60 * 24 * 60 * 60 * 1000)).toISOString();
 
-      // Fetch counts first (batch 1)
-        const { count: bookingCount } = await supabase.from('bookings').select('*', { count: 'exact', head: true });
-        const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
-        const { count: enquiryCount } = await supabase.from('enquiries').select('*', { count: 'exact', head: true });
-        const { data: revenueDataRaw } = await supabase.from('bookings').select('amount, created_at').eq('payment_status', 'completed');
+        // Fetch counts first (batch 1) - use head:false to avoid 204 JSON parse crash
+          const { count: bookingCount } = await supabase.from('bookings').select('*', { count: 'exact', head: false }).limit(0);
+          const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: false }).limit(0);
+          const { count: enquiryCount } = await supabase.from('enquiries').select('*', { count: 'exact', head: false }).limit(0);
+          const { data: revenueDataRaw } = await supabase.from('bookings').select('amount, created_at').eq('payment_status', 'completed');
 
-        // Fetch trend counts (batch 2)
-        const { count: currentBookings } = await supabase.from('bookings').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo);
-        const { count: previousBookings } = await supabase.from('bookings').select('*', { count: 'exact', head: true }).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo);
-        const { count: currentUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo);
-        const { count: previousUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo);
-        const { count: currentEnquiries } = await supabase.from('enquiries').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo);
-        const { count: previousEnquiries } = await supabase.from('enquiries').select('*', { count: 'exact', head: true }).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo);
+          // Fetch trend counts (batch 2)
+          const { count: currentBookings } = await supabase.from('bookings').select('*', { count: 'exact', head: false }).limit(0).gte('created_at', thirtyDaysAgo);
+          const { count: previousBookings } = await supabase.from('bookings').select('*', { count: 'exact', head: false }).limit(0).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo);
+          const { count: currentUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: false }).limit(0).gte('created_at', thirtyDaysAgo);
+          const { count: previousUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: false }).limit(0).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo);
+          const { count: currentEnquiries } = await supabase.from('enquiries').select('*', { count: 'exact', head: false }).limit(0).gte('created_at', thirtyDaysAgo);
+          const { count: previousEnquiries } = await supabase.from('enquiries').select('*', { count: 'exact', head: false }).limit(0).lt('created_at', thirtyDaysAgo).gte('created_at', sixtyDaysAgo);
 
         const totalRevenue = revenueDataRaw?.reduce((acc: number, curr: { amount?: number }) => acc + (Number(curr.amount) || 0), 0) || 0;
         const currentRevenue = revenueDataRaw?.filter((r: { created_at?: string }) => r.created_at && r.created_at >= thirtyDaysAgo).reduce((acc: number, curr: { amount?: number }) => acc + (Number(curr.amount) || 0), 0) || 0;
@@ -3878,11 +3879,17 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
   const [selectedRashi, setSelectedRashi] = useState('aries');
   const [rashifalForm, setRashifalForm] = useState({
     content_english: '',
-    content_gujarati: '',
-    content_hindi: '',
-    lucky_number: '',
-  });
-  const [existingData, setExistingData] = useState<any[]>([]);
+      content_gujarati: '',
+      content_hindi: '',
+    });
+
+    const [weeklyExistingData, setWeeklyExistingData] = useState<any[]>([]);
+    const [weeklyForm, setWeeklyForm] = useState({
+      content_english: '',
+      content_gujarati: '',
+      content_hindi: '',
+    });
+    const [existingData, setExistingData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
     const [sendingEmail, setSendingEmail] = useState(false);
 
@@ -3922,27 +3929,25 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
       const existing = existingData.find(r => r.rashi === selectedRashi);
       if (existing) {
         setRashifalForm({
-          content_english: existing.content_english || '',
-          content_gujarati: existing.content_gujarati || '',
-          content_hindi: existing.content_hindi || '',
-          lucky_number: existing.lucky_number || '',
-        });
+            content_english: existing.content_english || '',
+            content_gujarati: existing.content_gujarati || '',
+            content_hindi: existing.content_hindi || '',
+          });
+        } else {
+          setRashifalForm({ content_english: '', content_gujarati: '', content_hindi: '' });
+        }
       } else {
-        setRashifalForm({ content_english: '', content_gujarati: '', content_hindi: '', lucky_number: '' });
+        const existing = weeklyExistingData.find(r => r.rashi === selectedRashi);
+        if (existing) {
+          setWeeklyForm({
+            content_english: existing.content_english || '',
+            content_gujarati: existing.content_gujarati || '',
+            content_hindi: existing.content_hindi || '',
+          });
+        } else {
+          setWeeklyForm({ content_english: '', content_gujarati: '', content_hindi: '' });
+        }
       }
-    } else {
-      const existing = weeklyExistingData.find(r => r.rashi === selectedRashi);
-      if (existing) {
-        setWeeklyForm({
-          content_english: existing.content_english || '',
-          content_gujarati: existing.content_gujarati || '',
-          content_hindi: existing.content_hindi || '',
-          lucky_number: existing.lucky_number || '',
-        });
-      } else {
-        setWeeklyForm({ content_english: '', content_gujarati: '', content_hindi: '', lucky_number: '' });
-      }
-    }
   }, [selectedRashi, existingData, weeklyExistingData, rashifalMode]);
 
   const fetchExistingRashifal = async () => {
@@ -4189,20 +4194,7 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
                 </div>
               </div>
 
-              {/* Lucky Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{t("Lucky Number")}</Label>
-                    <Input 
-                      placeholder="7, 9"
-                      value={currentForm.lucky_number}
-                      onChange={(e) => setCurrentForm({...currentForm, lucky_number: e.target.value})}
-                      className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}
-                    />
-                  </div>
-                  </div>
-
-                  {/* Email Notification Toggle */}
+                {/* Email Notification Toggle */}
 
                   <Button type="submit" className="w-full bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white font-black h-12 rounded-xl" disabled={isActionLoading}>
                     {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
