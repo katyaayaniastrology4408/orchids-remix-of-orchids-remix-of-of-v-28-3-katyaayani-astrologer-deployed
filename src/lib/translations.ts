@@ -456,6 +456,10 @@ export function translateText(text: string, lang: "hi" | "gu" | "en"): string | 
   // Skip if only numbers, symbols, or very short
   if (/^[\d\s\-\+\.\,\:\;\!\?\@\#\$\%\&\*\(\)\/\\₹€\$]+$/.test(trimmed)) return null;
   if (trimmed.length < 2) return null;
+  // Skip camelCase / code-like strings (e.g. setTimeout, useState, router.push)
+  if (/^[a-z][a-zA-Z0-9]*[A-Z][a-zA-Z0-9]*/.test(trimmed)) return null;
+  // Skip strings with dots or parentheses (method calls / properties)
+  if (/[\.\(\)\[\]{}]/.test(trimmed)) return null;
   
   // 1. Exact match
   const exact = dictionary[trimmed];

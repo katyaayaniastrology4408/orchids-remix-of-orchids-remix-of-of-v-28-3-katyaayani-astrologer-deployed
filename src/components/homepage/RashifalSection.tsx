@@ -1,19 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 
-// ─── Static template data (replace with API later) ───────────────────────────
+// ─── Static template data ─────────────────────────────────────────────────────
 
 const rashiData = {
   en: {
     badge: "Daily Horoscope",
     title: "Today's Rashifal",
     subtitle: "Cosmic guidance for all 12 zodiac signs",
-    readMore: "Read More",
-    readLess: "Read Less",
     rashis: [
       { name: "Aries",       symbol: "♈", color: "#ef4444", tip: "A powerful day for new beginnings. Channel your energy wisely and trust your instincts in career matters.", lucky: "Red", number: "9" },
       { name: "Taurus",      symbol: "♉", color: "#f59e0b", tip: "Financial stability is on the horizon. Avoid impulsive decisions and focus on long-term investments.", lucky: "Green", number: "6" },
@@ -33,29 +31,25 @@ const rashiData = {
     badge: "दैनिक राशिफल",
     title: "आज का राशिफल",
     subtitle: "सभी 12 राशियों के लिए ब्रह्मांडीय मार्गदर्शन",
-    readMore: "अधिक पढ़ें",
-    readLess: "कम पढ़ें",
     rashis: [
-      { name: "मेष",     symbol: "♈", color: "#ef4444", tip: "नई शुरुआत के लिए शक्तिशाली दिन। करियर में अपनी प्रवृत्ति पर भरोसा करें और ऊर्जा का सही उपयोग करें।", lucky: "लाल", number: "9" },
-      { name: "वृषभ",   symbol: "♉", color: "#f59e0b", tip: "आर्थिक स्थिरता नज़दीक है। आवेशपूर्ण निर्णयों से बचें और दीर्घकालिक निवेश पर ध्यान दें।", lucky: "हरा", number: "6" },
-      { name: "मिथुन",  symbol: "♊", color: "#3b82f6", tip: "संवाद से अवसर मिलते हैं। आज स्पष्ट रूप से व्यक्त करें, संबंध प्रगाढ़ होंगे।", lucky: "पीला", number: "5" },
-      { name: "कर्क",   symbol: "♋", color: "#8b5cf6", tip: "पारिवारिक बंधन मज़बूत होते हैं। पुराने विवाद सुलझते हैं और घर में सुकून आता है।", lucky: "सफेद", number: "2" },
-      { name: "सिंह",   symbol: "♌", color: "#f97316", tip: "आत्मविश्वास चमकता है। नेतृत्व और रचनात्मक कार्यों को आज ब्रह्मांडीय समर्थन मिलता है।", lucky: "सोना", number: "1" },
-      { name: "कन्या",  symbol: "♍", color: "#10b981", tip: "विस्तार पर ध्यान देने से फल मिलता है। स्वास्थ्य सुधार और कार्यस्थल पर मान्यता मिलती है।", lucky: "नीला", number: "3" },
-      { name: "तुला",   symbol: "♎", color: "#ec4899", tip: "संतुलन आपकी शक्ति है। संबंध गहरे होते हैं और कलात्मक प्रयास खुशी लाते हैं।", lucky: "गुलाबी", number: "7" },
+      { name: "मेष",      symbol: "♈", color: "#ef4444", tip: "नई शुरुआत के लिए शक्तिशाली दिन। करियर में अपनी प्रवृत्ति पर भरोसा करें और ऊर्जा का सही उपयोग करें।", lucky: "लाल", number: "9" },
+      { name: "वृषभ",    symbol: "♉", color: "#f59e0b", tip: "आर्थिक स्थिरता नज़दीक है। आवेशपूर्ण निर्णयों से बचें और दीर्घकालिक निवेश पर ध्यान दें।", lucky: "हरा", number: "6" },
+      { name: "मिथुन",   symbol: "♊", color: "#3b82f6", tip: "संवाद से अवसर मिलते हैं। आज स्पष्ट रूप से व्यक्त करें, संबंध प्रगाढ़ होंगे।", lucky: "पीला", number: "5" },
+      { name: "कर्क",    symbol: "♋", color: "#8b5cf6", tip: "पारिवारिक बंधन मज़बूत होते हैं। पुराने विवाद सुलझते हैं और घर में सुकून आता है।", lucky: "सफेद", number: "2" },
+      { name: "सिंह",    symbol: "♌", color: "#f97316", tip: "आत्मविश्वास चमकता है। नेतृत्व और रचनात्मक कार्यों को आज ब्रह्मांडीय समर्थन मिलता है।", lucky: "सोना", number: "1" },
+      { name: "कन्या",   symbol: "♍", color: "#10b981", tip: "विस्तार पर ध्यान देने से फल मिलता है। स्वास्थ्य सुधार और कार्यस्थल पर मान्यता मिलती है।", lucky: "नीला", number: "3" },
+      { name: "तुला",    symbol: "♎", color: "#ec4899", tip: "संतुलन आपकी शक्ति है। संबंध गहरे होते हैं और कलात्मक प्रयास खुशी लाते हैं।", lucky: "गुलाबी", number: "7" },
       { name: "वृश्चिक", symbol: "♏", color: "#dc2626", tip: "छुपे सत्य सामने आते हैं। अपनी अंतरात्मा पर भरोसा करें और जो आगे न बढ़ाए उसे छोड़ें।", lucky: "काला", number: "8" },
-      { name: "धनु",    symbol: "♐", color: "#7c3aed", tip: "विस्तार और रोमांच बुलाता है। शारीरिक या आध्यात्मिक यात्रा नए दृष्टिकोण खोलती है।", lucky: "बैंगनी", number: "3" },
-      { name: "मकर",    symbol: "♑", color: "#6b7280", tip: "अनुशासन से पुरस्कार मिलते हैं। करियर में मील का पत्थर पहुंच के भीतर है।", lucky: "भूरा", number: "4" },
-      { name: "कुंभ",   symbol: "♒", color: "#06b6d4", tip: "नवाचार जागता है। अपरंपरागत विचारों को समर्थन मिलता है; आपकी अनूठी दृष्टि शक्ति है।", lucky: "आसमानी", number: "11" },
-      { name: "मीन",    symbol: "♓", color: "#8b5cf6", tip: "सपने और अंतर्ज्ञान मार्गदर्शन करते हैं। आध्यात्मिक अभ्यास और रचनात्मक कार्य आसानी से चलते हैं।", lucky: "समुद्री हरा", number: "7" },
+      { name: "धनु",     symbol: "♐", color: "#7c3aed", tip: "विस्तार और रोमांच बुलाता है। शारीरिक या आध्यात्मिक यात्रा नए दृष्टिकोण खोलती है।", lucky: "बैंगनी", number: "3" },
+      { name: "मकर",     symbol: "♑", color: "#6b7280", tip: "अनुशासन से पुरस्कार मिलते हैं। करियर में मील का पत्थर पहुंच के भीतर है।", lucky: "भूरा", number: "4" },
+      { name: "कुंभ",    symbol: "♒", color: "#06b6d4", tip: "नवाचार जागता है। अपरंपरागत विचारों को समर्थन मिलता है; आपकी अनूठी दृष्टि शक्ति है।", lucky: "आसमानी", number: "11" },
+      { name: "मीन",     symbol: "♓", color: "#8b5cf6", tip: "सपने और अंतर्ज्ञान मार्गदर्शन करते हैं। आध्यात्मिक अभ्यास और रचनात्मक कार्य आसानी से चलते हैं।", lucky: "समुद्री हरा", number: "7" },
     ]
   },
   gu: {
     badge: "દૈનિક રાશિફળ",
     title: "આજનું રાશિફળ",
     subtitle: "12 રાશિઓ માટે કોસ્મિક માર્ગદર્શન",
-    readMore: "વધુ વાંચો",
-    readLess: "ઓછું વાંચો",
     rashis: [
       { name: "મેષ",     symbol: "♈", color: "#ef4444", tip: "નવી શરૂઆત માટે શક્તિશાળી દિવસ. કારકિર્દીમાં તમારી સૂઝ પર ભરોસો રાખો.", lucky: "લાલ", number: "9" },
       { name: "વૃષભ",   symbol: "♉", color: "#f59e0b", tip: "આર્થિક સ્થિરતા નજીક છે. આવેગપૂર્ણ નિર્ણયો ટાળો અને લાંબા ગાળાના રોકાણ પર ધ્યાન આપો.", lucky: "લીલો", number: "6" },
@@ -73,7 +67,64 @@ const rashiData = {
   }
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
+type Rashi = { name: string; symbol: string; color: string; tip: string; lucky: string; number: string };
+// lucky and number kept in data but not rendered in UI
+
+function RashiModal({ rashi, isDark, onClose }: { rashi: Rashi; isDark: boolean; onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+
+      {/* Modal */}
+      <div
+        className={`relative z-10 w-full max-w-sm rounded-2xl shadow-2xl p-6 ${
+          isDark ? "bg-[#0d0b1a] border border-white/10" : "bg-white border border-orange-100"
+        }`}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className={`absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+            isDark ? "bg-white/5 hover:bg-white/10 text-white/60" : "bg-black/5 hover:bg-black/10 text-black/50"
+          }`}
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        {/* Symbol */}
+        <div
+          className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl font-bold mx-auto mb-4"
+          style={{ background: rashi.color + "20", color: rashi.color }}
+        >
+          {rashi.symbol}
+        </div>
+
+        {/* Name */}
+          <h3
+            className="text-center text-xl font-bold font-[family-name:var(--font-cinzel)] mb-5"
+            style={{ color: rashi.color }}
+          >
+            {rashi.name}
+          </h3>
+
+          {/* Divider */}
+          <div className="h-px mb-5" style={{ background: rashi.color + "30" }} />
+
+          {/* Tip */}
+          <p className={`text-sm leading-relaxed text-center ${isDark ? "text-white/70" : "text-black/60"}`}>
+            {rashi.tip}
+          </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Section ─────────────────────────────────────────────────────────────
 
 export default function RashifalSection() {
   const { theme } = useTheme();
@@ -83,9 +134,7 @@ export default function RashifalSection() {
   const lang = (language as "en" | "hi" | "gu") in rashiData ? (language as "en" | "hi" | "gu") : "en";
   const content = rashiData[lang];
 
-  const [expanded, setExpanded] = useState<number | null>(null);
-
-  const toggle = (i: number) => setExpanded(prev => (prev === i ? null : i));
+  const [selected, setSelected] = useState<number | null>(null);
 
   return (
     <section className={`py-20 px-6 ${isDark ? "bg-[#07040e]" : "bg-[#fffaf4]"}`}>
@@ -107,64 +156,42 @@ export default function RashifalSection() {
           </p>
         </div>
 
-        {/* 12 Rashi Grid */}
+        {/* 12 Rashi Grid — click opens popup */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {content.rashis.map((rashi, i) => {
-            const isOpen = expanded === i;
-            return (
+          {content.rashis.map((rashi, i) => (
+            <button
+              key={i}
+              onClick={() => setSelected(i)}
+              className={`rounded-2xl border p-4 flex items-center gap-3 text-left transition-all duration-200 w-full group ${
+                isDark
+                  ? "bg-[#0d0b1a] border-white/5 hover:border-white/20 hover:bg-white/5"
+                  : "bg-white border-orange-100 hover:border-orange-300 shadow-sm hover:shadow-md"
+              }`}
+            >
               <div
-                key={i}
-                className={`rounded-2xl border transition-all duration-300 overflow-hidden cursor-pointer ${
-                  isDark
-                    ? "bg-[#0d0b1a] border-white/5 hover:border-white/15"
-                    : "bg-white border-orange-100 hover:border-orange-200 shadow-sm"
-                } ${isOpen ? (isDark ? "border-white/20" : "border-orange-300") : ""}`}
-                onClick={() => toggle(i)}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-xl font-bold flex-shrink-0 transition-transform group-hover:scale-110"
+                style={{ background: rashi.color + "20", color: rashi.color }}
               >
-                {/* Card Top */}
-                <div className="p-4 flex items-center gap-3">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-xl font-bold flex-shrink-0"
-                    style={{ background: rashi.color + "20", color: rashi.color }}
-                  >
-                    {rashi.symbol}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm truncate">{rashi.name}</p>
-                    <p className={`text-[10px] uppercase tracking-widest ${isDark ? "text-white/40" : "text-black/40"}`}>
-                      #{rashi.number}
-                    </p>
-                  </div>
-                  <div className={`${isDark ? "text-white/30" : "text-black/30"}`}>
-                    {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  </div>
-                </div>
-
-                {/* Expandable Content */}
-                <div
-                  className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                    isOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0"
-                  }`}
-                >
-                  <div className={`px-4 pb-4 border-t ${isDark ? "border-white/5" : "border-orange-50"}`}>
-                    <p className={`text-xs leading-relaxed mt-3 ${isDark ? "text-white/70" : "text-black/60"}`}>
-                      {rashi.tip}
-                    </p>
-                    <div className="flex items-center gap-2 mt-3">
-                      <span
-                        className="text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full"
-                        style={{ background: rashi.color + "20", color: rashi.color }}
-                      >
-                        Lucky: {rashi.lucky}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                {rashi.symbol}
               </div>
-            );
-          })}
+              <div className="flex-1 min-w-0">
+                <p className={`font-semibold text-sm truncate ${isDark ? "text-white/90" : "text-black/80"}`}>
+                  {rashi.name}
+                </p>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
+
+      {/* Popup Modal */}
+      {selected !== null && (
+        <RashiModal
+          rashi={content.rashis[selected]}
+          isDark={isDark}
+          onClose={() => setSelected(null)}
+        />
+      )}
     </section>
   );
 }
