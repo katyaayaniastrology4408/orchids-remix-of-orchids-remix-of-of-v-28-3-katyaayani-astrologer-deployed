@@ -3883,12 +3883,6 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
       content_hindi: '',
     });
 
-    const [weeklyExistingData, setWeeklyExistingData] = useState<any[]>([]);
-    const [weeklyForm, setWeeklyForm] = useState({
-      content_english: '',
-      content_gujarati: '',
-      content_hindi: '',
-    });
     const [existingData, setExistingData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
     const [sendingEmail, setSendingEmail] = useState(false);
@@ -3913,7 +3907,6 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
     content_english: '',
     content_gujarati: '',
     content_hindi: '',
-    lucky_number: '',
   });
 
   useEffect(() => {
