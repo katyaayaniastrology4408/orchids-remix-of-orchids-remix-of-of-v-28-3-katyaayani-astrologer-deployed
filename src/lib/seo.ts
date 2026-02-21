@@ -33,39 +33,39 @@ const BRAND_DESC = "Katyaayani Astrologer connects modern times with ancient ast
 // ─── Default Meta Fallbacks Per Page ───
 const PAGE_DEFAULTS: Record<string, { title: string; description: string; keywords: string }> = {
   "/": {
-    title: "Katyaayani Astrologer - Best Vedic Astrologer | Kundali, Horoscope & Jyotish Consultation",
-    description: `${BRAND_DESC} Expert Vedic astrology consultations, kundali analysis, horoscope readings, vastu shastra & personalized remedies since 2007. Book online or home consultation today.`,
-    keywords: "katyaayani astrologer, katyaayani jyotish, vedic astrologer, best astrologer, kundali analysis, horoscope reading, jyotish consultation, astrology online, vastu shastra, rudram joshi astrologer, indian astrology, birth chart analysis, rashifal, panchang, hindu calendar, astrology consultation online, best vedic astrologer india, kundali matching, marriage astrology, career astrology, health astrology, astrology remedies, ancient astrology modern times, vedic wisdom technology, કાત્યાયની જ્યોતિષ, कात्यायनी ज्योतिष",
+    title: "Katyaayani Astrologer - Best Ancient Astrologer | Kundali, Horoscope & Jyotish Consultation",
+    description: `${BRAND_DESC} Expert ancient astrology consultations, kundali analysis, horoscope readings, vastu shastra & personalized remedies since 2007. Book online or home consultation today.`,
+    keywords: "katyaayani astrologer, katyaayani jyotish, ancient astrologer, best astrologer, kundali analysis, horoscope reading, jyotish consultation, astrology online, vastu shastra, rudram joshi astrologer, indian astrology, birth chart analysis, rashifal, panchang, hindu calendar, astrology consultation online, best ancient astrologer india, kundali matching, marriage astrology, career astrology, health astrology, astrology remedies, ancient astrology modern times, ancient wisdom technology, કાત્યાયની જ્યોતિષ, कात्यायनी ज्योतिष",
   },
   "/about": {
-    title: "About Katyaayani Astrologer (Rudram Joshi) - Trusted Vedic Astrologer Since 2007",
-    description: `${BRAND_DESC} Learn about Rudram Joshi - a trusted Vedic astrology expert with 18+ years experience offering kundali analysis, horoscope readings, vastu consultation & spiritual guidance.`,
-    keywords: "about katyaayani astrologer, rudram joshi astrologer, vedic astrologer experience, trusted astrologer india, katyaayani jyotish about, ancient wisdom modern astrology",
+    title: "About Katyaayani Astrologer (Rudram Joshi) - Trusted Ancient Astrologer Since 2007",
+    description: `${BRAND_DESC} Learn about Rudram Joshi - a trusted ancient astrology expert with 18+ years experience offering kundali analysis, horoscope readings, vastu consultation & spiritual guidance.`,
+    keywords: "about katyaayani astrologer, rudram joshi astrologer, ancient astrologer experience, trusted astrologer india, katyaayani jyotish about, ancient wisdom modern astrology",
   },
   "/services": {
     title: "Astrology Services - Kundali, Horoscope, Vastu & Marriage Matching | Katyaayani",
-    description: `Explore Katyaayani Astrologer's services: kundali analysis, horoscope reading, kundali matching for marriage, vastu shastra, career astrology, health astrology & personalized Vedic remedies. ${BRAND_DESC}`,
-    keywords: "astrology services, kundali matching, horoscope analysis, vastu shastra consultation, marriage astrology, career astrology, gemstone recommendation, vedic remedies, katyaayani services, personalized astrology solutions",
+    description: `Explore Katyaayani Astrologer's services: kundali analysis, horoscope reading, kundali matching for marriage, vastu shastra, career astrology, health astrology & personalized ancient remedies. ${BRAND_DESC}`,
+    keywords: "astrology services, kundali matching, horoscope analysis, vastu shastra consultation, marriage astrology, career astrology, gemstone recommendation, ancient remedies, katyaayani services, personalized astrology solutions",
   },
   "/booking": {
     title: "Book Astrology Consultation Online | Katyaayani Astrologer",
-    description: `Book your personalized Vedic astrology consultation with Katyaayani Astrologer. Choose online video call or in-person home visit sessions. ${BRAND_DESC}`,
-    keywords: "book astrology appointment, online astrology consultation, astrology booking, katyaayani booking, vedic consultation appointment, astrologer near me, book astrologer online",
+    description: `Book your personalized ancient astrology consultation with Katyaayani Astrologer. Choose online video call or in-person home visit sessions. ${BRAND_DESC}`,
+    keywords: "book astrology appointment, online astrology consultation, astrology booking, katyaayani booking, ancient consultation appointment, astrologer near me, book astrologer online",
   },
   "/blog": {
-    title: "Astrology Blog - Vedic Insights, Horoscope Updates & Spiritual Wisdom | Katyaayani",
-    description: `Read the latest astrology articles, Vedic insights, horoscope updates, rashifal predictions, panchang information & spiritual wisdom. ${BRAND_DESC}`,
-    keywords: "astrology blog, vedic knowledge, horoscope updates, spiritual articles, astrology tips, katyaayani blog, jyotish articles, vedic wisdom blog",
+    title: "Astrology Blog - Ancient Insights, Horoscope Updates & Spiritual Wisdom | Katyaayani",
+    description: `Read the latest astrology articles, ancient insights, horoscope updates, rashifal predictions, panchang information & spiritual wisdom. ${BRAND_DESC}`,
+    keywords: "astrology blog, ancient knowledge, horoscope updates, spiritual articles, astrology tips, katyaayani blog, jyotish articles, ancient wisdom blog",
   },
   "/horoscope": {
     title: "Daily Horoscope & Yearly Predictions - Zodiac Forecasts | Katyaayani Astrologer",
-    description: `Get accurate daily horoscope and yearly predictions for all 12 zodiac signs by Katyaayani Astrologer. Personalized Vedic astrology forecasts for love, career, health & finance. ${BRAND_DESC}`,
+    description: `Get accurate daily horoscope and yearly predictions for all 12 zodiac signs by Katyaayani Astrologer. Personalized ancient astrology forecasts for love, career, health & finance. ${BRAND_DESC}`,
     keywords: "daily horoscope, yearly horoscope, zodiac predictions, today horoscope, astrology forecast, rashi, horoscope today, katyaayani horoscope, zodiac signs daily, yearly predictions 2026",
   },
   "/rashifal": {
     title: "Rashifal - Daily & Weekly Rashi Predictions in Hindi & Gujarati | Katyaayani Astrologer",
-    description: `Read your daily and weekly rashifal predictions by Katyaayani Astrologer. Accurate Vedic astrology forecasts in Hindi & Gujarati for all 12 zodiac signs. ${BRAND_DESC}`,
-    keywords: "rashifal, daily rashifal, weekly rashifal, aaj ka rashifal, rashi bhavishya, vedic astrology hindi, rashifal today, katyaayani rashifal, રાશિફળ, साप्ताहिक राशिफल, દૈનિક રાશિફળ",
+    description: `Read your daily and weekly rashifal predictions by Katyaayani Astrologer. Accurate ancient astrology forecasts in Hindi & Gujarati for all 12 zodiac signs. ${BRAND_DESC}`,
+    keywords: "rashifal, daily rashifal, weekly rashifal, aaj ka rashifal, rashi bhavishya, ancient astrology hindi, rashifal today, katyaayani rashifal, રાશિફળ, साप्ताहिक राशिफल, દૈનિક રાશિફળ",
   },
   "/hindu-calendar": {
     title: "Hindu Calendar 2026 - Panchang, Tithi & Nakshatra | Katyaayani Astrologer",
@@ -79,12 +79,12 @@ const PAGE_DEFAULTS: Record<string, { title: string; description: string; keywor
   },
   "/online-consulting": {
     title: "Online Astrology Consultation - Video Call Sessions Worldwide | Katyaayani",
-    description: `Get expert Vedic astrology consultation online via video call with Katyaayani Astrologer. Available worldwide. Convenient, personalized & accurate kundali and horoscope sessions. ${BRAND_DESC}`,
+    description: `Get expert ancient astrology consultation online via video call with Katyaayani Astrologer. Available worldwide. Convenient, personalized & accurate kundali and horoscope sessions. ${BRAND_DESC}`,
     keywords: "online astrology consultation, virtual astrology session, video call astrology, online kundali reading, astrologer online, katyaayani online consultation, worldwide astrology, astrology from home",
   },
   "/feedback": {
     title: "Client Reviews & Testimonials | Katyaayani Astrologer",
-    description: `Read genuine testimonials and reviews from satisfied clients of Katyaayani Astrologer. Trusted by hundreds of clients for Vedic astrology consultations since 2007. ${BRAND_DESC}`,
+    description: `Read genuine testimonials and reviews from satisfied clients of Katyaayani Astrologer. Trusted by hundreds of clients for ancient astrology consultations since 2007. ${BRAND_DESC}`,
     keywords: "katyaayani astrologer reviews, astrology testimonials, client feedback, astrologer reviews, trusted astrologer reviews, client experiences",
   },
   "/privacy": {
@@ -105,17 +105,17 @@ const PAGE_DEFAULTS: Record<string, { title: string; description: string; keywor
   "/disclaimer": {
     title: "Disclaimer | Katyaayani Astrologer",
     description: "Read the disclaimer for Katyaayani Astrologer's services. Understand the nature of astrological guidance and the limitations of our predictions and remedies.",
-    keywords: "disclaimer, katyaayani astrologer disclaimer, astrology disclaimer, vedic astrology guidance",
+    keywords: "disclaimer, katyaayani astrologer disclaimer, astrology disclaimer, ancient astrology guidance",
   },
   "/contact": {
-    title: "Contact Katyaayani Astrologer | Vedic Astrology Consultation Enquiry",
-    description: "Contact Katyaayani Astrologer (Rudram Joshi) for Vedic astrology consultations, kundali analysis, horoscope readings & enquiries. Located in Vastral, Ahmedabad. Available online worldwide.",
+    title: "Contact Katyaayani Astrologer | Ancient Astrology Consultation Enquiry",
+    description: "Contact Katyaayani Astrologer (Rudram Joshi) for ancient astrology consultations, kundali analysis, horoscope readings & enquiries. Located in Vastral, Ahmedabad. Available online worldwide.",
     keywords: "contact katyaayani astrologer, astrologer contact, rudram joshi contact, astrology enquiry, book astrologer, katyaayani contact ahmedabad",
   },
   "/kundli": {
     title: "Kundali Analysis - Janam Kundali, Kundali Matching & Birth Chart | Katyaayani Astrologer",
-    description: "Get expert Vedic Kundali (birth chart) analysis by Katyaayani Astrologer. Services include Janam Kundali reading, Kundali Matching for marriage, Dasha analysis & personalized remedies since 2007.",
-    keywords: "kundali analysis, janam kundali, kundali matching, birth chart reading, vedic kundali, kundali milan, kundali online, katyaayani kundali, horoscope chart, dasha analysis, કુંડળી, कुंडली विश्लेषण",
+    description: "Get expert ancient Kundali (birth chart) analysis by Katyaayani Astrologer. Services include Janam Kundali reading, Kundali Matching for marriage, Dasha analysis & personalized remedies since 2007.",
+    keywords: "kundali analysis, janam kundali, kundali matching, birth chart reading, ancient kundali, kundali milan, kundali online, katyaayani kundali, horoscope chart, dasha analysis, કુંડળી, कुंडली विश्लेषण",
   },
   "/signin": {
     title: "Sign In to Your Account | Katyaayani Astrologer",
@@ -138,7 +138,7 @@ const PAGE_DEFAULTS: Record<string, { title: string; description: string; keywor
 export function generateSchemaMarkup(pagePath: string, seoData?: { meta_title?: string; meta_description?: string; og_image?: string }): Record<string, unknown> {
   const title = seoData?.meta_title || PAGE_DEFAULTS[pagePath]?.title || SITE_NAME;
   const description = seoData?.meta_description || PAGE_DEFAULTS[pagePath]?.description || "";
-    const image = seoData?.og_image || `${SITE_URL}/opengraph-image`;
+  const image = seoData?.og_image || "https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/blog-images/og/og-home-1771646111561.png";
   const url = `${SITE_URL}${pagePath === "/" ? "" : pagePath}`;
 
   // Base Organization schema (always included)
@@ -183,7 +183,7 @@ export function generateSchemaMarkup(pagePath: string, seoData?: { meta_title?: 
             url: SITE_URL,
             image: LOGO_IMAGE,
           priceRange: "$$",
-          serviceType: ["Vedic Astrology Consultation", "Kundali Analysis", "Horoscope Reading", "Vastu Shastra", "Marriage Matching"],
+          serviceType: ["Ancient Astrology Consultation", "Kundali Analysis", "Horoscope Reading", "Vastu Shastra", "Marriage Matching"],
           areaServed: {
             "@type": "Country",
             name: "India",
@@ -192,7 +192,7 @@ export function generateSchemaMarkup(pagePath: string, seoData?: { meta_title?: 
             "@type": "OfferCatalog",
             name: "Astrology Services",
             itemListElement: [
-              { "@type": "Offer", itemOffered: { "@type": "Service", name: "Vedic Kundali Analysis" } },
+                { "@type": "Offer", itemOffered: { "@type": "Service", name: "Ancient Kundali Analysis" } },
               { "@type": "Offer", itemOffered: { "@type": "Service", name: "Horoscope & Rashifal Reading" } },
               { "@type": "Offer", itemOffered: { "@type": "Service", name: "Kundali Matching for Marriage" } },
               { "@type": "Offer", itemOffered: { "@type": "Service", name: "Vastu Shastra Consultation" } },
@@ -205,10 +205,10 @@ export function generateSchemaMarkup(pagePath: string, seoData?: { meta_title?: 
           "@type": "Person",
           name: "Rudram Joshi",
           alternateName: "Katyaayani Astrologer",
-          jobTitle: "Vedic Astrologer",
+          jobTitle: "Ancient Astrologer",
           url: SITE_URL,
           image: LOGO_IMAGE,
-          knowsAbout: ["Vedic Astrology", "Jyotish Shastra", "Kundali Analysis", "Vastu Shastra", "Horoscope Reading"],
+          knowsAbout: ["Ancient Astrology", "Jyotish Shastra", "Kundali Analysis", "Vastu Shastra", "Horoscope Reading"],
           worksFor: organization,
         },
       ],
@@ -225,7 +225,7 @@ export function generateSchemaMarkup(pagePath: string, seoData?: { meta_title?: 
         mainEntity: {
           "@type": "Person",
           name: "Katyaayani",
-          jobTitle: "Vedic Astrologer",
+          jobTitle: "Ancient Astrologer",
           url: SITE_URL,
           image: LOGO_IMAGE,
       },
@@ -240,7 +240,7 @@ export function generateSchemaMarkup(pagePath: string, seoData?: { meta_title?: 
       description,
       url,
       provider: organization,
-      serviceType: "Vedic Astrology Services",
+        serviceType: "Ancient Astrology Services",
     };
   }
 
@@ -439,7 +439,7 @@ export async function getSeoMetadata(pagePath: string): Promise<Metadata> {
     // Open Graph: DB -> auto from title/description
     const ogTitle = data?.og_title || title;
     const ogDescription = data?.og_description || description;
-      const ogImage = data?.og_image || `${SITE_URL}/opengraph-image`;
+      const ogImage = data?.og_image || "https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/blog-images/og/og-home-1771646111561.png";
 
       const openGraph: Record<string, unknown> = {
         type: "website",

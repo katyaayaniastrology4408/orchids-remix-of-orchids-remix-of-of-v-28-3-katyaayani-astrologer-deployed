@@ -32,16 +32,16 @@ const cinzel = Cinzel({
 const ICON_BASE = 'https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png';
 
 const SITE_URL = "https://www.katyaayaniastrologer.com";
-const OG_IMAGE = `${SITE_URL}/opengraph-image`;
+const OG_IMAGE = "https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/blog-images/og/og-home-1771646111561.png";
 const LOGO_URL = "https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/LOGO/favicon_bg_fixed.ico";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: {
-    default: "Katyaayani Astrologer - Best Vedic Astrologer | Kundali, Horoscope & Jyotish",
-    template: "%s | Katyaayani Astrologer",
-  },
-  description: "Katyaayani Astrologer connects modern times with ancient astrology, blending ancient wisdom with today's technology to provide accurate guidance, practical solutions, and personalized remedies. Expert Vedic astrology consultations, kundali analysis, horoscope readings, vastu shastra since 2007. Book online consultation today.",
+    title: {
+      default: "Katyaayani Astrologer - Best Ancient Astrologer | Kundali, Horoscope & Jyotish",
+      template: "%s | Katyaayani Astrologer",
+    },
+    description: "Katyaayani Astrologer connects modern times with ancient astrology, blending ancient wisdom with today's technology to provide accurate guidance, practical solutions, and personalized remedies. Expert ancient astrology consultations, kundali analysis, horoscope readings, vastu shastra since 2007. Book online consultation today.",
   keywords: [
     // English primary
     "katyaayani astrologer", "katyaayani jyotish", "vedic astrologer", "best astrologer india",
@@ -86,24 +86,24 @@ export const metadata: Metadata = {
     url: SITE_URL,
     locale: "en_IN",
     alternateLocale: ["hi_IN", "gu_IN"],
-    title: "A Journey Within - Katyayani Vedic Astrology",
-    description: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom. Expert kundali analysis, horoscope readings, vastu consultation & personalized remedies since 2007.",
-    images: [
-        {
-      url: OG_IMAGE,
-            width: 1200,
-            height: 630,
-              alt: "Katyaayani Astrologer Logo - Best Vedic Astrologer",
-            type: "image/png",
-        },
-      ],
+      title: "A Journey Within - Katyayani Ancient Astrology",
+      description: "Step into the timeless legacy of Katyayani Ancient Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom. Expert kundali analysis, horoscope readings, vastu consultation & personalized remedies since 2007.",
+      images: [
+          {
+        url: OG_IMAGE,
+              width: 1200,
+              height: 630,
+                alt: "Katyaayani Astrologer - Best Ancient Astrologer",
+              type: "image/png",
+          },
+        ],
     countryName: "India",
   },
   twitter: {
     card: "summary_large_image",
-    title: "A Journey Within - Katyayani Vedic Astrology",
-    description: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
-    images: [{ url: OG_IMAGE, alt: "Katyaayani Astrologer Logo - Best Vedic Astrologer" }],
+    title: "A Journey Within - Katyayani Ancient Astrology",
+    description: "Step into the timeless legacy of Katyayani Ancient Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
+    images: [{ url: OG_IMAGE, alt: "Katyaayani Astrologer - Best Ancient Astrologer" }],
   },
   alternates: {
     canonical: SITE_URL,
@@ -143,7 +143,7 @@ export const metadata: Metadata = {
     "msapplication-config": "/browserconfig.xml",
     "msapplication-navbutton-color": "#FF6B00",
     "msapplication-starturl": "https://www.katyaayaniastrologer.com",
-    "msapplication-tooltip": "Katyaayani Astrologer - Best Vedic Astrologer",
+    "msapplication-tooltip": "Katyaayani Astrologer - Best Ancient Astrologer",
     "msapplication-task": "name=Home;action-uri=https://www.katyaayaniastrologer.com;icon-uri=https://www.katyaayaniastrologer.com/favicon.ico",
 
     // Apple / Safari
@@ -163,11 +163,11 @@ export const metadata: Metadata = {
     "target": "all",
     "audience": "all",
     "coverage": "Worldwide",
-    "classification": "Astrology, Jyotish, Vedic Astrology, Spiritual Services",
-    "subject": "Vedic Astrology Consultation & Services by Katyaayani Astrologer",
-    "abstract": "Katyaayani Astrologer offers expert Vedic astrology consultations including kundali analysis, horoscope readings, rashifal predictions, vastu shastra, and personalized remedies since 2007.",
-    "topic": "Vedic Astrology, Kundali, Horoscope, Rashifal, Vastu Shastra",
-    "summary": "Best Vedic Astrologer in India offering online and in-person astrology consultations, kundali matching, horoscope readings, and personalized remedies.",
+    "classification": "Astrology, Jyotish, Ancient Astrology, Spiritual Services",
+    "subject": "Ancient Astrology Consultation & Services by Katyaayani Astrologer",
+    "abstract": "Katyaayani Astrologer offers expert ancient astrology consultations including kundali analysis, horoscope readings, rashifal predictions, vastu shastra, and personalized remedies since 2007.",
+    "topic": "Ancient Astrology, Kundali, Horoscope, Rashifal, Vastu Shastra",
+    "summary": "Best Ancient Astrologer in India offering online and in-person astrology consultations, kundali matching, horoscope readings, and personalized remedies.",
     "copyright": "Katyaayani Astrologer",
     "author": "Rudram Joshi - Katyaayani Astrologer",
     "designer": "Katyaayani Astrologer",
@@ -176,16 +176,16 @@ export const metadata: Metadata = {
     "url": "https://www.katyaayaniastrologer.com",
     "identifier-URL": "https://www.katyaayaniastrologer.com",
     "directory": "submission",
-    "pagename": "Katyaayani Astrologer - Best Vedic Astrologer",
+    "pagename": "Katyaayani Astrologer - Best Ancient Astrologer",
     "category": "Astrology",
     "HandheldFriendly": "True",
     "MobileOptimized": "320",
 
     // DuckDuckGo / Brave / Opera respect these
-    "dc.title": "Katyaayani Astrologer - Best Vedic Astrologer",
+    "dc.title": "Katyaayani Astrologer - Best Ancient Astrologer",
     "dc.creator": "Rudram Joshi",
-    "dc.subject": "Vedic Astrology, Kundali, Horoscope, Rashifal, Vastu",
-    "dc.description": "Expert Vedic astrology consultations, kundali analysis, horoscope readings, vastu shastra & personalized remedies since 2007.",
+    "dc.subject": "Ancient Astrology, Kundali, Horoscope, Rashifal, Vastu",
+    "dc.description": "Expert ancient astrology consultations, kundali analysis, horoscope readings, vastu shastra & personalized remedies since 2007.",
     "dc.publisher": "Katyaayani Astrologer",
     "dc.language": "en-IN",
     "dc.coverage": "India, Worldwide",

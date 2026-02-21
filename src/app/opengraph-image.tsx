@@ -2,13 +2,13 @@ import { ImageResponse } from "next/og";
 import { createClient } from "@supabase/supabase-js";
 
 export const runtime = "edge";
-export const alt = "Katyaayani Astrologer - Best Vedic Astrologer in India";
+export const alt = "Katyaayani Astrologer - Best Ancient Astrologer in India";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const revalidate = 3600;
 
 const DEFAULT_COVER =
-  "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/82257351-6e7a-48cd-a2d1-b2ac49e135b9/coverimage-1771354510444.png";
+  "https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/blog-images/og/og-home-1771646111561.png";
 
 async function getCoverImageUrl(): Promise<string> {
   try {
@@ -90,7 +90,7 @@ export default async function Image() {
               letterSpacing: "0.5px",
             }}
           >
-            Best Vedic Astrologer Since 2007
+              Best Ancient Astrologer Since 2007
           </span>
         </div>
       </div>

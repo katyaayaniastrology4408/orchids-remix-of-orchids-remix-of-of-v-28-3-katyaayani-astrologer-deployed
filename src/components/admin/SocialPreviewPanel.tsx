@@ -36,16 +36,16 @@ interface OGData {
 export default function SocialPreviewPanel({ isDark, t, setSuccess, setError }: Props) {
   const [loading, setLoading] = useState(false);
   const [ogData, setOgData] = useState<OGData>({
-    ogTitle: "A Journey Within - Katyayani Vedic Astrology",
-    ogDescription: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom. Expert kundali analysis, horoscope readings, vastu consultation & personalized remedies since 2007.",
-    ogImage: `${SITE_URL}/opengraph-image`,
+    ogTitle: "A Journey Within - Katyayani Ancient Astrology",
+    ogDescription: "Step into the timeless legacy of Katyayani Ancient Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom. Expert kundali analysis, horoscope readings, vastu consultation & personalized remedies since 2007.",
+    ogImage: "https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/blog-images/og/og-home-1771646111561.png",
     ogUrl: SITE_URL,
     ogType: "website",
     twitterCard: "summary_large_image",
-    twitterTitle: "A Journey Within - Katyayani Vedic Astrology",
-    twitterDescription: "Step into the timeless legacy of Katyayani Vedic Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
-    twitterImage: `${SITE_URL}/opengraph-image`,
-    schemaName: "Katyayani Vedic Astrology",
+    twitterTitle: "A Journey Within - Katyayani Ancient Astrology",
+    twitterDescription: "Step into the timeless legacy of Katyayani Ancient Astrology 'KVA', where centuries-old Brahmin traditions meet 21st-century wisdom.",
+    twitterImage: "https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/blog-images/og/og-home-1771646111561.png",
+    schemaName: "Katyayani Ancient Astrology",
     schemaFounder: "Rudram Joshi",
     schemaLogo: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=256&height=256&resize=contain",
     schemaImage: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=256&height=256&resize=contain",
@@ -117,7 +117,7 @@ export default function SocialPreviewPanel({ isDark, t, setSuccess, setError }: 
     setSuccess("Copied to clipboard!");
   };
 
-  const ogImagePreviewUrl = `/opengraph-image?_t=${ogImageTs}`;
+  const ogImagePreviewUrl = `https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/blog-images/og/og-home-1771646111561.png?_t=${ogImageTs}`;
 
   return (
     <div className="space-y-6">
@@ -303,7 +303,7 @@ export default function SocialPreviewPanel({ isDark, t, setSuccess, setError }: 
                 </div>
                 <div className="flex-1 space-y-2">
                   <h3 className="text-lg font-bold">{ogData.schemaName}</h3>
-                  <p className="text-xs text-muted-foreground">Vedic Astrology Organization</p>
+                    <p className="text-xs text-muted-foreground">Ancient Astrology Organization</p>
                   <p className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>
                     {ogData.ogDescription.substring(0, 120)}...
                   </p>
@@ -488,7 +488,7 @@ export default function SocialPreviewPanel({ isDark, t, setSuccess, setError }: 
                 <div className="col-span-2">
                   <p className="text-xs text-muted-foreground">Services</p>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {["Vedic Astrology", "Kundali Analysis", "Horoscope Reading", "Vastu Shastra", "Marriage Matching"].map(s => (
+                      {["Ancient Astrology", "Kundali Analysis", "Horoscope Reading", "Vastu Shastra", "Marriage Matching"].map(s => (
                       <Badge key={s} variant="outline" className="text-[10px]">{s}</Badge>
                     ))}
                   </div>
