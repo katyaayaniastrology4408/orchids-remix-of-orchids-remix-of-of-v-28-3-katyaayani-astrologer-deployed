@@ -252,8 +252,23 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ─── GET: fetch recent ping logs ──────────────────────────────────────────────
-export async function GET() {
+// ─── GET: fetch recent ping logs + google config status ───────────────────────
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+
+  // ?check=google — just verify if service account is configured, no submission
+  if (searchParams.get("check") === "google") {
+    const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+    if (!raw) return NextResponse.json({ configured: false });
+    try {
+      const sa = JSON.parse(raw);
+      const configured = !!(sa.client_email && sa.private_key);
+      return NextResponse.json({ configured });
+    } catch {
+      return NextResponse.json({ configured: false });
+    }
+  }
+
   try {
     const { data, error } = await supabase
       .from("ping_logs")
