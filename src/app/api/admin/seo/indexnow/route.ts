@@ -40,16 +40,16 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Log each ping
-      for (const r of results) {
-        await supabase.from("ping_logs").insert({
-          target: r.target,
-          sitemap_url: sitemapUrl,
-          status: r.status,
-          status_code: r.statusCode || null,
-          error_message: r.error || null,
-        });
-      }
+       // Log each ping
+       for (const r of results) {
+         await supabase.from("ping_logs").insert({
+           target: r.target,
+           sitemap_url: sitemapUrl,
+           status: r.status,
+           response_code: r.statusCode || null,
+           error_message: r.error || null,
+         });
+       }
 
       return NextResponse.json({ success: true, results });
     }
@@ -59,51 +59,55 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: "No URLs provided" }, { status: 400 });
     }
 
-    // Submit to IndexNow API (works for Bing, Yandex, Seznam, Naver)
-    const indexNowEndpoints = [
-      "https://api.indexnow.org/IndexNow",
-      "https://www.bing.com/IndexNow",
-    ];
+      // Submit to IndexNow API (works for Bing, Yandex, Seznam, Naver, and others)
+      // Also ping Google sitemap for Google indexing
+      const indexNowEndpoints = [
+        { url: "https://api.indexnow.org/IndexNow", label: "IndexNow API" },
+        { url: "https://www.bing.com/IndexNow", label: "Bing" },
+      ];
 
-    const allResults: { endpoint: string; status: string; statusCode?: number; error?: string }[] = [];
+    const allResults: { target: string; status: string; statusCode?: number; error?: string }[] = [];
+    const urlList = urls.map((u: string) => u.startsWith("http") ? u : `${SITE_URL}${u}`);
 
-    for (const endpoint of indexNowEndpoints) {
+    for (const ep of indexNowEndpoints) {
       try {
-        const response = await fetch(endpoint, {
+        const response = await fetch(ep.url, {
           method: "POST",
           headers: { "Content-Type": "application/json; charset=utf-8" },
           body: JSON.stringify({
             host: HOST,
             key: INDEXNOW_KEY,
             keyLocation: `${SITE_URL}/${INDEXNOW_KEY}.txt`,
-            urlList: urls.map((u: string) => u.startsWith("http") ? u : `${SITE_URL}${u}`),
+            urlList,
           }),
         });
 
         const statusText = response.status === 200 ? "success" :
           response.status === 202 ? "accepted" : "failed";
 
-        allResults.push({
-          endpoint,
-          status: statusText,
-          statusCode: response.status,
-        });
+        allResults.push({ target: ep.label, status: statusText, statusCode: response.status });
       } catch (e: unknown) {
-        allResults.push({
-          endpoint,
-          status: "error",
-          error: e instanceof Error ? e.message : "Unknown error",
-        });
+        allResults.push({ target: ep.label, status: "error", error: e instanceof Error ? e.message : "Unknown error" });
       }
+    }
+
+    // Also ping Google sitemap for Google indexing
+    try {
+      const sitemapUrl = `${SITE_URL}/sitemap.xml`;
+      const googleRes = await fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`);
+      allResults.push({ target: "Google (sitemap ping)", status: googleRes.ok ? "success" : "failed", statusCode: googleRes.status });
+    } catch (e: unknown) {
+      allResults.push({ target: "Google (sitemap ping)", status: "error", error: e instanceof Error ? e.message : "Unknown error" });
     }
 
     // Log to ping_logs
     for (const r of allResults) {
       await supabase.from("ping_logs").insert({
-        target: `IndexNow (${r.endpoint.includes("bing") ? "Bing" : "API"})`,
-        sitemap_url: urls.join(", "),
+        target: r.target,
+        sitemap_url: urlList.slice(0, 3).join(", ") + (urlList.length > 3 ? ` +${urlList.length - 3} more` : ""),
         status: r.status,
-        status_code: r.statusCode || null,
+        response_code: r.statusCode || null,
+        response_body: `${urls.length} URLs submitted`,
         error_message: r.error || null,
       });
     }

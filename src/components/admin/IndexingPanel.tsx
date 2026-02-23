@@ -60,12 +60,13 @@ const ALL_PAGES = [
 
 type LogEntry = {
   id: string;
-  action: string;
   target: string;
+  sitemap_url: string;
   status: string;
-  message: string;
+  response_code: number | null;
+  response_body: string | null;
+  error_message: string | null;
   created_at: string;
-  urls_count?: number;
 };
 
 export default function IndexingPanel({ isDark, t, setSuccess, setError }: IndexingPanelProps) {
@@ -359,15 +360,18 @@ export default function IndexingPanel({ isDark, t, setSuccess, setError }: Index
                 <div key={log.id} className={`flex items-center justify-between p-3 rounded-xl border text-xs ${isDark ? "bg-white/5 border-white/10" : "bg-gray-50 border-gray-200"}`}>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="font-bold truncate">{log.action || "submit"}</span>
-                      <span className="text-muted-foreground">→ {log.target}</span>
-                      {log.urls_count && <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${isDark ? "bg-white/10 text-white/60" : "bg-gray-200 text-gray-600"}`}>{log.urls_count} URLs</span>}
+                      <span className="font-bold truncate">{log.target}</span>
+                      {log.response_body && <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${isDark ? "bg-white/10 text-white/60" : "bg-gray-200 text-gray-600"}`}>{log.response_body}</span>}
                     </div>
+                    <p className="text-[10px] text-muted-foreground truncate">{log.sitemap_url?.substring(0, 60)}{log.sitemap_url?.length > 60 ? "..." : ""}</p>
                     <p className="text-[10px] text-muted-foreground">{new Date(log.created_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}</p>
                   </div>
-                  <span className={`ml-2 shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusColor(log.status)}`}>
-                    {log.status}
-                  </span>
+                  <div className="ml-2 shrink-0 flex flex-col items-end gap-1">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusColor(log.status)}`}>
+                      {log.status}
+                    </span>
+                    {log.response_code && <span className="text-[9px] text-muted-foreground">HTTP {log.response_code}</span>}
+                  </div>
                 </div>
               ))}
             </div>
@@ -382,12 +386,14 @@ export default function IndexingPanel({ isDark, t, setSuccess, setError }: Index
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {[
-              { label: "Google Search Console", url: "https://search.google.com/search-console", color: "text-[#4285f4]" },
-              { label: "Bing Webmaster Tools", url: "https://www.bing.com/webmasters", color: "text-[#00b4d8]" },
-              { label: "Google Rich Results Test", url: `https://search.google.com/test/rich-results?url=${SITE_URL}`, color: "text-green-500" },
-              { label: "Google PageSpeed", url: `https://pagespeed.web.dev/analysis?url=${SITE_URL}`, color: "text-orange-500" },
-            ].map(link => (
+      {[
+                { label: "Google Search Console", url: "https://search.google.com/search-console", color: "text-[#4285f4]" },
+                { label: "Google URL Inspection", url: `https://search.google.com/search-console/inspect?resource_id=sc-domain%3Akatyaayaniastrologer.com`, color: "text-[#4285f4]" },
+                { label: "Bing Webmaster Tools", url: "https://www.bing.com/webmasters", color: "text-[#00b4d8]" },
+                { label: "Bing URL Submission", url: `https://www.bing.com/webmasters/indexnow?siteUrl=${encodeURIComponent(SITE_URL)}`, color: "text-[#00b4d8]" },
+                { label: "Google Rich Results Test", url: `https://search.google.com/test/rich-results?url=${SITE_URL}`, color: "text-green-500" },
+                { label: "Google PageSpeed", url: `https://pagespeed.web.dev/analysis?url=${SITE_URL}`, color: "text-orange-500" },
+              ].map(link => (
               <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer"
                 className={`flex items-center justify-between p-3 rounded-xl border transition-all hover:scale-[1.01] ${isDark ? "bg-white/5 border-white/10 hover:border-white/20" : "bg-gray-50 border-gray-200 hover:border-gray-300"}`}>
                 <span className={`text-sm font-semibold ${link.color}`}>{link.label}</span>
