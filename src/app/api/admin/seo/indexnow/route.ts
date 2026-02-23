@@ -103,12 +103,16 @@ async function submitToGoogle(urlList: string[]): Promise<{ target: string; stat
         },
         body: JSON.stringify({ url, type: "URL_UPDATED" }),
       });
-      if (res.ok) {
-        successCount++;
-      } else {
-        const err = await res.text().catch(() => "");
-        lastError = `HTTP ${res.status}: ${err.substring(0, 100)}`;
-      }
+        if (res.ok) {
+          successCount++;
+        } else {
+          const err = await res.text().catch(() => "");
+          if (res.status === 403) {
+            lastError = `403 Forbidden — Add service account as Owner in Google Search Console: indexing-bot@katyaayani-astrologer.iam.gserviceaccount.com`;
+          } else {
+            lastError = `HTTP ${res.status}: ${err.substring(0, 100)}`;
+          }
+        }
     } catch (e) {
       lastError = e instanceof Error ? e.message : "Unknown error";
     }
@@ -188,13 +192,15 @@ export async function POST(req: NextRequest) {
       }
 
       for (const r of allResults) {
-        await supabase.from("ping_logs").insert({
-          target: r.target,
-          sitemap_url: `${SITE_URL}/sitemap.xml`,
-          status: r.status,
-          response_code: r.statusCode ?? null,
-          error_message: r.status !== "success" ? (r.body?.substring(0, 200) || null) : null,
-        }).catch(() => {});
+        try {
+          await supabase.from("ping_logs").insert({
+            target: r.target,
+            sitemap_url: `${SITE_URL}/sitemap.xml`,
+            status: r.status,
+            response_code: r.statusCode ?? null,
+            error_message: r.status !== "success" ? (r.body?.substring(0, 200) || null) : null,
+          });
+        } catch {}
       }
 
       return NextResponse.json({ success: true, results: allResults });
@@ -227,20 +233,22 @@ export async function POST(req: NextRequest) {
       allResults.push(googleResult);
     }
 
-    // Save to DB
-    const urlSummary = urlList.slice(0, 3).join(", ") + (urlList.length > 3 ? ` +${urlList.length - 3} more` : "");
-    for (const r of allResults) {
-      await supabase.from("ping_logs").insert({
-        target: r.target,
-        sitemap_url: urlSummary,
-        status: r.status,
-        response_code: r.statusCode ?? null,
-        response_body: `${urlList.length} URLs submitted`,
-        error_message: r.status !== "success"
-          ? (r.body?.substring(0, 200) || null)
-          : null,
-      }).catch(() => {});
-    }
+      // Save to DB
+      const urlSummary = urlList.slice(0, 3).join(", ") + (urlList.length > 3 ? ` +${urlList.length - 3} more` : "");
+      for (const r of allResults) {
+        try {
+          await supabase.from("ping_logs").insert({
+            target: r.target,
+            sitemap_url: urlSummary,
+            status: r.status,
+            response_code: r.statusCode ?? null,
+            response_body: `${urlList.length} URLs submitted`,
+            error_message: r.status !== "success"
+              ? (r.body?.substring(0, 200) || null)
+              : null,
+          });
+        } catch {}
+      }
 
     return NextResponse.json({ success: true, results: allResults, urlCount: urlList.length });
   } catch (error: unknown) {

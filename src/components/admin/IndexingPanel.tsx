@@ -38,18 +38,6 @@ const STATIC_PAGES = [
   `${SITE_URL}/terms`,
   `${SITE_URL}/refund-policy`,
   `${SITE_URL}/disclaimer`,
-  `${SITE_URL}/horoscope/aries`,
-  `${SITE_URL}/horoscope/taurus`,
-  `${SITE_URL}/horoscope/gemini`,
-  `${SITE_URL}/horoscope/cancer`,
-  `${SITE_URL}/horoscope/leo`,
-  `${SITE_URL}/horoscope/virgo`,
-  `${SITE_URL}/horoscope/libra`,
-  `${SITE_URL}/horoscope/scorpio`,
-  `${SITE_URL}/horoscope/sagittarius`,
-  `${SITE_URL}/horoscope/capricorn`,
-  `${SITE_URL}/horoscope/aquarius`,
-  `${SITE_URL}/horoscope/pisces`,
 ];
 
 type LogEntry = {
@@ -260,6 +248,26 @@ export default function IndexingPanel({ isDark, setSuccess, setError }: Indexing
                 2. Add as Owner in Search Console <ExternalLink className="w-3 h-3" />
               </a>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Google configured but needs Search Console ownership */}
+      {googleConfigured === true && (
+        <div className={`flex items-start gap-3 p-4 rounded-xl border ${isDark ? "bg-blue-500/5 border-blue-500/20" : "bg-blue-50 border-blue-200"}`}>
+          <Info className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-bold text-blue-600">Google Indexing API — One Step Remaining</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Service account is configured. For indexing to work, add the service account as <strong>Owner</strong> in Google Search Console:
+            </p>
+            <div className="mt-2 p-2 rounded-lg font-mono text-[11px] bg-blue-500/10 text-blue-700 break-all select-all">
+              indexing-bot@katyaayani-astrologer.iam.gserviceaccount.com
+            </div>
+            <a href="https://search.google.com/search-console/users" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:underline mt-2">
+              Open Search Console Users &amp; Permissions <ExternalLink className="w-3 h-3" />
+            </a>
           </div>
         </div>
       )}
