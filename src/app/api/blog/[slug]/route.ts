@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '@/lib/email.config';
 import { newBlogPostTemplate, blogPostUpdatedTemplate } from '@/lib/email-templates';
+import { autoIndexUrl } from '@/lib/auto-index';
 export const dynamic = 'force-dynamic' ; 
 
 const supabase = createClient(
@@ -220,6 +221,8 @@ export async function PUT(
             category: data.category,
             featured_image: data.featured_image,
           });
+          // Auto-index newly published blog post
+          autoIndexUrl(`/blog/${data.slug}`);
         } else if (!isNewlyPublished && data && data.is_published) {
           // Send update notification for already-published blog that was edited
           sendBlogUpdateNotificationToAllUsers({
@@ -229,6 +232,8 @@ export async function PUT(
             category: data.category,
             featured_image: data.featured_image,
           });
+          // Re-index updated published post
+          autoIndexUrl(`/blog/${data.slug}`);
         }
 
       return NextResponse.json({ success: true, data });

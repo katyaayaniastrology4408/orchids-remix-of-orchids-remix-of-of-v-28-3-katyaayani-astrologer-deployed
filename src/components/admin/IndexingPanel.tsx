@@ -21,29 +21,41 @@ interface IndexingPanelProps {
 const SITE_URL = "https://www.katyaayaniastrologer.com";
 
 const ALL_PAGES = [
+  // Core pages
   `${SITE_URL}/`,
   `${SITE_URL}/about`,
   `${SITE_URL}/services`,
-  `${SITE_URL}/blog`,
   `${SITE_URL}/booking`,
-  `${SITE_URL}/contact`,
-  `${SITE_URL}/rashifal`,
   `${SITE_URL}/online-consulting`,
+  `${SITE_URL}/contact`,
+  `${SITE_URL}/feedback`,
+  // Content pages
+  `${SITE_URL}/blog`,
+  `${SITE_URL}/blog/why-astrology`,
+  `${SITE_URL}/blog/website-successfullylaunched`,
+  `${SITE_URL}/rashifal`,
+  `${SITE_URL}/hindu-calendar`,
+  `${SITE_URL}/important-days`,
+  `${SITE_URL}/horoscope`,
   `${SITE_URL}/kundli`,
+  // Legal
   `${SITE_URL}/privacy`,
   `${SITE_URL}/terms`,
-  `${SITE_URL}/horoscope/mesh`,
-  `${SITE_URL}/horoscope/vrushabh`,
-  `${SITE_URL}/horoscope/mithun`,
-  `${SITE_URL}/horoscope/kark`,
-  `${SITE_URL}/horoscope/sinh`,
-  `${SITE_URL}/horoscope/kanya`,
-  `${SITE_URL}/horoscope/tula`,
-  `${SITE_URL}/horoscope/vrushchik`,
-  `${SITE_URL}/horoscope/dhanu`,
-  `${SITE_URL}/horoscope/makar`,
-  `${SITE_URL}/horoscope/kumbh`,
-  `${SITE_URL}/horoscope/meen`,
+  `${SITE_URL}/refund-policy`,
+  `${SITE_URL}/disclaimer`,
+  // Horoscope sign pages (English slugs)
+  `${SITE_URL}/horoscope/aries`,
+  `${SITE_URL}/horoscope/taurus`,
+  `${SITE_URL}/horoscope/gemini`,
+  `${SITE_URL}/horoscope/cancer`,
+  `${SITE_URL}/horoscope/leo`,
+  `${SITE_URL}/horoscope/virgo`,
+  `${SITE_URL}/horoscope/libra`,
+  `${SITE_URL}/horoscope/scorpio`,
+  `${SITE_URL}/horoscope/sagittarius`,
+  `${SITE_URL}/horoscope/capricorn`,
+  `${SITE_URL}/horoscope/aquarius`,
+  `${SITE_URL}/horoscope/pisces`,
 ];
 
 type LogEntry = {

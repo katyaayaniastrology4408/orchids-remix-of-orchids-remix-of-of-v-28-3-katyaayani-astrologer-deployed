@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { newBlogPostTemplate } from '@/lib/email-templates';
+import { autoIndexUrl } from '@/lib/auto-index';
 export const dynamic = 'force-dynamic';
 
 const supabase = createClient(
@@ -166,16 +167,18 @@ export async function POST(request: NextRequest) {
     
     if (error) throw error;
 
-    // Send notification via Resend if published
-    if (is_published && data) {
-      sendBlogNotificationViaResend({
-        title: data.title,
-        excerpt: data.excerpt,
-        slug: data.slug,
-        category: data.category,
-        featured_image: data.featured_image,
-      });
-    }
+      // Send notification via Resend if published
+      if (is_published && data) {
+        sendBlogNotificationViaResend({
+          title: data.title,
+          excerpt: data.excerpt,
+          slug: data.slug,
+          category: data.category,
+          featured_image: data.featured_image,
+        });
+        // Auto-index new published blog post
+        autoIndexUrl(`/blog/${data.slug}`);
+      }
     
     return NextResponse.json({ success: true, data });
   } catch (error) {
