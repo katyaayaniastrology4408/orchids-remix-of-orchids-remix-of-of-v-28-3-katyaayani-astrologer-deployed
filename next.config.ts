@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    htmlLimitedBots: /Bingbot|Googlebot|Slurp|DuckDuckBot|Baiduspider|YandexBot/i,
-  },
+  experimental: {},
   devIndicators: false,
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
