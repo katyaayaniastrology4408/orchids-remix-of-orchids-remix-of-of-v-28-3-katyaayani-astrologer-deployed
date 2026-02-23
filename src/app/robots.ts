@@ -8,22 +8,22 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin", "/admin/", "/api/", "/signin", "/signup", "/profile"],
+          disallow: ["/admin", "/admin/", "/api/", "/signin", "/signup", "/profile", "/complete-profile", "/auth", "/payment"],
       },
       {
         userAgent: "Googlebot",
         allow: "/",
-        disallow: ["/admin", "/admin/", "/api/"],
+        disallow: ["/admin", "/admin/", "/api/", "/signin", "/signup", "/profile", "/complete-profile", "/auth", "/payment"],
       },
       {
         userAgent: "Googlebot-Image",
         allow: "/",
-        disallow: ["/admin", "/admin/", "/api/"],
+        disallow: ["/admin", "/admin/", "/api/", "/signin", "/signup", "/profile", "/complete-profile", "/auth", "/payment"],
       },
       {
         userAgent: "bingbot",
         allow: "/",
-        disallow: ["/admin", "/admin/", "/api/"],
+        disallow: ["/admin", "/admin/", "/api/", "/signin", "/signup", "/profile", "/complete-profile", "/auth", "/payment"],
       },
       {
         userAgent: "msnbot",
