@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Globe, Send, RefreshCw, CheckCircle, XCircle, Clock, Loader2,
-  ExternalLink, Zap, FileText, AlertTriangle, Search, Info
+  ExternalLink, Zap, FileText, Info, Search, Settings
 } from "lucide-react";
 import { safeJson } from "@/lib/safe-json";
 
@@ -68,36 +68,74 @@ type SubmitResult = {
   target: string;
   status: string;
   statusCode?: number;
-  message?: string;
   body?: string;
 };
 
+type SubmitMode = "all" | "bing" | "google" | "custom" | null;
+
+function statusColor(s: string) {
+  if (s === "success") return "bg-green-500/10 text-green-500 border-green-500/20";
+  if (s === "partial") return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
+  if (s === "failed" || s === "error") return "bg-red-500/10 text-red-500 border-red-500/20";
+  if (s === "not_configured") return "bg-orange-500/10 text-orange-500 border-orange-500/20";
+  if (s === "info") return "bg-blue-500/10 text-blue-500 border-blue-500/20";
+  return "bg-gray-500/10 text-gray-500 border-gray-500/20";
+}
+
+function statusIcon(s: string) {
+  if (s === "success") return <CheckCircle className="w-3.5 h-3.5 text-green-500" />;
+  if (s === "partial") return <CheckCircle className="w-3.5 h-3.5 text-yellow-500" />;
+  if (s === "failed" || s === "error") return <XCircle className="w-3.5 h-3.5 text-red-500" />;
+  if (s === "not_configured") return <Settings className="w-3.5 h-3.5 text-orange-500" />;
+  if (s === "info") return <Info className="w-3.5 h-3.5 text-blue-500" />;
+  return <Clock className="w-3.5 h-3.5 text-gray-400" />;
+}
+
+function statusLabel(s: string) {
+  if (s === "not_configured") return "Not Configured";
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 export default function IndexingPanel({ isDark, t, setSuccess, setError }: IndexingPanelProps) {
   const [customUrls, setCustomUrls] = useState("");
-  const [submitting, setSubmitting] = useState<"all" | "bing" | "custom" | null>(null);
+  const [submitting, setSubmitting] = useState<SubmitMode>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
   const [sitemapPages, setSitemapPages] = useState(0);
   const [sitemapOk, setSitemapOk] = useState<boolean | null>(null);
-  const [lastResult, setLastResult] = useState<{ success: boolean; results: SubmitResult[]; urlCount?: number } | null>(null);
+  const [lastResults, setLastResults] = useState<SubmitResult[] | null>(null);
+  const [lastUrlCount, setLastUrlCount] = useState(0);
+  const [googleConfigured, setGoogleConfigured] = useState<boolean | null>(null);
 
-  const cardClass = isDark ? "bg-[#12121a] border-[#ff6b35]/10" : "bg-white border-[#ff6b35]/20";
+  const card = isDark ? "bg-[#12121a] border-[#ff6b35]/10" : "bg-white border-[#ff6b35]/20";
 
   useEffect(() => {
     fetchLogs();
     checkSitemap();
+    checkGoogleConfig();
   }, []);
 
   const checkSitemap = async () => {
     try {
       const res = await fetch("/sitemap.xml");
       const text = await res.text();
-      const matches = text.match(/<loc>/g) || [];
-      setSitemapPages(matches.length);
+      setSitemapPages((text.match(/<loc>/g) || []).length);
       setSitemapOk(res.ok);
-    } catch {
-      setSitemapOk(false);
-    }
+    } catch { setSitemapOk(false); }
+  };
+
+  const checkGoogleConfig = async () => {
+    // Check via a test call with 0 URLs (returns not_configured if no service account)
+    try {
+      const res = await fetch("/api/admin/seo/indexnow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ urls: [`${SITE_URL}/`], engines: "google" }),
+      });
+      const data = await safeJson(res);
+      const result = data?.results?.find((r: SubmitResult) => r.target === "Google");
+      setGoogleConfigured(result?.status !== "not_configured");
+    } catch { setGoogleConfigured(false); }
   };
 
   const fetchLogs = async () => {
@@ -111,223 +149,177 @@ export default function IndexingPanel({ isDark, t, setSuccess, setError }: Index
     finally { setLogsLoading(false); }
   };
 
-  const submitIndexNow = async (urls: string[], label: "all" | "bing" | "custom") => {
-    setSubmitting(label);
-    setLastResult(null);
+  const submit = async (urls: string[], mode: SubmitMode, engines: "all" | "bing" | "google") => {
+    setSubmitting(mode);
+    setLastResults(null);
     try {
       const res = await fetch("/api/admin/seo/indexnow", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ urls }),
+        body: JSON.stringify({ urls, engines }),
       });
       const data = await safeJson(res);
-      setLastResult(data);
       if (data?.success) {
         const results: SubmitResult[] = data.results || [];
-        const ok = results.filter(r => r.status === "success").length;
-        setSuccess(`${urls.length} URLs submitted to Bing via IndexNow! (${ok} accepted)`);
-        if (label === "custom") setCustomUrls("");
+        setLastResults(results);
+        setLastUrlCount(data.urlCount || urls.length);
+        const ok = results.filter(r => r.status === "success" || r.status === "partial").length;
+        const total = results.length;
+        setSuccess(`Submitted ${urls.length} URLs to ${ok}/${total} engines successfully!`);
+        if (mode === "custom") setCustomUrls("");
         fetchLogs();
       } else {
-        setError(data?.message || t("Submission failed"));
+        setError(data?.message || "Submission failed");
       }
     } catch {
-      setError(t("Network error. Try again."));
+      setError("Network error. Try again.");
     }
     setSubmitting(null);
   };
 
-  const handleCustomSubmit = () => {
+  const handleCustomSubmit = (engines: "all" | "bing" | "google") => {
     const urls = customUrls.split("\n").map(u => u.trim()).filter(u => u.startsWith("http"));
-    if (!urls.length) { setError(t("Enter at least one valid URL starting with http")); return; }
-    submitIndexNow(urls, "custom");
-  };
-
-  const statusColor = (s: string) => {
-    if (s === "success") return "bg-green-500/10 text-green-500 border-green-500/20";
-    if (s === "failed" || s === "error") return "bg-red-500/10 text-red-500 border-red-500/20";
-    if (s === "info") return "bg-blue-500/10 text-blue-500 border-blue-500/20";
-    return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
-  };
-
-  const statusIcon = (s: string) => {
-    if (s === "success") return <CheckCircle className="w-3.5 h-3.5 text-green-500" />;
-    if (s === "failed" || s === "error") return <XCircle className="w-3.5 h-3.5 text-red-500" />;
-    if (s === "info") return <Info className="w-3.5 h-3.5 text-blue-500" />;
-    return <AlertTriangle className="w-3.5 h-3.5 text-yellow-500" />;
+    if (!urls.length) { setError("Enter at least one valid URL starting with http"); return; }
+    submit(urls, "custom", engines);
   };
 
   return (
-    <div className="space-y-6 pb-20 md:pb-0">
+    <div className="space-y-5 pb-20 md:pb-0">
 
       {/* Header */}
-      <div className={`p-5 rounded-2xl border ${cardClass}`}>
+      <div className={`p-5 rounded-2xl border ${card}`}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-black text-[#ff6b35] flex items-center gap-2">
-              <Search className="w-5 h-5" /> {t("Google & Bing Indexing")}
+              <Search className="w-5 h-5" /> Google &amp; Bing Indexing
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              {t("Submit pages to Bing via IndexNow · Google via Search Console")}
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Submit pages to Google Indexing API &amp; Bing via IndexNow
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${
               sitemapOk === null ? "bg-gray-500/10 text-gray-500 border-gray-500/20"
               : sitemapOk ? "bg-green-500/10 text-green-500 border-green-500/20"
               : "bg-red-500/10 text-red-500 border-red-500/20"
             }`}>
-              {sitemapOk === null ? <Clock className="w-3 h-3" /> : sitemapOk ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-              Sitemap {sitemapOk === null ? "..." : sitemapOk ? `${sitemapPages} pages` : "Error"}
-            </div>
+              {sitemapOk ? <CheckCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+              Sitemap {sitemapOk ? `${sitemapPages} pages` : "..."}
+            </span>
+            <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${
+              googleConfigured === null ? "bg-gray-500/10 text-gray-500 border-gray-500/20"
+              : googleConfigured ? "bg-green-500/10 text-green-500 border-green-500/20"
+              : "bg-orange-500/10 text-orange-500 border-orange-500/20"
+            }`}>
+              <Globe className="w-3 h-3" />
+              Google API {googleConfigured === null ? "..." : googleConfigured ? "Ready" : "Setup needed"}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Google info banner */}
-      <div className={`flex items-start gap-3 p-4 rounded-xl border ${isDark ? "bg-[#4285f4]/5 border-[#4285f4]/20" : "bg-[#4285f4]/5 border-[#4285f4]/20"}`}>
-        <Info className="w-4 h-4 text-[#4285f4] mt-0.5 shrink-0" />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-[#4285f4]">Google Indexing — Search Console Required</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Google deprecated its sitemap ping API in January 2024. To index pages on Google, submit your sitemap manually via Google Search Console.
-          </p>
-          <a
-            href="https://search.google.com/search-console"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 mt-2 text-xs font-bold text-[#4285f4] hover:underline"
-          >
-            Open Google Search Console <ExternalLink className="w-3 h-3" />
-          </a>
-        </div>
-      </div>
-
-      {/* Main Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-        {/* Submit All to Bing via IndexNow */}
-        <Card className={cardClass}>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-[#00b4d8]/10 flex items-center justify-center">
-                <Zap className="w-4 h-4 text-[#00b4d8]" />
-              </div>
-              Submit All Pages via IndexNow
-            </CardTitle>
-            <CardDescription>Submits {ALL_PAGES.length} pages to Bing &amp; partners instantly</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex flex-wrap gap-1">
-              {ALL_PAGES.slice(0, 6).map(u => (
-                <span key={u} className={`text-[10px] px-2 py-0.5 rounded-full border ${isDark ? "bg-white/5 border-white/10 text-muted-foreground" : "bg-gray-50 border-gray-200 text-gray-600"}`}>
-                  {u.replace(SITE_URL, "") || "/"}
-                </span>
-              ))}
-              {ALL_PAGES.length > 6 && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#00b4d8]/10 text-[#00b4d8] border border-[#00b4d8]/20">
-                  +{ALL_PAGES.length - 6} more
-                </span>
-              )}
-            </div>
-            <Button
-              className="w-full bg-[#00b4d8] hover:bg-[#0096b4] text-white font-bold"
-              disabled={!!submitting}
-              onClick={() => submitIndexNow(ALL_PAGES, "all")}
-            >
-              {submitting === "all"
-                ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Submitting...</>
-                : <><Send className="w-4 h-4 mr-2" />Submit All to Bing (IndexNow)</>}
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Google Search Console card */}
-        <Card className={cardClass}>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-[#4285f4]/10 flex items-center justify-center">
-                <Globe className="w-4 h-4 text-[#4285f4]" />
-              </div>
-              Google Search Console
-            </CardTitle>
-            <CardDescription>Submit sitemap &amp; request URL indexing manually</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {[
-              { label: "Submit Sitemap", url: `https://search.google.com/search-console/sitemaps?resource_id=sc-domain%3Akatyaayaniastrologer.com` },
-              { label: "Request URL Indexing", url: `https://search.google.com/search-console/inspect?resource_id=sc-domain%3Akatyaayaniastrologer.com` },
-              { label: "Coverage Report", url: `https://search.google.com/search-console/index?resource_id=sc-domain%3Akatyaayaniastrologer.com` },
-            ].map(link => (
-              <a
-                key={link.label}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`flex items-center justify-between w-full p-2.5 rounded-lg border text-sm font-semibold text-[#4285f4] transition-colors ${isDark ? "bg-[#4285f4]/5 border-[#4285f4]/15 hover:border-[#4285f4]/30" : "bg-[#4285f4]/5 border-[#4285f4]/20 hover:border-[#4285f4]/40"}`}
-              >
-                {link.label}
-                <ExternalLink className="w-3.5 h-3.5 opacity-60" />
+      {/* Google not configured banner */}
+      {googleConfigured === false && (
+        <div className={`flex items-start gap-3 p-4 rounded-xl border ${isDark ? "bg-orange-500/5 border-orange-500/20" : "bg-orange-50 border-orange-200"}`}>
+          <Settings className="w-4 h-4 text-orange-500 mt-0.5 shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-bold text-orange-600">Google Indexing API — Setup Required</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              To index pages on Google instantly, you need a Google Cloud service account.
+              Add <code className="bg-orange-500/10 px-1 rounded text-orange-600 text-[11px]">GOOGLE_SERVICE_ACCOUNT_JSON</code> to your environment variables.
+            </p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <a href="https://console.cloud.google.com/iam-admin/serviceaccounts" target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs font-bold text-orange-600 hover:underline">
+                1. Create Service Account <ExternalLink className="w-3 h-3" />
               </a>
-            ))}
+              <span className="text-muted-foreground text-xs">·</span>
+              <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs font-bold text-orange-600 hover:underline">
+                2. Add as Owner in Search Console <ExternalLink className="w-3 h-3" />
+              </a>
+              <span className="text-muted-foreground text-xs">·</span>
+              <span className="text-xs text-muted-foreground">3. Enable Indexing API in Cloud Console</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Submit Buttons */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
+        {/* Submit All — Google + Bing */}
+        <Card className={`${card} sm:col-span-3`}>
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <p className="font-bold text-sm flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-[#ff6b35]" />
+                  Submit All {ALL_PAGES.length} Pages
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Submits to both Google Indexing API &amp; Bing IndexNow at once
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  className="bg-[#ff6b35] hover:bg-[#e55a25] text-white font-bold text-sm"
+                  disabled={!!submitting}
+                  onClick={() => submit(ALL_PAGES, "all", "all")}
+                >
+                  {submitting === "all"
+                    ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Submitting...</>
+                    : <><Send className="w-4 h-4 mr-2" />Submit to Google + Bing</>}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-[#4285f4]/40 text-[#4285f4] font-bold text-sm hover:bg-[#4285f4]/10"
+                  disabled={!!submitting}
+                  onClick={() => submit(ALL_PAGES, "google", "google")}
+                >
+                  {submitting === "google"
+                    ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Submitting...</>
+                    : <><Globe className="w-4 h-4 mr-2" />Google Only</>}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-[#00b4d8]/40 text-[#00b4d8] font-bold text-sm hover:bg-[#00b4d8]/10"
+                  disabled={!!submitting}
+                  onClick={() => submit(ALL_PAGES, "bing", "bing")}
+                >
+                  {submitting === "bing"
+                    ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Submitting...</>
+                    : <><Zap className="w-4 h-4 mr-2" />Bing Only</>}
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Custom URL Submit */}
-      <Card className={cardClass}>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center">
-              <FileText className="w-4 h-4 text-purple-500" />
-            </div>
-            Submit Specific URLs to Bing
-          </CardTitle>
-          <CardDescription>One URL per line — submits to Bing via IndexNow</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Textarea
-            value={customUrls}
-            onChange={e => setCustomUrls(e.target.value)}
-            placeholder={`${SITE_URL}/blog/your-post\n${SITE_URL}/services`}
-            rows={4}
-            className={`font-mono text-xs ${isDark ? "bg-white/5 border-white/10" : ""}`}
-          />
-          <Button
-            className="bg-purple-600 hover:bg-purple-700 text-white font-bold"
-            disabled={!!submitting || !customUrls.trim()}
-            onClick={handleCustomSubmit}
-          >
-            {submitting === "custom"
-              ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Submitting...</>
-              : <><Send className="w-4 h-4 mr-2" />Submit to Bing (IndexNow)</>}
-          </Button>
-        </CardContent>
-      </Card>
 
       {/* Last Result */}
-      {lastResult && (
-        <Card className={`${cardClass} border-2 ${lastResult.success ? "border-green-500/30" : "border-red-500/30"}`}>
+      {lastResults && lastResults.length > 0 && (
+        <Card className={card}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
-              {lastResult.success ? <CheckCircle className="w-4 h-4 text-green-500" /> : <XCircle className="w-4 h-4 text-red-500" />}
-              Last Submission Result
-              {lastResult.urlCount && <span className="text-muted-foreground font-normal">— {lastResult.urlCount} URLs</span>}
+              <CheckCircle className="w-4 h-4 text-green-500" />
+              Submission Result
+              <span className="font-normal text-muted-foreground">— {lastUrlCount} URLs</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {(lastResult.results || []).map((r, i) => (
-                <div key={i} className={`p-2.5 rounded-lg border text-xs ${isDark ? "bg-white/5 border-white/10" : "bg-gray-50 border-gray-200"}`}>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold">{r.target}</span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {lastResults.map((r, i) => (
+                <div key={i} className={`p-3 rounded-xl border ${isDark ? "bg-white/5 border-white/10" : "bg-gray-50 border-gray-200"}`}>
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <span className="font-bold text-sm">{r.target}</span>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 ${statusColor(r.status)}`}>
-                      {statusIcon(r.status)} {r.status}
-                      {r.statusCode ? ` · HTTP ${r.statusCode}` : ""}
+                      {statusIcon(r.status)} {statusLabel(r.status)}
+                      {r.statusCode ? ` · ${r.statusCode}` : ""}
                     </span>
                   </div>
-                  {(r.message || r.body) && r.status === "info" && (
-                    <p className="text-muted-foreground mt-1 leading-relaxed">{r.message || r.body}</p>
+                  {r.body && (
+                    <p className="text-[11px] text-muted-foreground leading-relaxed break-words">{r.body}</p>
                   )}
                 </div>
               ))}
@@ -336,13 +328,61 @@ export default function IndexingPanel({ isDark, t, setSuccess, setError }: Index
         </Card>
       )}
 
-      {/* History Logs */}
-      <Card className={cardClass}>
+      {/* Custom URL submit */}
+      <Card className={card}>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center">
+              <FileText className="w-4 h-4 text-purple-500" />
+            </div>
+            Submit Specific URLs
+          </CardTitle>
+          <CardDescription>One URL per line — submit specific pages to Google &amp; Bing</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Textarea
+            value={customUrls}
+            onChange={e => setCustomUrls(e.target.value)}
+            placeholder={`${SITE_URL}/blog/your-new-post\n${SITE_URL}/services`}
+            rows={4}
+            className={`font-mono text-xs ${isDark ? "bg-white/5 border-white/10" : ""}`}
+          />
+          <div className="flex flex-wrap gap-2">
+            <Button
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold"
+              disabled={!!submitting || !customUrls.trim()}
+              onClick={() => handleCustomSubmit("all")}
+            >
+              {submitting === "custom"
+                ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Submitting...</>
+                : <><Send className="w-4 h-4 mr-2" />Submit to Google + Bing</>}
+            </Button>
+            <Button
+              variant="outline"
+              className="border-[#4285f4]/40 text-[#4285f4] font-bold hover:bg-[#4285f4]/10"
+              disabled={!!submitting || !customUrls.trim()}
+              onClick={() => handleCustomSubmit("google")}
+            >
+              <Globe className="w-4 h-4 mr-2" />Google
+            </Button>
+            <Button
+              variant="outline"
+              className="border-[#00b4d8]/40 text-[#00b4d8] font-bold hover:bg-[#00b4d8]/10"
+              disabled={!!submitting || !customUrls.trim()}
+              onClick={() => handleCustomSubmit("bing")}
+            >
+              <Zap className="w-4 h-4 mr-2" />Bing
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Indexing History */}
+      <Card className={card}>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2">
-              <Clock className="w-4 h-4 text-muted-foreground" />
-              Indexing History
+              <Clock className="w-4 h-4 text-muted-foreground" /> Indexing History
             </CardTitle>
             <Button variant="ghost" size="sm" onClick={fetchLogs} disabled={logsLoading}>
               <RefreshCw className={`w-3.5 h-3.5 ${logsLoading ? "animate-spin" : ""}`} />
@@ -359,7 +399,7 @@ export default function IndexingPanel({ isDark, t, setSuccess, setError }: Index
             </div>
           ) : (
             <div className="space-y-2">
-              {logs.slice(0, 20).map((log) => (
+              {logs.slice(0, 25).map((log) => (
                 <div key={log.id} className={`flex items-start justify-between gap-3 p-3 rounded-xl border text-xs ${isDark ? "bg-white/5 border-white/10" : "bg-gray-50 border-gray-200"}`}>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
@@ -373,7 +413,7 @@ export default function IndexingPanel({ isDark, t, setSuccess, setError }: Index
                     <p className="text-[10px] text-muted-foreground truncate">
                       {log.sitemap_url?.substring(0, 70)}{(log.sitemap_url?.length || 0) > 70 ? "..." : ""}
                     </p>
-                    {log.error_message && log.status !== "info" && (
+                    {log.error_message && log.status !== "info" && log.status !== "not_configured" && (
                       <p className="text-[10px] text-red-400 mt-0.5 truncate">{log.error_message}</p>
                     )}
                     <p className="text-[10px] text-muted-foreground mt-0.5">
@@ -382,7 +422,7 @@ export default function IndexingPanel({ isDark, t, setSuccess, setError }: Index
                   </div>
                   <div className="shrink-0 flex flex-col items-end gap-1 pt-0.5">
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 ${statusColor(log.status)}`}>
-                      {statusIcon(log.status)} {log.status}
+                      {statusIcon(log.status)} {statusLabel(log.status)}
                     </span>
                     {log.response_code && (
                       <span className="text-[9px] text-muted-foreground">HTTP {log.response_code}</span>
@@ -396,19 +436,19 @@ export default function IndexingPanel({ isDark, t, setSuccess, setError }: Index
       </Card>
 
       {/* Quick Links */}
-      <Card className={cardClass}>
+      <Card className={card}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm">SEO Tools &amp; Webmaster Panels</CardTitle>
+          <CardTitle className="text-sm">SEO Webmaster Tools</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {[
               { label: "Google Search Console", url: "https://search.google.com/search-console", color: "text-[#4285f4]" },
+              { label: "Google — Submit Sitemap", url: `https://search.google.com/search-console/sitemaps?resource_id=sc-domain%3Akatyaayaniastrologer.com`, color: "text-[#4285f4]" },
+              { label: "Google — Request Indexing", url: `https://search.google.com/search-console/inspect?resource_id=sc-domain%3Akatyaayaniastrologer.com`, color: "text-[#4285f4]" },
               { label: "Bing Webmaster Tools", url: "https://www.bing.com/webmasters", color: "text-[#00b4d8]" },
               { label: "Google PageSpeed Insights", url: `https://pagespeed.web.dev/analysis?url=${SITE_URL}`, color: "text-orange-500" },
               { label: "Google Rich Results Test", url: `https://search.google.com/test/rich-results?url=${SITE_URL}`, color: "text-green-500" },
-              { label: "IndexNow Check Tool", url: `https://www.bing.com/indexnow`, color: "text-[#00b4d8]" },
-              { label: "Google Mobile Test", url: `https://search.google.com/test/mobile-friendly?url=${SITE_URL}`, color: "text-purple-500" },
             ].map(link => (
               <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer"
                 className={`flex items-center justify-between p-3 rounded-xl border transition-all hover:scale-[1.01] ${isDark ? "bg-white/5 border-white/10 hover:border-white/20" : "bg-gray-50 border-gray-200 hover:border-gray-300"}`}>
@@ -419,6 +459,7 @@ export default function IndexingPanel({ isDark, t, setSuccess, setError }: Index
           </div>
         </CardContent>
       </Card>
+
     </div>
   );
 }

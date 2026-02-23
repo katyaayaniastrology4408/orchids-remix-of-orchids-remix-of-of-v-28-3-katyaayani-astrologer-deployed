@@ -8,12 +8,122 @@ const supabase = createClient(
 
 const INDEXNOW_KEY = process.env.INDEXNOW_API_KEY || "a889b4f2a770404297f5fe6867c814f5";
 const SITE_URL = (process.env.NEXT_PUBLIC_APP_URL || "https://www.katyaayaniastrologer.com").replace(/\/$/, "");
-const HOST = new URL(SITE_URL).hostname; // "www.katyaayaniastrologer.com"
-
-// The key file MUST be at the root of the domain. We serve it via a dedicated route.
-// keyLocation always points to the production domain (not localhost).
+const HOST = new URL(SITE_URL).hostname;
 const KEY_LOCATION = `${SITE_URL}/${INDEXNOW_KEY}.txt`;
 
+// ─── Google Indexing API via Service Account JWT ─────────────────────────────
+// Reads GOOGLE_SERVICE_ACCOUNT_JSON env var (the full JSON key file content)
+async function getGoogleAccessToken(): Promise<string | null> {
+  try {
+    const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+    if (!raw) return null;
+
+    const sa = JSON.parse(raw);
+    const now = Math.floor(Date.now() / 1000);
+
+    // Build JWT header + payload
+    const header = { alg: "RS256", typ: "JWT" };
+    const payload = {
+      iss: sa.client_email,
+      scope: "https://www.googleapis.com/auth/indexing",
+      aud: "https://oauth2.googleapis.com/token",
+      iat: now,
+      exp: now + 3600,
+    };
+
+    const b64 = (obj: object) =>
+      Buffer.from(JSON.stringify(obj)).toString("base64url");
+
+    const signingInput = `${b64(header)}.${b64(payload)}`;
+
+    // Import private key
+    const privateKeyPem = sa.private_key as string;
+    const pemBody = privateKeyPem
+      .replace(/-----BEGIN PRIVATE KEY-----/, "")
+      .replace(/-----END PRIVATE KEY-----/, "")
+      .replace(/\n/g, "");
+    const keyData = Buffer.from(pemBody, "base64");
+
+    const cryptoKey = await crypto.subtle.importKey(
+      "pkcs8",
+      keyData,
+      { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+
+    const encoder = new TextEncoder();
+    const signature = await crypto.subtle.sign(
+      "RSASSA-PKCS1-v1_5",
+      cryptoKey,
+      encoder.encode(signingInput)
+    );
+
+    const jwt = `${signingInput}.${Buffer.from(signature).toString("base64url")}`;
+
+    // Exchange JWT for access token
+    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+        assertion: jwt,
+      }),
+    });
+
+    const tokenData = await tokenRes.json();
+    return tokenData.access_token || null;
+  } catch {
+    return null;
+  }
+}
+
+async function submitToGoogle(urlList: string[]): Promise<{ target: string; status: string; statusCode?: number; body?: string }> {
+  const token = await getGoogleAccessToken();
+  if (!token) {
+    return {
+      target: "Google",
+      status: "not_configured",
+      body: "Google service account not configured. Set GOOGLE_SERVICE_ACCOUNT_JSON env var.",
+    };
+  }
+
+  // Google Indexing API allows max 100 URLs per batch request
+  const batch = urlList.slice(0, 100);
+  let successCount = 0;
+  let lastError = "";
+
+  for (const url of batch) {
+    try {
+      const res = await fetch("https://indexing.googleapis.com/v3/urlNotifications:publish", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ url, type: "URL_UPDATED" }),
+      });
+      if (res.ok) {
+        successCount++;
+      } else {
+        const err = await res.text().catch(() => "");
+        lastError = `HTTP ${res.status}: ${err.substring(0, 100)}`;
+      }
+    } catch (e) {
+      lastError = e instanceof Error ? e.message : "Unknown error";
+    }
+  }
+
+  if (successCount === batch.length) {
+    return { target: "Google", status: "success", body: `${successCount}/${batch.length} URLs submitted` };
+  } else if (successCount > 0) {
+    return { target: "Google", status: "partial", body: `${successCount}/${batch.length} succeeded. Last error: ${lastError}` };
+  } else {
+    return { target: "Google", status: "failed", body: lastError || "All submissions failed" };
+  }
+}
+
+// ─── IndexNow (Bing + partners) ───────────────────────────────────────────────
 async function submitIndexNow(urlList: string[]): Promise<{ target: string; status: string; statusCode?: number; body?: string }[]> {
   const payload = {
     host: HOST,
@@ -26,8 +136,8 @@ async function submitIndexNow(urlList: string[]): Promise<{ target: string; stat
   const body = JSON.stringify(payload);
 
   const endpoints = [
+    { label: "Bing (IndexNow)", url: "https://www.bing.com/IndexNow" },
     { label: "IndexNow API", url: "https://api.indexnow.org/IndexNow" },
-    { label: "Bing", url: "https://www.bing.com/IndexNow" },
   ];
 
   const results = [];
@@ -35,12 +145,13 @@ async function submitIndexNow(urlList: string[]): Promise<{ target: string; stat
   for (const ep of endpoints) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
+      const timeout = setTimeout(() => controller.abort(), 12000);
       const res = await fetch(ep.url, { method: "POST", headers, body, signal: controller.signal });
       clearTimeout(timeout);
       const responseBody = await res.text().catch(() => "");
+      // 200 = OK, 202 = Accepted (both are success)
       const status = res.status === 200 || res.status === 202 ? "success" : "failed";
-      results.push({ target: ep.label, status, statusCode: res.status, body: responseBody });
+      results.push({ target: ep.label, status, statusCode: res.status, body: responseBody || `HTTP ${res.status}` });
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Unknown error";
       results.push({ target: ep.label, status: "error", body: msg });
@@ -50,60 +161,51 @@ async function submitIndexNow(urlList: string[]): Promise<{ target: string; stat
   return results;
 }
 
+// ─── POST handler ─────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { urls, action, target } = body;
+    const { urls, action, engines } = body;
 
-    // ─── Ping Sitemap ────────────────────────────────────────────────────────
+    // engines can be "bing", "google", or "all" (default: "all")
+    const targetEngines = engines || "all";
+    const doBing = targetEngines === "all" || targetEngines === "bing";
+    const doGoogle = targetEngines === "all" || targetEngines === "google";
+
+    // ─── Ping / Submit action ────────────────────────────────────────────────
     if (action === "ping-sitemap") {
-      const sitemapUrl = `${SITE_URL}/sitemap.xml`;
-      const allResults: { target: string; status: string; statusCode?: number; message?: string }[] = [];
+      // Treat as submitting the homepage + sitemap URL
+      const urlsToSubmit = [`${SITE_URL}/`];
+      const allResults: { target: string; status: string; statusCode?: number; body?: string }[] = [];
 
-      const shouldGoogle = !target || target === "Google" || target === "all";
-      const shouldBing   = !target || target === "Bing"   || target === "all";
-
-      // Google deprecated their sitemap ping endpoint in Jan 2024.
-      // The only way to submit to Google is via Search Console manually.
-      if (shouldGoogle) {
-        allResults.push({
-          target: "Google",
-          status: "info",
-          message: "Google sitemap ping was deprecated in Jan 2024. Please submit via Google Search Console.",
-        });
-        await supabase.from("ping_logs").insert({
-          target: "Google",
-          sitemap_url: sitemapUrl,
-          status: "info",
-          response_code: null,
-          error_message: "Deprecated: use Search Console at https://search.google.com/search-console",
-        });
+      if (doBing) {
+        const bingResults = await submitIndexNow(urlsToSubmit);
+        allResults.push(...bingResults);
+      }
+      if (doGoogle) {
+        const googleResult = await submitToGoogle(urlsToSubmit);
+        allResults.push(googleResult);
       }
 
-      // For Bing, use IndexNow instead of the deprecated ping endpoint.
-      if (shouldBing) {
-        const bingResults = await submitIndexNow([`${SITE_URL}/`]);
-        for (const r of bingResults) {
-          allResults.push({ target: r.target, status: r.status, statusCode: r.statusCode });
-          await supabase.from("ping_logs").insert({
-            target: r.target,
-            sitemap_url: sitemapUrl,
-            status: r.status,
-            response_code: r.statusCode ?? null,
-            error_message: r.status !== "success" ? (r.body?.substring(0, 200) || `HTTP ${r.statusCode}`) : null,
-          });
-        }
+      for (const r of allResults) {
+        await supabase.from("ping_logs").insert({
+          target: r.target,
+          sitemap_url: `${SITE_URL}/sitemap.xml`,
+          status: r.status,
+          response_code: r.statusCode ?? null,
+          error_message: r.status !== "success" ? (r.body?.substring(0, 200) || null) : null,
+        }).catch(() => {});
       }
 
       return NextResponse.json({ success: true, results: allResults });
     }
 
-    // ─── Submit URL list ─────────────────────────────────────────────────────
+    // ─── URL list submission ─────────────────────────────────────────────────
     if (!urls || !Array.isArray(urls) || urls.length === 0) {
       return NextResponse.json({ success: false, message: "No URLs provided" }, { status: 400 });
     }
 
-    // Only submit URLs that belong to our domain
+    // Only keep URLs from our domain
     const urlList: string[] = urls
       .map((u: string) => (u.startsWith("http") ? u : `${SITE_URL}${u}`))
       .filter((u: string) => {
@@ -114,15 +216,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: "No valid URLs for this host" }, { status: 400 });
     }
 
-    const allResults = await submitIndexNow(urlList);
+    const allResults: { target: string; status: string; statusCode?: number; body?: string }[] = [];
 
-    // Google does not support IndexNow — guide user to Search Console
-    allResults.push({
-      target: "Google",
-      status: "info",
-      statusCode: undefined,
-      body: "Google does not support IndexNow. Use Google Search Console to request indexing.",
-    });
+    if (doBing) {
+      const bingResults = await submitIndexNow(urlList);
+      allResults.push(...bingResults);
+    }
+    if (doGoogle) {
+      const googleResult = await submitToGoogle(urlList);
+      allResults.push(googleResult);
+    }
 
     // Save to DB
     const urlSummary = urlList.slice(0, 3).join(", ") + (urlList.length > 3 ? ` +${urlList.length - 3} more` : "");
@@ -133,15 +236,15 @@ export async function POST(req: NextRequest) {
         status: r.status,
         response_code: r.statusCode ?? null,
         response_body: `${urlList.length} URLs submitted`,
-        error_message: r.status !== "success" && r.status !== "info"
-          ? (r.body?.substring(0, 200) || `HTTP ${r.statusCode}`)
+        error_message: r.status !== "success"
+          ? (r.body?.substring(0, 200) || null)
           : null,
-      });
+      }).catch(() => {});
     }
 
     return NextResponse.json({ success: true, results: allResults, urlCount: urlList.length });
   } catch (error: unknown) {
-    console.error("IndexNow error:", error);
+    console.error("Indexing API error:", error);
     return NextResponse.json(
       { success: false, message: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
@@ -149,7 +252,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET: fetch recent ping logs
+// ─── GET: fetch recent ping logs ──────────────────────────────────────────────
 export async function GET() {
   try {
     const { data, error } = await supabase
