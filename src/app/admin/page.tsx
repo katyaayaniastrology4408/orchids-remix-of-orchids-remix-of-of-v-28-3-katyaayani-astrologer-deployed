@@ -1857,169 +1857,195 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
                       {activeTab === "settings" && (
 
               <div className="space-y-6 pb-20 md:pb-0">
-                {/* SMTP Email Stats */}
-              <Card className={isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle className="text-[#ff6b35] flex items-center gap-2"><Mail className="w-6 h-6" /> {t("SMTP Email Stats")}</CardTitle>
-                    <CardDescription>{t("Email sending limits and usage details")}</CardDescription>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={fetchEmailStats} disabled={emailStatsLoading} className="border-[#ff6b35]/20 text-[#ff6b35]">
-                    {emailStatsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                  </Button>
-                </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* Daily Limits Progress - Gmail & Brevo */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Gmail Daily Limit */}
-                      <div className={`p-4 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#ff6b35]/5 border-[#ff6b35]/10'}`}>
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-sm font-bold flex items-center gap-2"><Gauge className="w-4 h-4 text-blue-500" /> Gmail SMTP</p>
-                          <span className="text-xs font-bold text-muted-foreground">{emailStats.gmailTodayUsed} / {emailStats.gmailDailyLimit}</span>
+                  {/* Email Stats */}
+                <Card className={isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle className="text-[#ff6b35] flex items-center gap-2"><Mail className="w-6 h-6" /> {t("Email Stats")}</CardTitle>
+                      <CardDescription>{t("Email sending limits and usage details")}</CardDescription>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={fetchEmailStats} disabled={emailStatsLoading} className="border-[#ff6b35]/20 text-[#ff6b35]">
+                      {emailStatsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                    </Button>
+                  </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* Provider Info Banners */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className={`p-3 rounded-xl border flex items-center gap-3 ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-200'}`}>
+                          <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                            <Mail className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-black text-blue-600 dark:text-blue-400">Gmail SMTP</p>
+                            <p className="text-[10px] text-muted-foreground font-medium">Daily Rashifal માટે</p>
+                          </div>
                         </div>
-                        <div className={`w-full h-3 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
-                          <div 
-                            className={`h-3 rounded-full transition-all duration-500 ${
-                              (emailStats.gmailTodayUsed / emailStats.gmailDailyLimit) > 0.9 ? 'bg-red-500' :
-                              (emailStats.gmailTodayUsed / emailStats.gmailDailyLimit) > 0.7 ? 'bg-amber-500' :
-                              'bg-blue-500'
-                            }`}
-                            style={{ width: `${Math.min((emailStats.gmailTodayUsed / emailStats.gmailDailyLimit) * 100, 100)}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between mt-2">
-                          <span className={`text-xs font-bold ${
-                            emailStats.gmailRemaining < 50 ? 'text-red-500' : 
-                            emailStats.gmailRemaining < 150 ? 'text-amber-500' : 'text-green-500'
-                          }`}>
-                            {emailStats.gmailRemaining} {t("remaining")}
-                          </span>
-                          {emailStats.gmailTodayFailed > 0 && (
-                            <span className="text-[10px] text-red-500 font-bold">{emailStats.gmailTodayFailed} {t("failed today")}</span>
-                          )}
+                        <div className={`p-3 rounded-xl border flex items-center gap-3 ${isDark ? 'bg-[#ff6b35]/10 border-[#ff6b35]/20' : 'bg-orange-50 border-orange-200'}`}>
+                          <div className="w-9 h-9 rounded-full bg-[#ff6b35] flex items-center justify-center flex-shrink-0">
+                            <Send className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-black text-[#ff6b35]">Resend</p>
+                            <p className="text-[10px] text-muted-foreground font-medium">Weekly Rashifal માટે</p>
+                          </div>
                         </div>
                       </div>
 
-                        {/* Resend Daily Limit */}
+                      {/* Daily Limits Progress */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Gmail Daily Limit */}
                         <div className={`p-4 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#ff6b35]/5 border-[#ff6b35]/10'}`}>
-                          <div className="flex items-center justify-between mb-2">
-                            <p className="text-sm font-bold flex items-center gap-2"><Gauge className="w-4 h-4 text-[#ff6b35]" /> Resend</p>
-                            <span className="text-xs font-bold text-muted-foreground">{emailStats.resendTodayUsed} / {emailStats.resendDailyLimit}</span>
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-sm font-bold flex items-center gap-2"><Gauge className="w-4 h-4 text-blue-500" /> Gmail SMTP</p>
+                            <span className="text-xs font-bold text-muted-foreground">{emailStats.gmailTodayUsed} / {emailStats.gmailDailyLimit}</span>
                           </div>
+                          <p className="text-[10px] text-blue-500 font-semibold mb-2">Daily Rashifal</p>
                           <div className={`w-full h-3 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
                             <div 
                               className={`h-3 rounded-full transition-all duration-500 ${
-                                (emailStats.resendTodayUsed / emailStats.resendDailyLimit) > 0.9 ? 'bg-red-500' :
-                                (emailStats.resendTodayUsed / emailStats.resendDailyLimit) > 0.7 ? 'bg-amber-500' :
-                                'bg-[#ff6b35]'
+                                (emailStats.gmailTodayUsed / emailStats.gmailDailyLimit) > 0.9 ? 'bg-red-500' :
+                                (emailStats.gmailTodayUsed / emailStats.gmailDailyLimit) > 0.7 ? 'bg-amber-500' :
+                                'bg-blue-500'
                               }`}
-                              style={{ width: `${Math.min((emailStats.resendTodayUsed / emailStats.resendDailyLimit) * 100, 100)}%` }}
+                              style={{ width: `${Math.min((emailStats.gmailTodayUsed / emailStats.gmailDailyLimit) * 100, 100)}%` }}
                             />
                           </div>
                           <div className="flex justify-between mt-2">
                             <span className={`text-xs font-bold ${
-                              emailStats.resendRemaining < 10 ? 'text-red-500' : 
-                              emailStats.resendRemaining < 30 ? 'text-amber-500' : 'text-green-500'
+                              emailStats.gmailRemaining < 50 ? 'text-red-500' : 
+                              emailStats.gmailRemaining < 150 ? 'text-amber-500' : 'text-green-500'
                             }`}>
-                              {emailStats.resendRemaining} {t("remaining")}
+                              {emailStats.gmailRemaining} {t("remaining")}
                             </span>
-                            {emailStats.resendTodayFailed > 0 && (
-                              <span className="text-[10px] text-red-500 font-bold">{emailStats.resendTodayFailed} {t("failed today")}</span>
+                            {emailStats.gmailTodayFailed > 0 && (
+                              <span className="text-[10px] text-red-500 font-bold">{emailStats.gmailTodayFailed} {t("failed today")}</span>
                             )}
                           </div>
                         </div>
-                    </div>
 
-                    <p className="text-[10px] text-muted-foreground text-center">{t("Limits reset daily at midnight")}</p>
+                          {/* Resend Daily Limit */}
+                          <div className={`p-4 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#ff6b35]/5 border-[#ff6b35]/10'}`}>
+                            <div className="flex items-center justify-between mb-1">
+                              <p className="text-sm font-bold flex items-center gap-2"><Gauge className="w-4 h-4 text-[#ff6b35]" /> Resend</p>
+                              <span className="text-xs font-bold text-muted-foreground">{emailStats.resendTodayUsed} / {emailStats.resendDailyLimit}</span>
+                            </div>
+                            <p className="text-[10px] text-[#ff6b35] font-semibold mb-2">Weekly Rashifal</p>
+                            <div className={`w-full h-3 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
+                              <div 
+                                className={`h-3 rounded-full transition-all duration-500 ${
+                                  (emailStats.resendTodayUsed / emailStats.resendDailyLimit) > 0.9 ? 'bg-red-500' :
+                                  (emailStats.resendTodayUsed / emailStats.resendDailyLimit) > 0.7 ? 'bg-amber-500' :
+                                  'bg-[#ff6b35]'
+                                }`}
+                                style={{ width: `${Math.min((emailStats.resendTodayUsed / emailStats.resendDailyLimit) * 100, 100)}%` }}
+                              />
+                            </div>
+                            <div className="flex justify-between mt-2">
+                              <span className={`text-xs font-bold ${
+                                emailStats.resendRemaining < 10 ? 'text-red-500' : 
+                                emailStats.resendRemaining < 30 ? 'text-amber-500' : 'text-green-500'
+                              }`}>
+                                {emailStats.resendRemaining} {t("remaining")}
+                              </span>
+                              {emailStats.resendTodayFailed > 0 && (
+                                <span className="text-[10px] text-red-500 font-bold">{emailStats.resendTodayFailed} {t("failed today")}</span>
+                              )}
+                            </div>
+                          </div>
+                      </div>
 
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className={`p-4 rounded-xl border text-center ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
-                        <Send className="w-5 h-5 text-green-500 mx-auto mb-2" />
-                        <p className="text-2xl font-black">{emailStats.totalSent}</p>
-                        <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">{t("Total Sent")}</p>
-                      </div>
-                      <div className={`p-4 rounded-xl border text-center ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
-                        <AlertCircle className="w-5 h-5 text-red-500 mx-auto mb-2" />
-                        <p className="text-2xl font-black">{emailStats.totalFailed}</p>
-                        <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">{t("Total Failed")}</p>
-                      </div>
-                      <div className={`p-4 rounded-xl border text-center ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
-                        <Inbox className="w-5 h-5 text-blue-500 mx-auto mb-2" />
-                        <p className="text-2xl font-black">{emailStats.todaySent}</p>
-                        <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">{t("Today Sent")}</p>
-                      </div>
-                      <div className={`p-4 rounded-xl border text-center ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
-                        <Calendar className="w-5 h-5 text-[#ff6b35] mx-auto mb-2" />
-                        <p className="text-2xl font-black">{emailStats.monthSent}</p>
-                        <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">{t("This Month")}</p>
-                      </div>
-                    </div>
+                      <p className="text-[10px] text-muted-foreground text-center">{t("Limits reset daily at midnight")}</p>
 
-                    {/* Today's Summary */}
-                    {(emailStats.todaySent > 0 || emailStats.todayFailed > 0) && (
-                      <div className={`p-4 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
-                        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">{t("Today's Summary")}</p>
-                        <div className="flex items-center gap-4 flex-wrap">
-                          <span className="text-xs font-bold text-green-500">{emailStats.todaySent} {t("sent")}</span>
-                          <span className="text-xs font-bold text-red-500">{emailStats.todayFailed} {t("failed")}</span>
-                            <span className="text-[10px] text-muted-foreground">
-                              ({t("Gmail")}: {emailStats.gmailTodayUsed} {t("sent")} / {emailStats.gmailTodayFailed} {t("failed")} | Resend: {emailStats.resendTodayUsed} {t("sent")} / {emailStats.resendTodayFailed} {t("failed")})
-                            </span>
+                      {/* Stats Grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className={`p-4 rounded-xl border text-center ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
+                          <Send className="w-5 h-5 text-green-500 mx-auto mb-2" />
+                          <p className="text-2xl font-black">{emailStats.totalSent}</p>
+                          <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">{t("Total Sent")}</p>
+                        </div>
+                        <div className={`p-4 rounded-xl border text-center ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
+                          <AlertCircle className="w-5 h-5 text-red-500 mx-auto mb-2" />
+                          <p className="text-2xl font-black">{emailStats.totalFailed}</p>
+                          <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">{t("Total Failed")}</p>
+                        </div>
+                        <div className={`p-4 rounded-xl border text-center ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
+                          <Inbox className="w-5 h-5 text-blue-500 mx-auto mb-2" />
+                          <p className="text-2xl font-black">{emailStats.todaySent}</p>
+                          <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">{t("Today Sent")}</p>
+                        </div>
+                        <div className={`p-4 rounded-xl border text-center ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
+                          <Calendar className="w-5 h-5 text-[#ff6b35] mx-auto mb-2" />
+                          <p className="text-2xl font-black">{emailStats.monthSent}</p>
+                          <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">{t("This Month")}</p>
                         </div>
                       </div>
-                    )}
 
-                    {/* Provider Breakdown */}
-                      <div className={`p-4 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
-                        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">{t("Provider Breakdown (All Time)")}</p>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                              <div>
-                                <p className="text-sm font-bold">Gmail SMTP</p>
-                                <p className="text-xs text-muted-foreground">{emailStats.gmailSent} {t("emails sent")}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <div className="w-3 h-3 rounded-full bg-[#ff6b35]"></div>
-                              <div>
-                                <p className="text-sm font-bold">Resend</p>
-                                <p className="text-xs text-muted-foreground">{emailStats.resendSent} {t("emails sent")}</p>
-                              </div>
-                            </div>
+                      {/* Today's Summary */}
+                      {(emailStats.todaySent > 0 || emailStats.todayFailed > 0) && (
+                        <div className={`p-4 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
+                          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">{t("Today's Summary")}</p>
+                          <div className="flex items-center gap-4 flex-wrap">
+                            <span className="text-xs font-bold text-green-500">{emailStats.todaySent} {t("sent")}</span>
+                            <span className="text-xs font-bold text-red-500">{emailStats.todayFailed} {t("failed")}</span>
+                              <span className="text-[10px] text-muted-foreground">
+                                (Gmail: {emailStats.gmailTodayUsed} {t("sent")} / {emailStats.gmailTodayFailed} {t("failed")} | Resend: {emailStats.resendTodayUsed} {t("sent")} / {emailStats.resendTodayFailed} {t("failed")})
+                              </span>
                           </div>
-                      </div>
+                        </div>
+                      )}
 
-                    {/* Recent Emails */}
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">{t("Recent Emails")}</p>
-                      <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                        {recentEmails.length > 0 ? recentEmails.map((email: any) => (
-                          <div key={email.id} className={`p-3 rounded-xl border flex items-center justify-between gap-3 ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${email.status === 'sent' ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                                <p className="text-xs font-bold truncate">{email.recipient}</p>
+                      {/* Provider Breakdown */}
+                        <div className={`p-4 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
+                          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">{t("Provider Breakdown (All Time)")}</p>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                <div>
+                                  <p className="text-sm font-bold">Gmail SMTP</p>
+                                  <p className="text-[10px] text-blue-500 font-semibold">Daily Rashifal</p>
+                                  <p className="text-xs text-muted-foreground">{emailStats.gmailSent} {t("emails sent")}</p>
+                                </div>
                               </div>
-                              <p className="text-[10px] text-muted-foreground truncate pl-4">{email.subject}</p>
-                              {email.error_message && <p className="text-[9px] text-red-500 truncate pl-4">{email.error_message}</p>}
+                              <div className="flex items-center gap-3">
+                                <div className="w-3 h-3 rounded-full bg-[#ff6b35]"></div>
+                                <div>
+                                  <p className="text-sm font-bold">Resend</p>
+                                  <p className="text-[10px] text-[#ff6b35] font-semibold">Weekly Rashifal</p>
+                                  <p className="text-xs text-muted-foreground">{emailStats.resendSent} {t("emails sent")}</p>
+                                </div>
+                              </div>
                             </div>
-                            <div className="text-right flex-shrink-0">
-                                <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                                    email.provider === 'gmail' ? 'bg-blue-500/10 text-blue-500' : 
-                                    'bg-[#ff6b35]/10 text-[#ff6b35]'
-                                  }`}>{email.provider}</span>
-                              <p className="text-[9px] text-muted-foreground mt-1">{new Date(email.created_at).toLocaleString()}</p>
+                        </div>
+
+                      {/* Recent Emails */}
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">{t("Recent Emails")}</p>
+                        <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                          {recentEmails.length > 0 ? recentEmails.map((email: any) => (
+                            <div key={email.id} className={`p-3 rounded-xl border flex items-center justify-between gap-3 ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${email.status === 'sent' ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                                  <p className="text-xs font-bold truncate">{email.recipient}</p>
+                                </div>
+                                <p className="text-[10px] text-muted-foreground truncate pl-4">{email.subject}</p>
+                                {email.error_message && <p className="text-[9px] text-red-500 truncate pl-4">{email.error_message}</p>}
+                              </div>
+                              <div className="text-right flex-shrink-0">
+                                  <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                                      email.provider === 'gmail' ? 'bg-blue-500/10 text-blue-500' : 
+                                      'bg-[#ff6b35]/10 text-[#ff6b35]'
+                                    }`}>{email.provider === 'gmail' ? 'Gmail' : 'Resend'}</span>
+                                <p className="text-[9px] text-muted-foreground mt-1">{new Date(email.created_at).toLocaleString()}</p>
+                              </div>
                             </div>
-                          </div>
-                        )) : (
-                          <div className="py-8 text-center text-xs text-muted-foreground italic">{t("No email logs yet. Emails will appear here once sent.")}</div>
-                        )}
+                          )) : (
+                            <div className="py-8 text-center text-xs text-muted-foreground italic">{t("No email logs yet. Emails will appear here once sent.")}</div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-              </Card>
+                    </CardContent>
+                </Card>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className={isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}>
