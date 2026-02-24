@@ -42,16 +42,31 @@ export async function POST(request: NextRequest) {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
 
-      // Send to one random user only
-      const randomUser = validUsers[Math.floor(Math.random() * validUsers.length)];
-      const userName = randomUser.name || 'Valued Seeker';
-      await sendEmail({
-        to: randomUser.email,
-        subject: `Today's Rashifal Has Been Updated! - ${formattedDate}`,
-        html: dailyRashifalEmailTemplate(userName, formattedDate, rashifalData),
-      });
+    let sentCount = 0;
+    const errors: string[] = [];
 
-      return NextResponse.json({ success: true, totalUsers: 1, sentTo: randomUser.email });
+    // Send to all users via Gmail SMTP (sequential with small delay)
+    for (const user of validUsers) {
+      try {
+        const userName = user.name || 'Valued Seeker';
+        const result = await sendEmail({
+          to: user.email,
+          subject: `Today's Rashifal Has Been Updated! - ${formattedDate}`,
+          html: dailyRashifalEmailTemplate(userName, formattedDate, rashifalData),
+        });
+        if (result.success) {
+          sentCount++;
+        } else {
+          errors.push(`${user.email}: ${result.error}`);
+        }
+      } catch (err: any) {
+        errors.push(`${user.email}: ${err.message}`);
+      }
+      // Small delay between sends to avoid Gmail rate limiting
+      await new Promise((r) => setTimeout(r, 300));
+    }
+
+    return NextResponse.json({ success: true, totalUsers: sentCount, errors: errors.length > 0 ? errors : undefined });
   } catch (error) {
     console.error('Error sending daily rashifal emails:', error);
     return NextResponse.json({ error: 'Failed to send emails' }, { status: 500 });
