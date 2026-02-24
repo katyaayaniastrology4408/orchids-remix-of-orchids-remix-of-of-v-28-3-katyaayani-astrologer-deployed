@@ -4105,27 +4105,30 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
             )}
             <div className="space-y-2">
               <Label>{t("Rashi")}</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {RASHI_LIST.map((rashi) => {
-                  const hasData = currentData.find(r => r.rashi === rashi.english);
-                  return (
-                    <button
-                      key={rashi.english}
-                      onClick={() => setSelectedRashi(rashi.english)}
-                      className={`p-2 rounded-lg text-center transition-all ${
-                        selectedRashi === rashi.english 
-                          ? 'bg-[#ff6b35] text-white' 
-                          : isDark 
-                            ? 'bg-white/5 hover:bg-white/10' 
-                            : 'bg-gray-100 hover:bg-gray-200'
-                      } ${hasData ? 'ring-2 ring-green-500/50' : ''}`}
-                    >
-                      <div className="text-xl">{RASHI_ICONS[rashi.english]}</div>
-                      <div className="text-[10px] font-bold">{rashi.gujarati}</div>
-                    </button>
-                  );
-                })}
-              </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {RASHI_LIST.map((rashi) => {
+                    const hasData = currentData.find(r => r.rashi === rashi.english);
+                    return (
+                      <button
+                        key={rashi.english}
+                        onClick={() => setSelectedRashi(rashi.english)}
+                        className={`p-2 rounded-lg text-left flex items-center gap-2 transition-all ${
+                          selectedRashi === rashi.english 
+                            ? 'bg-[#ff6b35] text-white' 
+                            : isDark 
+                              ? 'bg-white/5 hover:bg-white/10' 
+                              : 'bg-gray-100 hover:bg-gray-200'
+                        } ${hasData ? 'ring-2 ring-green-500/50' : ''}`}
+                      >
+                        <span className="text-lg leading-none">{RASHI_ICONS[rashi.english]}</span>
+                        <div className="min-w-0">
+                          <div className="text-[11px] font-bold leading-tight">{rashi.gujarati}</div>
+                          <div className="text-[9px] opacity-70 leading-tight capitalize">{rashi.english}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               <p className="text-[10px] text-muted-foreground mt-2">
                 <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1"></span>
                 {t("Green border = Data exists")}

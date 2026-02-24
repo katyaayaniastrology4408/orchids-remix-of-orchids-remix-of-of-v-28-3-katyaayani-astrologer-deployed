@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { sendEmail } from '@/lib/email.config';
+import { Resend } from 'resend';
 import { weeklyRashifalEmailTemplate } from '@/lib/email-templates';
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +14,11 @@ export async function POST(request: NextRequest) {
     const { week_start, week_end } = await request.json();
     if (!week_start || !week_end) {
       return NextResponse.json({ error: 'week_start and week_end are required' }, { status: 400 });
+    }
+
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+      return NextResponse.json({ error: 'Resend API key not configured' }, { status: 500 });
     }
 
     // Get all weekly rashifal data
@@ -45,18 +50,36 @@ export async function POST(request: NextRequest) {
       day: 'numeric', month: 'long', year: 'numeric'
     });
 
+    const resend = new Resend(resendApiKey);
+    const FROM = process.env.RESEND_FROM_EMAIL || 'Katyaayani Astrologer <noreply@katyaayaniastrologer.com>';
+    const subject = `Weekly Rashifal Updated! (${formattedStart} - ${formattedEnd})`;
+
     let sentCount = 0;
-    for (const user of validUsers) {
+
+    // Send in batches of 50
+    const BATCH_SIZE = 50;
+    for (let i = 0; i < validUsers.length; i += BATCH_SIZE) {
+      const batch = validUsers.slice(i, i + BATCH_SIZE);
+      const emails = batch.map((user) => ({
+        from: FROM,
+        to: user.email,
+        subject,
+        html: weeklyRashifalEmailTemplate(user.name || 'Valued Seeker', formattedStart, formattedEnd, rashifalData),
+      }));
+
       try {
-        const userName = user.name || 'Valued Seeker';
-        await sendEmail({
-          to: user.email,
-          subject: `Weekly Rashifal Updated! (${formattedStart} - ${formattedEnd})`,
-          html: weeklyRashifalEmailTemplate(userName, formattedStart, formattedEnd, rashifalData),
-        });
-        sentCount++;
+        const { data: batchData, error: batchError } = await resend.batch.send(emails);
+        if (!batchError) {
+          sentCount += batch.length;
+        } else {
+          console.error('Batch error:', batchError);
+        }
       } catch (err) {
-        console.error(`Failed to send to ${user.email}:`, err);
+        console.error('Batch send failed:', err);
+      }
+
+      if (i + BATCH_SIZE < validUsers.length) {
+        await new Promise((r) => setTimeout(r, 500));
       }
     }
 
