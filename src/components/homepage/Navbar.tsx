@@ -76,7 +76,6 @@ export default function Navbar() {
             <Link href="/" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("Home")}</Link>
                 <Link href="/services" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("Services")}</Link>
                 <Link href="/booking" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("Book")}</Link>
-                <Link href="/online-consulting" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("Online")}</Link>
               <Link href="/blog" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("Blog")}</Link>
               <Link href="/feedback" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("Feedback")}</Link>
               <Link href="/about" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("About")}</Link>
@@ -137,7 +136,6 @@ export default function Navbar() {
 <Link href="/" className="block py-2 text-[#ff6b35]" onClick={() => setIsMenuOpen(false)}>{t("Home")}</Link>
                       <Link href="/services" className="block py-2" onClick={() => setIsMenuOpen(false)}>{t("Services")}</Link>
                       <Link href="/booking" className="block py-2" onClick={() => setIsMenuOpen(false)}>{t("Book")}</Link>
-                      <Link href="/online-consulting" className="block py-2" onClick={() => setIsMenuOpen(false)}>{t("Online")}</Link>
                     <Link href="/blog" className="block py-2" onClick={() => setIsMenuOpen(false)}>{t("Blog")}</Link>
                     <Link href="/feedback" className="block py-2" onClick={() => setIsMenuOpen(false)}>{t("Feedback")}</Link>
                   <Link href="/about" className="block py-2" onClick={() => setIsMenuOpen(false)}>{t("About")}</Link>

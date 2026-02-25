@@ -564,7 +564,7 @@ const fetchBookingDetails = async (bid: string) => {
 <div className="hidden md:flex items-center gap-6">
               <Link href="/" className="hover:text-[#ff6b35] transition-colors text-xl">{t('Home')}</Link>
               <Link href="/services" className="hover:text-[#ff6b35] transition-colors text-xl">{t('Services')}</Link>
-              <Link href="/online-consulting" className="hover:text-[#ff6b35] transition-colors text-xl">{t('Online')}</Link>
+
               <Link href="/booking" className="text-[#ff6b35] text-xl">{t('Book')}</Link>
               <Link href="/feedback" className="hover:text-[#ff6b35] transition-colors text-xl">{t('Feedback')}</Link>
               <Link href="/about" className="hover:text-[#ff6b35] transition-colors text-xl">{t('About')}</Link>
@@ -596,7 +596,6 @@ const fetchBookingDetails = async (bid: string) => {
 <div className="px-6 py-4 space-y-3">
                   <Link href="/" className="block py-2 hover:text-[#ff6b35]" onClick={() => setIsMenuOpen(false)}>{t('Home')}</Link>
                   <Link href="/services" className="block py-2 hover:text-[#ff6b35]" onClick={() => setIsMenuOpen(false)}>{t('Services')}</Link>
-                  <Link href="/online-consulting" className="block py-2 hover:text-[#ff6b35]" onClick={() => setIsMenuOpen(false)}>{t('Online')}</Link>
                   <Link href="/booking" className="block py-2 text-[#ff6b35]" onClick={() => setIsMenuOpen(false)}>{t('Book')}</Link>
                   <Link href="/feedback" className="block py-2 hover:text-[#ff6b35]" onClick={() => setIsMenuOpen(false)}>{t('Feedback')}</Link>
                   <Link href="/about" className="block py-2 hover:text-[#ff6b35]" onClick={() => setIsMenuOpen(false)}>{t('About')}</Link>
