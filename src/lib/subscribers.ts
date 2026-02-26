@@ -47,15 +47,32 @@ export async function getUnifiedSubscribers(): Promise<Subscriber[]> {
 
 /**
  * Syncs a user to the newsletter_subscribers table.
+ * Avoids overwriting is_newsletter_subscriber if it's already true.
  */
 export async function syncToSubscribers(email: string, name: string, source: string = 'system_sync', isNewsletterSubscriber: boolean = false) {
   if (!email) return;
   
   try {
+    const lowercaseEmail = email.toLowerCase();
+    
+    // Check if they are already a newsletter subscriber if we're trying to set it to false
+    if (!isNewsletterSubscriber) {
+      const { data: existing } = await supabase
+        .from('newsletter_subscribers')
+        .select('is_newsletter_subscriber')
+        .eq('email', lowercaseEmail)
+        .maybeSingle();
+        
+      if (existing?.is_newsletter_subscriber) {
+        // Keep it as true if it was already true
+        isNewsletterSubscriber = true;
+      }
+    }
+
     const { error } = await supabase
       .from('newsletter_subscribers')
       .upsert({
-        email: email.toLowerCase(),
+        email: lowercaseEmail,
         first_name: name || email.split('@')[0],
         source,
         is_active: true,

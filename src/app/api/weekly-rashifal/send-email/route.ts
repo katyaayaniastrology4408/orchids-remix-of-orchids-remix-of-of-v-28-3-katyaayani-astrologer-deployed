@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { sendEmail } from '@/lib/email.config';
+import { sendResendBatch } from '@/lib/email.config';
 import { weeklyRashifalEmailTemplate } from '@/lib/email-templates';
 import { getUnifiedSubscribers } from '@/lib/subscribers';
 export const dynamic = 'force-dynamic';
@@ -44,32 +44,28 @@ export async function POST(request: NextRequest) {
 
     const subject = `Weekly Rashifal Updated! (${formattedStart} - ${formattedEnd})`;
 
-    let sentCount = 0;
-    const errors: string[] = [];
+    // Prepare emails for batch
+    const emails = validUsers.map(user => ({
+      to: user.email,
+      subject,
+      html: weeklyRashifalEmailTemplate(user.name || 'Valued Seeker', formattedStart, formattedEnd, rashifalData),
+    }));
 
-    // Send to all users via SMTP (sequential with small delay to avoid rate limits)
-    for (const user of validUsers) {
-      try {
-        const result = await sendEmail({
-          to: user.email,
-          subject,
-          html: weeklyRashifalEmailTemplate(user.name || 'Valued Seeker', formattedStart, formattedEnd, rashifalData),
-        });
-        if (result.success) {
-          sentCount++;
-        } else {
-          errors.push(`${user.email}: ${result.error}`);
-        }
-      } catch (err: any) {
-        errors.push(`${user.email}: ${err.message}`);
-      }
-      // Small delay
-      await new Promise((r) => setTimeout(r, 200));
+    // Send via Resend Batch
+    const result = await sendResendBatch(emails);
+
+    if (!result.success) {
+      return NextResponse.json({ error: result.error || 'Failed to send batch emails' }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, totalUsers: sentCount, errors: errors.length > 0 ? errors : undefined });
-  } catch (error) {
+    return NextResponse.json({ 
+      success: true, 
+      totalUsers: result.total, 
+      sent: result.sent, 
+      failed: result.failed 
+    });
+  } catch (error: any) {
     console.error('Error sending weekly rashifal emails:', error);
-    return NextResponse.json({ error: 'Failed to send emails' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to send emails' }, { status: 500 });
   }
 }
