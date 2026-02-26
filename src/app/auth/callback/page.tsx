@@ -9,50 +9,78 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     const handleCallback = async () => {
-      // Wait for Supabase to exchange the code for a session
-      const { data: { session }, error } = await supabase.auth.getSession();
+      try {
+        console.log("Auth callback: Exchanging session...");
+        // Wait for Supabase to exchange the code for a session
+        const { data: { session }, error } = await supabase.auth.getSession();
 
-      if (error || !session) {
-        router.replace("/");
-        return;
-      }
+        if (error) {
+          console.error("Auth callback error:", error.message);
+          router.replace("/signin?error=" + encodeURIComponent(error.message));
+          return;
+        }
 
-      const user = session.user;
-      const provider = user.app_metadata?.provider;
+        if (!session) {
+          console.warn("Auth callback: No session found");
+          router.replace("/signin?error=No%20session%20found");
+          return;
+        }
 
-      if (provider === "google") {
-        // Step 1: Ensure profile row exists (insert if new user)
-        await fetch("/api/auth/google-login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id: user.id,
-            email: user.email,
-            name: user.user_metadata?.full_name || user.user_metadata?.name || "",
-            avatar: user.user_metadata?.avatar_url || "",
-          }),
-        });
+        const user = session.user;
+        const provider = user.app_metadata?.provider;
+        console.log("Auth callback: User identified", { id: user.id, provider });
 
-        // Step 2: Check if profile is complete (has dob + pob filled)
-        const { data: profile } = await (supabase as any)
-          .from("profiles")
-          .select("dob, pob, phone, gender, tob")
-          .eq("id", user.id)
-          .single();
+        if (provider === "google") {
+          // Step 1: Ensure profile row exists (insert if new user)
+          try {
+            const res = await fetch("/api/auth/google-login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                id: user.id,
+                email: user.email,
+                name: user.user_metadata?.full_name || user.user_metadata?.name || "",
+                avatar: user.user_metadata?.avatar_url || "",
+              }),
+            });
+            if (!res.ok) {
+              const errData = await res.json();
+              console.error("Google login API error:", errData.error);
+            }
+          } catch (fetchErr) {
+            console.error("Google login API fetch failed:", fetchErr);
+          }
 
-        const isComplete =
-          profile?.dob && profile?.pob && profile?.phone && profile?.gender;
+          // Step 2: Check if profile is complete (has dob + pob filled)
+          const { data: profile, error: profileError } = await (supabase as any)
+            .from("profiles")
+            .select("dob, pob, phone, gender, tob")
+            .eq("id", user.id)
+            .maybeSingle();
 
-        if (!isComplete) {
-          // New user or incomplete profile — go fill details
-          router.replace("/complete-profile");
+          if (profileError) {
+            console.error("Profile fetch error:", profileError.message);
+          }
+
+          const isComplete =
+            profile?.dob && profile?.pob && profile?.phone && profile?.gender;
+
+          console.log("Auth callback: Profile completeness check", { isComplete });
+
+          if (!isComplete) {
+            // New user or incomplete profile — go fill details
+            router.replace("/complete-profile");
+          } else {
+            // Returning user — go straight to profile
+            router.replace("/profile");
+          }
         } else {
-          // Returning user — go straight to profile
+          // Email/password login — go to profile
           router.replace("/profile");
         }
-      } else {
-        // Email/password login — go to profile
-        router.replace("/profile");
+      } catch (err: any) {
+        console.error("Auth callback unexpected error:", err);
+        router.replace("/signin?error=" + encodeURIComponent(err.message || "Unknown error"));
       }
     };
 

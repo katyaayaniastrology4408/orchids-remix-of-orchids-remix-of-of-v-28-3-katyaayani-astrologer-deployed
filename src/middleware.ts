@@ -9,9 +9,13 @@ const RATE_LIMIT_MAX_PAGE = 120; // 120 requests/min for pages
 
 // Strict auth rate limits
 const AUTH_RATE_LIMITS: Record<string, { max: number; windowMs: number }> = {
-  "/api/admin/auth/send-otp":   { max: 3,  windowMs: 10 * 60 * 1000 }, // 3 per 10 min
-  "/api/admin/auth/verify-otp": { max: 10, windowMs: 10 * 60 * 1000 }, // 10 per 10 min
-  "/api/auth/signup":           { max: 5,  windowMs: 60 * 60 * 1000 }, // 5 per hour
+  "/api/admin/auth/send-otp":   { max: 10, windowMs: 10 * 60 * 1000 }, // Increased to 10 per 10 min
+  "/api/admin/auth/verify-otp": { max: 20, windowMs: 10 * 60 * 1000 }, // Increased to 20 per 10 min
+  "/api/auth/signup-otp":       { max: 20, windowMs: 60 * 60 * 1000 }, // Specific for signup-otp, 20 per hour
+  "/api/auth/signup":           { max: 20, windowMs: 60 * 60 * 1000 }, // Increased to 20 per hour
+  "/api/auth/send-otp":         { max: 20, windowMs: 60 * 60 * 1000 }, // Increased to 20 per hour
+  "/api/auth/verify-otp":       { max: 50, windowMs: 60 * 60 * 1000 }, // Increased to 50 per hour
+  "/api/auth/reset-password":   { max: 10, windowMs: 60 * 60 * 1000 }, // Increased to 10 per hour
 };
 
 function checkRateLimit(ip: string, max: number, windowMs: number = RATE_LIMIT_WINDOW): boolean {
@@ -123,10 +127,15 @@ export async function middleware(req: NextRequest) {
       "/api/newsletter/subscribe",
       "/api/bookings",
       "/api/auth/signup",
+      "/api/auth/signup-otp",
       "/api/auth/login",
+      "/api/auth/send-otp",
+      "/api/auth/verify-otp",
+      "/api/auth/reset-password",
     ];
-    if (req.method === "POST" && csrfProtectedPosts.some((p) => pathname.startsWith(p))) {
+    if (req.method === "POST" && csrfProtectedPosts.includes(pathname)) {
       if (!checkCsrf(req)) {
+        console.warn(`CSRF blocked: ${pathname} from ${req.headers.get("origin") || req.headers.get("referer") || "unknown"}`);
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
     }

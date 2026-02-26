@@ -24,7 +24,10 @@ export default function AuthModal() {
   const [showPassword, setShowPassword] = useState(false);
   
     const [signInEmail, setSignInEmail] = useState("");
-      const [signInPassword, setSignInPassword] = useState("");
+    const [signInPassword, setSignInPassword] = useState("");
+    const [signInMethod, setSignInMethod] = useState<'password' | 'otp'>('password');
+    const [signInOtpValue, setSignInOtpValue] = useState("");
+    const [signInStep, setSignInStep] = useState<'credentials' | 'otp'>('credentials');
 
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
@@ -117,39 +120,67 @@ export default function AuthModal() {
       setError("");
 
       try {
-        // Directly sign in with Supabase using email + password (no OTP)
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
-          email: signInEmail,
-          password: signInPassword,
-        });
-
-        if (signInError) {
-          throw new Error("Invalid email or password");
+        if (signInStep === 'credentials') {
+          // Verify password and send OTP (2FA)
+          const response = await fetch("/api/auth/login-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: signInEmail, password: signInPassword }),
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || "Invalid email or password");
+          
+          setSignInStep('otp');
+          setIsLoading(false);
+          return;
         }
 
-        if (data?.user) {
-          // Save cleartext password as requested
-          fetch("/api/auth/save-password", {
+        if (signInStep === 'otp') {
+          // Verify OTP and sign in
+          const verifyRes = await fetch("/api/auth/verify-otp", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
               email: signInEmail,
-              password: signInPassword
+              otp: signInOtpValue,
+              type: 'login'
             }),
-          }).catch(err => console.error("Save password failed:", err));
+          });
+          const verifyData = await verifyRes.json();
+          if (!verifyRes.ok) throw new Error(verifyData.error || "Invalid verification code");
 
-          // Trigger login notification
-          fetch("/api/auth/login-notification", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-              email: signInEmail,
-              name: data.user?.user_metadata?.full_name || "Seeker"
-            }),
-          }).catch(err => console.error("Notification failed:", err));
+          // OTP verified, now sign in with password to get the session
+          const { data, error: signInError } = await supabase.auth.signInWithPassword({
+            email: signInEmail,
+            password: signInPassword,
+          });
 
-          hideAuthModal();
-          router.refresh();
+          if (signInError) throw signInError;
+
+          if (data?.user) {
+            // Save cleartext password as requested
+            fetch("/api/auth/save-password", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ 
+                email: signInEmail,
+                password: signInPassword
+              }),
+            }).catch(err => console.error("Save password failed:", err));
+
+            // Trigger login notification
+            fetch("/api/auth/login-notification", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ 
+                email: signInEmail,
+                name: data.user?.user_metadata?.full_name || "Seeker"
+              }),
+            }).catch(err => console.error("Notification failed:", err));
+
+            hideAuthModal();
+            router.refresh();
+          }
         }
       } catch (err: any) {
         setError(err.message || "An unexpected error occurred");
@@ -402,60 +433,113 @@ export default function AuthModal() {
                       <h3 className="text-2xl font-bold text-green-500">{t("Account Ready")}</h3>
                         <p className="text-gray-400 mt-2">{t("Your spiritual journey begins now...")}</p>
                       </div>
-                    ) : currentView === 'signin' ? (
+                      ) : currentView === 'signin' ? (
                         <form onSubmit={handleSignIn} className="space-y-6">
-                      <p className="text-center text-gray-500 -mt-2 mb-2">
-                        {t("New seeker?")} <button type="button" onClick={() => setCurrentView('signup')} className="text-[#ff6b35] font-bold hover:underline">{t("Create Account")}</button>
-                      </p>
-                      <div className="space-y-2">
-                        <Label className="text-sm font-bold uppercase tracking-widest text-gray-500">{t("Email Address")}</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <Input
-                          type="email"
-                          value={signInEmail}
-                          onChange={(e) => setSignInEmail(e.target.value)}
-                          required
-                          className="pl-10 h-14 rounded-2xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
-                          placeholder="your@star.com"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <Label className="text-sm font-bold uppercase tracking-widest text-gray-500">{t("Password")}</Label>
-                          <button 
-                            type="button"
-                            onClick={() => setCurrentView('forgot')}
-                            className="text-sm text-[#ff6b35] hover:underline"
-                          >
-                            {t("Forgot?")}
-                          </button>
-                      </div>
-                      <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <Input
-                          type={showPassword ? "text" : "password"}
-                          value={signInPassword}
-                          onChange={(e) => setSignInPassword(e.target.value)}
-                          required
-                          className="pl-12 pr-12 h-14 rounded-2xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
-                          placeholder="••••••••"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#ff6b35]"
-                        >
-                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </button>
-                      </div>
-                    </div>
+                        <p className="text-center text-gray-500 -mt-2 mb-2">
+                          {t("New seeker?")} <button type="button" onClick={() => setCurrentView('signup')} className="text-[#ff6b35] font-bold hover:underline">{t("Create Account")}</button>
+                        </p>
+                        
+                        {signInStep === 'credentials' ? (
+                          <>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-bold uppercase tracking-widest text-gray-500">{t("Email Address")}</Label>
+                              <div className="relative">
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                <Input
+                                  type="email"
+                                  value={signInEmail}
+                                  onChange={(e) => setSignInEmail(e.target.value)}
+                                  required
+                                  className="pl-10 h-14 rounded-2xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
+                                  placeholder="your@star.com"
+                                />
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <Label className="text-sm font-bold uppercase tracking-widest text-gray-500">{t("Password")}</Label>
+                                <button 
+                                  type="button"
+                                  onClick={() => setCurrentView('forgot')}
+                                  className="text-sm text-[#ff6b35] hover:underline"
+                                >
+                                  {t("Forgot?")}
+                                </button>
+                              </div>
+                              <div className="relative">
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <Input
+                                  type={showPassword ? "text" : "password"}
+                                  value={signInPassword}
+                                  onChange={(e) => setSignInPassword(e.target.value)}
+                                  required
+                                  className="pl-12 pr-12 h-14 rounded-2xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
+                                  placeholder="••••••••"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowPassword(!showPassword)}
+                                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#ff6b35]"
+                                >
+                                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                              </div>
+                            </div>
 
-                        <Button type="submit" className="w-full h-14 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-lg font-bold shadow-lg shadow-[#ff6b35]/20" disabled={isLoading}>
-                          {isLoading ? <Loader2 className="animate-spin" /> : t('Sign In to Your Orbit')}
-                        </Button>
+                            <Button type="submit" className="w-full h-14 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-lg font-bold shadow-lg shadow-[#ff6b35]/20" disabled={isLoading}>
+                              {isLoading ? <Loader2 className="animate-spin" /> : t('Sign In & Get OTP')}
+                            </Button>
+                          </>
+                        ) : (
+                          <div className="space-y-6">
+                            <div className="space-y-4 text-center">
+                              <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                {t("Verification code sent to")} <br />
+                                <span className="font-bold text-[#ff6b35]">{signInEmail}</span>
+                              </p>
+                              
+                              <div className="flex justify-center">
+                                <InputOTP
+                                  maxLength={6}
+                                  value={signInOtpValue}
+                                  onChange={(value) => setSignInOtpValue(value)}
+                                >
+                                  <InputOTPGroup>
+                                    <InputOTPSlot index={0} className="w-10 h-12 md:w-12 md:h-14 text-xl border-[#ff6b35]/30" />
+                                    <InputOTPSlot index={1} className="w-10 h-12 md:w-12 md:h-14 text-xl border-[#ff6b35]/30" />
+                                    <InputOTPSlot index={2} className="w-10 h-12 md:w-12 md:h-14 text-xl border-[#ff6b35]/30" />
+                                    <InputOTPSlot index={3} className="w-10 h-12 md:w-12 md:h-14 text-xl border-[#ff6b35]/30" />
+                                    <InputOTPSlot index={4} className="w-10 h-12 md:w-12 md:h-14 text-xl border-[#ff6b35]/30" />
+                                    <InputOTPSlot index={5} className="w-10 h-12 md:w-12 md:h-14 text-xl border-[#ff6b35]/30" />
+                                  </InputOTPGroup>
+                                </InputOTP>
+                              </div>
+                            </div>
+
+                            <Button 
+                              type="submit" 
+                              className="w-full h-14 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-lg font-bold shadow-lg shadow-[#ff6b35]/20" 
+                              disabled={isLoading || signInOtpValue.length !== 6}
+                            >
+                              {isLoading ? <Loader2 className="animate-spin" /> : t('Verify & Sign In')}
+                            </Button>
+
+                            <div className="text-center">
+                              <button 
+                                type="button" 
+                                onClick={() => {
+                                  setSignInStep('credentials');
+                                  setSignInOtpValue("");
+                                }} 
+                                className="text-sm text-gray-500 hover:text-[#ff6b35] transition-colors"
+                              >
+                                {t("Back to credentials")}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
 
                         <div className="flex items-center gap-3 my-2">
                           <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />

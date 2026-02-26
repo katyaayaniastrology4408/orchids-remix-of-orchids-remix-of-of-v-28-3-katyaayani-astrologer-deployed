@@ -15,6 +15,19 @@ export async function POST(req: Request) {
 
     const supabaseAdmin = getSupabaseAdmin();
 
+    // If type is login, verify user exists first
+    if (type === 'login' || type === 'forgot_password') {
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+      
+      if (!profile) {
+        return NextResponse.json({ error: 'No account found with this email' }, { status: 404 });
+      }
+    }
+
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     

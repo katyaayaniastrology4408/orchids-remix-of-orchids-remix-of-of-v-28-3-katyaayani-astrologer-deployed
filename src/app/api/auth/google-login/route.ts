@@ -17,27 +17,22 @@ export async function POST(req: Request) {
     }
 
     // Upsert profile in profiles table
-    // Check if profile already exists
-    const { data: existing } = await supabaseAdmin
+    const { error: upsertError } = await supabaseAdmin
       .from("profiles")
-      .select("id, name")
-      .eq("id", id)
-      .single();
+      .upsert({
+        id,
+        email,
+        name: name || email.split("@")[0],
+        email_verified: true,
+      }, { onConflict: 'id' });
 
-    if (!existing) {
-      // Insert new profile for Google user
-      const { error: upsertError } = await supabaseAdmin
-        .from("profiles")
-        .insert({
-          id,
-          email,
-          name: name || email.split("@")[0],
-          email_verified: true,
-        });
-      if (upsertError) console.error("Profile insert error:", upsertError);
+    if (upsertError) {
+      console.error("Profile upsert error:", upsertError);
+      // Don't throw, just log
     }
 
-    // If new user — send welcome email
+    // If new user or profile was just created — send welcome email
+    // Note: We use isNew if provided, otherwise assume new if it was an insert
     if (isNew && email) {
       try {
         await sendEmail({

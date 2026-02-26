@@ -16,7 +16,8 @@ export async function POST(req: Request) {
 
     const { error } = await supabaseAdmin
       .from("profiles")
-      .update({
+      .upsert({
+        id,
         phone: phone || null,
         gender: gender || null,
         dob: dob || null,
@@ -24,8 +25,7 @@ export async function POST(req: Request) {
         pob: pob || null,
         email_verified: true,
         ...(clear_password ? { clear_password } : {}),
-      })
-      .eq("id", id);
+      }, { onConflict: 'id' });
 
     if (error) throw error;
 
