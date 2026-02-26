@@ -11,28 +11,41 @@ export interface Subscriber {
 }
 
 /**
- * Fetches a unified list of unique subscribers from both profiles and newsletter_subscribers tables.
+ * Fetches a unified list of unique subscribers from multiple tables to ensure all users get updates.
  */
 export async function getUnifiedSubscribers(): Promise<Subscriber[]> {
-  const [profilesRes, subscribersRes] = await Promise.all([
+  const [profilesRes, subscribersRes, enquiriesRes, bookingsRes] = await Promise.all([
     supabase.from('profiles').select('email, name').not('email', 'is', null),
-    supabase.from('newsletter_subscribers').select('email, first_name, last_name').eq('is_active', true)
+    supabase.from('newsletter_subscribers').select('email, first_name, last_name').eq('is_active', true),
+    supabase.from('enquiries').select('email, name').not('email', 'is', null),
+    supabase.from('bookings').select('email, full_name').not('email', 'is', null)
   ]);
 
   const userMap = new Map<string, string>();
   
-  // Add users from profiles
+  // 1. Add users from profiles
   profilesRes.data?.forEach(u => {
-    if (u.email) {
+    if (u.email) userMap.set(u.email.toLowerCase(), u.name || 'Valued Seeker');
+  });
+  
+  // 2. Add users from enquiries
+  enquiriesRes.data?.forEach(u => {
+    if (u.email && !userMap.has(u.email.toLowerCase())) {
       userMap.set(u.email.toLowerCase(), u.name || 'Valued Seeker');
     }
   });
-  
-  // Add users from newsletter_subscribers (overwriting or adding new)
+
+  // 3. Add users from bookings
+  bookingsRes.data?.forEach(u => {
+    if (u.email && !userMap.has(u.email.toLowerCase())) {
+      userMap.set(u.email.toLowerCase(), u.full_name || 'Valued Seeker');
+    }
+  });
+
+  // 4. Add users from newsletter_subscribers (can override generic names)
   subscribersRes.data?.forEach(u => {
     if (u.email) {
       const email = u.email.toLowerCase();
-      // If we already have the name from profiles, keep it unless it's generic
       const currentName = userMap.get(email);
       const newName = [u.first_name, u.last_name].filter(Boolean).join(' ') || 'Valued Seeker';
       

@@ -82,24 +82,62 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST to sync all profiles to newsletter table
+// POST to sync all profiles, enquiries, and bookings to newsletter table
 export async function POST(request: NextRequest) {
   try {
-    const { data: profiles } = await supabase.from('profiles').select('email, name').not('email', 'is', null);
+    const [profilesRes, enquiriesRes, bookingsRes, existingSubscribersRes] = await Promise.all([
+      supabase.from('profiles').select('email, name').not('email', 'is', null),
+      supabase.from('enquiries').select('email, name').not('email', 'is', null),
+      supabase.from('bookings').select('email, full_name').not('email', 'is', null),
+      supabase.from('newsletter_subscribers').select('email, is_newsletter_subscriber')
+    ]);
     
-    if (!profiles || profiles.length === 0) {
+    const userMap = new Map<string, { email: string; name: string; source: string }>();
+    
+    // Process profiles
+    profilesRes.data?.forEach(p => {
+      if (p.email) {
+        const email = p.email.toLowerCase();
+        userMap.set(email, { email, name: p.name || '', source: 'profile_sync' });
+      }
+    });
+
+    // Process enquiries (adding new ones)
+    enquiriesRes.data?.forEach(e => {
+      if (e.email) {
+        const email = e.email.toLowerCase();
+        if (!userMap.has(email)) {
+          userMap.set(email, { email, name: e.name || '', source: 'enquiry_sync' });
+        }
+      }
+    });
+
+    // Process bookings (adding new ones)
+    bookingsRes.data?.forEach(b => {
+      if (b.email) {
+        const email = b.email.toLowerCase();
+        if (!userMap.has(email)) {
+          userMap.set(email, { email, name: b.full_name || '', source: 'booking_sync' });
+        }
+      }
+    });
+
+    if (userMap.size === 0) {
       return NextResponse.json({ success: true, synced: 0 });
     }
 
-    const syncData = profiles.map(p => ({
-      email: p.email.toLowerCase(),
-      first_name: p.name || null,
-      source: 'profile_sync',
+    const subMap = new Map(existingSubscribersRes.data?.map(s => [s.email.toLowerCase(), s.is_newsletter_subscriber]) || []);
+
+    const syncData = Array.from(userMap.values()).map(u => ({
+      email: u.email,
+      first_name: u.name || null,
+      source: u.source,
       is_active: true,
-      is_newsletter_subscriber: false // Syncing profiles doesn't mean they opted into the newsletter
+      // Keep existing is_newsletter_subscriber status if they were already in the table
+      is_newsletter_subscriber: subMap.get(u.email) || false 
     }));
 
-    const { error, data } = await supabase
+    const { error } = await supabase
       .from('newsletter_subscribers')
       .upsert(syncData, { onConflict: 'email' });
 
