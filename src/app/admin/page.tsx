@@ -4074,7 +4074,41 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
       finally { setSendingEmail(false); }
     };
 
-  const currentData = rashifalMode === 'daily' ? existingData : weeklyExistingData;
+    const [subscriberEmail, setSubscriberEmail] = useState("");
+    const [subscriberName, setSubscriberName] = useState("");
+
+    const handleAddSubscriber = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!subscriberEmail || !subscriberEmail.includes("@")) {
+        setError(t("Please enter a valid email"));
+        return;
+      }
+      setIsActionLoading(true);
+      try {
+        const res = await fetch("/api/newsletter/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            email: subscriberEmail,
+            firstName: subscriberName 
+          }),
+        });
+        const data = await safeJson(res);
+        if (data.success) {
+          setSuccess(t("Subscriber added successfully!"));
+          setSubscriberEmail("");
+          setSubscriberName("");
+        } else {
+          setError(data.error || t("Failed to add subscriber"));
+        }
+      } catch (err) {
+        setError(t("An error occurred"));
+      } finally {
+        setIsActionLoading(false);
+      }
+    };
+
+    const currentData = rashifalMode === 'daily' ? existingData : weeklyExistingData;
   const currentForm = rashifalMode === 'daily' ? rashifalForm : weeklyForm;
   const setCurrentForm = rashifalMode === 'daily' ? setRashifalForm : setWeeklyForm;
   const rashiInfo = RASHI_LIST.find(r => r.english === selectedRashi);
@@ -4252,6 +4286,50 @@ function RashifalManager({ isDark, t, isActionLoading, setIsActionLoading, setSu
             </CardContent>
           </Card>
         </div>
+
+        {/* Manual Email Addition */}
+        <Card className={`mt-6 ${isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}`}>
+          <CardHeader>
+            <CardTitle className="text-[#ff6b35] flex items-center gap-2">
+              <UserPlus className="w-5 h-5" /> {t("Manual Email Addition")}
+            </CardTitle>
+            <CardDescription>
+              {rashifalMode === 'daily' 
+                ? t("Manually add emails to receive daily horoscope updates. These will be added to the newsletter subscriber list.") 
+                : t("Manually add emails to receive weekly horoscope updates. These will be added to the newsletter subscriber list.")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleAddSubscriber} className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 space-y-2">
+                <Label>{t("Email Address")} *</Label>
+                <Input 
+                  type="email" 
+                  placeholder="example@gmail.com" 
+                  value={subscriberEmail}
+                  onChange={(e) => setSubscriberEmail(e.target.value)}
+                  className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}
+                  required
+                />
+              </div>
+              <div className="flex-1 space-y-2">
+                <Label>{t("Devotee Name")} ({t("Optional")})</Label>
+                <Input 
+                  placeholder="Sevak Name" 
+                  value={subscriberName}
+                  onChange={(e) => setSubscriberName(e.target.value)}
+                  className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}
+                />
+              </div>
+              <div className="flex items-end">
+                <Button type="submit" className="w-full md:w-auto bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white font-bold h-10 px-6 rounded-xl" disabled={isActionLoading}>
+                  {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                  {t("Add Email")}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     );
   }

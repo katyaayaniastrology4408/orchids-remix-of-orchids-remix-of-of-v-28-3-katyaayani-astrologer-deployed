@@ -32,13 +32,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No weekly rashifal data found. Please save rashifal first.' }, { status: 400 });
     }
 
-    // Get all users
-    const { data: allUsers } = await supabase
-      .from('profiles')
-      .select('email, name')
-      .not('email', 'is', null);
+    // Get all users from profiles and newsletter_subscribers
+    const [profilesRes, subscribersRes] = await Promise.all([
+      supabase.from('profiles').select('email, name').not('email', 'is', null),
+      supabase.from('newsletter_subscribers').select('email, first_name, last_name').eq('is_active', true)
+    ]);
 
-    const validUsers = (allUsers || []).filter(u => u.email && u.email.includes('@'));
+    const userMap = new Map<string, string>();
+    
+    profilesRes.data?.forEach(u => {
+      if (u.email) {
+        userMap.set(u.email.toLowerCase(), u.name || 'Valued Seeker');
+      }
+    });
+    
+    subscribersRes.data?.forEach(u => {
+      if (u.email) {
+        const email = u.email.toLowerCase();
+        if (!userMap.has(email)) {
+          const name = [u.first_name, u.last_name].filter(Boolean).join(' ') || 'Valued Seeker';
+          userMap.set(email, name);
+        }
+      }
+    });
+
+    const validUsers = Array.from(userMap.entries()).map(([email, name]) => ({ email, name }));
+    
     if (validUsers.length === 0) {
       return NextResponse.json({ error: 'No users found to send emails to' }, { status: 400 });
     }
