@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { sendResendBatch } from '@/lib/email.config';
+import { sendSmtpBatch } from '@/lib/email.config';
 import { dailyRashifalEmailTemplate } from '@/lib/email-templates';
 import { getUnifiedSubscribers } from '@/lib/subscribers';
 export const dynamic = 'force-dynamic';
@@ -48,8 +48,8 @@ export async function POST(request: NextRequest) {
       html: dailyRashifalEmailTemplate(user.name || 'Valued Seeker', formattedDate, rashifalData),
     }));
 
-    // Send via Resend Batch
-    const result = await sendResendBatch(emails);
+    // Send via SMTP Batch (User requested SMTP for Daily)
+    const result = await sendSmtpBatch(emails);
 
     if (!result.success) {
       return NextResponse.json({ error: result.error || 'Failed to send batch emails' }, { status: 500 });
