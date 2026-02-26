@@ -11,24 +11,36 @@ export default function AuthCallbackPage() {
     const handleCallback = async () => {
       try {
         console.log("Auth callback: Exchanging session...");
-        // Wait for Supabase to exchange the code for a session
-        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        // Wait a small moment for cookies to be set
+        await new Promise(r => setTimeout(r, 500));
 
-        if (error) {
-          console.error("Auth callback error:", error.message);
-          router.replace("/signin?error=" + encodeURIComponent(error.message));
-          return;
+        // Get user is more reliable than getSession in some environments
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+        if (userError || !user) {
+          console.error("Auth callback error (User):", userError?.message);
+          // Try getSession as fallback
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          if (sessionError || !session) {
+            console.error("Auth callback error (Session fallback):", sessionError?.message);
+            router.replace("/signin?error=" + encodeURIComponent(sessionError?.message || "User session not found"));
+            return;
+          }
+          // If session found, continue with session.user
         }
 
-        if (!session) {
-          console.warn("Auth callback: No session found");
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session && !user) {
           router.replace("/signin?error=No%20session%20found");
           return;
         }
 
-        const user = session.user;
-        const provider = user.app_metadata?.provider;
-        console.log("Auth callback: User identified", { id: user.id, provider });
+        const activeUser = user || session?.user;
+        if (!activeUser) return;
+
+        const provider = activeUser.app_metadata?.provider;
+        console.log("Auth callback: User identified", { id: activeUser.id, provider });
 
         if (provider === "google") {
           // Step 1: Ensure profile row exists (insert if new user)
@@ -37,10 +49,11 @@ export default function AuthCallbackPage() {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                id: user.id,
-                email: user.email,
-                name: user.user_metadata?.full_name || user.user_metadata?.name || "",
-                avatar: user.user_metadata?.avatar_url || "",
+                id: activeUser.id,
+                email: activeUser.email,
+                name: activeUser.user_metadata?.full_name || activeUser.user_metadata?.name || "",
+                avatar: activeUser.user_metadata?.avatar_url || "",
+                isNew: true // Assume new if coming from callback
               }),
             });
             if (!res.ok) {
@@ -55,7 +68,7 @@ export default function AuthCallbackPage() {
           const { data: profile, error: profileError } = await (supabase as any)
             .from("profiles")
             .select("dob, pob, phone, gender, tob")
-            .eq("id", user.id)
+            .eq("id", activeUser.id)
             .maybeSingle();
 
           if (profileError) {

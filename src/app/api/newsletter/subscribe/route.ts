@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
           first_name: firstName || null,
           last_name: lastName || null,
           is_active: true,
+          is_newsletter_subscriber: true,
         },
         { onConflict: 'email' }
       );

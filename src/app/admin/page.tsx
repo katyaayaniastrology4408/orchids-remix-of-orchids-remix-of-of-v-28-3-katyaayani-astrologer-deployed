@@ -4346,9 +4346,10 @@ function BlogManager({ isDark, t, isActionLoading, setIsActionLoading, setSucces
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [showForm, setShowForm] = useState(false);
-    const [editingPost, setEditingPost] = useState<any>(null);
-    const [uploading, setUploading] = useState(false);
-  const [blogForm, setBlogForm] = useState({
+      const [editingPost, setEditingPost] = useState<any>(null);
+      const [uploading, setUploading] = useState(false);
+      const [sendingBlogEmail, setSendingBlogEmail] = useState<string | null>(null);
+    const [blogForm, setBlogForm] = useState({
     title: '',
     title_gujarati: '',
     title_hindi: '',
@@ -4481,27 +4482,45 @@ function BlogManager({ isDark, t, isActionLoading, setIsActionLoading, setSucces
     }
   };
 
-  const handleEditPost = (post: any) => {
-    setEditingPost(post);
-    setBlogForm({
-      title: post.title || '',
-      title_gujarati: post.title_gujarati || '',
-      title_hindi: post.title_hindi || '',
-      slug: post.slug || '',
-      excerpt: post.excerpt || '',
-      excerpt_gujarati: post.excerpt_gujarati || '',
-      excerpt_hindi: post.excerpt_hindi || '',
-      content: post.content || '',
-      content_gujarati: post.content_gujarati || '',
-      content_hindi: post.content_hindi || '',
-      category: post.category || 'astrology',
-      featured_image: post.featured_image || '',
-      is_published: post.is_published ?? true,
-    });
-    setShowForm(true);
-  };
+    const handleEditPost = (post: any) => {
+      setEditingPost(post);
+      setBlogForm({
+        title: post.title || '',
+        title_gujarati: post.title_gujarati || '',
+        title_hindi: post.title_hindi || '',
+        slug: post.slug || '',
+        excerpt: post.excerpt || '',
+        excerpt_gujarati: post.excerpt_gujarati || '',
+        excerpt_hindi: post.excerpt_hindi || '',
+        content: post.content || '',
+        content_gujarati: post.content_gujarati || '',
+        content_hindi: post.content_hindi || '',
+        category: post.category || 'astrology',
+        featured_image: post.featured_image || '',
+        is_published: post.is_published ?? true,
+      });
+      setShowForm(true);
+    };
 
-  const handleDeletePost = async (id: string) => {
+    const handleSendBlogEmail = async (postId: string) => {
+      setSendingBlogEmail(postId);
+      try {
+        const res = await fetch('/api/blog/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ postId }),
+        });
+        const data = await safeJson(res);
+        if (data.success) {
+          setSuccess(`${t("Blog notification sent to")} ${data.totalUsers} ${t("users")}!`);
+        } else {
+          setError(data.error || t("Failed to send emails"));
+        }
+      } catch (err) { setError(t("An error occurred")); }
+      finally { setSendingBlogEmail(null); }
+    };
+
+    const handleDeletePost = async (id: string) => {
     if (!confirm(t("Are you sure you want to delete this post?"))) return;
     setIsActionLoading(true);
     try {
@@ -4817,10 +4836,21 @@ function BlogManager({ isDark, t, isActionLoading, setIsActionLoading, setSucces
                       {post.title && <span className="text-[8px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-500">English</span>}
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="h-8 text-xs border-[#ff6b35]/20 text-[#ff6b35]" onClick={() => handleEditPost(post)}>
-                      <Eye className="w-3 h-3 mr-1" /> {t("Edit")}
-                    </Button>
+                    <div className="flex gap-2">
+                      {post.is_published && (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-8 text-xs border-green-500/20 text-green-500 hover:bg-green-500/10"
+                          onClick={() => handleSendBlogEmail(post.id)}
+                          disabled={sendingBlogEmail === post.id}
+                        >
+                          {sendingBlogEmail === post.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3 mr-1" />} {t("Notify")}
+                        </Button>
+                      )}
+                      <Button variant="outline" size="sm" className="h-8 text-xs border-[#ff6b35]/20 text-[#ff6b35]" onClick={() => handleEditPost(post)}>
+                        <Eye className="w-3 h-3 mr-1" /> {t("Edit")}
+                      </Button>
                       <Button variant="outline" size="sm" className="h-8 text-xs text-red-500 border-red-500/20" onClick={() => handleDeletePost(post.id)}>
                         <Trash2 className="w-3 h-3" />
                       </Button>

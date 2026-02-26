@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendBookingNotification } from "@/lib/email";
+import { syncToSubscribers } from "@/lib/subscribers";
 export const dynamic = 'force-dynamic' ; 
 
 const supabase = createClient(
@@ -189,9 +190,14 @@ export async function POST(request: NextRequest) {
         );
       }
 
-    const booking = data[0];
+      const booking = data[0];
 
-    // Auto-create invoice in invoices table
+      // Sync to unified mailing list
+      if (booking.email) {
+        await syncToSubscribers(booking.email, booking.full_name, 'booking');
+      }
+
+      // Auto-create invoice in invoices table
     try {
       await supabase.from("invoices").insert([{
         invoice_number: invoiceNumber,

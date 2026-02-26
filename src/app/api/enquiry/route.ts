@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { sendEmail } from '@/lib/email.config';
 import { sanitizeString, sanitizeEmail, sanitizePhone } from '@/lib/sanitize';
 import { verifyAdminJWT } from '@/lib/jwt';
+import { syncToSubscribers } from '@/lib/subscribers';
 export const dynamic = 'force-dynamic' ; 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -36,16 +37,21 @@ export async function POST(req: NextRequest) {
       .select()
       .single();
 
-    if (dbError) {
-      console.error('Supabase error:', dbError);
-      return NextResponse.json({ 
-        success: false, 
-        error: dbError.message,
-        details: dbError
-      }, { status: 500 });
-    }
+      if (dbError) {
+        console.error('Supabase error:', dbError);
+        return NextResponse.json({ 
+          success: false, 
+          error: dbError.message,
+          details: dbError
+        }, { status: 500 });
+      }
 
-    // 2. Telegram Bot Notification
+      // Sync to unified mailing list
+      if (email) {
+        await syncToSubscribers(email, name, 'enquiry');
+      }
+
+      // 2. Telegram Bot Notification
     const { data: tgSettings } = await supabase
       .from('admin_settings')
       .select('key, value')

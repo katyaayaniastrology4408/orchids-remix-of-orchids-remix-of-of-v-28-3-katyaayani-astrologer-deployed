@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '@/lib/email.config';
-import { dailyRashifalEmailTemplate } from '@/lib/email-templates';
+import { newBlogPostTemplate } from '@/lib/email-templates';
 import { getUnifiedSubscribers } from '@/lib/subscribers';
 export const dynamic = 'force-dynamic';
 
@@ -12,20 +12,20 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { date } = await request.json();
-    if (!date) {
-      return NextResponse.json({ error: 'Date is required' }, { status: 400 });
+    const { postId } = await request.json();
+    if (!postId) {
+      return NextResponse.json({ error: 'postId is required' }, { status: 400 });
     }
 
-    // Get all rashifal data for this date
-    const { data: rashifalData, error: rashifalError } = await supabase
-      .from('daily_rashifal')
+    // Get blog post data
+    const { data: post, error: postError } = await supabase
+      .from('blog_posts')
       .select('*')
-      .eq('date', date);
+      .eq('id', postId)
+      .single();
 
-    if (rashifalError) throw rashifalError;
-    if (!rashifalData || rashifalData.length === 0) {
-      return NextResponse.json({ error: 'No rashifal data found for this date. Please save rashifal first.' }, { status: 400 });
+    if (postError || !post) {
+      return NextResponse.json({ error: 'Blog post not found' }, { status: 404 });
     }
 
     // Get all users from unified subscriber list
@@ -34,10 +34,6 @@ export async function POST(request: NextRequest) {
     if (validUsers.length === 0) {
       return NextResponse.json({ error: 'No users found to send emails to' }, { status: 400 });
     }
-
-    const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('en-IN', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-    });
 
     let sentCount = 0;
     const errors: string[] = [];
@@ -48,8 +44,8 @@ export async function POST(request: NextRequest) {
         const userName = user.name || 'Valued Seeker';
         const result = await sendEmail({
           to: user.email,
-          subject: `Today's Rashifal Has Been Updated! - ${formattedDate}`,
-          html: dailyRashifalEmailTemplate(userName, formattedDate, rashifalData),
+          subject: `New Article: ${post.title}`,
+          html: newBlogPostTemplate(post, userName),
         });
         if (result.success) {
           sentCount++;
@@ -59,13 +55,13 @@ export async function POST(request: NextRequest) {
       } catch (err: any) {
         errors.push(`${user.email}: ${err.message}`);
       }
-      // Small delay between sends to avoid Gmail rate limiting
-      await new Promise((r) => setTimeout(r, 300));
+      // Small delay between sends to avoid rate limiting
+      await new Promise((r) => setTimeout(r, 200));
     }
 
     return NextResponse.json({ success: true, totalUsers: sentCount, errors: errors.length > 0 ? errors : undefined });
-  } catch (error) {
-    console.error('Error sending daily rashifal emails:', error);
-    return NextResponse.json({ error: 'Failed to send emails' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Error sending blog notification emails:', error);
+    return NextResponse.json({ error: error.message || 'Failed to send emails' }, { status: 500 });
   }
 }

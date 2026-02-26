@@ -30,11 +30,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Resend API key not configured' }, { status: 500 });
     }
 
-    // Get all active subscribers
+    // Get all active subscribers who explicitly opted in for the newsletter
     const { data: subscribers, error } = await supabaseAdmin
       .from('newsletter_subscribers')
       .select('email, first_name, last_name')
-      .eq('is_active', true);
+      .eq('is_active', true)
+      .eq('is_newsletter_subscriber', true);
 
     if (error) {
       return NextResponse.json({ error: 'Failed to fetch subscribers' }, { status: 500 });

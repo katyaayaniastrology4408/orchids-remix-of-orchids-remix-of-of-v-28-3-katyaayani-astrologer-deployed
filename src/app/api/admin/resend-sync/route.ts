@@ -31,11 +31,12 @@ export async function POST(request: NextRequest) {
   if (!resendApiKey) return NextResponse.json({ error: 'Resend not configured' }, { status: 500 });
 
   try {
-    // Fetch all active subscribers from Supabase
+    // Fetch all active subscribers from Supabase who opted in for the newsletter
     const { data: subscribers, error: dbError } = await supabaseAdmin
       .from('newsletter_subscribers')
       .select('email, first_name, last_name')
-      .eq('is_active', true);
+      .eq('is_active', true)
+      .eq('is_newsletter_subscriber', true);
 
     if (dbError) return NextResponse.json({ error: dbError.message }, { status: 500 });
     if (!subscribers || subscribers.length === 0) {

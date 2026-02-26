@@ -15,13 +15,18 @@ export async function POST(req: Request) {
 
     const supabaseAdmin = getSupabaseAdmin();
 
+    console.log(`[SignupOTP] Attempting signup for: ${email}`);
+
     // Check if email already exists
     const { data: existingUser } = await supabaseAdmin.auth.admin.listUsers();
     const userExists = existingUser?.users?.some(u => u.email === email);
     
     if (userExists) {
+      console.warn(`[SignupOTP] Account already exists for: ${email}`);
       return NextResponse.json({ error: 'An account with this email already exists' }, { status: 400 });
     }
+
+    console.log(`[SignupOTP] Generating OTP for: ${email}`);
 
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -45,9 +50,11 @@ export async function POST(req: Request) {
       );
 
     if (dbError) {
-      console.error('Database error saving signup OTP:', dbError);
+      console.error('[SignupOTP] Database error saving OTP:', dbError);
       return NextResponse.json({ error: 'Failed to generate verification code' }, { status: 500 });
     }
+
+    console.log(`[SignupOTP] Sending email to ${email}...`);
 
     // Send email via SMTP
     const emailResult = await sendEmail({
@@ -57,14 +64,12 @@ export async function POST(req: Request) {
     });
 
     if (!emailResult.success) {
-      console.error('Email sending failed:', emailResult.error);
+      console.error('[SignupOTP] Email sending failed:', emailResult.error);
       return NextResponse.json({ error: 'Failed to send verification email' }, { status: 500 });
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'OTP sent successfully to your email' 
-    });
+    console.log(`[SignupOTP] OTP sent successfully to ${email}`);
+    return NextResponse.json({ success: true, message: 'OTP sent successfully' });
   } catch (error: any) {
     console.error('Signup OTP Error:', error);
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });

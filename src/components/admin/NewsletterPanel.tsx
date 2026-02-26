@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Loader2, Send, Mail, Users, CheckCircle2, AlertCircle, RefreshCw, Zap, Star, UserPlus, ExternalLink } from "lucide-react";
+import { Loader2, Send, Mail, Users, CheckCircle2, AlertCircle, RefreshCw, Zap, Star, UserPlus, ExternalLink, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -72,7 +72,16 @@ export default function NewsletterPanel({ isDark, t, setSuccess, setError }: Pro
   const [subscriberCount, setSubscriberCount] = useState<number | null>(null);
   const [sendResult, setSendResult] = useState<{ sent: number; failed: number } | null>(null);
 
-  // Resend contacts state
+  // Unified subscribers state
+  const [unifiedSubscribers, setUnifiedSubscribers] = useState<any[]>([]);
+  const [unifiedStats, setUnifiedStats] = useState<any>(null);
+    const [loadingUnified, setLoadingUnified] = useState(false);
+    const [syncingProfiles, setSyncingProfiles] = useState(false);
+    const [manualEmail, setManualEmail] = useState("");
+    const [manualName, setManualName] = useState("");
+    const [addingManual, setAddingManual] = useState(false);
+
+    // Resend contacts state
   const [resendContacts, setResendContacts] = useState<any[]>([]);
   const [loadingContacts, setLoadingContacts] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -84,6 +93,7 @@ export default function NewsletterPanel({ isDark, t, setSuccess, setError }: Pro
     fetchTemplates();
     fetchSubscriberCount();
     fetchResendContacts();
+    fetchUnifiedSubscribers();
   }, []);
 
   // Reset variables when template changes
@@ -94,6 +104,35 @@ export default function NewsletterPanel({ isDark, t, setSuccess, setError }: Pro
 
     const safeJson = async (res: Response) => {
       try { const t = await res.text(); return t ? JSON.parse(t) : {}; } catch { return {}; }
+    };
+
+    const fetchUnifiedSubscribers = async () => {
+      setLoadingUnified(true);
+      try {
+        const res = await fetch("/api/admin/unified-subscribers");
+        const data = await safeJson(res);
+        if (data.success) {
+          setUnifiedSubscribers(data.data || []);
+          setUnifiedStats(data.stats);
+        }
+      } catch (err) { console.error(err); }
+      finally { setLoadingUnified(false); }
+    };
+
+    const syncProfilesToNewsletter = async () => {
+      setSyncingProfiles(true);
+      try {
+        const res = await fetch("/api/admin/unified-subscribers", { method: "POST" });
+        const data = await safeJson(res);
+        if (data.success) {
+          setSuccess(`${data.synced} users synced to newsletter list!`);
+          fetchUnifiedSubscribers();
+          fetchSubscriberCount();
+        } else {
+          setError(data.error || "Sync failed");
+        }
+      } catch (err: any) { setError(err.message); }
+      finally { setSyncingProfiles(false); }
     };
 
     const fetchTemplates = async () => {
@@ -378,7 +417,94 @@ export default function NewsletterPanel({ isDark, t, setSuccess, setError }: Pro
         </CardContent>
         </Card>
 
-      {/* Resend Contacts Section */}
+        {/* Unified Seeker List Section */}
+        <Card className={isDark ? "bg-[#12121a] border-[#ff6b35]/10" : "bg-white border-[#ff6b35]/20"}>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <CardTitle className="text-[#ff6b35] flex items-center gap-2">
+                  <Activity className="w-5 h-5" /> Unified Seeker List
+                </CardTitle>
+                <CardDescription className="mt-1">
+                  Daily, Weekly, and Blog emails aa badha j users ne SMTP (Gmail) dvara jay che.
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={fetchUnifiedSubscribers}
+                  disabled={loadingUnified}
+                  className="h-8 text-xs"
+                >
+                  {loadingUnified ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                  <span className="ml-1">Refresh</span>
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={syncProfilesToNewsletter}
+                  disabled={syncingProfiles}
+                  className="h-8 text-xs bg-[#ff6b35] hover:bg-[#e55a2b] text-white"
+                >
+                  {syncingProfiles ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <RefreshCw className="w-3 h-3 mr-1" />}
+                  Sync Profiles
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Stats row */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className={`p-3 rounded-xl border text-center ${isDark ? "bg-[#0d0d15] border-[#ff6b35]/10" : "bg-gray-50 border-[#ff6b35]/15"}`}>
+                <p className="text-xl font-black text-[#ff6b35]">{loadingUnified ? "..." : unifiedStats?.total ?? 0}</p>
+                <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground">Total Seekers</p>
+              </div>
+              <div className={`p-3 rounded-xl border text-center ${isDark ? "bg-[#0d0d15] border-[#ff6b35]/10" : "bg-gray-50 border-[#ff6b35]/15"}`}>
+                <p className="text-xl font-black text-amber-500">{loadingUnified ? "..." : unifiedStats?.profiles ?? 0}</p>
+                <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground">From Profiles</p>
+              </div>
+              <div className={`p-3 rounded-xl border text-center ${isDark ? "bg-[#0d0d15] border-[#ff6b35]/10" : "bg-gray-50 border-[#ff6b35]/15"}`}>
+                <p className="text-xl font-black text-green-500">{loadingUnified ? "..." : unifiedSubscribers.filter(u => u.isNewsletterSub).length}</p>
+                <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground">Newsletter Opt-in</p>
+              </div>
+            </div>
+
+            {/* List */}
+            {loadingUnified ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-[#ff6b35]" />
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                {unifiedSubscribers.map((user: any, idx: number) => (
+                  <div
+                    key={user.email + idx}
+                    className={`flex items-center justify-between p-3 rounded-lg border text-sm ${isDark ? "bg-[#0d0d15] border-white/5" : "bg-gray-50 border-gray-100"}`}
+                  >
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{user.email}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {user.name} • {user.source}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-blue-500/10 text-blue-500`}>
+                        DAILY/WEEKLY
+                      </span>
+                      {user.isNewsletterSub && (
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-green-500/10 text-green-500`}>
+                          NEWSLETTER
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Resend Contacts Section */}
       <Card className={isDark ? "bg-[#12121a] border-[#ff6b35]/10" : "bg-white border-[#ff6b35]/20"}>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between flex-wrap gap-3">

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { Resend } from 'resend';
+import { sendEmail } from '@/lib/email.config';
 import { weeklyRashifalEmailTemplate } from '@/lib/email-templates';
+import { getUnifiedSubscribers } from '@/lib/subscribers';
 export const dynamic = 'force-dynamic';
 
 const supabase = createClient(
@@ -16,11 +17,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'week_start and week_end are required' }, { status: 400 });
     }
 
-    const resendApiKey = process.env.RESEND_API_KEY;
-    if (!resendApiKey) {
-      return NextResponse.json({ error: 'Resend API key not configured' }, { status: 500 });
-    }
-
     // Get all weekly rashifal data
     const { data: rashifalData, error: rashifalError } = await supabase
       .from('weekly_rashifal')
@@ -32,31 +28,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No weekly rashifal data found. Please save rashifal first.' }, { status: 400 });
     }
 
-    // Get all users from profiles and newsletter_subscribers
-    const [profilesRes, subscribersRes] = await Promise.all([
-      supabase.from('profiles').select('email, name').not('email', 'is', null),
-      supabase.from('newsletter_subscribers').select('email, first_name, last_name').eq('is_active', true)
-    ]);
-
-    const userMap = new Map<string, string>();
-    
-    profilesRes.data?.forEach(u => {
-      if (u.email) {
-        userMap.set(u.email.toLowerCase(), u.name || 'Valued Seeker');
-      }
-    });
-    
-    subscribersRes.data?.forEach(u => {
-      if (u.email) {
-        const email = u.email.toLowerCase();
-        if (!userMap.has(email)) {
-          const name = [u.first_name, u.last_name].filter(Boolean).join(' ') || 'Valued Seeker';
-          userMap.set(email, name);
-        }
-      }
-    });
-
-    const validUsers = Array.from(userMap.entries()).map(([email, name]) => ({ email, name }));
+    // Get all users from unified subscriber list
+    const validUsers = await getUnifiedSubscribers();
     
     if (validUsers.length === 0) {
       return NextResponse.json({ error: 'No users found to send emails to' }, { status: 400 });
@@ -69,40 +42,32 @@ export async function POST(request: NextRequest) {
       day: 'numeric', month: 'long', year: 'numeric'
     });
 
-    const resend = new Resend(resendApiKey);
-    const FROM = process.env.RESEND_FROM_EMAIL || 'Katyaayani Astrologer <noreply@katyaayaniastrologer.com>';
     const subject = `Weekly Rashifal Updated! (${formattedStart} - ${formattedEnd})`;
 
     let sentCount = 0;
+    const errors: string[] = [];
 
-    // Send in batches of 50
-    const BATCH_SIZE = 50;
-    for (let i = 0; i < validUsers.length; i += BATCH_SIZE) {
-      const batch = validUsers.slice(i, i + BATCH_SIZE);
-      const emails = batch.map((user) => ({
-        from: FROM,
-        to: user.email,
-        subject,
-        html: weeklyRashifalEmailTemplate(user.name || 'Valued Seeker', formattedStart, formattedEnd, rashifalData),
-      }));
-
+    // Send to all users via SMTP (sequential with small delay to avoid rate limits)
+    for (const user of validUsers) {
       try {
-        const { data: batchData, error: batchError } = await resend.batch.send(emails);
-        if (!batchError) {
-          sentCount += batch.length;
+        const result = await sendEmail({
+          to: user.email,
+          subject,
+          html: weeklyRashifalEmailTemplate(user.name || 'Valued Seeker', formattedStart, formattedEnd, rashifalData),
+        });
+        if (result.success) {
+          sentCount++;
         } else {
-          console.error('Batch error:', batchError);
+          errors.push(`${user.email}: ${result.error}`);
         }
-      } catch (err) {
-        console.error('Batch send failed:', err);
+      } catch (err: any) {
+        errors.push(`${user.email}: ${err.message}`);
       }
-
-      if (i + BATCH_SIZE < validUsers.length) {
-        await new Promise((r) => setTimeout(r, 500));
-      }
+      // Small delay
+      await new Promise((r) => setTimeout(r, 200));
     }
 
-    return NextResponse.json({ success: true, totalUsers: sentCount });
+    return NextResponse.json({ success: true, totalUsers: sentCount, errors: errors.length > 0 ? errors : undefined });
   } catch (error) {
     console.error('Error sending weekly rashifal emails:', error);
     return NextResponse.json({ error: 'Failed to send emails' }, { status: 500 });

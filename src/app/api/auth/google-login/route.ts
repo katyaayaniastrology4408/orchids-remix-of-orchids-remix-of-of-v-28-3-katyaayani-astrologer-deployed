@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendEmail } from "@/lib/email.config";
 import { welcomeEmailTemplate } from "@/lib/email-templates";
+import { syncToSubscribers } from "@/lib/subscribers";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,12 +27,15 @@ export async function POST(req: Request) {
         email_verified: true,
       }, { onConflict: 'id' });
 
-    if (upsertError) {
-      console.error("Profile upsert error:", upsertError);
-      // Don't throw, just log
-    }
+      if (upsertError) {
+        console.error("Profile upsert error:", upsertError);
+        // Don't throw, just log
+      }
 
-    // If new user or profile was just created — send welcome email
+      // Sync to newsletter_subscribers for unified mailing list
+      await syncToSubscribers(email, name || '', 'google_signup', false);
+
+      // If new user or profile was just created — send welcome email
     // Note: We use isNew if provided, otherwise assume new if it was an insert
     if (isNew && email) {
       try {

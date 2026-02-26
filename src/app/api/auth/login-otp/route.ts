@@ -15,6 +15,8 @@ export async function POST(req: Request) {
 
     const supabaseAdmin = getSupabaseAdmin();
 
+    console.log(`[LoginOTP] Attempting login for: ${email}`);
+
     // 1. Verify user credentials first
     const { data: authData, error: authError } = await supabaseAdmin.auth.signInWithPassword({
       email,
@@ -22,8 +24,11 @@ export async function POST(req: Request) {
     });
 
     if (authError || !authData.user) {
+      console.error(`[LoginOTP] Auth failed for ${email}:`, authError?.message);
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
+
+    console.log(`[LoginOTP] Auth successful for ${email}, generating OTP...`);
 
     // 2. User is valid, now generate OTP for 2FA
     // Generate 6-digit OTP
@@ -56,9 +61,11 @@ export async function POST(req: Request) {
       );
 
     if (dbError) {
-      console.error('Database error saving login OTP:', dbError);
+      console.error('[LoginOTP] Database error saving OTP:', dbError);
       return NextResponse.json({ error: 'Failed to generate verification code' }, { status: 500 });
     }
+
+    console.log(`[LoginOTP] Sending email to ${email}...`);
 
     // 3. Send email via SMTP
     const emailResult = await sendEmail({
@@ -68,14 +75,12 @@ export async function POST(req: Request) {
     });
 
     if (!emailResult.success) {
-      console.error('Email sending failed:', emailResult.error);
+      console.error('[LoginOTP] Email sending failed:', emailResult.error);
       return NextResponse.json({ error: 'Failed to send verification email' }, { status: 500 });
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'OTP sent successfully to your email' 
-    });
+    console.log(`[LoginOTP] OTP sent successfully to ${email}`);
+    return NextResponse.json({ success: true, message: 'OTP sent successfully' });
   } catch (error: any) {
     console.error('Login OTP Error:', error);
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });

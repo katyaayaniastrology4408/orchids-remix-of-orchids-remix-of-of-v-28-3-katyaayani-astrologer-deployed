@@ -2,11 +2,9 @@ import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { sendWelcomeEmail } from "@/lib/email";
 import bcrypt from 'bcryptjs';
-import { Resend } from 'resend';
 import { sanitizeString, sanitizeEmail, sanitizePhone } from '@/lib/sanitize';
+import { syncToSubscribers } from '@/lib/subscribers';
 export const dynamic = 'force-dynamic';
-
-const RESEND_AUDIENCE_ID = 'e6bafd8b-5149-4862-a298-e23bd5578190';
 
 export async function POST(req: Request) {
   try {
@@ -74,34 +72,20 @@ export async function POST(req: Request) {
           });
 
 
-      if (profileError) console.error("Error updating profile:", profileError);
+        if (profileError) console.error("Error updating profile:", profileError);
+
+          // Sync to newsletter_subscribers for unified mailing list (but not for newsletter specifically)
+          await syncToSubscribers(email, fullName, 'profile_signup', false);
 
           // 5. Send Welcome Email
           try {
             await sendWelcomeEmail({ email, name: fullName });
           } catch (e) {
-            console.error("Error in post-signup operations:", e);
+            console.error("Error sending welcome email:", e);
           }
+        }
 
-          // 6. Add to Resend audience (newsletter contacts)
-          if (process.env.RESEND_API_KEY) {
-            try {
-              const resend = new Resend(process.env.RESEND_API_KEY);
-              const nameParts = (fullName || '').trim().split(' ');
-              await resend.contacts.create({
-                audienceId: RESEND_AUDIENCE_ID,
-                email,
-                firstName: nameParts[0] || undefined,
-                lastName: nameParts.slice(1).join(' ') || undefined,
-                unsubscribed: false,
-              });
-            } catch (resendErr) {
-              console.error('Resend contact add error (signup):', resendErr);
-            }
-          }
-      }
-
-    return NextResponse.json({ success: true, user });
+      return NextResponse.json({ success: true, user });
   } catch (error: any) {
     console.error("Signup error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
