@@ -98,48 +98,48 @@ function RashiModal({ rashi, index, isDark, onClose }: { rashi: Rashi; index: nu
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
-      {/* Modal box */}
-      <div
-        className={`relative w-full max-w-sm rounded-2xl shadow-2xl p-6 ${
-          isDark ? "bg-[#0d0b1a] border border-white/10" : "bg-white border border-orange-100"
-        }`}
-        style={{ zIndex: 100000 }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Close */}
-        <button
-          onClick={onClose}
-          className={`absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-            isDark ? "bg-white/5 hover:bg-white/10 text-white/60" : "bg-black/5 hover:bg-black/10 text-black/50"
-          }`}
-        >
-          <X className="w-4 h-4" />
-        </button>
-
-        {/* SVG Icon */}
+        {/* Modal box */}
         <div
-          className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4"
-          style={{ background: rashi.color + "18" }}
+          className={`relative w-full max-w-md rounded-[32px] shadow-2xl p-8 md:p-10 ${
+            isDark ? "bg-[#0d0b1a] border border-white/10" : "bg-white border border-orange-100"
+          }`}
+          style={{ zIndex: 100000 }}
+          onClick={e => e.stopPropagation()}
         >
-          <Icon color={rashi.color} size={52} />
+          {/* Close */}
+          <button
+            onClick={onClose}
+            className={`absolute top-4 right-4 w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-95 z-[100001] ${
+              isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-black/5 hover:bg-black/10 text-black"
+            }`}
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          {/* SVG Icon */}
+          <div
+            className="w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6"
+            style={{ background: rashi.color + "18" }}
+          >
+            <Icon color={rashi.color} size={64} />
+          </div>
+
+          {/* Name */}
+          <h3
+            className="text-center text-3xl md:text-4xl font-bold font-[family-name:var(--font-cinzel)] mb-6"
+            style={{ color: rashi.color }}
+          >
+            {rashi.name}
+          </h3>
+
+          {/* Divider */}
+          <div className="h-px mb-8" style={{ background: rashi.color + "30" }} />
+
+          {/* Prediction */}
+          <p className={`text-lg md:text-xl leading-relaxed text-center font-medium ${isDark ? "text-white/80" : "text-black/70"}`}>
+            {rashi.tip}
+          </p>
         </div>
-
-        {/* Name */}
-        <h3
-          className="text-center text-xl font-bold font-[family-name:var(--font-cinzel)] mb-5"
-          style={{ color: rashi.color }}
-        >
-          {rashi.name}
-        </h3>
-
-        {/* Divider */}
-        <div className="h-px mb-5" style={{ background: rashi.color + "30" }} />
-
-        {/* Prediction */}
-        <p className={`text-sm leading-relaxed text-center ${isDark ? "text-white/70" : "text-black/60"}`}>
-          {rashi.tip}
-        </p>
-      </div>
     </div>,
     document.body
   );

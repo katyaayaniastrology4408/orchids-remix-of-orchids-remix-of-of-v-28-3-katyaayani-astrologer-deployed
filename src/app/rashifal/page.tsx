@@ -314,11 +314,11 @@ function RashifalPageContent() {
                     <div className="animate-spin w-8 h-8 border-4 border-[#ff6b35] border-t-transparent rounded-full mx-auto" />
                   </div>
                 ) : (
-                  <>
-                      <p className={`text-base md:text-lg leading-relaxed mb-8 whitespace-pre-line ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {getContent(selectedRashiData)}
-                        </p>
-                  </>
+                    <>
+                        <p className={`text-lg md:text-xl leading-relaxed mb-8 whitespace-pre-line font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+                            {getContent(selectedRashiData)}
+                          </p>
+                    </>
                 )}
               </CardContent>
             </Card>

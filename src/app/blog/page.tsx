@@ -14,6 +14,9 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 import Navbar from "@/components/homepage/Navbar";
 import Footer from "@/components/homepage/Footer";
+import dynamic from "next/dynamic";
+
+const RashifalSection = dynamic(() => import("@/components/homepage/RashifalSection"), { ssr: false });
 
 interface BlogPost {
   id: string;
@@ -292,9 +295,10 @@ export default function BlogPage() {
             ))}
           </motion.div>
         )}
-      </main>
-
-      <Footer />
-    </div>
+        </main>
+  
+        <RashifalSection />
+        <Footer />
+      </div>
   );
 }
