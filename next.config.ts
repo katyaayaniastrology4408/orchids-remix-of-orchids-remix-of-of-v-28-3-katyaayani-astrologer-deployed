@@ -2,11 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: {
-    turbopack: true,
-    ppr: 'incremental',
+    cacheComponents: true,
   },
   devIndicators: false,
-  eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   compress: true,
   poweredByHeader: false,
