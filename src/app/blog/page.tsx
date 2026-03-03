@@ -115,11 +115,11 @@ export default function BlogPage() {
           </p>
         </div>
 
-        {/* Two-column layout: Left = banners+images highlights, Right = posts */}
-        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Two-column layout: Left = posts, Right = banners+highlights */}
+          <div className="flex flex-col lg:flex-row gap-8">
 
-          {/* LEFT — Highlight Banners */}
-          <aside className="lg:w-72 xl:w-80 flex-shrink-0 flex flex-col gap-5">
+            {/* RIGHT — Highlight Banners (rendered after posts in DOM but shown right via order) */}
+            <aside className="lg:w-72 xl:w-80 flex-shrink-0 flex flex-col gap-5 lg:order-2">
 
             {/* Daily Horoscope Banner */}
             <Link href="/rashifal">
@@ -248,8 +248,8 @@ export default function BlogPage() {
             )}
           </aside>
 
-          {/* RIGHT — Blog Posts */}
-          <div className="flex-1 min-w-0">
+            {/* LEFT — Blog Posts */}
+            <div className="flex-1 min-w-0 lg:order-1">
             {loading ? (
               <div className="flex flex-col gap-5">
                 {[...Array(5)].map((_, i) => (
