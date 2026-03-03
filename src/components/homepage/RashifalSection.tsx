@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Sparkles, X } from "lucide-react";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import X from "lucide-react/dist/esm/icons/x";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 import { RASHI_ICONS } from "@/components/RashiIcons";

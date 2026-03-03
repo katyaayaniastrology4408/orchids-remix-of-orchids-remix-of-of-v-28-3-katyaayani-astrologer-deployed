@@ -1,7 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X, LogOut, Moon, Sun } from "lucide-react";
+import Menu from "lucide-react/dist/esm/icons/menu";
+import X from "lucide-react/dist/esm/icons/x";
+import LogOut from "lucide-react/dist/esm/icons/log-out";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Sun from "lucide-react/dist/esm/icons/sun";
+import Bell from "lucide-react/dist/esm/icons/bell";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useMenu } from "@/contexts/MenuContext";
@@ -21,7 +26,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export default function Navbar() {
+interface NavbarProps {
+  hasNotification?: boolean;
+}
+
+export default function Navbar({ hasNotification = false }: NavbarProps) {
   const { theme, toggleTheme } = useTheme();
   const { isMenuOpen, setIsMenuOpen } = useMenu();
   const { language, t } = useTranslation();
@@ -82,10 +91,33 @@ export default function Navbar() {
                 <Link href="/about" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("About")}</Link>
               </div>
 
-        <div className="flex items-center gap-2">
-              <GoogleTranslateWidget />
-              
-              <Button
+          <div className="flex items-center gap-2">
+                <GoogleTranslateWidget />
+                
+                {/* Notification Bell */}
+                <div className="relative">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-[#ff6b35] hover:bg-[#ff6b35]/10"
+                    onClick={() => {
+                      const banner = document.getElementById('new-blog-banner');
+                      if (banner) {
+                        banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      } else {
+                        window.location.href = '/blog';
+                      }
+                    }}
+                    title={t("New Notifications")}
+                  >
+                    <Bell className="w-5 h-5" />
+                  </Button>
+                  {hasNotification && (
+                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-600 border-2 border-white dark:border-[#0a0a0f] rounded-full animate-pulse" />
+                  )}
+                </div>
+                
+                <Button
                 variant="ghost"
                 size="icon"
                 onClick={toggleTheme}

@@ -1,14 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
-  Moon, 
-  X, 
-  ChevronDown, 
-  ChevronUp, 
-  AlertCircle, 
-  ArrowRight 
-} from "lucide-react";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import X from "lucide-react/dist/esm/icons/x";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 import Link from "next/link";
@@ -175,7 +173,7 @@ export default function ChandraGrahanBanner() {
 
   return (
       <div
-        className={`w-full mt-[72px] transition-all duration-300 ${
+        className={`w-full transition-all duration-300 ${
           isDark
             ? "bg-gradient-to-r from-[#1a0a2e] via-[#120818] to-[#1a0a2e] border-y border-[#ff6b35]/20"
             : "bg-gradient-to-r from-[#fff5ee] via-[#fffcf8] to-[#fff5ee] border-y border-[#ff6b35]/20"

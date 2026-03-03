@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sun, Moon, Calendar, Sparkles, ChevronDown } from "lucide-react";
+import Sun from "lucide-react/dist/esm/icons/sun";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 import { contentData } from "@/data/homepage";

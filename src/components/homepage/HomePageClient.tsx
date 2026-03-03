@@ -4,21 +4,19 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import NextImage from "next/image";
 import dynamic from "next/dynamic";
-import { 
-  Star, 
-  Moon, 
-  Sun, 
-  Sparkles, 
-  House, 
-  Video, 
-  ChevronRight, 
-  ChevronDown, 
-  Calendar, 
-  Newspaper,
-  Bell,
-  ArrowRight,
-  X
-} from "lucide-react";
+import Star from "lucide-react/dist/esm/icons/star";
+import Moon from "lucide-react/dist/esm/icons/moon";
+import Sun from "lucide-react/dist/esm/icons/sun";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import House from "lucide-react/dist/esm/icons/house";
+import Video from "lucide-react/dist/esm/icons/video";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import Newspaper from "lucide-react/dist/esm/icons/newspaper";
+import Bell from "lucide-react/dist/esm/icons/bell";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import X from "lucide-react/dist/esm/icons/x";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -46,10 +44,10 @@ const AstrologerTip = dynamic(() => import("@/components/homepage/AstrologerTip"
   ssr: true,
   loading: () => <div className="h-[350px] w-full bg-gray-100/5" />
 });
-const ChandraGrahanBanner = dynamic(() => import("@/components/homepage/ChandraGrahanBanner"), { 
-  ssr: true,
-  loading: () => <div className="h-[164px] w-full bg-gray-100/5 mt-[72px]" />
-});
+  const ChandraGrahanBanner = dynamic(() => import("@/components/homepage/ChandraGrahanBanner"), { 
+    ssr: true,
+    loading: () => <div className="h-[164px] w-full bg-gray-100/5 mt-20" />
+  });
 
 import { testimonialsData, contentData } from "@/data/homepage";
 import "@/styles/homepage.css";
@@ -202,56 +200,59 @@ export default function HomePageClient({ initialLatestPosts, hasTodayPosts, actu
 
   if (!mounted) return null;
 
-  return (
+    return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-[#0a0a0f] text-[#f5f0e8]' : 'bg-[#fdfbf7] text-[#4a3f35]'}`}>
-      <Navbar />
+      <Navbar hasNotification={newBlogBanner.show} />
 
-      <ChandraGrahanBanner />
+      <div className="mt-20 relative z-40 shadow-sm shadow-[#ff6b35]/5">
+        <ChandraGrahanBanner />
 
-      {/* New Blog Notification Banner (Auto-expires after 24h) */}
-      {newBlogBanner.show && newBlogBanner.post && (
-        <div 
-          className={`w-full transition-all duration-300 ${
-            theme === 'dark' 
-              ? 'bg-gradient-to-r from-[#2a1a10] via-[#3a2215] to-[#2a1a10] border-y border-[#ff6b35]/20' 
-              : 'bg-gradient-to-r from-[#fff9f0] via-[#fffcf8] to-[#fff9f0] border-y border-[#ff6b35]/20'
-          }`}
-        >
-          <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-[#ff6b35]/20' : 'bg-[#ff6b35]/10'}`}>
-                <Bell className="w-5 h-5 text-[#ff6b35] animate-bounce" />
+        {/* New Blog Notification Banner (Auto-expires after 24h) */}
+        {newBlogBanner.show && newBlogBanner.post && (
+          <div 
+            id="new-blog-banner"
+            className={`w-full transition-all duration-300 border-b border-[#ff6b35]/20 ${
+              theme === 'dark' 
+                ? 'bg-gradient-to-r from-[#2a1a10] via-[#3a2215] to-[#2a1a10]' 
+                : 'bg-gradient-to-r from-[#fff9f0] via-[#fffcf8] to-[#fff9f0]'
+            }`}
+          >
+            <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-[#ff6b35]/20' : 'bg-[#ff6b35]/10'}`}>
+                  <Bell className="w-5 h-5 text-[#ff6b35] animate-pulse" />
+                </div>
+                <div>
+                  <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest mb-1 ${
+                    theme === 'dark' ? 'bg-orange-900/40 text-orange-400' : 'bg-orange-50 text-orange-600'
+                  }`}>
+                    {language === 'gu' ? 'નવો લેખ' : language === 'hi' ? 'नया लेख' : 'NEW ARTICLE'}
+                  </span>
+                  <h3 className={`text-sm font-bold line-clamp-1 ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
+                    {newBlogBanner.post.title}
+                  </h3>
+                </div>
               </div>
-              <div>
-                <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest mb-1 ${
-                  theme === 'dark' ? 'bg-orange-900/40 text-orange-400' : 'bg-orange-50 text-orange-600'
-                }`}>
-                  {language === 'gu' ? 'નવો લેખ' : language === 'hi' ? 'नया लेख' : 'NEW ARTICLE'}
-                </span>
-                <h3 className={`text-sm font-bold line-clamp-1 ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
-                  {newBlogBanner.post.title}
-                </h3>
+              
+              <div className="flex items-center gap-3">
+                <Link 
+                  href={`/blog/${newBlogBanner.post.slug}`}
+                  className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-xl bg-[#ff6b35] text-white hover:bg-[#ff8c5e] transition-colors whitespace-nowrap"
+                >
+                  {language === 'gu' ? 'વાંચો' : language === 'hi' ? 'पढ़ें' : 'Read Now'}
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+                <button 
+                  onClick={() => setNewBlogBanner({ show: false, post: null })}
+                  className={`p-2 rounded-lg hover:bg-black/5 transition-colors ${theme === 'dark' ? 'text-white/40 hover:text-white' : 'text-black/40 hover:text-black'}`}
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <Link 
-                href={`/blog/${newBlogBanner.post.slug}`}
-                className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-xl bg-[#ff6b35] text-white hover:bg-[#ff8c5e] transition-colors whitespace-nowrap"
-              >
-                {language === 'gu' ? 'વાંચો' : language === 'hi' ? 'पढ़ें' : 'Read Now'}
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-              <button 
-                onClick={() => setNewBlogBanner({ show: false, post: null })}
-                className={`p-2 rounded-lg hover:bg-black/5 transition-colors ${theme === 'dark' ? 'text-white/40 hover:text-white' : 'text-black/40 hover:text-black'}`}
-              >
-                <X className="w-4 h-4" />
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden py-24">
         <StarField />
@@ -569,11 +570,11 @@ export default function HomePageClient({ initialLatestPosts, hasTodayPosts, actu
                           <p className={`text-xs font-semibold uppercase tracking-wider ${theme === 'dark' ? 'text-[#ff8c5e]' : 'text-[#ff6b35]'}`}>
                             {new Date(post.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                           </p>
-                          {new Date(post.created_at).toISOString().split('T')[0] === new Date().toISOString().split('T')[0] && (
-                            <span className="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded-full font-bold animate-pulse">
-                              {language === 'gu' ? 'નવું' : language === 'hi' ? 'નયા' : 'NEW'}
-                            </span>
-                          )}
+                            {new Date(post.created_at).toISOString().split('T')[0] === new Date().toISOString().split('T')[0] && (
+                              <span className="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded-full font-bold animate-pulse">
+                                {language === 'gu' ? 'નવું' : language === 'hi' ? 'नया' : 'NEW'}
+                              </span>
+                            )}
                         </div>
                         <h3 className={`font-[family-name:var(--font-cinzel)] font-bold text-lg mb-2 line-clamp-2 group-hover:text-[#ff6b35] transition-colors ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
                           {post.title}

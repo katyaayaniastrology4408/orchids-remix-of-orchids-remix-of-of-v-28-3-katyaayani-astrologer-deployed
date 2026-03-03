@@ -1,7 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Phone, Mail, MapPin, Send, Loader2, CheckCircle, Star, ChevronRight, Instagram } from "lucide-react";
+import Phone from "lucide-react/dist/esm/icons/phone";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import Send from "lucide-react/dist/esm/icons/send";
+import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import Star from "lucide-react/dist/esm/icons/star";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Instagram from "lucide-react/dist/esm/icons/instagram";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 import { contentData } from "@/data/homepage";

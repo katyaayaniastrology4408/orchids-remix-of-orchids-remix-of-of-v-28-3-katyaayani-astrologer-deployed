@@ -1,6 +1,8 @@
 "use client";
 
-import { Lightbulb, Star, Quote } from "lucide-react";
+import Lightbulb from "lucide-react/dist/esm/icons/lightbulb";
+import Star from "lucide-react/dist/esm/icons/star";
+import Quote from "lucide-react/dist/esm/icons/quote";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 
