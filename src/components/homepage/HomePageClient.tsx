@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { Star, Moon, Sun, Sparkles, Home, Video, ChevronRight, ChevronDown, Calendar, Newspaper } from "lucide-react";
+import { Star, Moon, Sun, Sparkles, Home, Video, ChevronRight, ChevronDown, Calendar, Newspaper, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -28,8 +28,9 @@ export default function HomePageClient() {
     const [panchangApiData, setPanchangApiData] = useState<any>(null);
     const [hinduCalendar, setHinduCalendar] = useState({ month: "--", tithi: "--", vaara: "--", paksha: "--" });
     const [dbReviews, setDbReviews] = useState<{ name: string; text: string; rating: number }[]>([]);
-
-  const [latestPosts, setLatestPosts] = useState<{ id: string; title: string; slug: string; excerpt: string; featured_image: string; created_at: string }[]>([]);
+    const [galleryImages, setGalleryImages] = useState<{ id: string; image_url: string; title: string; description: string; created_at: string }[]>([]);
+  
+    const [latestPosts, setLatestPosts] = useState<{ id: string; title: string; slug: string; excerpt: string; featured_image: string; created_at: string }[]>([]);
 
   useEffect(() => {
     setMounted(true);
@@ -50,6 +51,16 @@ export default function HomePageClient() {
       .then(json => {
         if (json.success && Array.isArray(json.data)) {
           setLatestPosts(json.data.slice(0, 3));
+        }
+      })
+      .catch(() => {});
+
+    // Fetch gallery images
+    fetch('/api/gallery')
+      .then(r => r.json())
+      .then(json => {
+        if (json.success && Array.isArray(json.data)) {
+          setGalleryImages(json.data);
         }
       })
       .catch(() => {});
@@ -298,7 +309,7 @@ export default function HomePageClient() {
         {/* Trust Signals Bar */}
         <section className={`py-12 border-y ${theme === 'dark' ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/10'}`}>
           <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
               <div className="text-center">
                 <p className="text-[#ff6b35] text-3xl md:text-4xl font-bold font-[family-name:var(--font-cinzel)] mb-1">17+</p>
                 <p className={`text-sm uppercase tracking-widest font-semibold ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
@@ -306,15 +317,9 @@ export default function HomePageClient() {
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-[#ff6b35] text-3xl md:text-4xl font-bold font-[family-name:var(--font-cinzel)] mb-1">25k+</p>
+                <p className="text-[#ff6b35] text-3xl md:text-4xl font-bold font-[family-name:var(--font-cinzel)] mb-1">10k+</p>
                 <p className={`text-sm uppercase tracking-widest font-semibold ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
                   {language === 'gu' ? 'પરામર્શ' : language === 'hi' ? 'परामर्श' : 'Consultations'}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-[#ff6b35] text-3xl md:text-4xl font-bold font-[family-name:var(--font-cinzel)] mb-1">20+</p>
-                <p className={`text-sm uppercase tracking-widest font-semibold ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
-                  {language === 'gu' ? 'દેશોમાં ગ્રાહકો' : language === 'hi' ? 'देशों में ग्राहक' : 'Countries'}
                 </p>
               </div>
               <div className="text-center">
@@ -323,7 +328,7 @@ export default function HomePageClient() {
                   {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 fill-[#ff6b35] text-[#ff6b35]" />)}
                 </div>
                 <p className={`text-sm uppercase tracking-widest font-semibold ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
-                  {language === 'gu' ? 'રેટિંગ' : language === 'hi' ? 'रेटिंग' : 'Average Rating'}
+                  {language === 'gu' ? 'રેટિંગ' : language === 'hi' ? 'रेटિંગ' : 'Average Rating'}
                 </p>
               </div>
             </div>
@@ -443,6 +448,55 @@ export default function HomePageClient() {
       <RashifalSection />
 
       <AstrologerTip />
+      
+      {/* Gallery Section */}
+      {galleryImages.length > 0 && (
+        <section className={`py-24 px-6 ${theme === 'dark' ? 'bg-[#0a0a0f]' : 'bg-[#fcfaf7]'}`}>
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="flex justify-center gap-2 mb-4">
+                <ImageIcon className="w-8 h-8 text-[#ff6b35]" />
+              </div>
+              <h2 className="font-[family-name:var(--font-cinzel)] text-4xl md:text-5xl font-bold mb-4 text-gradient-ancient">
+                {language === 'gu' ? 'પવિત્ર ગેલેરી' : language === 'hi' ? 'पवित्र गैलरी' : 'Sacred Gallery'}
+              </h2>
+              <p className={`text-xl max-w-2xl mx-auto ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
+                {language === 'gu' ? 'કાત્યાયની જ્યોતિષ દ્વારા પસંદ કરવામાં આવેલા પવિત્ર વૈદિક, આધ્યાત્મિક અને જ્યોતિષીય ચિત્રોનો અમારો સંગ્રહ જુઓ.' : 
+                 language === 'hi' ? 'कात्यायनी ज्योतिष द्वारा क्यूरेट किए गए पवित्र वैदिक, आध्यात्मिक और ज्योतिषीय चित्रों का हमारा संग्रह देखें।' : 
+                 'Explore our collection of sacred Vedic, spiritual, and astrological pictures curated by Katyaayani Astrologer.'}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {galleryImages.map((img) => (
+                <div 
+                  key={img.id}
+                  className="group relative flex flex-col bg-white dark:bg-[#12121a] rounded-3xl overflow-hidden border border-[#ff6b35]/10 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
+                >
+                  <div className="aspect-[4/5] overflow-hidden bg-black/5 relative">
+                    <img 
+                      src={img.image_url} 
+                      alt={img.description || img.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  </div>
+                  
+                  <div className="p-6">
+                    <h3 className="font-[family-name:var(--font-cinzel)] text-lg font-bold text-[#ff6b35] mb-2 group-hover:translate-x-1 transition-transform">
+                      {img.title || "Untitiled Visual"}
+                    </h3>
+                    <p className={`text-xs line-clamp-3 leading-relaxed ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
+                      {img.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Latest Blog Posts */}
       {latestPosts.length > 0 && (

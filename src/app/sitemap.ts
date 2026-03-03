@@ -40,28 +40,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       { url: `${baseUrl}/disclaimer`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
     ];
 
-    // --- Gallery Page & Images ---
-    let galleryEntry: MetadataRoute.Sitemap = [];
-    try {
-      const { data: galleryImages } = await supabase
-        .from("gallery")
-        .select("image_url, updated_at, created_at")
-        .eq("is_active", true);
-
-      const images = (galleryImages || []).map(img => img.image_url);
-      const lastMod = galleryImages && galleryImages.length > 0 
-        ? new Date(galleryImages[0].updated_at || galleryImages[0].created_at)
-        : new Date();
-
-      galleryEntry = [{
-        url: `${baseUrl}/gallery`,
-        lastModified: lastMod,
-        changeFrequency: "daily",
-        priority: 0.8,
-        images: images
-      }];
-    } catch (e) { console.error("Sitemap gallery error:", e); }
-
     // --- Blog Posts ---
   let blogPages: MetadataRoute.Sitemap = [];
     try {
@@ -111,5 +89,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
     } catch (e) { console.error("Sitemap custom error:", e); }
 
-    return [...staticPages, ...galleryEntry, ...blogPages, ...cmsPages, ...customPages];
+    return [...staticPages, ...blogPages, ...cmsPages, ...customPages];
 }
