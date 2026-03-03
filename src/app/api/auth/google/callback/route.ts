@@ -14,7 +14,9 @@ export async function GET(req: Request) {
   const code = url.searchParams.get("code");
   const error = url.searchParams.get("error");
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const host = req.headers.get("host") || "www.katyaayaniastrologer.com";
+  const protocol = host.includes("localhost") ? "http" : "https";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
 
   if (error || !code) {
     return NextResponse.redirect(`${appUrl}/signin?error=${encodeURIComponent(error || "Google login cancelled")}`);
@@ -111,6 +113,9 @@ export async function GET(req: Request) {
     const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
       type: "magiclink",
       email: googleUser.email,
+      options: {
+        redirectTo: `${appUrl}/auth/google-complete?uid=${supabaseUserId}&isNew=${isNew}`
+      }
     });
 
     if (sessionError || !sessionData?.properties?.hashed_token) {
@@ -123,7 +128,10 @@ export async function GET(req: Request) {
     // Redirect to the magic link to establish session
     const actionLink = sessionData.properties.action_link;
     if (actionLink) {
-      return NextResponse.redirect(actionLink);
+      // Force the action link to use our appUrl instead of whatever Supabase has configured as Site URL
+      const actionUrl = new URL(actionLink);
+      const finalActionUrl = `${appUrl}${actionUrl.pathname}${actionUrl.search}`;
+      return NextResponse.redirect(finalActionUrl);
     }
 
     return NextResponse.redirect(`${appUrl}/auth/google-complete?uid=${supabaseUserId}&isNew=${isNew}`);

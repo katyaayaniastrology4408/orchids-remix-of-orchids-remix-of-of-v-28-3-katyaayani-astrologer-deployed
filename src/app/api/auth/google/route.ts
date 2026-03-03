@@ -8,7 +8,17 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Google OAuth not configured. Please add GOOGLE_CLIENT_ID to environment variables." }, { status: 500 });
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const origin = req.headers.get("origin") || req.headers.get("referer");
+  const host = req.headers.get("host") || "www.katyaayaniastrologer.com";
+  const protocol = host.includes("localhost") ? "http" : "https";
+  
+  // Use the environment variable if available, otherwise fallback to the current host
+  // but prioritize the production domain if we're not on localhost.
+  let appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!appUrl) {
+    appUrl = host.includes("localhost") ? `http://${host}` : "https://www.katyaayaniastrologer.com";
+  }
+  
   const redirectUri = `${appUrl}/api/auth/google/callback`;
 
   // Store a random state in the redirect URL for CSRF protection

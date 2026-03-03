@@ -56,7 +56,11 @@ export async function POST(req: NextRequest) {
         <p>Please review this request in the admin panel.</p>
       `;
 
-      await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/test-email`, {
+      const host = req.headers.get("host") || "www.katyaayaniastrologer.com";
+      const protocol = host.includes("localhost") ? "http" : "https";
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
+
+      await fetch(`${appUrl}/api/test-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

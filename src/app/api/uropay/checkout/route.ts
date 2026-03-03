@@ -16,7 +16,9 @@ export async function POST(request: NextRequest) {
     // UroPay API endpoint (v1)
     const UROPAY_API_URL = "https://api.uropay.me/v1/order/create";
 
-    const origin = request.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const host = request.headers.get("host") || "www.katyaayaniastrologer.com";
+    const protocol = host.includes("localhost") ? "http" : "https";
+    const origin = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
 
     const response = await fetch(UROPAY_API_URL, {
       method: "POST",
