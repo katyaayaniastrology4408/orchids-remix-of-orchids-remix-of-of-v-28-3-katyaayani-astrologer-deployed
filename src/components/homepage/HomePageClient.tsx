@@ -33,7 +33,7 @@ const AstrologerTip = dynamic(() => import("@/components/homepage/AstrologerTip"
 });
 const ChandraGrahanBanner = dynamic(() => import("@/components/homepage/ChandraGrahanBanner"), { 
   ssr: true,
-  loading: () => <div className="h-[148px] w-full bg-gray-100/5 mt-[72px]" />
+  loading: () => <div className="h-[164px] w-full bg-gray-100/5 mt-[72px]" />
 });
 
 import { testimonialsData, contentData } from "@/data/homepage";
@@ -204,7 +204,7 @@ export default function HomePageClient({ initialGalleryImages, initialLatestPost
         }`} />
 
         <div className="relative z-10 text-center px-6 max-w-4xl">
-          <div className={mounted ? "fade-in-up" : ""}>
+          <div className="fade-in-up">
             <div className="flex justify-center gap-4 mb-6">
               <Sun className="w-12 h-12 text-[#ff6b35]" />
               <Moon className="w-12 h-12 text-[#ffa07a]" />
@@ -226,7 +226,7 @@ export default function HomePageClient({ initialGalleryImages, initialLatestPost
                   <p className="text-[10px] uppercase tracking-widest opacity-60 font-bold">
                     {language === 'gu' ? 'સૂર્યોદય' : language === 'hi' ? 'सूर्योदय' : 'SUNRISE'}
                   </p>
-                  <p className="text-sm font-bold">{panchangTimes.sunrise}</p>
+                  <p className="text-sm font-bold min-w-[80px]">{panchangTimes.sunrise}</p>
                 </div>
               </div>
               <div className="w-px h-8 bg-[#ff6b35]/20" />
@@ -236,7 +236,7 @@ export default function HomePageClient({ initialGalleryImages, initialLatestPost
                   <p className="text-[10px] uppercase tracking-widest opacity-60 font-bold">
                     {language === 'gu' ? 'સૂર્યાસ્ત' : language === 'hi' ? 'सूर्यास्त' : 'SUNSET'}
                   </p>
-                  <p className="text-sm font-bold">{panchangTimes.sunset}</p>
+                  <p className="text-sm font-bold min-w-[80px]">{panchangTimes.sunset}</p>
                 </div>
               </div>
             </div>
@@ -250,7 +250,7 @@ export default function HomePageClient({ initialGalleryImages, initialLatestPost
                   <p className="text-[10px] uppercase tracking-widest opacity-60 font-bold">
                     {language === 'gu' ? 'હિંદુ માસ' : language === 'hi' ? 'हिंदू मास' : 'HINDU MONTH'}
                   </p>
-                  <p className="text-sm font-bold">{hinduCalendar.month}</p>
+                  <p className="text-sm font-bold min-w-[70px]">{hinduCalendar.month}</p>
                 </div>
               </div>
               <div className="w-px h-8 bg-[#ff6b35]/20" />
@@ -260,7 +260,7 @@ export default function HomePageClient({ initialGalleryImages, initialLatestPost
                   <p className="text-[10px] uppercase tracking-widest opacity-60 font-bold">
                     {language === 'gu' ? 'તિથિ' : language === 'hi' ? 'तिथि' : 'TITHI'}
                   </p>
-                  <p className="text-sm font-bold">{hinduCalendar.tithi}</p>
+                  <p className="text-sm font-bold min-w-[70px]">{hinduCalendar.tithi}</p>
                 </div>
               </div>
               <div className="w-px h-8 bg-[#ff6b35]/20" />
@@ -270,7 +270,7 @@ export default function HomePageClient({ initialGalleryImages, initialLatestPost
                   <p className="text-[10px] uppercase tracking-widest opacity-60 font-bold">
                     {language === 'gu' ? 'પક્ષ' : language === 'hi' ? 'पक्ष' : 'PAKSHA'}
                   </p>
-                  <p className="text-sm font-bold">{hinduCalendar.paksha}</p>
+                  <p className="text-sm font-bold min-w-[70px]">{hinduCalendar.paksha}</p>
                 </div>
               </div>
               <div className="w-px h-8 bg-[#ff6b35]/20" />
@@ -280,7 +280,7 @@ export default function HomePageClient({ initialGalleryImages, initialLatestPost
                   <p className="text-[10px] uppercase tracking-widest opacity-60 font-bold">
                     {language === 'gu' ? 'વાર' : language === 'hi' ? 'वार' : 'DAY'}
                   </p>
-                  <p className="text-sm font-bold">{hinduCalendar.vaara}</p>
+                  <p className="text-sm font-bold min-w-[70px]">{hinduCalendar.vaara}</p>
                 </div>
               </div>
             </div>

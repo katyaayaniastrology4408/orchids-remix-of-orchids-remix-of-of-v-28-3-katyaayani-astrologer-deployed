@@ -15,8 +15,13 @@ export async function GET(req: Request) {
   const error = url.searchParams.get("error");
 
   const host = req.headers.get("host") || "www.katyaayaniastrologer.com";
-  const protocol = host.includes("localhost") ? "http" : "https";
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
+  
+  // Dynamic base URL detection
+  // Prioritize the current host if we're on localhost to allow testing.
+  // Otherwise use NEXT_PUBLIC_APP_URL or detected host.
+  const appUrl = host.includes("localhost") 
+    ? `http://${host}` 
+    : (process.env.NEXT_PUBLIC_APP_URL || `https://${host}`);
 
   if (error || !code) {
     return NextResponse.redirect(`${appUrl}/signin?error=${encodeURIComponent(error || "Google login cancelled")}`);

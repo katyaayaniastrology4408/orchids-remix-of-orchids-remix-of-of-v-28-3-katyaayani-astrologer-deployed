@@ -10,14 +10,13 @@ export async function GET(req: Request) {
 
   const origin = req.headers.get("origin") || req.headers.get("referer");
   const host = req.headers.get("host") || "www.katyaayaniastrologer.com";
-  const protocol = host.includes("localhost") ? "http" : "https";
   
-  // Use the environment variable if available, otherwise fallback to the current host
-  // but prioritize the production domain if we're not on localhost.
-  let appUrl = process.env.NEXT_PUBLIC_APP_URL;
-  if (!appUrl) {
-    appUrl = host.includes("localhost") ? `http://${host}` : "https://www.katyaayaniastrologer.com";
-  }
+  // Dynamic base URL detection
+  // Prioritize the current host if we're on localhost to allow testing.
+  // Otherwise use NEXT_PUBLIC_APP_URL or detected host.
+  const appUrl = host.includes("localhost") 
+    ? `http://${host}` 
+    : (process.env.NEXT_PUBLIC_APP_URL || `https://${host}`);
   
   const redirectUri = `${appUrl}/api/auth/google/callback`;
 

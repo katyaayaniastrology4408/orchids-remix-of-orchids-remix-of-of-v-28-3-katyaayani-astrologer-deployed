@@ -439,6 +439,10 @@ export const dictionary: Record<string, { hi: string; gu: string }> = {
   "Invalid verification code": { hi: "अमान्य सत्यापन कोड", gu: "અમાન્ય ચકાસણી કોડ" },
 };
 
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 // Build lookup maps
 const lowerCaseMap: Record<string, { hi: string; gu: string }> = {};
 // Sort keys by length descending for greedy replacement
@@ -448,6 +452,13 @@ for (const [key, value] of Object.entries(dictionary)) {
   sortedKeys.push(key);
 }
 sortedKeys.sort((a, b) => b.length - a.length);
+
+// Pre-calculate master regex for performance
+const pattern = sortedKeys
+  .filter(k => k.length >= 3)
+  .map(k => escapeRegex(k))
+  .join('|');
+const masterRegex = new RegExp(`(${pattern})`, 'gi');
 
 export function translateText(text: string, lang: "hi" | "gu" | "en"): string | null {
   if (lang === "en") return null;
@@ -472,20 +483,15 @@ export function translateText(text: string, lang: "hi" | "gu" | "en"): string | 
   // 3. Word-level / phrase-level replacement (greedy, longest match first)
   let result = trimmed;
   let changed = false;
-  for (const key of sortedKeys) {
-    if (key.length < 3) continue; // skip very short keys to avoid false matches
-    const val = dictionary[key];
-    // Case-insensitive search
-    const regex = new RegExp(escapeRegex(key), "gi");
-    if (regex.test(result)) {
-      result = result.replace(regex, val[lang]);
+  
+  result = result.replace(masterRegex, (match) => {
+    const val = lowerCaseMap[match.toLowerCase().trim()];
+    if (val) {
       changed = true;
+      return val[lang];
     }
-  }
+    return match;
+  });
   
   return changed ? result : null;
-}
-
-function escapeRegex(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

@@ -136,27 +136,31 @@ export function DOMTranslator({ language }: { language: "hi" | "gu" | "en" }) {
 
     if (language === "en") return; // No observer needed for English
 
+    let timeoutId: NodeJS.Timeout;
     const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        // New nodes added
-        for (const node of mutation.addedNodes) {
-          if (node.nodeType === Node.TEXT_NODE) {
-            translateNode(node as Text, langRef.current);
-          } else if (node.nodeType === Node.ELEMENT_NODE) {
-            const el = node as Element;
-            if (!shouldSkipNode(el)) {
-              translateDOM(el, langRef.current);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        for (const mutation of mutations) {
+          // New nodes added
+          for (const node of mutation.addedNodes) {
+            if (node.nodeType === Node.TEXT_NODE) {
+              translateNode(node as Text, langRef.current);
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+              const el = node as Element;
+              if (!shouldSkipNode(el)) {
+                translateDOM(el, langRef.current);
+              }
+            }
+          }
+          // Text content changed
+          if (mutation.type === "characterData" && mutation.target.nodeType === Node.TEXT_NODE) {
+            const parent = mutation.target.parentElement;
+            if (parent && !parent.hasAttribute(TRANSLATED_ATTR)) {
+              translateNode(mutation.target as Text, langRef.current);
             }
           }
         }
-        // Text content changed
-        if (mutation.type === "characterData" && mutation.target.nodeType === Node.TEXT_NODE) {
-          const parent = mutation.target.parentElement;
-          if (parent && !parent.hasAttribute(TRANSLATED_ATTR)) {
-            translateNode(mutation.target as Text, langRef.current);
-          }
-        }
-      }
+      }, 100); // 100ms debounce
     });
 
     observer.observe(document.body, {
