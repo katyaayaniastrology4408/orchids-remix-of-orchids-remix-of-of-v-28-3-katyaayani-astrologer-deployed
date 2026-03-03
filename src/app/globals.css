@@ -231,3 +231,47 @@
     print-color-adjust: exact !important;
   }
 }
+
+/* Blog content: Muhurat box styling */
+.muhurat-box {
+  margin: 1.5rem 0;
+  padding: 1.25rem 1.5rem;
+  border-radius: 1rem;
+  border-left: 4px solid #ff6b35;
+  background: linear-gradient(135deg, rgba(255,107,53,0.08), rgba(255,140,94,0.04));
+  border: 1px solid rgba(255,107,53,0.25);
+}
+
+.muhurat-box h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ff6b35;
+  margin-bottom: 0.5rem;
+  margin-top: 0;
+}
+
+.muhurat-box p {
+  margin: 0.25rem 0;
+}
+
+.muhurat-box p strong {
+  font-size: 1.3rem;
+  color: #ff6b35;
+}
+
+.dark .muhurat-box {
+  background: linear-gradient(135deg, rgba(255,107,53,0.12), rgba(255,140,94,0.06));
+  border-color: rgba(255,107,53,0.35);
+}
+
+/* Blog prose: lead paragraph */
+.prose p.lead {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  font-weight: 500;
+  color: #5a4f44;
+}
+
+.dark .prose p.lead {
+  color: #c4bdb3;
+}
