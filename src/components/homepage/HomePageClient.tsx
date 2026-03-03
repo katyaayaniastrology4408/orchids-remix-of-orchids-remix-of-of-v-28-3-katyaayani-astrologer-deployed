@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+// Updated at 2026-03-03-T23:02 - Force HMR update
 import { Star, Moon, Sun, Sparkles, Home, Video, ChevronRight, ChevronDown, Calendar, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,7 +13,7 @@ import { useTranslation } from "@/components/GoogleTranslateWidget";
 import Navbar from "@/components/homepage/Navbar";
 import Image from "next/image";
 
-// Re-write to force HMR cache clearing
+// Updated at 2026-03-03-T22:55
 const Footer = dynamic(() => import("@/components/homepage/Footer"), { 
   ssr: true,
   loading: () => <div className="h-[600px] w-full bg-gray-100/5" />
@@ -53,6 +54,7 @@ interface HomePageClientProps {
   initialLatestPosts: LatestPost[];
 }
 
+// Updated at 2026-03-03-T23:06 - Force clean reload to clear HMR cache
 export default function HomePageClient({ initialLatestPosts }: HomePageClientProps) {
   const [mounted, setMounted] = useState(false);
   const { theme } = useTheme();
@@ -60,12 +62,14 @@ export default function HomePageClient({ initialLatestPosts }: HomePageClientPro
   const { user, showAuthModal, showEnquiryModal } = useAuth();
   const [panchangTimes, setPanchangTimes] = useState({ sunrise: "--", sunset: "--" });
   const [panchangApiData, setPanchangApiData] = useState<any>(null);
-    const [hinduCalendar, setHinduCalendar] = useState({ month: "--", tithi: "--", vaara: "--", paksha: "--" });
-    const [dbReviews, setDbReviews] = useState<{ name: string; text: string; rating: number }[]>([]);
-    const [latestPosts, setLatestPosts] = useState<LatestPost[]>(initialLatestPosts);
+  const [hinduCalendar, setHinduCalendar] = useState({ month: "--", tithi: "--", vaara: "--", paksha: "--" });
+  const [dbReviews, setDbReviews] = useState<{ name: string; text: string; rating: number }[]>([]);
+  const [latestPosts, setLatestPosts] = useState<LatestPost[]>(initialLatestPosts);
 
-    useEffect(() => {
-      setMounted(true);
+  useEffect(() => {
+    // Force a small delay to ensure hydration is clean
+    setMounted(true);
+    console.log("HomePageClient hydrated");
 
       // Fetch approved DB reviews (3+ stars)
       fetch('/api/feedback?minRating=3')

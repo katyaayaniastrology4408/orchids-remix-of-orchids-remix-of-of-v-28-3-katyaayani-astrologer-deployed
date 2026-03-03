@@ -63,7 +63,6 @@ export default function Navbar() {
               height={56}
               priority
               loading="eager"
-              fetchPriority="high"
             className="object-contain"
           />
           <span
