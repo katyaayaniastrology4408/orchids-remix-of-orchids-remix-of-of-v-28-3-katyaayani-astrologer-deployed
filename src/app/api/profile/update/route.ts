@@ -28,8 +28,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, dob, tob, pob, phone, gender, address } = await req.json();
-
+    const { name, dob, tob, pob, phone, gender, address, city } = await req.json();
+  
     // 1. Update Supabase Profile
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
@@ -40,7 +40,8 @@ export async function POST(req: Request) {
         pob,
         phone,
         gender,
-        address
+        address,
+        city
       })
       .eq('id', user.id);
 

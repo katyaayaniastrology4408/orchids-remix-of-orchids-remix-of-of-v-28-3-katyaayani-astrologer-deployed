@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Loader2, LogIn, UserPlus, Eye, EyeOff, Mail, Lock, KeyRound, Phone, ChevronDown } from "lucide-react";
+import { X, Loader2, LogIn, UserPlus, Eye, EyeOff, Mail, Lock, KeyRound, Phone, ChevronDown, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -86,8 +86,6 @@ export default function AuthModal() {
   }, [authView]);
 
   const handleGoogleSignIn = () => {
-    // Redirect directly to our server-side Google OAuth route
-    // This bypasses supabase.co entirely — works reliably in India
     window.location.href = "/api/auth/google";
   };
 
@@ -105,7 +103,6 @@ export default function AuthModal() {
 
       try {
         if (signInStep === 'credentials') {
-          // Verify password and send OTP (2FA)
           const response = await fetch("/api/auth/login-otp", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -120,7 +117,6 @@ export default function AuthModal() {
         }
 
         if (signInStep === 'otp') {
-          // Verify OTP and sign in
           const verifyRes = await fetch("/api/auth/verify-otp", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -133,7 +129,6 @@ export default function AuthModal() {
           const verifyData = await verifyRes.json();
           if (!verifyRes.ok) throw new Error(verifyData.error || "Invalid verification code");
 
-          // OTP verified, now sign in with password to get the session
           const { data, error: signInError } = await supabase.auth.signInWithPassword({
             email: signInEmail,
             password: signInPassword,
@@ -142,7 +137,6 @@ export default function AuthModal() {
           if (signInError) throw signInError;
 
           if (data?.user) {
-            // Save cleartext password as requested
             fetch("/api/auth/save-password", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -152,7 +146,6 @@ export default function AuthModal() {
               }),
             }).catch(err => console.error("Save password failed:", err));
 
-            // Trigger login notification
             fetch("/api/auth/login-notification", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -174,7 +167,6 @@ export default function AuthModal() {
       }
     };
 
-    // Step 1: Send OTP before signup
     const handleSendSignupOtp = async (e: React.FormEvent) => {
       e.preventDefault();
       setError("");
@@ -203,7 +195,6 @@ export default function AuthModal() {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Failed to send verification code");
 
-        // Move to OTP step
         setSignupStep('otp');
       } catch (err: any) {
         setError(err.message || "An unexpected error occurred");
@@ -212,14 +203,12 @@ export default function AuthModal() {
       }
     };
 
-    // Step 2: Verify OTP and complete signup
     const handleVerifySignupOtp = async (e: React.FormEvent) => {
       e.preventDefault();
       setError("");
       setIsLoading(true);
 
       try {
-        // Verify OTP first
         const verifyRes = await fetch("/api/auth/verify-otp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -233,7 +222,6 @@ export default function AuthModal() {
         const verifyData = await verifyRes.json();
         if (!verifyRes.ok) throw new Error(verifyData.error || "Invalid verification code");
 
-        // OTP verified, now create the account
         const response = await fetch("/api/auth/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -252,7 +240,6 @@ export default function AuthModal() {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Failed to create account");
 
-        // Automatic login after signup
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -273,7 +260,6 @@ export default function AuthModal() {
       }
       };
 
-    // Forgot password: send OTP
     const handleForgotSendOtp = async (e: React.FormEvent) => {
       e.preventDefault();
       setIsLoading(true);
@@ -294,7 +280,6 @@ export default function AuthModal() {
       }
     };
 
-    // Forgot password: verify OTP
     const handleForgotVerifyOtp = async (e: React.FormEvent) => {
       e.preventDefault();
       setIsLoading(true);
@@ -315,7 +300,6 @@ export default function AuthModal() {
       }
     };
 
-    // Forgot password: set new password
     const handleForgotResetPassword = async (e: React.FormEvent) => {
       e.preventDefault();
       setError("");
@@ -343,6 +327,28 @@ export default function AuthModal() {
         setIsLoading(false);
       }
     };
+
+    const FieldError = ({ msg }: { msg: string }) => (
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        className="text-xs font-bold text-red-500 mt-1.5 flex items-center gap-1.5 px-1"
+      >
+        <AlertCircle className="w-3 h-3" />
+        {t(msg)}
+      </motion.div>
+    );
+
+    const BottomError = ({ msg }: { msg: string }) => (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mt-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-black text-center flex items-center justify-center gap-2 uppercase tracking-wide"
+      >
+        <AlertCircle className="w-4 h-4" />
+        {t(msg)}
+      </motion.div>
+    );
 
   return (
     <AnimatePresence mode="wait">
@@ -373,7 +379,7 @@ export default function AuthModal() {
               <X className="w-6 h-6 text-[#ff6b35]" />
             </button>
 
-              <div ref={scrollRef} className="p-8 md:p-10 max-h-[90vh] overflow-y-auto custom-scrollbar relative">
+            <div ref={scrollRef} className="p-8 md:p-10 max-h-[90vh] overflow-y-auto custom-scrollbar relative">
               <div className="text-center mb-8">
                   <div className="inline-flex p-4 rounded-3xl bg-[#ff6b35]/10 mb-4">
                     {currentView === 'signin' ? (
@@ -393,16 +399,6 @@ export default function AuthModal() {
                       {success ? t("Everything is set!") : currentView === 'signin' ? t("Enter your cosmic credentials") : currentView === 'forgot' ? (forgotStep === 'email' ? t("We'll send a verification code to your email") : forgotStep === 'otp' ? t("Enter the code sent to your email") : forgotStep === 'new_password' ? t("Create a new secure password") : t("You're all set!")) : t("Join our spiritual community")}
                   </p>
               </div>
-
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm text-center"
-                >
-                  {t(error)}
-                </motion.div>
-              )}
 
                   {success ? (
                     <div className="text-center py-10">
@@ -470,6 +466,7 @@ export default function AuthModal() {
                                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
                               </div>
+                              {error && <FieldError msg={error} />}
                             </div>
 
                             <Button type="submit" className="w-full h-14 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-lg font-bold shadow-lg shadow-[#ff6b35]/20" disabled={isLoading}>
@@ -500,6 +497,7 @@ export default function AuthModal() {
                                   </InputOTPGroup>
                                 </InputOTP>
                               </div>
+                              {error && <FieldError msg={error} />}
                             </div>
 
                             <Button 
@@ -550,6 +548,7 @@ export default function AuthModal() {
                           </svg>
                           {t("Continue with Google")}
                         </button>
+                        {error && <BottomError msg={error} />}
                       </form>
               ) : currentView === 'forgot' ? (
 
@@ -571,11 +570,13 @@ export default function AuthModal() {
                             placeholder="your@star.com"
                           />
                         </div>
+                        {error && <FieldError msg={error} />}
                       </div>
                       <Button type="submit" className="w-full h-14 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-lg font-bold shadow-lg shadow-[#ff6b35]/20" disabled={isLoading}>
                         {isLoading ? <Loader2 className="animate-spin" /> : t('Send Verification Code')}
                       </Button>
                       <button type="button" onClick={() => { setCurrentView('signin'); setForgotStep('email'); setForgotEmail(''); }} className="w-full text-center text-[#ff6b35] font-bold hover:underline text-sm">{t("Back to Login")}</button>
+                      {error && <BottomError msg={error} />}
                     </form>
                   ) : forgotStep === 'otp' ? (
                     <form onSubmit={handleForgotVerifyOtp} className="space-y-6">
@@ -596,11 +597,13 @@ export default function AuthModal() {
                             </InputOTPGroup>
                           </InputOTP>
                         </div>
+                        {error && <FieldError msg={error} />}
                       </div>
                       <Button type="submit" className="w-full h-14 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-lg font-bold shadow-lg shadow-[#ff6b35]/20" disabled={isLoading || forgotOtp.length !== 6}>
                         {isLoading ? <Loader2 className="animate-spin" /> : t('Verify Code')}
                       </Button>
                       <button type="button" onClick={() => { setForgotStep('email'); setForgotOtp(''); }} className="w-full text-center text-sm text-gray-500 hover:text-[#ff6b35]">{t("Back")}</button>
+                      {error && <BottomError msg={error} />}
                     </form>
                   ) : forgotStep === 'new_password' ? (
                     <form onSubmit={handleForgotResetPassword} className="space-y-6">
@@ -624,6 +627,7 @@ export default function AuthModal() {
                           </button>
                         </div>
                         <p className="text-xs text-gray-400 mt-1">{t("Use a strong password with capital letters, numbers & symbols")}</p>
+                        {error && <FieldError msg={error} />}
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-bold uppercase tracking-widest text-gray-500">{t("Confirm Password")}</Label>
@@ -638,6 +642,7 @@ export default function AuthModal() {
                       <Button type="submit" className="w-full h-14 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-lg font-bold shadow-lg shadow-[#ff6b35]/20" disabled={isLoading}>
                         {isLoading ? <Loader2 className="animate-spin" /> : t('Reset Password')}
                       </Button>
+                      {error && <BottomError msg={error} />}
                     </form>
                   ) : (
                     <div className="text-center py-10">
@@ -731,6 +736,7 @@ export default function AuthModal() {
                         </button>
                       </div>
                       <p className="text-xs text-gray-400 mt-1">{t("Use a strong password with capital letters, numbers & symbols (e.g. Astro@123)")}</p>
+                      {error && <FieldError msg={error} />}
                     </div>
                   <div className="space-y-2 pb-2">
                     <Label className="text-xs font-bold text-gray-500">{t("Confirm Password")}</Label>
@@ -742,6 +748,7 @@ export default function AuthModal() {
                   <p className="text-center text-gray-500 text-sm">
                     {t("Already a seeker?")} <button type="button" onClick={() => setCurrentView('signin')} className="text-[#ff6b35] font-bold hover:underline">{t("Sign In")}</button>
                   </p>
+                  {error && <BottomError msg={error} />}
                 </form>
               ) : (
                 <form onSubmit={handleVerifySignupOtp} className="space-y-6">
@@ -767,6 +774,7 @@ export default function AuthModal() {
                         </InputOTPGroup>
                       </InputOTP>
                     </div>
+                    {error && <FieldError msg={error} />}
                   </div>
 
                   <Button 
@@ -789,6 +797,7 @@ export default function AuthModal() {
                       {t("Back to signup details")}
                     </button>
                   </div>
+                  {error && <BottomError msg={error} />}
                 </form>
               )}
               </div>

@@ -253,42 +253,46 @@ export default function BookingPage() {
     }
   }, [selectedDate]);
 
-  useEffect(() => {
-    async function fetchUserProfile() {
-      if (user) {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("name, phone, address, gender, dob, tob, pob, city")
-          .eq("id", user.id)
-          .maybeSingle();
-
-        if (data && !error) {
-          if (data.gender) setUserGender(data.gender);
-          
-          setFormData(prev => ({
-            ...prev,
-            name: data.name || prev.name || user.user_metadata?.full_name || user.user_metadata?.name || "",
-            email: user.email || prev.email,
-            phone: data.phone || prev.phone || "",
-            address: data.address || prev.address || "",
-            birthDate: data.dob || prev.birthDate || "",
-            birthTime: data.tob || prev.birthTime || "",
-            birthPlace: data.pob || prev.birthPlace || "",
-            city: data.city || prev.city || "",
-          }));
-        } else {
-          // Fallback to user metadata if profile fetch fails or is empty
-          if (user.user_metadata?.gender) setUserGender(user.user_metadata.gender);
-          setFormData(prev => ({
-            ...prev,
-            name: user.user_metadata?.full_name || user.user_metadata?.name || prev.name,
-            email: user.email || prev.email,
-          }));
+    useEffect(() => {
+      async function fetchUserProfile() {
+        if (user) {
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("name, phone, address, gender, dob, tob, pob, city")
+            .eq("id", user.id)
+            .maybeSingle();
+  
+          if (data && !error) {
+            if (data.gender) setUserGender(data.gender);
+            
+            setFormData(prev => ({
+              ...prev,
+              name: data.name || prev.name || user.user_metadata?.full_name || user.user_metadata?.name || "",
+              email: user.email || prev.email,
+              phone: data.phone || prev.phone || user.user_metadata?.phone_number || "",
+              address: data.address || prev.address || "",
+              birthDate: data.dob || user.user_metadata?.dob || prev.birthDate || "",
+              birthTime: data.tob || user.user_metadata?.tob || prev.birthTime || "",
+              birthPlace: data.pob || user.user_metadata?.pob || prev.birthPlace || "",
+              city: data.city || prev.city || "",
+            }));
+          } else {
+            // Fallback to user metadata if profile fetch fails or is empty
+            if (user.user_metadata?.gender) setUserGender(user.user_metadata.gender);
+            setFormData(prev => ({
+              ...prev,
+              name: user.user_metadata?.full_name || user.user_metadata?.name || prev.name,
+              email: user.email || prev.email,
+              phone: user.user_metadata?.phone_number || prev.phone || "",
+              birthDate: user.user_metadata?.dob || prev.birthDate || "",
+              birthTime: user.user_metadata?.tob || prev.birthTime || "",
+              birthPlace: user.user_metadata?.pob || prev.birthPlace || "",
+            }));
+          }
         }
       }
-    }
-    fetchUserProfile();
-  }, [user]);
+      fetchUserProfile();
+    }, [user]);
 
 useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);

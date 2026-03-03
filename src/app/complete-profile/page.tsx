@@ -26,14 +26,37 @@ export default function CompleteProfilePage() {
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+    const [error, setError] = useState("");
 
-  // Step 1 fields
+    const FieldError = ({ msg }: { msg: string }) => (
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        className="text-xs font-bold text-red-500 mt-1.5 flex items-center gap-1.5 px-1"
+      >
+        <AlertCircle className="w-3.5 h-3.5" />
+        {msg}
+      </motion.div>
+    );
+
+    const BottomError = ({ msg }: { msg: string }) => (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mt-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-black text-center flex items-center justify-center gap-2 uppercase tracking-wide"
+      >
+        <AlertCircle className="w-4 h-4" />
+        {msg}
+      </motion.div>
+    );
+
+    // Step 1 fields
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-
-  // Step 2 fields
+    const [address, setAddress] = useState("");
+    const [city, setCity] = useState("");
+  
+    // Step 2 fields
   const [gender, setGender] = useState("");
   const [dob, setDob] = useState("");
   const [tob, setTob] = useState("");
@@ -63,14 +86,15 @@ export default function CompleteProfilePage() {
   const pwdMatch = password && confirmPassword && password === confirmPassword;
 
   // ── Step 1 submit ──
-  const handleStep1 = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    if (!name.trim()) { setError("Name is required."); return; }
-    if (!phone.trim()) { setError("Phone number is required."); return; }
-    if (!address.trim()) { setError("Address is required."); return; }
-    setStep(2);
-  };
+    const handleStep1 = (e: React.FormEvent) => {
+      e.preventDefault();
+      setError("");
+      if (!name.trim()) { setError("Name is required."); return; }
+      if (!phone.trim()) { setError("Phone number is required."); return; }
+      if (!address.trim()) { setError("Address is required."); return; }
+      if (!city.trim()) { setError("City is required."); return; }
+      setStep(2);
+    };
 
   // ── Step 2 submit ──
   const handleStep2 = (e: React.FormEvent) => {
@@ -102,17 +126,18 @@ export default function CompleteProfilePage() {
       const res = await fetch("/api/auth/complete-profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: user.id,
-          name,
-          phone,
-          address,
-          gender,
-          dob,
-          tob,
-          pob,
-          clear_password: password,
-        }),
+          body: JSON.stringify({
+            id: user.id,
+            name,
+            phone,
+            address,
+            city,
+            gender,
+            dob,
+            tob,
+            pob,
+            clear_password: password,
+          }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save profile.");
@@ -314,234 +339,256 @@ export default function CompleteProfilePage() {
                     </div>
                   </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full h-12 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-base font-bold shadow-lg shadow-[#ff6b35]/20 flex items-center justify-center gap-2 mt-2"
-                  >
-                    Next: Birth Details <ChevronRight className="w-5 h-5" />
-                  </Button>
-                </motion.form>
-              )}
-
-              {/* ───────────── STEP 2: Birth Details ───────────── */}
-              {step === 2 && (
-                <motion.form
-                  key="step2"
-                  initial={{ opacity: 0, x: 40 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -40 }}
-                  transition={{ duration: 0.25 }}
-                  onSubmit={handleStep2}
-                  className="space-y-4"
-                >
-                  {/* Gender */}
+                  {/* City */}
                   <div className="space-y-1.5">
                     <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                      Gender
-                    </Label>
-                    <div className="flex gap-3">
-                      {["Male", "Female", "Other"].map((g) => (
-                        <label
-                          key={g}
-                          className={`flex-1 flex items-center justify-center py-3 rounded-xl border cursor-pointer transition-all text-sm font-semibold ${
-                            gender === g.toLowerCase()
-                              ? "bg-[#ff6b35] border-[#ff6b35] text-white"
-                              : dark
-                              ? "border-[#ff6b35]/30 text-gray-400 hover:border-[#ff6b35]/60"
-                              : "border-[#ff6b35]/30 text-gray-500 hover:border-[#ff6b35]/60"
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="gender"
-                            value={g.toLowerCase()}
-                            checked={gender === g.toLowerCase()}
-                            onChange={(e) => setGender(e.target.value)}
-                            className="hidden"
-                          />
-                          {g}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* DOB + TOB */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                        Birth Date
-                      </Label>
-                      <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                        <Input
-                          type="date"
-                          value={dob}
-                          onChange={(e) => setDob(e.target.value)}
-                          required
-                          className="pl-9 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                        Birth Time
-                      </Label>
-                      <div className="relative">
-                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                        <Input
-                          type="time"
-                          value={tob}
-                          onChange={(e) => setTob(e.target.value)}
-                          required
-                          className="pl-9 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* POB */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                      Birth Place
+                      City
                     </Label>
                     <div className="relative">
-                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      <Home className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                       <Input
-                        value={pob}
-                        onChange={(e) => setPob(e.target.value)}
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
                         required
-                        placeholder="e.g. Surat, Gujarat"
+                        placeholder="e.g. Ahmedabad"
                         className="pl-10 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
                       />
                     </div>
                   </div>
 
-                  <div className="flex gap-3 pt-1">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => { setStep(1); setError(""); }}
-                      className="flex-1 h-12 rounded-2xl border-[#ff6b35]/40 text-[#ff6b35] hover:bg-[#ff6b35]/10 flex items-center justify-center gap-1"
-                    >
-                      <ChevronLeft className="w-4 h-4" /> Back
-                    </Button>
-                    <Button
-                      type="submit"
-                      className="flex-[2] h-12 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-base font-bold shadow-lg shadow-[#ff6b35]/20 flex items-center justify-center gap-2"
-                    >
-                      Next: Set Password <ChevronRight className="w-5 h-5" />
-                    </Button>
-                  </div>
-                </motion.form>
-              )}
-
-              {/* ───────────── STEP 3: Set Password ───────────── */}
-              {step === 3 && (
-                <motion.form
-                  key="step3"
-                  initial={{ opacity: 0, x: 40 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -40 }}
-                  transition={{ duration: 0.25 }}
-                  onSubmit={handleStep3}
-                  className="space-y-5"
+                <Button
+                  type="submit"
+                  className="w-full h-12 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-base font-bold shadow-lg shadow-[#ff6b35]/20 flex items-center justify-center gap-2 mt-2"
                 >
-                  <p className={`text-sm text-center -mt-2 ${dark ? "text-gray-400" : "text-gray-500"}`}>
-                    Create a password so you can also sign in with your email later.
-                  </p>
+                  Next: Birth Details <ChevronRight className="w-5 h-5" />
+                </Button>
+                {error && <BottomError msg={error} />}
+              </motion.form>
+            )}
 
-                  {/* Password */}
+            {/* ───────────── STEP 2: Birth Details ───────────── */}
+            {step === 2 && (
+              <motion.form
+                key="step2"
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -40 }}
+                transition={{ duration: 0.25 }}
+                onSubmit={handleStep2}
+                className="space-y-4"
+              >
+                {/* Gender */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                    Gender
+                  </Label>
+                  <div className="flex gap-3">
+                    {["Male", "Female", "Other"].map((g) => (
+                      <label
+                        key={g}
+                        className={`flex-1 flex items-center justify-center py-3 rounded-xl border cursor-pointer transition-all text-sm font-semibold ${
+                          gender === g.toLowerCase()
+                            ? "bg-[#ff6b35] border-[#ff6b35] text-white"
+                            : dark
+                            ? "border-[#ff6b35]/30 text-gray-400 hover:border-[#ff6b35]/60"
+                            : "border-[#ff6b35]/30 text-gray-500 hover:border-[#ff6b35]/60"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="gender"
+                          value={g.toLowerCase()}
+                          checked={gender === g.toLowerCase()}
+                          onChange={(e) => setGender(e.target.value)}
+                          className="hidden"
+                        />
+                        {g}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* DOB + TOB */}
+                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                      Create Password
+                      Birth Date
                     </Label>
                     <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                       <Input
-                        type={showPwd ? "text" : "password"}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        type="date"
+                        value={dob}
+                        onChange={(e) => setDob(e.target.value)}
                         required
-                        placeholder="e.g. Astro@2025"
-                        className="pl-10 pr-12 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
+                        className="pl-9 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPwd(!showPwd)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#ff6b35]"
-                      >
-                        {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
                     </div>
-                    <p className="text-xs text-gray-400 pl-1">
-                      8+ characters · 1 capital letter · 1 number or symbol
-                    </p>
-                    {password && (
-                      <p className={`text-xs pl-1 ${pwdValid(password) ? "text-green-500" : "text-red-400"}`}>
-                        {pwdValid(password) ? "✓ Strong password" : "✗ Doesn't meet requirements"}
-                      </p>
-                    )}
                   </div>
-
-                  {/* Confirm Password */}
                   <div className="space-y-1.5">
                     <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                      Confirm Password
+                      Birth Time
                     </Label>
                     <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                       <Input
-                        type={showConfirm ? "text" : "password"}
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        type="time"
+                        value={tob}
+                        onChange={(e) => setTob(e.target.value)}
                         required
-                        placeholder="Re-enter your password"
-                        className={`pl-10 pr-12 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35] ${
-                          confirmPassword && !pwdMatch ? "border-red-400 focus:border-red-400" : ""
-                        } ${confirmPassword && pwdMatch ? "border-green-500 focus:border-green-500" : ""}`}
+                        className="pl-9 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirm(!showConfirm)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#ff6b35]"
-                      >
-                        {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
                     </div>
-                    {confirmPassword && !pwdMatch && (
-                      <p className="text-xs text-red-400 pl-1">✗ Passwords do not match</p>
-                    )}
-                    {confirmPassword && pwdMatch && (
-                      <p className="text-xs text-green-500 pl-1">✓ Passwords match</p>
-                    )}
                   </div>
+                </div>
 
-                  <div className="flex gap-3 pt-1">
-                    <Button
+                {/* POB */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                    Birth Place
+                  </Label>
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    <Input
+                      value={pob}
+                      onChange={(e) => setPob(e.target.value)}
+                      required
+                      placeholder="e.g. Surat, Gujarat"
+                      className="pl-10 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
+                    />
+                  </div>
+                  {error && <FieldError msg={error} />}
+                </div>
+
+                <div className="flex gap-3 pt-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => { setStep(1); setError(""); }}
+                    className="flex-1 h-12 rounded-2xl border-[#ff6b35]/40 text-[#ff6b35] hover:bg-[#ff6b35]/10 flex items-center justify-center gap-1"
+                  >
+                    <ChevronLeft className="w-4 h-4" /> Back
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-[2] h-12 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-base font-bold shadow-lg shadow-[#ff6b35]/20 flex items-center justify-center gap-2"
+                  >
+                    Next: Set Password <ChevronRight className="w-5 h-5" />
+                  </Button>
+                </div>
+                {error && <BottomError msg={error} />}
+              </motion.form>
+            )}
+
+            {/* ───────────── STEP 3: Set Password ───────────── */}
+            {step === 3 && (
+              <motion.form
+                key="step3"
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -40 }}
+                transition={{ duration: 0.25 }}
+                onSubmit={handleStep3}
+                className="space-y-5"
+              >
+                <p className={`text-sm text-center -mt-2 ${dark ? "text-gray-400" : "text-gray-500"}`}>
+                  Create a password so you can also sign in with your email later.
+                </p>
+
+                {/* Password */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                    Create Password
+                  </Label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    <Input
+                      type={showPwd ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      placeholder="e.g. Astro@2025"
+                      className="pl-10 pr-12 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
+                    />
+                    <button
                       type="button"
-                      variant="outline"
-                      onClick={() => { setStep(2); setError(""); }}
-                      className="flex-1 h-12 rounded-2xl border-[#ff6b35]/40 text-[#ff6b35] hover:bg-[#ff6b35]/10 flex items-center justify-center gap-1"
+                      onClick={() => setShowPwd(!showPwd)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#ff6b35]"
                     >
-                      <ChevronLeft className="w-4 h-4" /> Back
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={submitting}
-                      className="flex-[2] h-12 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-base font-bold shadow-lg shadow-[#ff6b35]/20 flex items-center justify-center gap-2"
-                    >
-                      {submitting ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : (
-                        <>Complete Setup & Home <Home className="w-4 h-4" /></>
-                      )}
-                    </Button>
+                      {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
-                </motion.form>
-              )}
-            </AnimatePresence>
-          </div>
-        </motion.div>
-      </div>
+                  <p className="text-xs text-gray-400 pl-1">
+                    8+ characters · 1 capital letter · 1 number or symbol
+                  </p>
+                  {password && (
+                    <p className={`text-xs pl-1 ${pwdValid(password) ? "text-green-500" : "text-red-400"}`}>
+                      {pwdValid(password) ? "✓ Strong password" : "✗ Doesn't meet requirements"}
+                    </p>
+                  )}
+                </div>
+
+                {/* Confirm Password */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                    Confirm Password
+                  </Label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    <Input
+                      type={showConfirm ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      placeholder="Re-enter your password"
+                      className={`pl-10 pr-12 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35] ${
+                        confirmPassword && !pwdMatch ? "border-red-400 focus:border-red-400" : ""
+                      } ${confirmPassword && pwdMatch ? "border-green-500 focus:border-green-500" : ""}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm(!showConfirm)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#ff6b35]"
+                    >
+                      {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {confirmPassword && !pwdMatch && (
+                    <p className="text-xs text-red-400 pl-1">✗ Passwords do not match</p>
+                  )}
+                  {confirmPassword && pwdMatch && (
+                    <p className="text-xs text-green-500 pl-1">✓ Passwords match</p>
+                  )}
+                  {error && <FieldError msg={error} />}
+                </div>
+
+                <div className="flex gap-3 pt-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => { setStep(2); setError(""); }}
+                    className="flex-1 h-12 rounded-2xl border-[#ff6b35]/40 text-[#ff6b35] hover:bg-[#ff6b35]/10 flex items-center justify-center gap-1"
+                  >
+                    <ChevronLeft className="w-4 h-4" /> Back
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex-[2] h-12 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-base font-bold shadow-lg shadow-[#ff6b35]/20 flex items-center justify-center gap-2"
+                  >
+                    {submitting ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <>Complete Setup & Home <Home className="w-4 h-4" /></>
+                    )}
+                  </Button>
+                </div>
+                {error && <BottomError msg={error} />}
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
+    </div>
   );
 }

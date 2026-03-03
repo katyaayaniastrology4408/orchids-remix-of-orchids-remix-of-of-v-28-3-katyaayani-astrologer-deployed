@@ -41,7 +41,8 @@ export default function ProfilePage() {
     pob: "",
     phone: "",
     gender: "",
-    address: ""
+    address: "",
+    city: ""
   });
   const router = useRouter();
   const { theme } = useTheme();
@@ -204,18 +205,19 @@ export default function ProfilePage() {
           console.error("Error fetching profile:", profileError);
         }
 
-          if (profileData) {
-            setProfile(profileData);
-            setEditForm({
-              name: profileData.name || user.user_metadata?.full_name || "",
-              dob: profileData.dob || user.user_metadata?.dob || "",
-              tob: profileData.tob || user.user_metadata?.tob || "",
-              pob: profileData.pob || user.user_metadata?.pob || "",
-              phone: profileData.phone || user.user_metadata?.phone_number || "",
-              gender: profileData.gender || user.user_metadata?.gender || "",
-              address: profileData.address || ""
-            });
-          }
+            if (profileData) {
+              setProfile(profileData);
+              setEditForm({
+                name: profileData.name || user.user_metadata?.full_name || "",
+                dob: profileData.dob || user.user_metadata?.dob || "",
+                tob: profileData.tob || user.user_metadata?.tob || "",
+                pob: profileData.pob || user.user_metadata?.pob || "",
+                phone: profileData.phone || user.user_metadata?.phone_number || "",
+                gender: profileData.gender || user.user_metadata?.gender || "",
+                address: profileData.address || "",
+                city: profileData.city || ""
+              });
+            }
       } catch (err) {
         console.error("Unexpected error:", err);
       } finally {
@@ -532,15 +534,23 @@ export default function ProfilePage() {
                             onChange={(e) => setEditForm({...editForm, pob: e.target.value})}
                           />
                         </div>
-                        <div className="space-y-2 sm:space-y-3 sm:col-span-1">
-                          <Label className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-60 ml-2">{t("Address")}</Label>
-                          <Input 
-                            className="h-12 sm:h-14 rounded-xl sm:rounded-2xl border-2 focus:border-[#ff6b35]"
-                            value={editForm.address}
-                            onChange={(e) => setEditForm({...editForm, address: e.target.value})}
-                          />
+                          <div className="space-y-2 sm:space-y-3 sm:col-span-1">
+                            <Label className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-60 ml-2">{t("Address")}</Label>
+                            <Input 
+                              className="h-12 sm:h-14 rounded-xl sm:rounded-2xl border-2 focus:border-[#ff6b35]"
+                              value={editForm.address}
+                              onChange={(e) => setEditForm({...editForm, address: e.target.value})}
+                            />
+                          </div>
+                          <div className="space-y-2 sm:space-y-3 sm:col-span-1">
+                            <Label className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-60 ml-2">{t("City")}</Label>
+                            <Input 
+                              className="h-12 sm:h-14 rounded-xl sm:rounded-2xl border-2 focus:border-[#ff6b35]"
+                              value={editForm.city}
+                              onChange={(e) => setEditForm({...editForm, city: e.target.value})}
+                            />
+                          </div>
                         </div>
-                      </div>
                     <Button type="submit" className="w-full bg-[#ff6b35] hover:bg-[#ff8c5e] h-12 sm:h-16 rounded-xl sm:rounded-2xl text-white text-sm sm:text-base font-black uppercase tracking-widest shadow-xl shadow-[#ff6b35]/30">
                       {t("Save Cosmic Identity")}
                     </Button>
