@@ -7,37 +7,47 @@ export const dynamic = 'force-dynamic' ;
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { email, password, type } = body || {};
-    let adminEmail = process.env.ADMIN_EMAIL;
+      const { email, password, type } = body || {};
+      let adminEmail = process.env.ADMIN_EMAIL;
 
-    // Check DB if env is missing
-    if (!adminEmail) {
-      const { data: setting } = await supabase
+      // Also check DB (in case env is stale or not loaded)
+      const { data: emailSetting } = await supabase
         .from('admin_settings')
         .select('value')
         .eq('key', 'admin_email')
         .single();
-      adminEmail = setting?.value;
-    }
+      const dbEmail = emailSetting?.value;
 
-    if (email !== adminEmail) {
-      return NextResponse.json({ error: "Invalid email" }, { status: 401 });
-    }
+      // Accept if email matches env OR DB
+      const emailLower = (email || "").trim().toLowerCase();
+      const emailMatches =
+        (adminEmail && emailLower === adminEmail.trim().toLowerCase()) ||
+        (dbEmail && emailLower === dbEmail.trim().toLowerCase());
+
+      if (!emailMatches) {
+        return NextResponse.json({ error: "Invalid email" }, { status: 401 });
+      }
+
+      // Use resolved email for rest of checks
+      if (!adminEmail) adminEmail = dbEmail;
 
     // If login, verify password first
     if (type === "login" || type === "password_change" || type === "settings_update") {
-      const { data: adminSettings, error } = await supabase
+      const { data: adminSettings } = await supabase
         .from('admin_settings')
         .select('value')
         .eq('key', 'admin_password')
         .single();
 
-      let actualPassword = process.env.ADMIN_PASSWORD || 'admin123';
-      if (!error && adminSettings) {
-        actualPassword = adminSettings.value;
-      }
+      const envPassword = process.env.ADMIN_PASSWORD;
+      const dbPassword = adminSettings?.value;
 
-      if (!password || password !== actualPassword) {
+      // Accept if password matches env OR DB
+      const passwordMatches =
+        (envPassword && password === envPassword) ||
+        (dbPassword && password === dbPassword);
+
+      if (!password || !passwordMatches) {
         return NextResponse.json({ error: "Invalid password" }, { status: 401 });
       }
     }

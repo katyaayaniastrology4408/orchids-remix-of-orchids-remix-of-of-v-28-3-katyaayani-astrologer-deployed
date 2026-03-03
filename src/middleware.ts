@@ -160,13 +160,25 @@ export async function middleware(req: NextRequest) {
     if (pathname.startsWith("/api/admin")) {
       // Always allow these without JWT (they are part of the login flow)
       const publicAdminRoutes = [
-        "/api/admin/health-check",
-        "/api/admin/auth/send-otp",
-        "/api/admin/auth/verify-otp",
-        "/api/admin/auth/forgot-password",
-        "/api/admin/auth/logout",
-      ];
-      if (!publicAdminRoutes.includes(pathname)) {
+          "/api/admin/health-check",
+          "/api/admin/auth/send-otp",
+          "/api/admin/auth/verify-otp",
+          "/api/admin/auth/forgot-password",
+          "/api/admin/auth/logout",
+          "/api/admin/auth",
+        ];
+
+        // Public GET routes (read-only data used by frontend pages)
+        const isPublicGet = req.method === "GET" && (
+          pathname === "/api/admin/seo" ||
+          pathname === "/api/admin/site-settings" ||
+          pathname === "/api/admin/pricing" ||
+          pathname === "/api/admin/branding"
+        );
+
+        // Public POST routes (data written by frontend for all visitors)
+        const isPublicPost = req.method === "POST" && pathname === "/api/admin/analytics";
+      if (!publicAdminRoutes.includes(pathname) && !isPublicGet && !isPublicPost) {
         const jwtCookie = req.cookies.get("admin-jwt")?.value;
         const isValid = jwtCookie ? await verifyAdminJWT(jwtCookie) : false;
 
