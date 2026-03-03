@@ -9,16 +9,18 @@ export async function GET(req: Request) {
   }
 
   const origin = req.headers.get("origin") || req.headers.get("referer");
-  const host = req.headers.get("host") || "www.katyaayaniastrologer.com";
-  
-  // Dynamic base URL detection
-  // Prioritize the current host if we're on localhost to allow testing.
-  // Otherwise use NEXT_PUBLIC_APP_URL or detected host.
-  const appUrl = host.includes("localhost") 
-    ? `http://${host}` 
-    : (process.env.NEXT_PUBLIC_APP_URL || `https://${host}`);
-  
-  const redirectUri = `${appUrl}/api/auth/google/callback`;
+    const host = req.headers.get("host") || "www.katyaayaniastrologer.com";
+    
+    // Improved local detection including IP addresses (for mobile testing)
+    const isLocal = host.includes("localhost") || 
+                    host.startsWith("192.168.") || 
+                    host.startsWith("10.") || 
+                    host.startsWith("172.") || 
+                    host.includes("127.0.0.1");
+    
+    const protocol = isLocal ? "http" : "https";
+    const appUrl = isLocal ? `${protocol}://${host}` : (process.env.NEXT_PUBLIC_APP_URL || `https://${host}`);
+    const redirectUri = `${appUrl}/api/auth/google/callback`;
 
   // Store a random state in the redirect URL for CSRF protection
   const state = Math.random().toString(36).substring(2, 18);

@@ -43,6 +43,7 @@ export default function GalleryPanel({ isDark, t }: { isDark: boolean; t: (key: 
   const [success, setSuccess] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ title: "", description: "" });
+  const [searchQuery, setSearchTerm] = useState("");
   
   const [newImage, setNewImage] = useState({
     title: "",
@@ -192,6 +193,11 @@ export default function GalleryPanel({ isDark, t }: { isDark: boolean; t: (key: 
     }
   };
 
+  const filteredImages = images.filter(img => 
+    img.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    img.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -295,24 +301,37 @@ export default function GalleryPanel({ isDark, t }: { isDark: boolean; t: (key: 
         {/* Gallery Grid */}
         <Card className={`lg:col-span-2 ${isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}`}>
           <CardHeader>
-            <CardTitle className="text-[#ff6b35] flex items-center gap-2">
-              <ImageIcon className="w-5 h-5" /> {t("Current Pictures")}
-            </CardTitle>
-            <CardDescription>{images.length} {t("images indexed")}</CardDescription>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <CardTitle className="text-[#ff6b35] flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5" /> {t("Current Pictures")}
+                </CardTitle>
+                <CardDescription>{images.length} {t("images indexed")}</CardDescription>
+              </div>
+              <div className="relative w-full sm:w-48">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <Input 
+                  placeholder={t("Search...")} 
+                  value={searchQuery}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className={`pl-8 h-8 text-xs ${isDark ? 'bg-white/5 border-[#ff6b35]/20' : 'bg-white border-[#ff6b35]/20'}`}
+                />
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="py-20 text-center">
                 <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#ff6b35]" />
               </div>
-            ) : images.length === 0 ? (
+            ) : filteredImages.length === 0 ? (
               <div className="py-20 text-center text-muted-foreground italic">
-                {t("No pictures in gallery yet.")}
+                {searchQuery ? t("No matching pictures found.") : t("No pictures in gallery yet.")}
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <AnimatePresence>
-                  {images.map((img) => (
+                  {filteredImages.map((img) => (
                     <motion.div 
                       key={img.id}
                       initial={{ opacity: 0, scale: 0.9 }}
@@ -342,13 +361,23 @@ export default function GalleryPanel({ isDark, t }: { isDark: boolean; t: (key: 
                               >
                                 <Edit3 className="w-3.5 h-3.5" />
                               </button>
-                              <button 
-                                onClick={() => handleDelete(img.id, img.image_url)}
-                                className="p-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
+                                <button 
+                                  onClick={() => handleDelete(img.id, img.image_url)}
+                                  className="p-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                                <button 
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(img.image_url);
+                                    setSuccess("Image URL copied to clipboard!");
+                                  }}
+                                  className="p-1.5 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors"
+                                  title="Copy URL"
+                                >
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                           </div>
                           
                           {editingId === img.id ? (

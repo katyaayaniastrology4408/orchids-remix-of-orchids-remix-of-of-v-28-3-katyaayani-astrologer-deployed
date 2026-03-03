@@ -3759,7 +3759,7 @@ function SidebarContent({ activeTab, setActiveTab, handleLogout, isDark, t }: {
                   <NavItem icon={<Sun className="w-4 h-4" />} label={t("Daily Rashifal")} active={activeTab === "rashifal"} onClick={() => setActiveTab("rashifal")} isDark={isDark} />
                 <NavItem icon={<Calendar className="w-4 h-4" />} label={t("Weekly Rashifal")} active={activeTab === "weekly-rashifal"} onClick={() => setActiveTab("weekly-rashifal")} isDark={isDark} />
               <NavItem icon={<FileText className="w-4 h-4" />} label={t("Blog")} active={activeTab === "blog"} onClick={() => setActiveTab("blog")} isDark={isDark} />
-              <NavItem icon={<ImageIcon className="w-4 h-4" />} label={t("Pictures")} active={activeTab === "gallery"} onClick={() => setActiveTab("gallery")} isDark={isDark} />
+                <NavItem icon={<ImageIcon className="w-4 h-4" />} label={t("Gallery")} active={activeTab === "gallery"} onClick={() => setActiveTab("gallery")} isDark={isDark} />
                     <NavItem icon={<SearchIcon className="w-4 h-4" />} label={t("SEO Manager")} active={activeTab === "seo"} onClick={() => setActiveTab("seo")} isDark={isDark} />
                   <NavItem icon={<Tag className="w-4 h-4" />} label={t("Keywords")} active={activeTab === "keywords"} onClick={() => setActiveTab("keywords")} isDark={isDark} />
                   <NavItem icon={<BarChart3 className="w-4 h-4" />} label={t("Analytics")} active={activeTab === "analytics"} onClick={() => setActiveTab("analytics")} isDark={isDark} />
