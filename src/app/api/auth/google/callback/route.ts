@@ -14,17 +14,23 @@ export async function GET(req: Request) {
   const code = url.searchParams.get("code");
   const error = url.searchParams.get("error");
 
-    const host = req.headers.get("host") || "www.katyaayaniastrologer.com";
+    // Use X-Forwarded headers if behind a proxy, otherwise use Host header
+    const forwardedHost = req.headers.get("x-forwarded-host");
+    const forwardedProto = req.headers.get("x-forwarded-proto") || "https";
+    const host = forwardedHost || req.headers.get("host") || "www.katyaayaniastrologer.com";
     
-    // Improved local detection including IP addresses (for mobile testing)
+    // Robust local detection
     const isLocal = host.includes("localhost") || 
+                    host.includes("127.0.0.1") || 
                     host.startsWith("192.168.") || 
                     host.startsWith("10.") || 
-                    host.startsWith("172.") || 
-                    host.includes("127.0.0.1");
+                    host.startsWith("172.");
     
-    const protocol = isLocal ? "http" : "https";
-    const appUrl = isLocal ? `${protocol}://${host}` : (process.env.NEXT_PUBLIC_APP_URL || `https://${host}`);
+    // In production, ALWAYS prefer the configured APP_URL to avoid redirect mismatches
+    // Unless we are explicitly on a local testing domain
+    const appUrl = (process.env.NODE_ENV === "production" && !isLocal)
+      ? (process.env.NEXT_PUBLIC_APP_URL || `https://${host}`)
+      : `${isLocal ? "http" : forwardedProto}://${host}`;
 
   if (error || !code) {
     return NextResponse.redirect(`${appUrl}/signin?error=${encodeURIComponent(error || "Google login cancelled")}`);

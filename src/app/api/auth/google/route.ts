@@ -9,18 +9,26 @@ export async function GET(req: Request) {
   }
 
   const origin = req.headers.get("origin") || req.headers.get("referer");
-    const host = req.headers.get("host") || "www.katyaayaniastrologer.com";
+  
+  // Use X-Forwarded headers if behind a proxy, otherwise use Host header
+  const forwardedHost = req.headers.get("x-forwarded-host");
+  const forwardedProto = req.headers.get("x-forwarded-proto") || "https";
+  const host = forwardedHost || req.headers.get("host") || "www.katyaayaniastrologer.com";
+  
+  // Robust local detection
+  const isLocal = host.includes("localhost") || 
+                  host.includes("127.0.0.1") || 
+                  host.startsWith("192.168.") || 
+                  host.startsWith("10.") || 
+                  host.startsWith("172.");
+  
+  // In production, ALWAYS prefer the configured APP_URL to avoid redirect mismatches
+  // Unless we are explicitly on a local testing domain
+  const appUrl = (process.env.NODE_ENV === "production" && !isLocal)
+    ? (process.env.NEXT_PUBLIC_APP_URL || `https://${host}`)
+    : `${isLocal ? "http" : forwardedProto}://${host}`;
     
-    // Improved local detection including IP addresses (for mobile testing)
-    const isLocal = host.includes("localhost") || 
-                    host.startsWith("192.168.") || 
-                    host.startsWith("10.") || 
-                    host.startsWith("172.") || 
-                    host.includes("127.0.0.1");
-    
-    const protocol = isLocal ? "http" : "https";
-    const appUrl = isLocal ? `${protocol}://${host}` : (process.env.NEXT_PUBLIC_APP_URL || `https://${host}`);
-    const redirectUri = `${appUrl}/api/auth/google/callback`;
+  const redirectUri = `${appUrl}/api/auth/google/callback`;
 
   // Store a random state in the redirect URL for CSRF protection
   const state = Math.random().toString(36).substring(2, 18);
