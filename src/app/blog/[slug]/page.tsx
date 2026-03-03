@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Calendar, Eye, ArrowLeft, Share2, User, X, Check, Link as LinkIcon } from "lucide-react";
@@ -187,24 +186,23 @@ export default function BlogPostPage() {
             {language === 'gu' ? 'પાછા જાઓ' : language === 'hi' ? 'वापस जाएं' : 'Go Back'}
           </Button>
 
-          {/* Featured Image */}
-          {post.featured_image && (
-            <div className="relative h-64 md:h-96 rounded-3xl overflow-hidden mb-8">
-              <Image
-                src={post.featured_image}
-                alt={getPostTitle(post)}
-                fill
-                className="object-cover"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-              <div className="absolute bottom-4 left-4">
-                <span className="bg-[#ff6b35] text-white text-sm px-4 py-1 rounded-full capitalize">
-                  {post.category}
-                </span>
+            {/* Featured Image */}
+            {post.featured_image && (
+              <div className="rounded-3xl overflow-hidden mb-8">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={post.featured_image}
+                  alt={getPostTitle(post)}
+                  className="w-full h-auto"
+                  style={{ display: 'block' }}
+                />
+                <div className="absolute bottom-4 left-4">
+                  <span className="bg-[#ff6b35] text-white text-sm px-4 py-1 rounded-full capitalize">
+                    {post.category}
+                  </span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Title */}
           <h1 className="font-[family-name:var(--font-cinzel)] text-3xl md:text-5xl font-bold mb-6 leading-tight">

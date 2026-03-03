@@ -4739,11 +4739,12 @@ function BlogManager({ isDark, t, isActionLoading, setIsActionLoading, setSucces
                     <Label>{t("Featured Image")}</Label>
                     {blogForm.featured_image ? (
                       <div className="relative group">
-                        <img
-                          src={blogForm.featured_image}
-                          alt="Featured"
-                          className="w-full h-48 object-cover rounded-xl border border-[#ff6b35]/20"
-                        />
+                          <img
+                            src={blogForm.featured_image}
+                            alt="Featured"
+                            className="w-full rounded-xl border border-[#ff6b35]/20"
+                            style={{ height: 'auto', maxHeight: '320px', objectFit: 'contain' }}
+                          />
                         <button
                           type="button"
                           onClick={() => setBlogForm({...blogForm, featured_image: ''})}

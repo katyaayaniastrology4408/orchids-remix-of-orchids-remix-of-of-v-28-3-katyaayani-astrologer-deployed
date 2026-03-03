@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { Calendar, Eye, ArrowRight, Star, Sparkles } from "lucide-react";
 import { 
@@ -359,20 +358,20 @@ export default function BlogPage() {
                       theme === 'dark' ? 'bg-[#12121a]' : 'bg-white'
                     } border-none shadow-lg`}>
                       {post.featured_image && (
-                        <div className="relative h-48 overflow-hidden">
-                          <Image
-                            src={post.featured_image}
-                            alt={getPostTitle(post)}
-                            fill
-                            className="object-cover"
-                          />
-                          <div className="absolute top-3 left-3">
-                            <span className="bg-[#ff6b35] text-white text-xs px-3 py-1 rounded-full capitalize">
-                              {post.category}
-                            </span>
+                          <div className="relative overflow-hidden">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={post.featured_image}
+                              alt={getPostTitle(post)}
+                              className="w-full h-auto max-h-72 object-contain"
+                            />
+                            <div className="absolute top-3 left-3">
+                              <span className="bg-[#ff6b35] text-white text-xs px-3 py-1 rounded-full capitalize">
+                                {post.category}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
                       <CardContent className="p-6">
                         <h3 className="font-bold text-lg mb-2 line-clamp-2">{getPostTitle(post)}</h3>
                         {getPostExcerpt(post) && (
