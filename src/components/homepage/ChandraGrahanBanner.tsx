@@ -144,13 +144,13 @@ export default function ChandraGrahanBanner() {
   const isDark = theme === "dark";
 
   return (
-    <div
-      className={`w-full transition-all duration-300 ${
-        isDark
-          ? "bg-gradient-to-r from-[#1a0a2e] via-[#120818] to-[#1a0a2e] border-y border-[#ff6b35]/20"
-          : "bg-gradient-to-r from-[#fff5ee] via-[#fffcf8] to-[#fff5ee] border-y border-[#ff6b35]/20"
-      }`}
-    >
+      <div
+        className={`w-full mt-[72px] transition-all duration-300 ${
+          isDark
+            ? "bg-gradient-to-r from-[#1a0a2e] via-[#120818] to-[#1a0a2e] border-y border-[#ff6b35]/20"
+            : "bg-gradient-to-r from-[#fff5ee] via-[#fffcf8] to-[#fff5ee] border-y border-[#ff6b35]/20"
+        }`}
+      >
       <div className="max-w-5xl mx-auto px-4 py-5">
         {/* Header Row */}
         <div className="flex items-start justify-between gap-4">

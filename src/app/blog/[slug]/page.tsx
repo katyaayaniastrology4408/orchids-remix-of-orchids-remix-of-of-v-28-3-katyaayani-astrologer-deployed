@@ -340,11 +340,13 @@ export default function BlogPostPage() {
               </div>
             </div>
 
-          {/* Content */}
-            <div 
-              className={`prose prose-lg max-w-none whitespace-pre-line ${theme === 'dark' ? 'prose-invert' : ''}`}
-              dangerouslySetInnerHTML={{ __html: getPostContent(post) }}
-            />
+            {/* Content */}
+              <div className={theme === 'dark' ? 'blog-dark' : 'blog-light'}>
+                <div
+                  className={`prose prose-lg max-w-none whitespace-pre-line ${theme === 'dark' ? 'prose-invert' : ''}`}
+                  dangerouslySetInnerHTML={{ __html: getPostContent(post) }}
+                />
+              </div>
 
           {/* Tags */}
           {post.tags && post.tags.length > 0 && (
