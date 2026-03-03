@@ -4,8 +4,21 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import NextImage from "next/image";
 import dynamic from "next/dynamic";
-// Standardized icons - Updated 2026-03-04-T00:55 - Re-built for HMR stability
-import { Star, Moon, Sun, Sparkles, Home, Video, ChevronRight, ChevronDown, Calendar, Newspaper } from "lucide-react";
+import { 
+  Star, 
+  Moon, 
+  Sun, 
+  Sparkles, 
+  House, 
+  Video, 
+  ChevronRight, 
+  ChevronDown, 
+  Calendar, 
+  Newspaper,
+  Bell,
+  ArrowRight,
+  X
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -53,10 +66,11 @@ interface LatestPost {
 interface HomePageClientProps {
   initialLatestPosts: LatestPost[];
   hasTodayPosts?: boolean;
+  actualLatestPost?: LatestPost | null;
 }
 
-// Updated at 2026-03-04-T00:55 - Force clean reload to clear HMR cache
-export default function HomePageClient({ initialLatestPosts, hasTodayPosts }: HomePageClientProps) {
+// Updated at 2026-03-04-T10:15 - New blog notification & HMR fix
+export default function HomePageClient({ initialLatestPosts, hasTodayPosts, actualLatestPost }: HomePageClientProps) {
   const [mounted, setMounted] = useState(false);
   const { theme } = useTheme();
   const { language } = useTranslation();
@@ -66,14 +80,24 @@ export default function HomePageClient({ initialLatestPosts, hasTodayPosts }: Ho
   const [hinduCalendar, setHinduCalendar] = useState({ month: "--", tithi: "--", vaara: "--", paksha: "--" });
   const [dbReviews, setDbReviews] = useState<{ name: string; text: string; rating: number }[]>([]);
   const [latestPosts, setLatestPosts] = useState<LatestPost[]>(initialLatestPosts);
+  const [newBlogBanner, setNewBlogBanner] = useState<{ show: boolean, post: LatestPost | null }>({ show: false, post: null });
 
   useEffect(() => {
-    // Force a small delay to ensure hydration is clean
     setMounted(true);
-    console.log("HomePageClient hydrated");
+    
+    // Check for "New Blog" notification (posted within last 24 hours)
+    if (actualLatestPost) {
+      const postDate = new Date(actualLatestPost.created_at);
+      const now = new Date();
+      const diffInHours = (now.getTime() - postDate.getTime()) / (1000 * 60 * 60);
+      
+      if (diffInHours >= 0 && diffInHours <= 24) {
+        setNewBlogBanner({ show: true, post: actualLatestPost });
+      }
+    }
 
-      // Fetch approved DB reviews (3+ stars)
-      fetch('/api/feedback?minRating=3')
+    // Fetch reviews and panchang...
+    fetch('/api/feedback?minRating=3')
         .then(r => r.json())
         .then(json => {
           if (json.success && Array.isArray(json.data)) {
@@ -82,6 +106,8 @@ export default function HomePageClient({ initialLatestPosts, hasTodayPosts }: Ho
         })
         .catch(() => {});
 
+      // Removed auto-fetch fallback to satisfy "only show blogs on their specific date" requirement
+      /*
       if (initialLatestPosts.length === 0) {
         fetch('/api/blog?limit=3&published=true')
           .then(r => r.json())
@@ -92,6 +118,7 @@ export default function HomePageClient({ initialLatestPosts, hasTodayPosts }: Ho
           })
           .catch(() => {});
       }
+      */
     
     let lastFetchDate = '';
 
@@ -180,6 +207,51 @@ export default function HomePageClient({ initialLatestPosts, hasTodayPosts }: Ho
       <Navbar />
 
       <ChandraGrahanBanner />
+
+      {/* New Blog Notification Banner (Auto-expires after 24h) */}
+      {newBlogBanner.show && newBlogBanner.post && (
+        <div 
+          className={`w-full transition-all duration-300 ${
+            theme === 'dark' 
+              ? 'bg-gradient-to-r from-[#2a1a10] via-[#3a2215] to-[#2a1a10] border-y border-[#ff6b35]/20' 
+              : 'bg-gradient-to-r from-[#fff9f0] via-[#fffcf8] to-[#fff9f0] border-y border-[#ff6b35]/20'
+          }`}
+        >
+          <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-[#ff6b35]/20' : 'bg-[#ff6b35]/10'}`}>
+                <Bell className="w-5 h-5 text-[#ff6b35] animate-bounce" />
+              </div>
+              <div>
+                <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest mb-1 ${
+                  theme === 'dark' ? 'bg-orange-900/40 text-orange-400' : 'bg-orange-50 text-orange-600'
+                }`}>
+                  {language === 'gu' ? 'નવો લેખ' : language === 'hi' ? 'नया लेख' : 'NEW ARTICLE'}
+                </span>
+                <h3 className={`text-sm font-bold line-clamp-1 ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
+                  {newBlogBanner.post.title}
+                </h3>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Link 
+                href={`/blog/${newBlogBanner.post.slug}`}
+                className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-xl bg-[#ff6b35] text-white hover:bg-[#ff8c5e] transition-colors whitespace-nowrap"
+              >
+                {language === 'gu' ? 'વાંચો' : language === 'hi' ? 'पढ़ें' : 'Read Now'}
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <button 
+                onClick={() => setNewBlogBanner({ show: false, post: null })}
+                className={`p-2 rounded-lg hover:bg-black/5 transition-colors ${theme === 'dark' ? 'text-white/40 hover:text-white' : 'text-black/40 hover:text-black'}`}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden py-24">
         <StarField />
@@ -392,9 +464,9 @@ export default function HomePageClient({ initialLatestPosts, hasTodayPosts }: Ho
                 className={`${theme === 'dark' ? 'bg-[#12121a] border-[#ff6b35]/20' : 'bg-[#fffdf9] border-[#ff6b35]/30'} hover:border-[#ff6b35]/50 transition-all duration-300 h-full group cursor-pointer`}
               >
                 <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 rounded-full bg-[#ff6b35]/10 flex items-center justify-center mx-auto mb-6 group-hover:bg-[#ff6b35]/20 transition-colors">
-                    <Home className="w-8 h-8 text-[#ff6b35]" />
-                  </div>
+                    <div className="w-16 h-16 rounded-full bg-[#ff6b35]/10 flex items-center justify-center mx-auto mb-6 group-hover:bg-[#ff6b35]/20 transition-colors">
+                      <House className="w-8 h-8 text-[#ff6b35]" />
+                    </div>
                   <h3 className={`font-[family-name:var(--font-cinzel)] text-2xl font-semibold mb-4 ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
                     {content.homeConsultation}
                   </h3>

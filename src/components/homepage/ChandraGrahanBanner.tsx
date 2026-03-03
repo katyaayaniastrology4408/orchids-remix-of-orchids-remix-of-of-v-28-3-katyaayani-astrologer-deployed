@@ -1,7 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { Moon, X, ChevronDown, ChevronUp, AlertCircle, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { 
+  Moon, 
+  X, 
+  ChevronDown, 
+  ChevronUp, 
+  AlertCircle, 
+  ArrowRight 
+} from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 import Link from "next/link";
@@ -142,17 +149,19 @@ export default function ChandraGrahanBanner() {
   // We keep it visible ON March 3rd, and hide it on March 4th or later.
   const [shouldShow, setShouldShow] = useState(true);
 
-  useEffect(() => {
-    const checkDate = () => {
-      if (typeof window !== "undefined") {
-        const today = new Date();
-        const eventDate = new Date("2026-03-03T23:59:59");
-        if (today > eventDate) {
-          setShouldShow(false);
+    useEffect(() => {
+      const checkDate = () => {
+        if (typeof window !== "undefined") {
+          const today = new Date();
+          // Eclipse ends at 6:47 PM on March 3, 2026. 
+          // We hide it slightly after (7:00 PM) to ensure anyone watching the site doesn't see it lingering.
+          const eventEndDate = new Date("2026-03-03T19:00:00");
+          if (today > eventEndDate) {
+            setShouldShow(false);
+          }
         }
-      }
-    };
-    checkDate();
+      };
+      checkDate();
     // Check every 30 minutes
     const interval = setInterval(checkDate, 30 * 60 * 1000);
     return () => clearInterval(interval);

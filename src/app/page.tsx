@@ -82,68 +82,77 @@ export async function generateMetadata(): Promise<Metadata> {
       .order("created_at", { ascending: false })
       .limit(3);
 
-    // If there are today's blogs, prioritize them. 
-    // If not, use latest blogs.
-    const hasTodayPosts = todayPosts && todayPosts.length > 0;
-    const displayPosts = hasTodayPosts ? todayPosts : latestPosts;
-    
-    const schema = generateSchemaMarkup("/", undefined, { 
-      galleryImages: [] 
-    });
-    
-    return (
-      <>
-        {/* Server-rendered structured data for SEO crawlers */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-        />
-    
-        {/* Hidden SEO content visible to crawlers but not disruptive to users */}
-        <div className="sr-only">
-          <h1>Katyaayani Astrologer - Best Vedic Astrologer for Kundali, Horoscope & Jyotish Consultation</h1>
-          <p>
-              Katyaayani Astrologer connects modern times with ancient astrology, blending ancient wisdom with today&apos;s technology 
-              to provide accurate guidance, practical solutions, and personalized remedies — creating a perfect balance between 
-              tradition and contemporary life. Our services include kundali analysis, horoscope reading, rashifal predictions, 
-              vastu shastra consultation, marriage and kundali matching, career astrology, health astrology, and personalized Vedic remedies.
+      // If there are today's blogs, show them exclusively.
+      // If no blogs for today, we can still show latest but maybe the user wants them to "go away".
+      // To satisfy "biji date par jatu revu joi ae", we show today's posts if they exist,
+      // otherwise we only show the very latest posts but marked clearly.
+        const hasTodayPosts = todayPosts && todayPosts.length > 0;
+        
+        // Latest post overall for the notification banner (within 24 hours)
+        const actualLatestPost = latestPosts && latestPosts.length > 0 ? latestPosts[0] : null;
+
+        // Strictly show only today's posts if they exist. 
+        // If no posts for today, we show nothing in the main blog section to satisfy "biji date par jatu revu joi ae"
+        const displayPosts = todayPosts || [];
+      
+      const schema = generateSchemaMarkup("/", undefined, { 
+        galleryImages: [] 
+      });
+      
+      return (
+        <>
+          {/* Server-rendered structured data for SEO crawlers */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          />
+      
+          {/* Hidden SEO content visible to crawlers but not disruptive to users */}
+          <div className="sr-only">
+            <h1>Katyaayani Astrologer - Best Vedic Astrologer for Kundali, Horoscope & Jyotish Consultation</h1>
+            <p>
+                Katyaayani Astrologer connects modern times with ancient astrology, blending ancient wisdom with today&apos;s technology 
+                to provide accurate guidance, practical solutions, and personalized remedies — creating a perfect balance between 
+                tradition and contemporary life. Our services include kundali analysis, horoscope reading, rashifal predictions, 
+                vastu shastra consultation, marriage and kundali matching, career astrology, health astrology, and personalized Vedic remedies.
+              </p>
+            <p>
+              Book your astrology consultation online or at home. We serve clients worldwide through video call consultations 
+              and in-person sessions. Get accurate birth chart analysis, daily horoscope predictions, Hindu panchang, 
+              nakshatra analysis, and spiritual guidance from an experienced Vedic astrologer.
             </p>
-          <p>
-            Book your astrology consultation online or at home. We serve clients worldwide through video call consultations 
-            and in-person sessions. Get accurate birth chart analysis, daily horoscope predictions, Hindu panchang, 
-            nakshatra analysis, and spiritual guidance from an experienced Vedic astrologer.
-          </p>
-          <h2>Our Astrology Services</h2>
-          <ul>
-            <li>Vedic Kundali Analysis &amp; Birth Chart Reading</li>
-            <li>Horoscope &amp; Rashifal Predictions</li>
-            <li>Kundali Matching for Marriage</li>
-            <li>Vastu Shastra Consultation</li>
-            <li>Career &amp; Business Astrology</li>
-            <li>Health &amp; Wellness Astrology</li>
-            <li>Gemstone &amp; Remedy Recommendations</li>
-            <li>Daily Panchang &amp; Hindu Calendar</li>
-            <li>Online Video Call Consultations</li>
-            <li>Home Visit Astrology Sessions</li>
-          </ul>
-          <h2>કાત્યાયની જ્યોતિષ - વૈદિક જ્યોતિષ પરામર્શ</h2>
-          <p>
-            કાત્યાયની જ્યોતિષ (રુદ્રમ જોશી) 2007 થી વૈદિક જ્યોતિષ પરામર્શ, કુંડળી વિશ્લેષણ, 
-            રાશિફળ, વાસ્તુ શાસ્ત્ર અને વ્યક્તિગત ઉપાયો પ્રદાન કરે છે.
-          </p>
-          <h2>कात्यायनी ज्योतिष - वैदिक ज्योतिष परामर्श</h2>
-          <p>
-            कात्यायनी ज्योतिष (रुद्रम जोशी) 2007 से वैदिक ज्योतिष परामर्श, कुंडली विश्लेषण, 
-            राशिफल, वास्तु शास्त्र और व्यक्तिगत उपाय प्रदान करते हैं।
-          </p>
-        </div>
-    
-        {/* Interactive client-side homepage */}
-        <HomePageClient 
-          initialLatestPosts={displayPosts || []} 
-          hasTodayPosts={hasTodayPosts}
-        />
-      </>
-    );
+            <h2>Our Astrology Services</h2>
+            <ul>
+              <li>Vedic Kundali Analysis &amp; Birth Chart Reading</li>
+              <li>Horoscope &amp; Rashifal Predictions</li>
+              <li>Kundali Matching for Marriage</li>
+              <li>Vastu Shastra Consultation</li>
+              <li>Career &amp; Business Astrology</li>
+              <li>Health &amp; Wellness Astrology</li>
+              <li>Gemstone &amp; Remedy Recommendations</li>
+              <li>Daily Panchang &amp; Hindu Calendar</li>
+              <li>Online Video Call Consultations</li>
+              <li>Home Visit Astrology Sessions</li>
+            </ul>
+            <h2>કાત્યાયની જ્યોતિષ - વૈદિક જ્યોતિષ પરામર્શ</h2>
+            <p>
+              કાત્યાયની જ્યોતિષ (રુદ્રમ જોશી) 2007 થી વૈદિક જ્યોતિષ પરામર્શ, કુંડળી વિશ્લેષણ, 
+              રાશિફળ, વાસ્તુ શાસ્ત્ર અને વ્યક્તિગત ઉપાયો પ્રદાન કરે છે.
+            </p>
+            <h2>कात्यायनी ज्योतिष - वैदिक ज्योतिष परामर्श</h2>
+            <p>
+              कात्यायनी ज्योतिष (रुद्रम जोशी) 2007 से वैदिक ज्योतिष परामर्श, कुंडली विश्लेषण, 
+              राशिफल, वास्तु शास्त्र और व्यक्तिगत उपाय प्रदान करते हैं।
+            </p>
+          </div>
+      
+          {/* Interactive client-side homepage */}
+          <HomePageClient 
+            initialLatestPosts={displayPosts || []} 
+            hasTodayPosts={hasTodayPosts}
+            actualLatestPost={actualLatestPost}
+          />
+        </>
+      );
   }
 
