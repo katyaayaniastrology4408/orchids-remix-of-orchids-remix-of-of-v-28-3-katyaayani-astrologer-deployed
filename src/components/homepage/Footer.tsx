@@ -62,10 +62,10 @@ export default function Footer() {
             </p>
             
             {/* Google Reviews Badge */}
-            <div className="mt-6 flex flex-col items-start gap-2">
-              <div className="flex items-center gap-2">
-                <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" className="h-4 object-contain" />
-                <div className="flex gap-0.5">
+              <div className="mt-6 flex flex-col items-start gap-2">
+                <div className="flex items-center gap-2">
+                  <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" width={49} height={16} className="h-4 object-contain" />
+                  <div className="flex gap-0.5">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="w-3 h-3 fill-[#FBBC05] text-[#FBBC05]" />
                   ))}

@@ -11,6 +11,8 @@ import { useTranslation } from "@/components/GoogleTranslateWidget";
 import Navbar from "@/components/homepage/Navbar";
 import Footer from "@/components/homepage/Footer";
 
+import Image from "next/image";
+
 interface BlogPost {
   id: string;
   title: string;
@@ -211,22 +213,24 @@ export default function BlogPostPage() {
           <aside className="w-full lg:w-[380px] lg:flex-shrink-0">
             <div className="lg:sticky lg:top-28 flex flex-col gap-6">
 
-              {/* Featured Image */}
-              {post.featured_image && (
-                <div className="relative rounded-2xl overflow-hidden shadow-xl">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={post.featured_image}
-                    alt={getPostTitle(post)}
-                    className="w-full h-auto block"
-                  />
-                  <div className="absolute bottom-3 left-3">
-                    <span className="bg-[#ff6b35] text-white text-xs font-semibold px-3 py-1 rounded-full capitalize shadow">
-                      {post.category}
-                    </span>
+                {/* Featured Image */}
+                {post.featured_image && (
+                  <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video">
+                    <Image
+                      src={post.featured_image}
+                      alt={getPostTitle(post)}
+                      fill
+                      priority
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 380px"
+                    />
+                    <div className="absolute bottom-3 left-3">
+                      <span className="bg-[#ff6b35] text-white text-xs font-semibold px-3 py-1 rounded-full capitalize shadow">
+                        {post.category}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Highlights Card */}
               <div className={`rounded-2xl border p-5 flex flex-col gap-4 ${theme === 'dark' ? 'bg-[#12121a] border-[#ff6b35]/20' : 'bg-[#fffdf9] border-[#ff6b35]/20'}`}>
@@ -438,16 +442,17 @@ export default function BlogPostPage() {
                       <div className={`h-full rounded-2xl overflow-hidden border transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1 ${
                         theme === 'dark' ? 'bg-[#12121a] border-white/5' : 'bg-white border-gray-100'
                       }`}>
-                        <div className="aspect-video relative overflow-hidden">
-                          {rp.featured_image && (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={rp.featured_image}
-                              alt={getPostTitle(rp)}
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                            />
-                          )}
-                        </div>
+                          <div className="aspect-video relative overflow-hidden">
+                            {rp.featured_image && (
+                              <Image
+                                src={rp.featured_image}
+                                alt={getPostTitle(rp)}
+                                fill
+                                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                sizes="(max-width: 768px) 100vw, 33vw"
+                              />
+                            )}
+                          </div>
                         <div className="p-4">
                           <span className="text-[10px] uppercase tracking-widest text-[#ff6b35] font-bold">
                             {rp.category}

@@ -4,6 +4,8 @@ import { getSeoMetadata, generateSchemaMarkup } from "@/lib/seo";
 import Link from "next/link";
 import { ImageIcon, ChevronRight, Home } from "lucide-react";
 
+import Image from "next/image";
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -74,16 +76,17 @@ export default async function GalleryPage() {
                 key={img.id}
                 className="group relative flex flex-col bg-white dark:bg-[#12121a] rounded-3xl overflow-hidden border border-[#ff6b35]/10 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
               >
-                <div className="aspect-[4/5] overflow-hidden bg-black/5 relative">
-                  <img 
-                    src={img.image_url} 
-                    alt={img.description || img.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    loading="lazy"
-                  />
-                  {/* Overlay for better readability if needed */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                </div>
+                  <div className="aspect-[4/5] overflow-hidden bg-black/5 relative">
+                    <Image
+                      src={img.image_url} 
+                      alt={img.description || img.title}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                    {/* Overlay for better readability if needed */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  </div>
                 
                 <div className="p-6">
                   <h2 className="font-[family-name:var(--font-cinzel)] text-lg font-bold text-[#ff6b35] mb-2 group-hover:translate-x-1 transition-transform">

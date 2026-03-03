@@ -12,9 +12,12 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 import Navbar from "@/components/homepage/Navbar";
 import Footer from "@/components/homepage/Footer";
-import dynamic from "next/dynamic";
+import Image from "next/image";
 
-const RashifalSection = dynamic(() => import("@/components/homepage/RashifalSection"), { ssr: false });
+const RashifalSection = dynamic(() => import("@/components/homepage/RashifalSection"), { 
+  ssr: true,
+  loading: () => <div className="h-[650px] w-full bg-gray-100/5" />
+});
 
 interface BlogPost {
   id: string;
@@ -222,15 +225,16 @@ export default function BlogPage() {
                 </p>
                 <div className="flex flex-col gap-3">
                   {posts.slice(0, 4).map((post) => (
-                    <Link key={post.id} href={`/blog/${post.slug}`} className="flex items-center gap-3 group">
-                      {post.featured_image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={post.featured_image}
-                          alt={getPostTitle(post)}
-                          className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
-                        />
-                      ) : (
+                      <Link key={post.id} href={`/blog/${post.slug}`} className="flex items-center gap-3 group">
+                        {post.featured_image ? (
+                          <Image
+                            src={post.featured_image}
+                            alt={getPostTitle(post)}
+                            width={56}
+                            height={56}
+                            className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
+                          />
+                        ) : (
                         <div className={`w-14 h-14 rounded-xl flex-shrink-0 ${theme === 'dark' ? 'bg-[#1a1a2e]' : 'bg-orange-50'}`} />
                       )}
                       <p className={`text-xs font-medium line-clamp-2 group-hover:text-[#ff6b35] transition-colors ${theme === 'dark' ? 'text-gray-300' : 'text-[#4a3f35]'}`}>
@@ -283,13 +287,13 @@ export default function BlogPage() {
 
                       {/* Thumbnail */}
                       {post.featured_image ? (
-                        <div className="sm:w-44 md:w-52 flex-shrink-0 rounded-xl overflow-hidden">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
+                        <div className="sm:w-44 md:w-52 flex-shrink-0 rounded-xl overflow-hidden relative" style={{ minHeight: '120px' }}>
+                          <Image
                             src={post.featured_image}
                             alt={getPostTitle(post)}
-                            className="w-full h-36 sm:h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            style={{ minHeight: '120px' }}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            sizes="(max-width: 768px) 100vw, 208px"
                           />
                         </div>
                       ) : (

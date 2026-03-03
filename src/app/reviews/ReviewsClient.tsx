@@ -206,10 +206,10 @@ export default function ReviewsClient() {
                                   />
                                 ))}
                               </div>
-                              <div className="flex items-center gap-1.5 opacity-60">
-                                <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="G" className="h-3" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest">{t('Google', 'गूगल', 'ગૂગલ')}</span>
-                              </div>
+                                <div className="flex items-center gap-1.5 opacity-60">
+                                  <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="G" width={37} height={12} className="h-3" />
+                                  <span className="text-[10px] font-bold uppercase tracking-widest">{t('Google', 'गूगल', 'ગૂગલ')}</span>
+                                </div>
                             </div>
                             
                             <p className={`italic mb-6 flex-grow leading-relaxed ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
@@ -324,11 +324,11 @@ export default function ReviewsClient() {
               viewport={{ once: true }}
               className="space-y-6"
             >
-              <div className="flex items-center justify-center gap-4 mb-4">
-                <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" className="h-7 object-contain" />
-                <div className="h-6 w-px bg-gray-300 mx-2" />
-                <span className="text-2xl font-bold font-[family-name:var(--font-cinzel)] tracking-tight">Customer Reviews</span>
-              </div>
+                <div className="flex items-center justify-center gap-4 mb-4">
+                  <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" width={85} height={28} className="h-7 object-contain" />
+                  <div className="h-6 w-px bg-gray-300 mx-2" />
+                  <span className="text-2xl font-bold font-[family-name:var(--font-cinzel)] tracking-tight">Customer Reviews</span>
+                </div>
               
               <div className="flex flex-col items-center">
                 <div className="flex items-center gap-3 mb-2">

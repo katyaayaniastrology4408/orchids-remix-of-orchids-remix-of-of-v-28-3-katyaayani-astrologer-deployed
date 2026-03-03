@@ -13,27 +13,27 @@ import Navbar from "@/components/homepage/Navbar";
 import Image from "next/image";
 
 const Footer = dynamic(() => import("@/components/homepage/Footer"), { 
-  ssr: false,
-  loading: () => <div className="h-[400px] w-full bg-gray-100/5 animate-pulse" />
+  ssr: true,
+  loading: () => <div className="h-[600px] w-full bg-gray-100/5" />
 });
 const CosmicInsights = dynamic(() => import("@/components/homepage/CosmicInsights"), { 
-  ssr: false,
-  loading: () => <div className="h-[600px] w-full bg-gray-100/5 animate-pulse" />
+  ssr: true,
+  loading: () => <div className="h-[950px] w-full bg-gray-100/5" />
 });
 const StarField = dynamic(() => import("@/components/homepage/StarField"), { 
-  ssr: false 
+  ssr: true 
 });
 const RashifalSection = dynamic(() => import("@/components/homepage/RashifalSection"), { 
-  ssr: false,
-  loading: () => <div className="h-[500px] w-full bg-gray-100/5 animate-pulse" />
+  ssr: true,
+  loading: () => <div className="h-[650px] w-full bg-gray-100/5" />
 });
 const AstrologerTip = dynamic(() => import("@/components/homepage/AstrologerTip"), { 
-  ssr: false,
-  loading: () => <div className="h-[300px] w-full bg-gray-100/5 animate-pulse" />
+  ssr: true,
+  loading: () => <div className="h-[350px] w-full bg-gray-100/5" />
 });
 const ChandraGrahanBanner = dynamic(() => import("@/components/homepage/ChandraGrahanBanner"), { 
-  ssr: false,
-  loading: () => <div className="h-[120px] w-full bg-gray-100/5 animate-pulse mt-[72px]" />
+  ssr: true,
+  loading: () => <div className="h-[148px] w-full bg-gray-100/5 mt-[72px]" />
 });
 
 import { testimonialsData, contentData } from "@/data/homepage";
@@ -607,7 +607,7 @@ export default function HomePageClient({ initialGalleryImages, initialLatestPost
                     rel="noopener noreferrer"
                   className="flex items-center gap-2 text-xs font-bold opacity-70 hover:opacity-100 transition-opacity"
                 >
-                  <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" className="h-3 object-contain" />
+                  <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" width={37} height={12} className="h-3 object-contain" />
                   <span>{language === 'gu' ? 'ગૂગલ પર જુઓ' : language === 'hi' ? 'गूगल पर देखें' : 'View on Google'}</span>
                   <ChevronRight className="w-3 h-3" />
                 </a>
@@ -618,10 +618,10 @@ export default function HomePageClient({ initialGalleryImages, initialLatestPost
             <div className="grid md:grid-cols-3 gap-8 mb-4">
               {testimonials.slice(0, 3).map((testimonial) => (
                 <div key={testimonial.name}>
-                  <Card className={`${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20' : 'bg-[#f8f4ee] border-[#ff6b35]/30'} h-full relative overflow-hidden group`}>
-                    <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
-                      <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="G" className="h-3" />
-                    </div>
+                    <Card className={`${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20' : 'bg-[#f8f4ee] border-[#ff6b35]/30'} h-full relative overflow-hidden group`}>
+                      <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
+                        <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="G" width={37} height={12} className="h-3" />
+                      </div>
                     <CardContent className="p-8">
                       <div className="flex items-center gap-4 mb-4">
                         <div>
