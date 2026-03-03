@@ -136,7 +136,7 @@ export default function HomePageClient({ initialLatestPosts }: HomePageClientPro
     }, 60 * 1000);
     const refreshId = setInterval(fetchPanchangData, 30 * 60 * 1000);
     return () => { clearInterval(intervalId); clearInterval(refreshId); };
-  }, [language, initialGalleryImages.length, initialLatestPosts.length]);
+  }, [language, initialLatestPosts.length]);
 
   // Chandra Grahan 2026 — schedule email blast 1 hour after page first load
   useEffect(() => {
