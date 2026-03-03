@@ -291,11 +291,46 @@ export default function HomePageClient() {
           <div className="chevrons">
             <ChevronDown />
             <ChevronDown />
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Mobile & Tablet Only Sign-in Section */}
+        {/* Trust Signals Bar */}
+        <section className={`py-12 border-y ${theme === 'dark' ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/10'}`}>
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div className="text-center">
+                <p className="text-[#ff6b35] text-3xl md:text-4xl font-bold font-[family-name:var(--font-cinzel)] mb-1">17+</p>
+                <p className={`text-sm uppercase tracking-widest font-semibold ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
+                  {language === 'gu' ? 'વર્ષોનો અનુભવ' : language === 'hi' ? 'वर्षों का अनुभव' : 'Years Experience'}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-[#ff6b35] text-3xl md:text-4xl font-bold font-[family-name:var(--font-cinzel)] mb-1">25k+</p>
+                <p className={`text-sm uppercase tracking-widest font-semibold ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
+                  {language === 'gu' ? 'પરામર્શ' : language === 'hi' ? 'परामर्श' : 'Consultations'}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-[#ff6b35] text-3xl md:text-4xl font-bold font-[family-name:var(--font-cinzel)] mb-1">20+</p>
+                <p className={`text-sm uppercase tracking-widest font-semibold ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
+                  {language === 'gu' ? 'દેશોમાં ગ્રાહકો' : language === 'hi' ? 'देशों में ग्राहक' : 'Countries'}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-[#ff6b35] text-3xl md:text-4xl font-bold font-[family-name:var(--font-cinzel)] mb-1">4.9/5</p>
+                <div className="flex justify-center gap-0.5 mb-1">
+                  {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 fill-[#ff6b35] text-[#ff6b35]" />)}
+                </div>
+                <p className={`text-sm uppercase tracking-widest font-semibold ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
+                  {language === 'gu' ? 'રેટિંગ' : language === 'hi' ? 'रेटिंग' : 'Average Rating'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Mobile & Tablet Only Sign-in Section */}
       <section className={`lg:hidden py-6 px-4 flex justify-center ${(!mounted || user) ? 'hidden' : 'block'}`}>
         <div className={`fade-in-up max-w-sm w-full p-5 rounded-2xl text-center relative overflow-hidden ${
           theme === 'dark' 

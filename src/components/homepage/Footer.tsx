@@ -117,17 +117,25 @@ export default function Footer() {
                 <Link href="/about" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("About")}</Link>
               </div>
             </div>
-            <div>
-              <h4 className={`font-[family-name:var(--font-cinzel)] text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#2d1810]'}`}>
-                {t("Policies")}
-              </h4>
-              <div className="flex flex-col gap-2">
-                      <Link href="/terms" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Terms")}</Link>
-                        <Link href="/privacy" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Privacy")}</Link>
-                        <Link href="/refund-policy" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Refund Policy")}</Link>
-                      <Link href="/disclaimer" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Disclaimer")}</Link>
+              <div>
+                <h4 className={`font-[family-name:var(--font-cinzel)] text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#2d1810]'}`}>
+                  {t("Policies")}
+                </h4>
+                <div className="flex flex-col gap-2">
+                  <Link href="/terms" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Terms")}</Link>
+                  <Link href="/privacy" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Privacy")}</Link>
+                  <Link href="/refund-policy" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Refund Policy")}</Link>
+                  <Link href="/disclaimer" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Disclaimer")}</Link>
+                  <div className="mt-2 pt-2 border-t border-[#ff6b35]/10">
+                    <p className={`text-[10px] uppercase tracking-widest font-bold mb-1 ${theme === 'dark' ? 'text-[#ff8c5e]' : 'text-[#ff6b35]'}`}>
+                      {language === 'gu' ? 'અમારી સાથે જોડાઓ' : language === 'hi' ? 'हमारे साथ जुड़ें' : 'Partner with us'}
+                    </p>
+                    <Link href="/contact?subject=Backlink%20Exchange" className={`text-xs ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors underline decoration-[#ff6b35]/30 underline-offset-4`}>
+                      {language === 'gu' ? 'લિંક એક્સચેન્જ' : language === 'hi' ? 'लिंक एक्सचेंज' : 'Backlink Exchange'}
+                    </Link>
+                  </div>
+                </div>
               </div>
-            </div>
           <div>
             <h4 className={`font-[family-name:var(--font-cinzel)] text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#2d1810]'}`}>
               {content.contact}
