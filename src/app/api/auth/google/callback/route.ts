@@ -151,10 +151,11 @@ export async function GET(req: Request) {
     // Redirect to the magic link to establish session
     const actionLink = sessionData.properties.action_link;
     if (actionLink) {
-      // Force the action link to use our appUrl instead of whatever Supabase has configured as Site URL
-      const actionUrl = new URL(actionLink);
-      const finalActionUrl = `${appUrl}${actionUrl.pathname}${actionUrl.search}`;
-      return NextResponse.redirect(finalActionUrl);
+      // DO NOT rewrite the domain to appUrl here if it's a Supabase internal URL
+      // This was causing 404s because /auth/v1/verify doesn't exist in our Next.js app
+      // If the user is in India and supabase.co is blocked, they should use a custom domain or proxy
+      // But for now, we must redirect to the actual link provided by Supabase
+      return NextResponse.redirect(actionLink);
     }
 
     return NextResponse.redirect(`${appUrl}/auth/google-complete?uid=${supabaseUserId}&isNew=${isNew}`);
