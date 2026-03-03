@@ -75,9 +75,10 @@ export default function Navbar() {
           <div className="hidden md:flex flex-1 justify-center gap-3 lg:gap-6 mx-4">
             <Link href="/" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("Home")}</Link>
                 <Link href="/services" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("Services")}</Link>
-                <Link href="/booking" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("Book")}</Link>
-              <Link href="/blog" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("Blog")}</Link>
-              <Link href="/feedback" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("Feedback")}</Link>
+                  <Link href="/booking" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("Book")}</Link>
+                <Link href="/blog" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("Blog")}</Link>
+                <Link href="/gallery" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("Gallery")}</Link>
+                <Link href="/feedback" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("Feedback")}</Link>
               <Link href="/about" className="hover:text-[#ff6b35] transition-colors text-sm lg:text-lg">{t("About")}</Link>
             </div>
 
@@ -137,6 +138,7 @@ export default function Navbar() {
                       <Link href="/services" className="block py-2" onClick={() => setIsMenuOpen(false)}>{t("Services")}</Link>
                       <Link href="/booking" className="block py-2" onClick={() => setIsMenuOpen(false)}>{t("Book")}</Link>
                     <Link href="/blog" className="block py-2" onClick={() => setIsMenuOpen(false)}>{t("Blog")}</Link>
+                    <Link href="/gallery" className="block py-2" onClick={() => setIsMenuOpen(false)}>{t("Gallery")}</Link>
                     <Link href="/feedback" className="block py-2" onClick={() => setIsMenuOpen(false)}>{t("Feedback")}</Link>
                   <Link href="/about" className="block py-2" onClick={() => setIsMenuOpen(false)}>{t("About")}</Link>
 

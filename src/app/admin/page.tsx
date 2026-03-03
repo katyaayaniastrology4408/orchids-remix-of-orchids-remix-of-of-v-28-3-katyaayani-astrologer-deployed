@@ -102,6 +102,7 @@ import NewsletterPanel from "@/components/admin/NewsletterPanel";
 import EmailConfigPanel from "@/components/admin/EmailConfigPanel";
 import EmailTemplatesPanel from "@/components/admin/EmailTemplatesPanel";
 import PricingPanel from "@/components/admin/PricingPanel";
+import GalleryPanel from "@/components/admin/GalleryPanel";
 
 // Safe JSON parse helper - prevents "Unexpected end of JSON input" errors
 async function safeJson(res: Response) {
@@ -1746,11 +1747,15 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
                 <RashifalManager isDark={isDark} t={t} isActionLoading={isActionLoading} setIsActionLoading={setIsActionLoading} setSuccess={setSuccess} setError={setError} mode="weekly" />
               )}
 
-              {activeTab === "blog" && (
-                <BlogManager isDark={isDark} t={t} isActionLoading={isActionLoading} setIsActionLoading={setIsActionLoading} setSuccess={setSuccess} setError={setError} />
-              )}
+                {activeTab === "blog" && (
+                  <BlogManager isDark={isDark} t={t} isActionLoading={isActionLoading} setIsActionLoading={setIsActionLoading} setSuccess={setSuccess} setError={setError} />
+                )}
 
-              {activeTab === "seo" && (
+                {activeTab === "gallery" && (
+                  <GalleryPanel isDark={isDark} t={t} />
+                )}
+
+                {activeTab === "seo" && (
                 <SeoManager isDark={isDark} t={t} isActionLoading={isActionLoading} setIsActionLoading={setIsActionLoading} setSuccess={setSuccess} setError={setError} />
               )}
 
@@ -3753,8 +3758,9 @@ function SidebarContent({ activeTab, setActiveTab, handleLogout, isDark, t }: {
                   <NavItem icon={<IndianRupee className="w-4 h-4" />} label={t("Pricing")} active={activeTab === "pricing"} onClick={() => setActiveTab("pricing")} isDark={isDark} />
                   <NavItem icon={<Sun className="w-4 h-4" />} label={t("Daily Rashifal")} active={activeTab === "rashifal"} onClick={() => setActiveTab("rashifal")} isDark={isDark} />
                 <NavItem icon={<Calendar className="w-4 h-4" />} label={t("Weekly Rashifal")} active={activeTab === "weekly-rashifal"} onClick={() => setActiveTab("weekly-rashifal")} isDark={isDark} />
-            <NavItem icon={<FileText className="w-4 h-4" />} label={t("Blog")} active={activeTab === "blog"} onClick={() => setActiveTab("blog")} isDark={isDark} />
-                  <NavItem icon={<SearchIcon className="w-4 h-4" />} label={t("SEO Manager")} active={activeTab === "seo"} onClick={() => setActiveTab("seo")} isDark={isDark} />
+              <NavItem icon={<FileText className="w-4 h-4" />} label={t("Blog")} active={activeTab === "blog"} onClick={() => setActiveTab("blog")} isDark={isDark} />
+              <NavItem icon={<ImageIcon className="w-4 h-4" />} label={t("Pictures")} active={activeTab === "gallery"} onClick={() => setActiveTab("gallery")} isDark={isDark} />
+                    <NavItem icon={<SearchIcon className="w-4 h-4" />} label={t("SEO Manager")} active={activeTab === "seo"} onClick={() => setActiveTab("seo")} isDark={isDark} />
                   <NavItem icon={<Tag className="w-4 h-4" />} label={t("Keywords")} active={activeTab === "keywords"} onClick={() => setActiveTab("keywords")} isDark={isDark} />
                   <NavItem icon={<BarChart3 className="w-4 h-4" />} label={t("Analytics")} active={activeTab === "analytics"} onClick={() => setActiveTab("analytics")} isDark={isDark} />
                   <div className="my-4 border-t border-[#ff6b35]/10 pt-4">

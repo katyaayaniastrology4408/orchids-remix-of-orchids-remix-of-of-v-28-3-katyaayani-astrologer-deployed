@@ -36,10 +36,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
     { url: `${baseUrl}/terms`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
     { url: `${baseUrl}/refund-policy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
-    { url: `${baseUrl}/disclaimer`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
-  ];
+      { url: `${baseUrl}/disclaimer`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
+    ];
 
-  // --- Blog Posts ---
+    // --- Gallery Page & Images ---
+    let galleryEntry: MetadataRoute.Sitemap = [];
+    try {
+      const { data: galleryImages } = await supabase
+        .from("gallery")
+        .select("image_url, updated_at, created_at")
+        .eq("is_active", true);
+
+      const images = (galleryImages || []).map(img => img.image_url);
+      const lastMod = galleryImages && galleryImages.length > 0 
+        ? new Date(galleryImages[0].updated_at || galleryImages[0].created_at)
+        : new Date();
+
+      galleryEntry = [{
+        url: `${baseUrl}/gallery`,
+        lastModified: lastMod,
+        changeFrequency: "daily",
+        priority: 0.8,
+        images: images
+      }];
+    } catch (e) { console.error("Sitemap gallery error:", e); }
+
+    // --- Blog Posts ---
   let blogPages: MetadataRoute.Sitemap = [];
     try {
       const { data: blogs } = await supabase
@@ -86,7 +108,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: (entry.change_frequency || "weekly") as "weekly",
       priority: Number(entry.priority) || 0.5,
     }));
-  } catch (e) { console.error("Sitemap custom error:", e); }
+    } catch (e) { console.error("Sitemap custom error:", e); }
 
-  return [...staticPages, ...blogPages, ...cmsPages, ...customPages];
+    return [...staticPages, ...galleryEntry, ...blogPages, ...cmsPages, ...customPages];
 }

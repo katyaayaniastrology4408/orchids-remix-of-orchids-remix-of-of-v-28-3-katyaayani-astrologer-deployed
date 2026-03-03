@@ -127,12 +127,17 @@ const PAGE_DEFAULTS: Record<string, { title: string; description: string; keywor
     description: "Create your free account on Katyaayani Astrologer to get personalized horoscope readings, book consultations, and receive daily rashifal predictions.",
     keywords: "sign up, register, create account, katyaayani astrologer account, free astrology account",
   },
-  "/profile": {
-    title: "My Profile | Katyaayani Astrologer",
-    description: "Manage your Katyaayani Astrologer profile, view booking history, check horoscope readings, and update your personal information.",
-    keywords: "my profile, account settings, katyaayani profile, booking history, astrology dashboard",
-  },
-};
+    "/profile": {
+      title: "My Profile | Katyaayani Astrologer",
+      description: "Manage your Katyaayani Astrologer profile, view booking history, check horoscope readings, and update your personal information.",
+      keywords: "my profile, account settings, katyaayani profile, booking history, astrology dashboard",
+    },
+    "/gallery": {
+      title: "Pictures Gallery - Sacred Vedic & Spiritual Images | Katyaayani Astrologer",
+      description: "Explore our collection of sacred Vedic, spiritual, and astrological pictures. High-quality images of temples, rituals, and celestial events by Katyaayani Astrologer.",
+      keywords: "astrology pictures, vedic gallery, spiritual images, katyaayani gallery, hindu ritual photos, astrology images google",
+    },
+  };
 
 // ─── Schema.org Generator ───
 export function generateSchemaMarkup(pagePath: string, seoData?: { meta_title?: string; meta_description?: string; og_image?: string }): Record<string, unknown> {
