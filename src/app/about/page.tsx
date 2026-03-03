@@ -27,7 +27,7 @@ export default function AboutPage() {
       {
         name: language === 'hi' ? "रुद्रम जोशी" : language === 'gu' ? "રુદ્રમ જોશી" : "Rudram Joshi",
         title: language === 'hi' ? "मुख्य ज्योतिषाचार्य" : language === 'gu' ? "મુખ્ય જ્યોતિષાચાર્ય" : "Chief Astrologer",
-        experience: language === 'hi' ? "18+ वर्ष" : language === 'gu' ? "18+ વર્ષ" : "18+ Years",
+        experience: language === 'hi' ? "17+ वर्ष" : language === 'gu' ? "17+ વર્ષ" : "17+ Years",
         specialization: language === 'hi' ? "ज्योतिष एवं कुंडली विशेषज्ञ" : language === 'gu' ? "જ્યોતિષ અને કુંડળી નિષ્ણાત" : "Astrology & Kundli Expert",
         bio: language === 'hi' ? "रुद्रम जोशी जी ने अपना जीवन ग्रहों की गति को समझने में समर्पित किया है। उनके सटीक भविष्यवाणी से हजारों लोगों का जीवन बदल गया है।" : 
              language === 'gu' ? "રુદ્રમ જોશીએ તેમનું જીવન ગ્રહોની ગતિ સમજવામાં સમર્પિત કર્યું છે. તેમની ચોક્કસ આગાહીથી હજારો લોકોનું જીવન બદલાઈ ગયું છે." :
@@ -36,9 +36,9 @@ export default function AboutPage() {
     ];
   
   const stats = [
-    { icon: Users, value: "2,000+", label: t("Satisfied Clients") },
-    { icon: Calendar, value: "18+", label: t("Years of Experience") },
-    { icon: Heart, value: "98%", label: t("Satisfaction Rate") },
+    { icon: Users, value: "10k+", label: language === 'hi' ? "परामर्श" : language === 'gu' ? "પરામર્શ" : "Consultations" },
+    { icon: Calendar, value: "17+", label: language === 'hi' ? "वर्षों का अनुभव" : language === 'gu' ? "વર્ષોનો અનુભવ" : "Years Experience" },
+    { icon: Award, value: "4.9/5", label: language === 'hi' ? "औसत रेटिंग" : language === 'gu' ? "સરેરાશ રેટિંગ" : "Average Rating" },
   ];
 
   const values = [

@@ -532,10 +532,10 @@ export default function HomePageClient({ initialLatestPosts }: HomePageClientPro
             <p className={`text-xl ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>{content.testimonialsDesc}</p>
             {/* Review count badge */}
               <div className="flex flex-col items-center mt-4 gap-3">
-                  <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold border ${theme === 'dark' ? 'bg-[#ff6b35]/10 border-[#ff6b35]/30 text-[#ff8c5e]' : 'bg-[#ff6b35]/10 border-[#ff6b35]/30 text-[#ff6b35]'}`}>
-                      <Star className="w-3.5 h-3.5 fill-current" />
-                      {language === 'gu' ? '૪.૯ રેટિંગ (૧૨૭+ સમીક્ષાઓ)' : language === 'hi' ? '4.9 रेटिंग (127+ समीक्षाएं)' : '4.9 Rating (127+ Reviews)'}
-                  </span>
+                    <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold border ${theme === 'dark' ? 'bg-[#ff6b35]/10 border-[#ff6b35]/30 text-[#ff8c5e]' : 'bg-[#ff6b35]/10 border-[#ff6b35]/30 text-[#ff6b35]'}`}>
+                        <Star className="w-3.5 h-3.5 fill-current" />
+                        {language === 'gu' ? '૪.૯ રેટિંગ (૧૦,૦૦૦+ પરામર્શ)' : language === 'hi' ? '4.9 रेटिंग (10,000+ परामर्श)' : '4.9 Rating (10,000+ Consultations)'}
+                    </span>
                   <a 
                     href="https://search.google.com/local/reviews?placeid=ChIJU4nnqVi3bg4RyDOjuqExd_w" 
                     target="_blank" 

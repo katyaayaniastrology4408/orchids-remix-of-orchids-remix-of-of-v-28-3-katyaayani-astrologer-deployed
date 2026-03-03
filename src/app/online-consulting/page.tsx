@@ -107,9 +107,9 @@ const faqs = {
 };
 
 const stats = [
-  { value: "5000+", labelEn: "Happy Clients", labelHi: "खुश ग्राहक", labelGu: "ખુશ ગ્રાહકો" },
-  { value: "15+", labelEn: "Years Experience", labelHi: "वर्षों का अनुभव", labelGu: "વર્ષોનો અનુભવ" },
-  { value: "98%", labelEn: "Satisfaction Rate", labelHi: "संतुष्टि दर", labelGu: "સંતોષ દર" }
+  { value: "10k+", labelEn: "Consultations", labelHi: "परामर्श", labelGu: "પરામર્શ" },
+  { value: "17+", labelEn: "Years Experience", labelHi: "वर्षों का अनुभव", labelGu: "વર્ષોનો અનુભવ" },
+  { value: "4.9/5", labelEn: "Average Rating", labelHi: "औसत रेटिंग", labelGu: "સરેરાશ રેટિંગ" }
 ];
 
 interface OnlineBooking {

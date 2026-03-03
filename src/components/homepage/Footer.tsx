@@ -71,9 +71,9 @@ export default function Footer() {
                   ))}
                 </div>
               </div>
-                <p className={`text-xs font-bold ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
-                  4.9 / 5.0 {language === 'gu' ? '(૧૨૭+ સમીક્ષાઓ)' : language === 'hi' ? '(127+ समीक्षाएं)' : '(127+ Reviews)'}
-                </p>
+                  <p className={`text-xs font-bold ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
+                    4.9 / 5.0 {language === 'gu' ? '(૧૦,૦૦૦+ પરામર્શ)' : language === 'hi' ? '(10,000+ परामर्श)' : '(10,000+ Consultations)'}
+                  </p>
                 <a 
                   href="https://search.google.com/local/reviews?placeid=ChIJU4nnqVi3bg4RyDOjuqExd_w"
                   target="_blank"

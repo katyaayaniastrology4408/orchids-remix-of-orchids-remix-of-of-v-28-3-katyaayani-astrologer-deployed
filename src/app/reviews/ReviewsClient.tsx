@@ -344,9 +344,9 @@ export default function ReviewsClient() {
                     </p>
                   </div>
                 </div>
-                    <p className="text-lg font-bold mb-8">
-                      {t('Based on 127+ authentic customer reviews', '127+ प्रामाणिक ग्राहक समीक्षाओं के आधार पर', '127+ અધિકૃત ગ્રાહક સમીક્ષાઓના આધારે')}
-                    </p>
+                      <p className="text-lg font-bold mb-8">
+                        {t('Based on 10,000+ authentic customer consultations', '10,000+ प्रामाणिक ग्राहक परामर्श के आधार पर', '૧૦,૦૦૦+ અધિકૃત ગ્રાહક પરામર્શના આધારે')}
+                      </p>
                   </div>
 
                   <div className="flex flex-wrap justify-center gap-4">

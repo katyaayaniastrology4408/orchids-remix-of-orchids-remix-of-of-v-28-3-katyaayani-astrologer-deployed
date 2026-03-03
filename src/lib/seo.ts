@@ -37,11 +37,11 @@ const PAGE_DEFAULTS: Record<string, { title: string; description: string; keywor
     description: `${BRAND_DESC} Expert ancient astrology consultations, kundali analysis, horoscope readings, vastu shastra & personalized remedies since 2007. Book online or home consultation today.`,
     keywords: "katyaayani astrologer, katyaayani jyotish, ancient astrologer, best astrologer, kundali analysis, horoscope reading, jyotish consultation, astrology online, vastu shastra, rudram joshi astrologer, indian astrology, birth chart analysis, rashifal, panchang, hindu calendar, astrology consultation online, best ancient astrologer india, kundali matching, marriage astrology, career astrology, health astrology, astrology remedies, ancient astrology modern times, ancient wisdom technology, કાત્યાયની જ્યોતિષ, कात्यायनी ज्योतिष",
   },
-  "/about": {
-    title: "About Katyaayani Astrologer (Rudram Joshi) - Trusted Ancient Astrologer Since 2007",
-    description: `${BRAND_DESC} Learn about Rudram Joshi - a trusted ancient astrology expert with 18+ years experience offering kundali analysis, horoscope readings, vastu consultation & spiritual guidance.`,
-    keywords: "about katyaayani astrologer, rudram joshi astrologer, ancient astrologer experience, trusted astrologer india, katyaayani jyotish about, ancient wisdom modern astrology",
-  },
+    "/about": {
+      title: "About Katyaayani Astrologer (Rudram Joshi) - Trusted Ancient Astrologer Since 2007",
+      description: `${BRAND_DESC} Learn about Rudram Joshi - a trusted ancient astrology expert with 17+ years experience offering kundali analysis, horoscope readings, vastu consultation & spiritual guidance.`,
+      keywords: "about katyaayani astrologer, rudram joshi astrologer, ancient astrologer experience, trusted astrologer india, katyaayani jyotish about, ancient wisdom modern astrology",
+    },
   "/services": {
     title: "Astrology Services - Kundali, Horoscope, Vastu & Marriage Matching | Katyaayani",
     description: `Explore Katyaayani Astrologer's services: kundali analysis, horoscope reading, kundali matching for marriage, vastu shastra, career astrology, health astrology & personalized ancient remedies. ${BRAND_DESC}`,

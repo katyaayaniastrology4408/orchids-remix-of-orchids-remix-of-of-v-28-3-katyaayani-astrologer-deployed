@@ -119,9 +119,9 @@ export default function KundliPage() {
                 </p>
                 <p className={`text-lg leading-relaxed ${theme === "dark" ? "text-[#a0998c]" : "text-[#6b5847]"}`}>
                   {t(
-                    "Katyaayani Astrologer (Rudram Joshi) has 18+ years of experience reading and interpreting Kundalis. With deep knowledge of Parashari and Jaimini systems, every reading is personalized, accurate, and actionable.",
-                    "कात्यायनी ज्योतिषी (रुद्रम जोशी) के पास कुंडली पढ़ने और व्याख्या करने का 18+ वर्षों का अनुभव है। पाराशरी और जैमिनी प्रणालियों की गहरी जानकारी के साथ, प्रत्येक पठन व्यक्तिगत, सटीक और व्यावहारिक है।",
-                    "કાત્યાયની જ્યોતિષ (રુદ્રમ જોષી) ને 18+ વર્ષનો કુંડળી વાંચન અને અર્થઘટનનો અનુભવ છે. પારાશરી અને જૈમિની પ્રણાલીઓના ઊંડા જ્ઞાન સાથે, દરેક વાંચન વ્યક્તિગત, ચોક્કસ અને ઉપયોગી છે."
+                    "Katyaayani Astrologer (Rudram Joshi) has 17+ years of experience reading and interpreting Kundalis. With deep knowledge of Parashari and Jaimini systems, every reading is personalized, accurate, and actionable.",
+                    "कात्यायनी ज्योतिषी (रुद्रम जोशी) के पास कुंडली पढ़ने और व्याख्या करने का 17+ वर्षों का अनुभव है। पाराशरी और जैमिनी प्रणालियों की गहरी जानकारी के साथ, प्रत्येक पठन व्यक्तिगत, सटीक और व्यावहारिक है।",
+                    "કાત્યાયની જ્યોતિષ (રુદ્રમ જોષી) ને 17+ વર્ષનો કુંડળી વાંચન અને અર્થઘટનનો અનુભવ છે. પારાશરી અને જૈમિની પ્રણાલીઓના ઊંડા જ્ઞાન સાથે, દરેક વાંચન વ્યક્તિગત, ચોક્કસ અને ઉપયોગી છે."
                   )}
                 </p>
               </div>
