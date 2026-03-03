@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import NextImage from "next/image";
 import dynamic from "next/dynamic";
-// Standardized icons - Updated 2026-03-03-T23:12
+// Standardized icons - Updated 2026-03-04-T00:30
 import { Star, Moon, Sun, Sparkles, Home, Video, ChevronRight, ChevronDown, Calendar, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -477,7 +477,7 @@ export default function HomePageClient({ initialLatestPosts }: HomePageClientPro
                   <Card className={`overflow-hidden h-full transition-all duration-300 group-hover:shadow-xl group-hover:shadow-[#ff6b35]/10 group-hover:-translate-y-1 ${theme === 'dark' ? 'bg-[#12121a] border-[#ff6b35]/20' : 'bg-[#fffdf9] border-[#ff6b35]/20'}`}>
                     {post.featured_image && (
                       <div className="relative h-48 overflow-hidden">
-                        <Image
+                        <NextImage
                           src={post.featured_image}
                           alt={post.title}
                           fill
