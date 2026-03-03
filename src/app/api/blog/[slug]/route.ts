@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '@/lib/email.config';
-import { newBlogPostTemplate, blogPostUpdatedTemplate } from '@/lib/email-templates';
+import { newBlogPostTemplate } from '@/lib/email-templates';
 import { autoIndexUrl } from '@/lib/auto-index';
 export const dynamic = 'force-dynamic' ; 
 
@@ -9,32 +9,6 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
-
-async function sendBlogUpdateNotificationToAllUsers(post: { title: string; excerpt?: string; slug: string; category?: string; featured_image?: string }) {
-  try {
-    const { data: profiles, error } = await supabase
-      .from('profiles')
-      .select('email, name');
-
-    if (error || !profiles || profiles.length === 0) return;
-
-    const results = await Promise.allSettled(
-      profiles.map(user => {
-        const userName = user.name || 'Seeker';
-        return sendEmail({
-          to: user.email,
-          subject: `Blog Updated: ${post.title} - Katyaayani Astrologer`,
-          html: blogPostUpdatedTemplate(post, userName),
-        });
-      })
-    );
-
-    const successCount = results.filter(r => r.status === 'fulfilled' && (r as any).value?.success).length;
-    console.log(`Blog update notification emails sent: ${successCount}/${profiles.length}`);
-  } catch (err) {
-    console.error('Error sending blog update notification emails:', err);
-  }
-}
 
 async function sendBlogNotificationToAllUsers(post: { title: string; excerpt?: string; slug: string; category?: string; featured_image?: string }) {
   try {
@@ -224,17 +198,9 @@ export async function PUT(
           // Auto-index newly published blog post
           autoIndexUrl(`/blog/${data.slug}`);
         } else if (!isNewlyPublished && data && data.is_published) {
-          // Send update notification for already-published blog that was edited
-          sendBlogUpdateNotificationToAllUsers({
-            title: data.title,
-            excerpt: data.excerpt,
-            slug: data.slug,
-            category: data.category,
-            featured_image: data.featured_image,
-          });
-          // Re-index updated published post
-          autoIndexUrl(`/blog/${data.slug}`);
-        }
+            // Re-index updated published post (no email to users on update)
+            autoIndexUrl(`/blog/${data.slug}`);
+          }
 
       return NextResponse.json({ success: true, data });
   } catch (error) {
