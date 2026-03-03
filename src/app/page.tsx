@@ -65,8 +65,16 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const { data: galleryImages } = await supabaseAdmin
     .from("gallery")
-    .select("image_url, title, description")
-    .eq("is_active", true);
+    .select("id, image_url, title, description, created_at")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
+
+  const { data: latestPosts } = await supabaseAdmin
+    .from("blog")
+    .select("id, title, slug, excerpt, featured_image, created_at")
+    .eq("is_published", true)
+    .order("created_at", { ascending: false })
+    .limit(3);
 
   const schema = generateSchemaMarkup("/", undefined, { 
     galleryImages: (galleryImages || []).map(img => ({
@@ -124,7 +132,10 @@ export default async function HomePage() {
       </div>
 
       {/* Interactive client-side homepage */}
-      <HomePageClient />
+      <HomePageClient 
+        initialGalleryImages={galleryImages || []} 
+        initialLatestPosts={latestPosts || []} 
+      />
     </>
   );
 }

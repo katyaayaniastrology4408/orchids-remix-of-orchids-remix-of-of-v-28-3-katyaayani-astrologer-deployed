@@ -10,27 +10,68 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 import Navbar from "@/components/homepage/Navbar";
-const Footer = dynamic(() => import("@/components/homepage/Footer"), { ssr: false });
-const CosmicInsights = dynamic(() => import("@/components/homepage/CosmicInsights"), { ssr: false });
-const StarField = dynamic(() => import("@/components/homepage/StarField"), { ssr: false });
-const RashifalSection = dynamic(() => import("@/components/homepage/RashifalSection"), { ssr: false });
-const AstrologerTip = dynamic(() => import("@/components/homepage/AstrologerTip"), { ssr: false });
-const ChandraGrahanBanner = dynamic(() => import("@/components/homepage/ChandraGrahanBanner"), { ssr: false });
+import Image from "next/image";
+
+const Footer = dynamic(() => import("@/components/homepage/Footer"), { 
+  ssr: false,
+  loading: () => <div className="h-[400px] w-full bg-gray-100/5 animate-pulse" />
+});
+const CosmicInsights = dynamic(() => import("@/components/homepage/CosmicInsights"), { 
+  ssr: false,
+  loading: () => <div className="h-[600px] w-full bg-gray-100/5 animate-pulse" />
+});
+const StarField = dynamic(() => import("@/components/homepage/StarField"), { 
+  ssr: false 
+});
+const RashifalSection = dynamic(() => import("@/components/homepage/RashifalSection"), { 
+  ssr: false,
+  loading: () => <div className="h-[500px] w-full bg-gray-100/5 animate-pulse" />
+});
+const AstrologerTip = dynamic(() => import("@/components/homepage/AstrologerTip"), { 
+  ssr: false,
+  loading: () => <div className="h-[300px] w-full bg-gray-100/5 animate-pulse" />
+});
+const ChandraGrahanBanner = dynamic(() => import("@/components/homepage/ChandraGrahanBanner"), { 
+  ssr: false,
+  loading: () => <div className="h-[120px] w-full bg-gray-100/5 animate-pulse mt-[72px]" />
+});
+
 import { testimonialsData, contentData } from "@/data/homepage";
 import "@/styles/homepage.css";
 
-export default function HomePageClient() {
+interface GalleryImage {
+  id: string;
+  image_url: string;
+  title: string;
+  description: string;
+  created_at: string;
+}
+
+interface LatestPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  featured_image: string;
+  created_at: string;
+}
+
+interface HomePageClientProps {
+  initialGalleryImages: GalleryImage[];
+  initialLatestPosts: LatestPost[];
+}
+
+export default function HomePageClient({ initialGalleryImages, initialLatestPosts }: HomePageClientProps) {
   const [mounted, setMounted] = useState(false);
   const { theme } = useTheme();
   const { language } = useTranslation();
   const { user, showAuthModal, showEnquiryModal } = useAuth();
   const [panchangTimes, setPanchangTimes] = useState({ sunrise: "--", sunset: "--" });
-    const [panchangApiData, setPanchangApiData] = useState<any>(null);
-    const [hinduCalendar, setHinduCalendar] = useState({ month: "--", tithi: "--", vaara: "--", paksha: "--" });
-    const [dbReviews, setDbReviews] = useState<{ name: string; text: string; rating: number }[]>([]);
-    const [galleryImages, setGalleryImages] = useState<{ id: string; image_url: string; title: string; description: string; created_at: string }[]>([]);
-  
-    const [latestPosts, setLatestPosts] = useState<{ id: string; title: string; slug: string; excerpt: string; featured_image: string; created_at: string }[]>([]);
+  const [panchangApiData, setPanchangApiData] = useState<any>(null);
+  const [hinduCalendar, setHinduCalendar] = useState({ month: "--", tithi: "--", vaara: "--", paksha: "--" });
+  const [dbReviews, setDbReviews] = useState<{ name: string; text: string; rating: number }[]>([]);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(initialGalleryImages);
+  const [latestPosts, setLatestPosts] = useState<LatestPost[]>(initialLatestPosts);
 
   useEffect(() => {
     setMounted(true);
@@ -45,34 +86,37 @@ export default function HomePageClient() {
       })
       .catch(() => {});
 
-    // Fetch latest 3 blog posts
-    fetch('/api/blog?limit=3&published=true')
-      .then(r => r.json())
-      .then(json => {
-        if (json.success && Array.isArray(json.data)) {
-          setLatestPosts(json.data.slice(0, 3));
-        }
-      })
-      .catch(() => {});
+    // Refresh data if needed (though it's fetched on server)
+    if (initialGalleryImages.length === 0) {
+      fetch('/api/gallery')
+        .then(r => r.json())
+        .then(json => {
+          if (json.success && Array.isArray(json.data)) {
+            setGalleryImages(json.data);
+          }
+        })
+        .catch(() => {});
+    }
 
-    // Fetch gallery images
-    fetch('/api/gallery')
-      .then(r => r.json())
-      .then(json => {
-        if (json.success && Array.isArray(json.data)) {
-          setGalleryImages(json.data);
-        }
-      })
-      .catch(() => {});
+    if (initialLatestPosts.length === 0) {
+      fetch('/api/blog?limit=3&published=true')
+        .then(r => r.json())
+        .then(json => {
+          if (json.success && Array.isArray(json.data)) {
+            setLatestPosts(json.data.slice(0, 3));
+          }
+        })
+        .catch(() => {});
+    }
     
     let lastFetchDate = '';
 
     const fetchPanchangData = async () => {
       try {
         const today = new Date().toISOString().split('T')[0];
-          const res = await fetch(`/api/panchang?t=${today}`, { cache: 'no-store' });
-          if (!res.ok) return;
-          const data = await res.json();
+        const res = await fetch(`/api/panchang?t=${today}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
         if (data.success) {
           lastFetchDate = today;
           setPanchangApiData(data.data);
@@ -113,8 +157,8 @@ export default function HomePageClient() {
       }
     }, 60 * 1000);
     const refreshId = setInterval(fetchPanchangData, 30 * 60 * 1000);
-      return () => { clearInterval(intervalId); clearInterval(refreshId); };
-    }, [language]);
+    return () => { clearInterval(intervalId); clearInterval(refreshId); };
+  }, [language, initialGalleryImages.length, initialLatestPosts.length]);
 
   // Chandra Grahan 2026 — schedule email blast 1 hour after page first load
   useEffect(() => {
@@ -132,29 +176,6 @@ export default function HomePageClient() {
     }, 60 * 60 * 1000); // 1 hour
     return () => clearTimeout(timer);
   }, []);
-
-  if (!mounted) {
-    // Render a minimal skeleton to avoid blank screen and improve LCP
-    return (
-      <div className="min-h-screen bg-[#fdfbf7]">
-        <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b bg-[#f5f0e8]/95 border-[#ff6b35]/20">
-          <div className="max-w-7xl mx-auto px-4 py-3 h-[64px]" />
-        </nav>
-        <section className="min-h-[60vh] flex items-center justify-center py-24">
-          <div className="text-center px-6 max-w-4xl">
-            <div className="flex justify-center gap-4 mb-6">
-              <Sun className="w-12 h-12 text-[#ff6b35]" />
-              <Moon className="w-12 h-12 text-[#ffa07a]" />
-              <Star className="w-12 h-12 text-[#ff6b35]" />
-            </div>
-            <h2 className="font-[family-name:var(--font-cinzel)] text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gradient-ancient">
-              Katyaayani Astrologer
-            </h2>
-          </div>
-        </section>
-      </div>
-    );
-  }
 
   const content = contentData[language];
   const staticTestimonials = testimonialsData[language];
@@ -183,7 +204,7 @@ export default function HomePageClient() {
         }`} />
 
         <div className="relative z-10 text-center px-6 max-w-4xl">
-          <div className="fade-in-up">
+          <div className={mounted ? "fade-in-up" : ""}>
             <div className="flex justify-center gap-4 mb-6">
               <Sun className="w-12 h-12 text-[#ff6b35]" />
               <Moon className="w-12 h-12 text-[#ffa07a]" />
@@ -196,7 +217,7 @@ export default function HomePageClient() {
               {content.heroDesc}
             </p>
 
-            <div className={`inline-flex items-center gap-6 px-6 py-3 rounded-2xl border mb-10 ${
+            <div className={`inline-flex items-center gap-6 px-6 py-3 rounded-2xl border mb-10 min-h-[66px] ${
               theme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-[#ff6b35]/5 border-[#ff6b35]/20'
             }`}>
               <div className="flex items-center gap-2">
@@ -220,7 +241,7 @@ export default function HomePageClient() {
               </div>
             </div>
 
-            <div className={`inline-flex flex-wrap items-center justify-center gap-4 px-5 py-2.5 rounded-2xl border mb-10 ${
+            <div className={`inline-flex flex-wrap items-center justify-center gap-4 px-5 py-2.5 rounded-2xl border mb-10 min-h-[66px] ${
               theme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-[#ff6b35]/5 border-[#ff6b35]/20'
             }`}>
               <div className="flex items-center gap-2">
@@ -328,7 +349,7 @@ export default function HomePageClient() {
                   {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 fill-[#ff6b35] text-[#ff6b35]" />)}
                 </div>
                 <p className={`text-sm uppercase tracking-widest font-semibold ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
-                  {language === 'gu' ? 'રેટિંગ' : language === 'hi' ? 'रेटિંગ' : 'Average Rating'}
+                  {language === 'gu' ? 'રેટિંગ' : language === 'hi' ? 'રેટિંગ' : 'Average Rating'}
                 </p>
               </div>
             </div>
@@ -336,7 +357,7 @@ export default function HomePageClient() {
         </section>
 
         {/* Mobile & Tablet Only Sign-in Section */}
-      <section className={`lg:hidden py-6 px-4 flex justify-center ${(!mounted || user) ? 'hidden' : 'block'}`}>
+      <section className={`lg:hidden py-6 px-4 flex justify-center ${user ? 'hidden' : 'block'}`}>
         <div className={`fade-in-up max-w-sm w-full p-5 rounded-2xl text-center relative overflow-hidden ${
           theme === 'dark' 
             ? 'bg-[#1a1a2e] border border-[#ff6b35]/20 shadow-lg shadow-[#ff6b35]/10' 
@@ -473,12 +494,13 @@ export default function HomePageClient() {
                   key={img.id}
                   className="group relative flex flex-col bg-white dark:bg-[#12121a] rounded-3xl overflow-hidden border border-[#ff6b35]/10 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
                 >
-                  <div className="aspect-[4/5] overflow-hidden bg-black/5 relative">
-                    <img 
+                  <div className="aspect-[4/5] relative overflow-hidden bg-black/5">
+                    <Image 
                       src={img.image_url} 
                       alt={img.description || img.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      loading="lazy"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   </div>
@@ -520,10 +542,12 @@ export default function HomePageClient() {
                   <Card className={`overflow-hidden h-full transition-all duration-300 group-hover:shadow-xl group-hover:shadow-[#ff6b35]/10 group-hover:-translate-y-1 ${theme === 'dark' ? 'bg-[#12121a] border-[#ff6b35]/20' : 'bg-[#fffdf9] border-[#ff6b35]/20'}`}>
                     {post.featured_image && (
                       <div className="relative h-48 overflow-hidden">
-                        <img
+                        <Image
                           src={post.featured_image}
                           alt={post.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          sizes="(max-width: 768px) 100vw, 33vw"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                       </div>
