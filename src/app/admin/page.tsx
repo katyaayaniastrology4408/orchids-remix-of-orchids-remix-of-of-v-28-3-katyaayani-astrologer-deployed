@@ -105,13 +105,14 @@ import PricingPanel from "@/components/admin/PricingPanel";
 
 // Safe JSON parse helper - prevents "Unexpected end of JSON input" errors
 async function safeJson(res: Response) {
-  if (!res.ok) {
-    try { const text = await res.text(); return text ? JSON.parse(text) : { success: false }; } catch { return { success: false }; }
-  }
+  if (res.status === 204) return { success: true };
   try {
     const text = await res.text();
-    return text ? JSON.parse(text) : { success: false };
-  } catch { return { success: false }; }
+    if (!text) return { success: res.ok };
+    return JSON.parse(text);
+  } catch {
+    return { success: res.ok };
+  }
 }
 
 type Activity = {

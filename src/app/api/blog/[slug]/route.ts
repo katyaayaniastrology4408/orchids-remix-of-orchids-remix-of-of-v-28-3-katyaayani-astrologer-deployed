@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '@/lib/email.config';
-import { newBlogPostTemplate } from '@/lib/email-templates';
+import { newBlogPostTemplate, blogPostUpdatedTemplate } from '@/lib/email-templates';
 import { autoIndexUrl } from '@/lib/auto-index';
 export const dynamic = 'force-dynamic' ; 
 

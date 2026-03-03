@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { Open_Sans, Cinzel } from "next/font/google";
 import "./globals.css";
 import ErrorReporter from "@/components/ErrorReporter";
-import dynamic from "next/dynamic";
-
-const VisualEditsMessengerClient = dynamic(() => import("@/components/VisualEditsMessengerClient"), { ssr: false });
+import VisualEditsMessengerClient from "@/components/VisualEditsMessengerClient";
 import Script from "next/script";
 import { Providers } from "@/components/Providers";
 import UnifiedLoginPopup from "@/components/auth/UnifiedLoginPopup";
