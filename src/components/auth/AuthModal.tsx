@@ -85,26 +85,10 @@ export default function AuthModal() {
     }
   }, [authView]);
 
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    setError("");
-    try {
-      const appUrl = window.location.origin;
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${appUrl}/auth/callback`,
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
-        },
-      });
-      if (error) throw error;
-    } catch (err: any) {
-      setError(err.message || "Google sign-in failed");
-      setIsLoading(false);
-    }
+  const handleGoogleSignIn = () => {
+    // Redirect directly to our server-side Google OAuth route
+    // This bypasses supabase.co entirely — works reliably in India
+    window.location.href = "/api/auth/google";
   };
 
   const validatePassword = (pass: string) => {

@@ -1,13 +1,18 @@
 import { NextResponse } from "next/server";
 
-export async function GET() {
+// Redirects browser to Google's OAuth consent screen directly
+// No supabase.co involved — pure Google OAuth PKCE flow
+export async function GET(req: Request) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   if (!clientId) {
-    return NextResponse.json({ error: "Google OAuth not configured" }, { status: 500 });
+    return NextResponse.json({ error: "Google OAuth not configured. Please add GOOGLE_CLIENT_ID to environment variables." }, { status: 500 });
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const redirectUri = `${appUrl}/api/auth/google/callback`;
+
+  // Store a random state in the redirect URL for CSRF protection
+  const state = Math.random().toString(36).substring(2, 18);
 
   const params = new URLSearchParams({
     client_id: clientId,
@@ -16,9 +21,21 @@ export async function GET() {
     scope: "openid email profile",
     access_type: "offline",
     prompt: "consent",
+    state,
   });
 
-  return NextResponse.redirect(
+  const response = NextResponse.redirect(
     `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
   );
+
+  // Store state in cookie for verification
+  response.cookies.set("google_oauth_state", state, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 600, // 10 minutes
+    path: "/",
+  });
+
+  return response;
 }
