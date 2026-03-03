@@ -41,19 +41,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // --- Blog Posts ---
   let blogPages: MetadataRoute.Sitemap = [];
-  try {
-    const { data: blogs } = await supabase
-      .from("blog_posts")
-      .select("slug, updated_at, published_at")
-      .eq("is_published", true);
+    try {
+      const { data: blogs } = await supabase
+        .from("blog_posts")
+        .select("slug, updated_at, published_at, featured_image")
+        .eq("is_published", true);
 
-    blogPages = (blogs || []).map((blog) => ({
-      url: `${baseUrl}/blog/${blog.slug}`,
-      lastModified: new Date(blog.updated_at || blog.published_at),
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    }));
-  } catch (e) { console.error("Sitemap blog error:", e); }
+      blogPages = (blogs || []).map((blog) => ({
+        url: `${baseUrl}/blog/${blog.slug}`,
+        lastModified: new Date(blog.updated_at || blog.published_at),
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+        images: blog.featured_image ? [blog.featured_image] : [],
+      }));
+    } catch (e) { console.error("Sitemap blog error:", e); }
 
   // --- CMS Pages ---
   let cmsPages: MetadataRoute.Sitemap = [];
