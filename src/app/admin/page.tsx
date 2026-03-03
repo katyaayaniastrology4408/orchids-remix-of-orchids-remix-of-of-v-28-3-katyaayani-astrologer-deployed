@@ -4366,12 +4366,19 @@ function BlogManager({ isDark, t, isActionLoading, setIsActionLoading, setSucces
   });
 
   const BLOG_CATEGORIES = [
-    { value: 'astrology', label: 'Astrology' },
-    { value: 'rashifal', label: 'Rashifal' },
-    { value: 'vastu', label: 'Vastu' },
-    { value: 'numerology', label: 'Numerology' },
-    { value: 'spirituality', label: 'Spirituality' },
-  ];
+      { value: 'astrology', label: 'Astrology / જ્યોતિષ' },
+      { value: 'festivals', label: 'Festivals / તહેવાર' },
+      { value: 'grahan', label: 'Grahan / ગ્રહણ' },
+      { value: 'muhurat', label: 'Muhurat / મુહૂર્ત' },
+      { value: 'rashifal', label: 'Rashifal / રાશિફળ' },
+      { value: 'vastu', label: 'Vastu / વાસ્તુ' },
+      { value: 'numerology', label: 'Numerology / અંકશાસ્ત્ર' },
+      { value: 'spirituality', label: 'Spirituality / અધ્યાત્મ' },
+      { value: 'puja', label: 'Puja & Vidhi / પૂજા' },
+      { value: 'remedies', label: 'Remedies / ઉપાય' },
+      { value: 'kundli', label: 'Kundli / કુંડળી' },
+      { value: 'vrat', label: 'Vrat & Calendar / વ્રત' },
+    ];
 
   useEffect(() => {
       fetchBlogPosts();
