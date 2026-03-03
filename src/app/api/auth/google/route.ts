@@ -15,18 +15,25 @@ export async function GET(req: Request) {
   const forwardedProto = req.headers.get("x-forwarded-proto") || "https";
   const host = forwardedHost || req.headers.get("host") || "www.katyaayaniastrologer.com";
   
-  // Robust local detection
-  const isLocal = host.includes("localhost") || 
-                  host.includes("127.0.0.1") || 
-                  host.startsWith("192.168.") || 
-                  host.startsWith("10.") || 
-                  host.startsWith("172.");
+  // Robust local detection - explicitly check if it's a localhost/internal IP
+  const isLocalHost = host.includes("localhost") || host.includes("127.0.0.1");
+  const isLocalIP = host.startsWith("192.168.") || host.startsWith("10.") || host.startsWith("172.");
+  const isLocal = isLocalHost || isLocalIP;
   
-  // In production, ALWAYS prefer the configured APP_URL to avoid redirect mismatches
-  // Unless we are explicitly on a local testing domain
-  const appUrl = (process.env.NODE_ENV === "production" && !isLocal)
-    ? (process.env.NEXT_PUBLIC_APP_URL || `https://${host}`)
-    : `${isLocal ? "http" : forwardedProto}://${host}`;
+  // Explicitly check for production domain to avoid any confusion
+  const isProductionDomain = host.includes("katyaayaniastrologer.com");
+
+  // Determine the base URL for redirects
+  let appUrl: string;
+  
+  if (isProductionDomain) {
+    appUrl = "https://www.katyaayaniastrologer.com";
+  } else if (process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes("localhost") && !isLocal) {
+    appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  } else {
+    // Fallback for local development or orchids preview
+    appUrl = `${isLocal ? "http" : forwardedProto}://${host}`;
+  }
     
   const redirectUri = `${appUrl}/api/auth/google/callback`;
 

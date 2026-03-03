@@ -65,11 +65,11 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
       "Content-Security-Policy",
       [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://*.supabase.co https://consent.cookiebot.com https://consentcdn.cookiebot.com",
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-        "font-src 'self' data: https://fonts.gstatic.com",
-        "img-src 'self' data: blob: https:",
-        "connect-src 'self' https://*.supabase.co https://api.resend.com https://api.telegram.org https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://region1.google-analytics.com https://consentcdn.cookiebot.com https://consent.cookiebot.com https://www.google.com https://googleads.g.doubleclick.net https://oauth2.googleapis.com https://www.googleapis.com https://accounts.google.com",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://*.supabase.co https://consent.cookiebot.com https://consentcdn.cookiebot.com https://translate.googleapis.com https://translate.google.com https://va.vercel-scripts.com",
+          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://translate.googleapis.com",
+          "font-src 'self' data: https://fonts.gstatic.com",
+          "img-src 'self' data: blob: https: https://www.google.com https://www.gstatic.com https://translate.google.com",
+          "connect-src 'self' https://*.supabase.co https://api.resend.com https://api.telegram.org https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://region1.google-analytics.com https://consentcdn.cookiebot.com https://consent.cookiebot.com https://www.google.com https://googleads.g.doubleclick.net https://oauth2.googleapis.com https://www.googleapis.com https://accounts.google.com https://translate.googleapis.com",
         "frame-src 'self' https://www.googletagmanager.com https://consent.cookiebot.com https://consentcdn.cookiebot.com https://accounts.google.com",
         "frame-ancestors 'self'",
         "base-uri 'self'",
@@ -96,7 +96,7 @@ function checkCsrf(req: NextRequest): boolean {
   return allowed.some((a) => source.startsWith(a));
 }
 
-export async function proxy(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown";
   maybeCleanup();
