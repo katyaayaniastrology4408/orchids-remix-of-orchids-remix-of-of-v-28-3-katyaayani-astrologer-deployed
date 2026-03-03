@@ -14,6 +14,8 @@ import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import PageViewTracker from "@/components/PageViewTracker";
 import NewsletterPopup from "@/components/NewsletterPopup";
 import SchemaMarkup from "@/components/SchemaMarkup";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const openSans = Open_Sans({
   subsets: ["latin"],
@@ -306,9 +308,11 @@ gtag('config', 'G-D13ED7NS0T');`}
                             <UserAlertsPopup />
                         <PageViewTracker />
                         <NewsletterPopup />
-                        <SchemaMarkup />
-                      </Providers>
-        <VisualEditsMessenger />
+                          <SchemaMarkup />
+                        </Providers>
+            <Analytics />
+            <SpeedInsights />
+          <VisualEditsMessenger />
       </body>
     </html>
   );
