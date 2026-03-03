@@ -518,22 +518,22 @@ export default function HomePageClient() {
             </h2>
             <p className={`text-xl ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>{content.testimonialsDesc}</p>
             {/* Review count badge */}
-            <div className="flex flex-col items-center mt-4 gap-3">
-              <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold border ${theme === 'dark' ? 'bg-[#ff6b35]/10 border-[#ff6b35]/30 text-[#ff8c5e]' : 'bg-[#ff6b35]/10 border-[#ff6b35]/30 text-[#ff6b35]'}`}>
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                  {language === 'gu' ? '૪.૯ રેટિંગ (૧૨૭+ સમીક્ષાઓ)' : language === 'hi' ? '4.9 रेटिंग (127+ समीक्षाएं)' : '4.9 Rating (127+ Reviews)'}
-              </span>
-              <a 
-                href="https://g.page/r/CU_fN-rG_K4REAE/review" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-xs font-bold opacity-70 hover:opacity-100 transition-opacity"
-              >
-                <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" className="h-3 object-contain" />
-                <span>{language === 'gu' ? 'ગૂગલ પર જુઓ' : language === 'hi' ? 'गूगल पर देखें' : 'View on Google'}</span>
-                <ChevronRight className="w-3 h-3" />
-              </a>
-            </div>
+              <div className="flex flex-col items-center mt-4 gap-3">
+                  <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold border ${theme === 'dark' ? 'bg-[#ff6b35]/10 border-[#ff6b35]/30 text-[#ff8c5e]' : 'bg-[#ff6b35]/10 border-[#ff6b35]/30 text-[#ff6b35]'}`}>
+                      <Star className="w-3.5 h-3.5 fill-current" />
+                      {language === 'gu' ? '૪.૯ રેટિંગ (૧૨૭+ સમીક્ષાઓ)' : language === 'hi' ? '4.9 रेटिंग (127+ समीक्षाएं)' : '4.9 Rating (127+ Reviews)'}
+                  </span>
+                  <a 
+                    href="https://search.google.com/local/reviews?placeid=ChIJU4nnqVi3bg4RyDOjuqExd_w" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-xs font-bold opacity-70 hover:opacity-100 transition-opacity"
+                >
+                  <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" className="h-3 object-contain" />
+                  <span>{language === 'gu' ? 'ગૂગલ પર જુઓ' : language === 'hi' ? 'गूगल पर देखें' : 'View on Google'}</span>
+                  <ChevronRight className="w-3 h-3" />
+                </a>
+              </div>
           </div>
 
           {/* First 3 reviews always visible */}

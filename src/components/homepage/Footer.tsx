@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Phone, Mail, MapPin, Send, Loader2, CheckCircle, Globe, Instagram } from "lucide-react";
+import { Phone, Mail, MapPin, Send, Loader2, CheckCircle, Instagram, Star, ChevronRight } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 import { contentData } from "@/data/homepage";
@@ -60,6 +60,31 @@ export default function Footer() {
             <p className={theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'}>
               {content.footerDesc}
             </p>
+            
+            {/* Google Reviews Badge */}
+            <div className="mt-6 flex flex-col items-start gap-2">
+              <div className="flex items-center gap-2">
+                <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" className="h-4 object-contain" />
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-3 h-3 fill-[#FBBC05] text-[#FBBC05]" />
+                  ))}
+                </div>
+              </div>
+                <p className={`text-xs font-bold ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
+                  4.9 / 5.0 {language === 'gu' ? '(૧૨૭+ સમીક્ષાઓ)' : language === 'hi' ? '(127+ समीक्षाएं)' : '(127+ Reviews)'}
+                </p>
+                <a 
+                  href="https://search.google.com/local/reviews?placeid=ChIJU4nnqVi3bg4RyDOjuqExd_w"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] font-bold text-[#4285F4] hover:underline flex items-center gap-1"
+                >
+                  {t("View all reviews on Google")}
+                  <ChevronRight className="w-3 h-3" />
+                </a>
+            </div>
+
             {/* Newsletter */}
             <div className="mt-6">
               <h5 className={`font-[family-name:var(--font-cinzel)] text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#2d1810]'}`}>

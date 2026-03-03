@@ -333,32 +333,32 @@ export default function ReviewsClient() {
                     </p>
                   </div>
                 </div>
-                <p className="text-lg font-bold mb-8">
-                  {t('Based on 127+ authentic customer reviews', '127+ प्रामाणिक ग्राहक समीक्षाओं के आधार पर', '127+ અધિકૃત ગ્રાહક સમીક્ષાઓના આધારે')}
-                </p>
-              </div>
+                    <p className="text-lg font-bold mb-8">
+                      {t('Based on 127+ authentic customer reviews', '127+ प्रामाणिक ग्राहक समीक्षाओं के आधार पर', '127+ અધિકૃત ગ્રાહક સમીક્ષાઓના આધારે')}
+                    </p>
+                  </div>
 
-              <div className="flex flex-wrap justify-center gap-4">
-                <a 
-                  href="https://www.google.com/search?q=Katyaayani+Astrologer+Ahmedabad&oq=Katyaayani+Astrologer+Ahmedabad&aqs=chrome..69i57j69i60l3.4182j0j7&sourceid=chrome&ie=UTF-8#lrd=0x395e85d45e548847:0x11ae79867037df4f,1" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-[#4285F4] text-white shadow-lg shadow-[#4285F4]/20 hover:bg-[#357abd] transition-all font-bold text-lg active:scale-95"
-                >
-                  <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" alt="G" className="w-6 h-6 bg-white rounded-full p-0.5" />
-                  {t('View All Google Reviews', 'गूगल पर सभी समीक्षाएं देखें', 'Google પર બધી સમીક્ષાઓ જુઓ')}
-                </a>
-                
-                <a 
-                  href="https://g.page/r/CU_fN-rG_K4REAE/review" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl border-2 border-[#ff6b35] text-[#ff6b35] hover:bg-[#ff6b35]/5 transition-all font-bold text-lg active:scale-95"
-                >
-                  <Star className="w-5 h-5" />
-                  {t('Write a Review', 'एक समीक्षा लिखें', 'સમીક્ષા લખો')}
-                </a>
-              </div>
+                  <div className="flex flex-wrap justify-center gap-4">
+                    <a 
+                      href="https://search.google.com/local/reviews?placeid=ChIJU4nnqVi3bg4RyDOjuqExd_w" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-[#4285F4] text-white shadow-lg shadow-[#4285F4]/20 hover:bg-[#357abd] transition-all font-bold text-lg active:scale-95"
+                    >
+                      <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" alt="G" className="w-6 h-6 bg-white rounded-full p-0.5" />
+                      {t('View All Google Reviews', 'गूगल पर सभी समीक्षाएं देखें', 'Google પર બધી સમીક્ષાઓ જુઓ')}
+                    </a>
+                    
+                    <a 
+                      href="https://search.google.com/local/writereview?placeid=ChIJU4nnqVi3bg4RyDOjuqExd_w&source=g.page.m.ia._&laa=nmx-review-solicitation-ia2" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl border-2 border-[#ff6b35] text-[#ff6b35] hover:bg-[#ff6b35]/5 transition-all font-bold text-lg active:scale-95"
+                  >
+                    <Star className="w-5 h-5" />
+                    {t('Write a Review', 'एक समीक्षा लिखें', 'સમીક્ષા લખો')}
+                  </a>
+                </div>
               
               <p className="text-xs opacity-50 max-w-md mx-auto leading-relaxed">
                 {t(
