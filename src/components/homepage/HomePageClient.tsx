@@ -12,6 +12,7 @@ import { useTranslation } from "@/components/GoogleTranslateWidget";
 import Navbar from "@/components/homepage/Navbar";
 import Image from "next/image";
 
+// Re-write to force HMR cache clearing
 const Footer = dynamic(() => import("@/components/homepage/Footer"), { 
   ssr: true,
   loading: () => <div className="h-[600px] w-full bg-gray-100/5" />
@@ -167,6 +168,8 @@ export default function HomePageClient({ initialLatestPosts }: HomePageClientPro
     }
   };
 
+  if (!mounted) return null;
+
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-[#0a0a0f] text-[#f5f0e8]' : 'bg-[#fdfbf7] text-[#4a3f35]'}`}>
       <Navbar />
@@ -212,7 +215,7 @@ export default function HomePageClient({ initialLatestPosts }: HomePageClientPro
                 <Moon className="w-5 h-5 text-[#ffa07a]" />
                 <div className="text-left">
                   <p className="text-[10px] uppercase tracking-widest opacity-60 font-bold">
-                    {language === 'gu' ? 'સૂર્યાસ્ત' : language === 'hi' ? 'सूर्यास्त' : 'SUNSET'}
+                    {language === 'gu' ? 'સૂર્યાસ્ત' : language === 'hi' ? 'सूर्યાસ્ત' : 'SUNSET'}
                   </p>
                   <p className="text-sm font-bold min-w-[80px]">{panchangTimes.sunset}</p>
                 </div>
