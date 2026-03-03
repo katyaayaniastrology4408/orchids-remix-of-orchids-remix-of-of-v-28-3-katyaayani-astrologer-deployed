@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Moon, Phone, Mail, MapPin, Send, Loader2, CheckCircle } from "lucide-react";
+import { Phone, Mail, MapPin, Send, Loader2, CheckCircle, Globe, Instagram } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 import { contentData } from "@/data/homepage";
@@ -146,11 +146,33 @@ export default function Footer() {
                           <Mail className="w-4 h-4 text-[#ff6b35]" />
                                 <span className="text-sm break-all font-normal">katyaayaniastrologer01@gmail.com</span>
                         </div>
-                <div className={`flex items-center gap-2 ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'}`}>
-                  <MapPin className="w-4 h-4 text-[#ff6b35]" />
-                  <span>Ahmedabad, Gujarat</span>
-                </div>
-            </div>
+                  <div className={`flex items-center gap-2 ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'}`}>
+                    <MapPin className="w-4 h-4 text-[#ff6b35]" />
+                    <span>Ahmedabad, Gujarat</span>
+                  </div>
+                  <div className={`flex items-center gap-2 ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'}`}>
+                    <Globe className="w-4 h-4 text-[#ff6b35]" />
+                    <a
+                      href="https://www.katyaayaniastrologer.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[#ff6b35] transition-colors text-sm"
+                    >
+                      www.katyaayaniastrologer.com
+                    </a>
+                  </div>
+                  <div className={`flex items-center gap-2 ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'}`}>
+                    <Instagram className="w-4 h-4 text-[#ff6b35]" />
+                    <a
+                      href="https://www.instagram.com/katyaayani_astrologer"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[#ff6b35] transition-colors text-sm"
+                    >
+                      @katyaayani_astrologer
+                    </a>
+                  </div>
+              </div>
           </div>
           <div>
             <h4 className={`font-[family-name:var(--font-cinzel)] text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#2d1810]'}`}>

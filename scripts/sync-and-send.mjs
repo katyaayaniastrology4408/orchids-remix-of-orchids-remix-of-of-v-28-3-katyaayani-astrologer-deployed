@@ -248,11 +248,16 @@ function buildEmailHtml(firstName) {
 
     <p style="color:#555;font-size:11px;margin:0 0 6px;">&copy; 2026 <strong style="color:#ff6b35;">Katyaayani Astrologer</strong>. All rights reserved.</p>
     <p style="color:#444;font-size:10px;margin:0 0 6px;">You received this email as a registered user of Katyaayani Astrologer.</p>
-    <p style="color:#333;font-size:10px;margin:0;">
-      <a href="https://wa.me/919824929588" style="color:#c9a87c;text-decoration:none;">WhatsApp: +91 98249 29588</a>
-      &nbsp;|&nbsp;
-      <a href="mailto:katyaayaniastrologer01@gmail.com" style="color:#c9a87c;text-decoration:none;">katyaayaniastrologer01@gmail.com</a>
-    </p>
+      <p style="color:#333;font-size:10px;margin:0 0 5px;">
+        <a href="https://wa.me/919824929588" style="color:#c9a87c;text-decoration:none;">📞 +91 98249 29588</a>
+        &nbsp;|&nbsp;
+        <a href="mailto:katyaayaniastrologer01@gmail.com" style="color:#c9a87c;text-decoration:none;">✉️ katyaayaniastrologer01@gmail.com</a>
+      </p>
+      <p style="color:#333;font-size:10px;margin:0;">
+        <a href="https://www.katyaayaniastrologer.com" style="color:#c9a87c;text-decoration:none;">🌐 www.katyaayaniastrologer.com</a>
+        &nbsp;|&nbsp;
+        <a href="https://www.instagram.com/katyaayani_astrologer" style="color:#c9a87c;text-decoration:none;">📸 @katyaayani_astrologer</a>
+      </p>
   </td></tr>
 
 </table>

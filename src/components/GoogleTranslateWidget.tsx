@@ -407,12 +407,8 @@ export function TranslationProvider({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("preferred-language") as Language;
-    if (saved && ["hi", "gu", "en"].includes(saved)) {
-      setLanguage(saved);
-    }
-    setMounted(true);
-  }, []);
+      setMounted(true);
+    }, []);
 
   const handleSetLanguage = (lang: Language) => {
     setLanguage(lang);
