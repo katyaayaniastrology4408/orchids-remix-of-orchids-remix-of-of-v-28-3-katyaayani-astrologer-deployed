@@ -348,24 +348,25 @@ export default function BlogPostPage() {
 
           {/* Tags */}
           {post.tags && post.tags.length > 0 && (
-            <div className={`mt-12 pt-8 border-t ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
-              <h3 className="font-bold mb-4">
-                {language === 'gu' ? 'ટૅગ્સ:' : language === 'hi' ? 'टैग्स:' : 'Tags:'}
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className={`px-4 py-1 rounded-full text-sm ${
-                      theme === 'dark' ? 'bg-white/10' : 'bg-gray-100'
-                    }`}
-                  >
-                    #{tag}
-                  </span>
-                ))}
+              <div className={`mt-12 pt-8 border-t ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
+                <h3 className="font-bold mb-4">
+                  {language === 'gu' ? 'ટૅગ્સ:' : language === 'hi' ? 'टैग्स:' : 'Tags:'}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {post.tags.map((tag) => (
+                    <Link
+                      key={tag}
+                      href={`/blog?tag=${encodeURIComponent(tag)}`}
+                      className={`px-4 py-1 rounded-full text-sm transition-colors hover:bg-[#ff6b35] hover:text-white ${
+                        theme === 'dark' ? 'bg-white/10 text-[#f5f0e8]' : 'bg-gray-100 text-[#4a3f35]'
+                      }`}
+                    >
+                      #{tag}
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Back to Blog */}
           <div className="mt-12 text-center">
