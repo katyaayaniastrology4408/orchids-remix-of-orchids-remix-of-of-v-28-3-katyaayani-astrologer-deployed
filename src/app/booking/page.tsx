@@ -254,14 +254,40 @@ export default function BookingPage() {
   }, [selectedDate]);
 
   useEffect(() => {
-    async function fetchGender() {
+    async function fetchUserProfile() {
       if (user) {
-        const { data } = await supabase.from("profiles").select("gender").eq("id", user.id).maybeSingle();
-        if (data?.gender) setUserGender(data.gender);
-        else if (user.user_metadata?.gender) setUserGender(user.user_metadata.gender);
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("name, phone, address, gender, dob, tob, pob, city")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (data && !error) {
+          if (data.gender) setUserGender(data.gender);
+          
+          setFormData(prev => ({
+            ...prev,
+            name: data.name || prev.name || user.user_metadata?.full_name || user.user_metadata?.name || "",
+            email: user.email || prev.email,
+            phone: data.phone || prev.phone || "",
+            address: data.address || prev.address || "",
+            birthDate: data.dob || prev.birthDate || "",
+            birthTime: data.tob || prev.birthTime || "",
+            birthPlace: data.pob || prev.birthPlace || "",
+            city: data.city || prev.city || "",
+          }));
+        } else {
+          // Fallback to user metadata if profile fetch fails or is empty
+          if (user.user_metadata?.gender) setUserGender(user.user_metadata.gender);
+          setFormData(prev => ({
+            ...prev,
+            name: user.user_metadata?.full_name || user.user_metadata?.name || prev.name,
+            email: user.email || prev.email,
+          }));
+        }
       }
     }
-    fetchGender();
+    fetchUserProfile();
   }, [user]);
 
 useEffect(() => {
@@ -629,7 +655,16 @@ const fetchBookingDetails = async (bid: string) => {
                 <CardContent className="p-6">
                   <div className="space-y-2">
                     <Label htmlFor="city" className="flex items-center gap-2"><MapPin className="w-4 h-4 text-[#ff6b35]" />{t('Your City')} *</Label>
-                    <input id="city" name="city" value={formData.city} onChange={handleInputChange} className={`w-full h-10 px-3 rounded-md border ${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20 text-[#f5f0e8]' : 'bg-white border-[#ff6b35]/20 text-[#2d1810]'}`} placeholder="e.g., Ahmedabad" />
+                      <input 
+                        id="city" 
+                        name="city" 
+                        value={formData.city} 
+                        onChange={handleInputChange} 
+                        readOnly={!!user && !!formData.city}
+                        className={`w-full h-10 px-3 rounded-md border ${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20 text-[#f5f0e8]' : 'bg-white border-[#ff6b35]/20 text-[#2d1810]'} ${!!user && !!formData.city ? 'opacity-70 cursor-not-allowed select-none' : ''}`} 
+                        placeholder="e.g., Ahmedabad" 
+                      />
+
                   </div>
                 </CardContent>
               </Card>
@@ -661,38 +696,97 @@ const fetchBookingDetails = async (bid: string) => {
               <Card className={`${theme === 'dark' ? 'bg-[#12121a]' : 'bg-white'} border-[#ff6b35]/20`}>
                 <CardContent className="p-8">
                   <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="name" className="flex items-center gap-2"><User className="w-4 h-4 text-[#ff6b35]" />{t('Full Name')} *</Label>
-                      <Input id="name" name="name" value={formData.name} onChange={handleInputChange} className={`${theme === 'dark' ? 'bg-[#1a1a2e] text-[#f5f0e8]' : 'bg-white text-[#2d1810]'} border-[#ff6b35]/20`} placeholder="Your full name" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="flex items-center gap-2"><Mail className="w-4 h-4 text-[#ff6b35]" />{t('Email')} *</Label>
-                      <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} className={`${theme === 'dark' ? 'bg-[#1a1a2e] text-[#f5f0e8]' : 'bg-white text-[#2d1810]'} border-[#ff6b35]/20`} placeholder="Your email" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="flex items-center gap-2"><Phone className="w-4 h-4 text-[#ff6b35]" />{t('Phone')} *</Label>
-                      <Input id="phone" name="phone" value={formData.phone} onChange={handleInputChange} className={`${theme === 'dark' ? 'bg-[#1a1a2e] text-[#f5f0e8]' : 'bg-white text-[#2d1810]'} border-[#ff6b35]/20`} placeholder="+91 98249 29588" />
-                    </div>
-                    {selectedType?.startsWith("home") && (
-                      <div className="space-y-4 md:col-span-2">
-                        <div className="space-y-2">
-                          <Label htmlFor="address" className="flex items-center gap-2"><MapPin className="w-4 h-4 text-[#ff6b35]" />{t('Address')}</Label>
-                          <Input id="address" name="address" value={formData.address} onChange={handleInputChange} className={`${theme === 'dark' ? 'bg-[#1a1a2e] text-[#f5f0e8]' : 'bg-white text-[#2d1810]'} border-[#ff6b35]/20`} placeholder="Your home address" />
-                        </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="name" className="flex items-center gap-2"><User className="w-4 h-4 text-[#ff6b35]" />{t('Full Name')} *</Label>
+                        <Input 
+                          id="name" 
+                          name="name" 
+                          value={formData.name} 
+                          onChange={handleInputChange} 
+                          readOnly={!!user && !!formData.name}
+                          className={`${theme === 'dark' ? 'bg-[#1a1a2e] text-[#f5f0e8]' : 'bg-white text-[#2d1810]'} border-[#ff6b35]/20 ${!!user && !!formData.name ? 'opacity-70 cursor-not-allowed select-none' : ''}`} 
+                          placeholder="Your full name" 
+                        />
                       </div>
-                    )}
-                    <div className="space-y-2">
-                      <Label htmlFor="birthDate" className="flex items-center gap-2"><Calendar className="w-4 h-4 text-[#ff6b35]" />{t('Birth Date')} *</Label>
-                      <Input id="birthDate" name="birthDate" type="date" value={formData.birthDate} onChange={handleInputChange} className={`${theme === 'dark' ? 'bg-[#1a1a2e] text-[#f5f0e8]' : 'bg-white text-[#2d1810]'} border-[#ff6b35]/20`} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="birthTime" className="flex items-center gap-2"><Clock className="w-4 h-4 text-[#ff6b35]" />{t('Birth Time')} *</Label>
-                      <Input id="birthTime" name="birthTime" type="time" required value={formData.birthTime} onChange={handleInputChange} className={`${theme === 'dark' ? 'bg-[#1a1a2e] text-[#f5f0e8]' : 'bg-white text-[#2d1810]'} border-[#ff6b35]/20`} />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="birthPlace" className="flex items-center gap-2"><MapPin className="w-4 h-4 text-[#ff6b35]" />{t('Birth Place')}</Label>
-                      <Input id="birthPlace" name="birthPlace" value={formData.birthPlace} onChange={handleInputChange} className={`${theme === 'dark' ? 'bg-[#1a1a2e] text-[#f5f0e8]' : 'bg-white text-[#2d1810]'} border-[#ff6b35]/20`} placeholder="City, Country" />
-                    </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="flex items-center gap-2"><Mail className="w-4 h-4 text-[#ff6b35]" />{t('Email')} *</Label>
+                        <Input 
+                          id="email" 
+                          name="email" 
+                          type="email" 
+                          value={formData.email} 
+                          onChange={handleInputChange} 
+                          readOnly={!!user && !!formData.email}
+                          className={`${theme === 'dark' ? 'bg-[#1a1a2e] text-[#f5f0e8]' : 'bg-white text-[#2d1810]'} border-[#ff6b35]/20 ${!!user && !!formData.email ? 'opacity-70 cursor-not-allowed select-none' : ''}`} 
+                          placeholder="Your email" 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phone" className="flex items-center gap-2"><Phone className="w-4 h-4 text-[#ff6b35]" />{t('Phone')} *</Label>
+                        <Input 
+                          id="phone" 
+                          name="phone" 
+                          value={formData.phone} 
+                          onChange={handleInputChange} 
+                          readOnly={!!user && !!formData.phone}
+                          className={`${theme === 'dark' ? 'bg-[#1a1a2e] text-[#f5f0e8]' : 'bg-white text-[#2d1810]'} border-[#ff6b35]/20 ${!!user && !!formData.phone ? 'opacity-70 cursor-not-allowed select-none' : ''}`} 
+                          placeholder="+91 98249 29588" 
+                        />
+                      </div>
+                      {selectedType?.startsWith("home") && (
+                        <div className="space-y-4 md:col-span-2">
+                          <div className="space-y-2">
+                            <Label htmlFor="address" className="flex items-center gap-2"><MapPin className="w-4 h-4 text-[#ff6b35]" />{t('Address')}</Label>
+                            <Input 
+                              id="address" 
+                              name="address" 
+                              value={formData.address} 
+                              onChange={handleInputChange} 
+                              readOnly={!!user && !!formData.address}
+                              className={`${theme === 'dark' ? 'bg-[#1a1a2e] text-[#f5f0e8]' : 'bg-white text-[#2d1810]'} border-[#ff6b35]/20 ${!!user && !!formData.address ? 'opacity-70 cursor-not-allowed select-none' : ''}`} 
+                              placeholder="Your home address" 
+                            />
+                          </div>
+                        </div>
+                      )}
+                      <div className="space-y-2">
+                        <Label htmlFor="birthDate" className="flex items-center gap-2"><Calendar className="w-4 h-4 text-[#ff6b35]" />{t('Birth Date')} *</Label>
+                        <Input 
+                          id="birthDate" 
+                          name="birthDate" 
+                          type="date" 
+                          value={formData.birthDate} 
+                          onChange={handleInputChange} 
+                          readOnly={!!user && !!formData.birthDate}
+                          className={`${theme === 'dark' ? 'bg-[#1a1a2e] text-[#f5f0e8]' : 'bg-white text-[#2d1810]'} border-[#ff6b35]/20 ${!!user && !!formData.birthDate ? 'opacity-70 cursor-not-allowed select-none' : ''}`} 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="birthTime" className="flex items-center gap-2"><Clock className="w-4 h-4 text-[#ff6b35]" />{t('Birth Time')} *</Label>
+                        <Input 
+                          id="birthTime" 
+                          name="birthTime" 
+                          type="time" 
+                          required 
+                          value={formData.birthTime} 
+                          onChange={handleInputChange} 
+                          readOnly={!!user && !!formData.birthTime}
+                          className={`${theme === 'dark' ? 'bg-[#1a1a2e] text-[#f5f0e8]' : 'bg-white text-[#2d1810]'} border-[#ff6b35]/20 ${!!user && !!formData.birthTime ? 'opacity-70 cursor-not-allowed select-none' : ''}`} 
+                        />
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="birthPlace" className="flex items-center gap-2"><MapPin className="w-4 h-4 text-[#ff6b35]" />{t('Birth Place')}</Label>
+                        <Input 
+                          id="birthPlace" 
+                          name="birthPlace" 
+                          value={formData.birthPlace} 
+                          onChange={handleInputChange} 
+                          readOnly={!!user && !!formData.birthPlace}
+                          className={`${theme === 'dark' ? 'bg-[#1a1a2e] text-[#f5f0e8]' : 'bg-white text-[#2d1810]'} border-[#ff6b35]/20 ${!!user && !!formData.birthPlace ? 'opacity-70 cursor-not-allowed select-none' : ''}`} 
+                          placeholder="City, Country" 
+                        />
+                      </div>
+
                     <div className="space-y-2 md:col-span-2">
                       <Label htmlFor="questions">{t('Special Questions')}</Label>
                       <Textarea id="questions" name="questions" value={formData.questions} onChange={handleInputChange} className={`${theme === 'dark' ? 'bg-[#1a1a2e] text-[#f5f0e8]' : 'bg-white text-[#2d1810]'} border-[#ff6b35]/20 min-h-[100px]`} placeholder="Career, relationships, etc..." />

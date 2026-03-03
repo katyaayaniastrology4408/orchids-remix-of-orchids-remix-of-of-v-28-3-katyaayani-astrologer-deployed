@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -24,11 +26,36 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function EnquiryForm({ onClose }: { onClose?: () => void }) {
   const { theme } = useTheme();
+  const { user } = useAuth();
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
+
+  useEffect(() => {
+    async function prefillData() {
+      if (user) {
+        // First set from auth metadata
+        const metaName = user.user_metadata?.full_name || user.user_metadata?.name || "";
+        if (metaName) setValue("name", metaName);
+        if (user.email) setValue("email", user.email);
+
+        // Then try fetching from profiles for more accurate data (like phone)
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("name, phone")
+          .eq("id", user.id)
+          .maybeSingle();
+        
+        if (data && !error) {
+          if (data.name) setValue("name", data.name);
+          if (data.phone) setValue("phone", data.phone);
+        }
+      }
+    }
+    prefillData();
+  }, [user, setValue]);
 
   const onSubmit = async (data: FormData) => {
     setStatus('loading');
@@ -90,33 +117,38 @@ export default function EnquiryForm({ onClose }: { onClose?: () => void }) {
               onSubmit={handleSubmit(onSubmit)}
               className="space-y-4"
             >
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Input 
-                    placeholder="Your Name" 
-                    {...register("name")}
-                    className={errors.name ? "border-red-500" : ""}
-                  />
-                  {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Input 
+                      placeholder="Your Name" 
+                      {...register("name")}
+                      readOnly={!!user}
+                      className={`${errors.name ? "border-red-500" : ""} ${!!user ? "opacity-70 cursor-not-allowed select-none" : ""}`}
+                    />
+                    {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Input 
+                      placeholder="Email Address" 
+                      type="email"
+                      {...register("email")}
+                      readOnly={!!user}
+                      className={`${errors.email ? "border-red-500" : ""} ${!!user ? "opacity-70 cursor-not-allowed select-none" : ""}`}
+                    />
+                    {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Input 
-                    placeholder="Email Address" 
-                    type="email"
-                    {...register("email")}
-                    className={errors.email ? "border-red-500" : ""}
-                  />
-                  {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Input 
-                    placeholder="Phone (Optional)" 
-                    {...register("phone")}
-                  />
-                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Input 
+                      placeholder="Phone (Optional)" 
+                      {...register("phone")}
+                      readOnly={!!user}
+                      className={!!user ? "opacity-70 cursor-not-allowed select-none" : ""}
+                    />
+                  </div>
+
                 <div className="space-y-2">
                   <Input 
                     placeholder="Subject" 

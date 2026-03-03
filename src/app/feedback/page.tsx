@@ -11,10 +11,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/contexts/AuthContext";
 import dynamic from "next/dynamic";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 import Navbar from "@/components/homepage/Navbar";
 import Footer from "@/components/homepage/Footer";
+import { useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 const CrispChat = dynamic(() => import("@/components/CrispChat"), { ssr: false });
 
@@ -24,6 +27,7 @@ export default function FeedbackPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { theme } = useTheme();
+  const { user } = useAuth();
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: "",
@@ -33,6 +37,31 @@ export default function FeedbackPage() {
     feedback: "",
     wouldRecommend: "",
   });
+
+  useEffect(() => {
+    async function prefillData() {
+      if (user) {
+        // Initial set from metadata
+        setFormData(prev => ({
+          ...prev,
+          name: user.user_metadata?.full_name || user.user_metadata?.name || prev.name,
+          email: user.email || prev.email,
+        }));
+
+        // Fetch from profile for confirmed data
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("name")
+          .eq("id", user.id)
+          .maybeSingle();
+        
+        if (data && !error && data.name) {
+          setFormData(prev => ({ ...prev, name: data.name }));
+        }
+      }
+    }
+    prefillData();
+  }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -197,29 +226,32 @@ export default function FeedbackPage() {
                       <Label htmlFor="name" className={theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#2d1810]'}>
                         {t("Your Name")}
                       </Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        className={`${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20 text-[#f5f0e8]' : 'bg-white border-[#ff6b35]/20 text-[#2d1810]'} focus:border-[#ff6b35]`}
-                        placeholder={t("Enter your name")}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className={theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#2d1810]'}>
-                        {t("Email")}
-                      </Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className={`${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20 text-[#f5f0e8]' : 'bg-white border-[#ff6b35]/20 text-[#2d1810]'} focus:border-[#ff6b35]`}
-                        placeholder="your@email.com"
-                      />
-                    </div>
+                        <Input
+                          id="name"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          readOnly={!!user && !!formData.name}
+                          className={`${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20 text-[#f5f0e8]' : 'bg-white border-[#ff6b35]/20 text-[#2d1810]'} focus:border-[#ff6b35] ${!!user && !!formData.name ? 'opacity-70 cursor-not-allowed select-none' : ''}`}
+                          placeholder={t("Enter your name")}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className={theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#2d1810]'}>
+                          {t("Email")}
+                        </Label>
+                        <Input
+                          id="email"
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          readOnly={!!user && !!formData.email}
+                          className={`${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20 text-[#f5f0e8]' : 'bg-white border-[#ff6b35]/20 text-[#2d1810]'} focus:border-[#ff6b35] ${!!user && !!formData.email ? 'opacity-70 cursor-not-allowed select-none' : ''}`}
+                          placeholder="your@email.com"
+                        />
+                      </div>
+
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-6">
