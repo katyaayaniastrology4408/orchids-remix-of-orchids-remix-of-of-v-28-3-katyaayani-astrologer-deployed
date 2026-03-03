@@ -107,5 +107,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
     } catch (e) { console.error("Sitemap custom error:", e); }
 
-    return [...staticPages, ...blogPages, ...cmsPages, ...customPages];
+    // --- City SEO Pages ---
+    const cities = ["ahmedabad", "surat", "vadodara", "rajkot", "mumbai", "delhi", "gandhinagar"];
+    const cityPages: MetadataRoute.Sitemap = cities.map((city) => ({
+      url: `${baseUrl}/astrologer-in/${city}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    }));
+
+    return [...staticPages, ...blogPages, ...cmsPages, ...customPages, ...cityPages];
 }

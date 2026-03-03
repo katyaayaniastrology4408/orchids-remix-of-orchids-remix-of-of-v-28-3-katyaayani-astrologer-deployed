@@ -86,14 +86,14 @@ export async function sendBookingNotification(booking: any, type: 'new' | 'cance
   }
 }
 
-export async function sendWelcomeEmail(user: { email: string; name: string; password?: string }) {
+export async function sendWelcomeEmail(user: { email: string; name: string }) {
   if (!user.email) return;
 
   try {
     await sendEmail({
       to: user.email,
       subject: 'Welcome to Katyaayani Astrologer ✨',
-      html: welcomeEmailTemplate(user.name, user.email, user.password)
+      html: welcomeEmailTemplate(user.name, user.email)
     });
   } catch (error) {
     console.error('Exception sending welcome email:', error);

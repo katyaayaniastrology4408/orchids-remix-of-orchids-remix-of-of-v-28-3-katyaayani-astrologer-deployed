@@ -440,8 +440,8 @@ export const forgotPasswordRequestTemplate = (name: string = 'Seeker', email: st
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background: rgba(251, 191, 36, 0.08); border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.2);">
           <tr>
             <td style="padding: 20px; text-align: center;">
-              <p style="color: #fbbf24; font-size: 14px; margin: 0;">⏳ Our team is reviewing your request</p>
-              <p style="color: #b8a896; font-size: 13px; margin-top: 10px;">You will receive another email with your new password or further instructions within 24 hours.</p>
+                <p style="color: #fbbf24; font-size: 14px; margin: 0;">⏳ Our team is reviewing your request</p>
+                <p style="color: #b8a896; font-size: 13px; margin-top: 10px;">You will receive another email with a reset link or further instructions within 24 hours.</p>
             </td>
           </tr>
         </table>
