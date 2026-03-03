@@ -6,12 +6,16 @@ import {
   Upload, 
   ImageIcon, 
   Loader2, 
-  Globe, 
-  Search,
-  ExternalLink,
-  CheckCircle2,
-  AlertCircle
-} from "lucide-react";
+    Globe, 
+    Search,
+    ExternalLink,
+    Edit3,
+    Check,
+    CheckCircle2,
+    AlertCircle,
+    Sparkles
+  } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -25,6 +29,8 @@ interface GalleryImage {
   title: string;
   description: string;
   created_at: string;
+  source_table?: string;
+  source_id?: string;
 }
 
 export default function GalleryPanel({ isDark, t }: { isDark: boolean; t: (key: string) => string }) {
@@ -32,8 +38,11 @@ export default function GalleryPanel({ isDark, t }: { isDark: boolean; t: (key: 
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isIndexing, setIsIndexing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ title: "", description: "" });
   
   const [newImage, setNewImage] = useState({
     title: "",
@@ -61,6 +70,30 @@ export default function GalleryPanel({ isDark, t }: { isDark: boolean; t: (key: 
       setError("Failed to fetch images");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleUpdate = async (id: string) => {
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('gallery')
+        .update({
+          title: editForm.title,
+          description: editForm.description
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setImages(images.map(img => img.id === id ? { ...img, ...editForm } : img));
+      setEditingId(null);
+      setSuccess("Image updated successfully!");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to update image");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -292,20 +325,76 @@ export default function GalleryPanel({ isDark, t }: { isDark: boolean; t: (key: 
                         alt={img.description} 
                         className="w-full h-full object-cover transition-transform group-hover:scale-110" 
                       />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">
-                        <div className="flex justify-end">
-                          <button 
-                            onClick={() => handleDelete(img.id, img.image_url)}
-                            className="p-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">
+                          <div className="flex justify-between items-start">
+                            {img.source_table ? (
+                              <div className="bg-[#ff6b35] text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold flex items-center gap-1">
+                                <Sparkles className="w-2 h-2" /> {t("AUTO")}
+                              </div>
+                            ) : <div></div>}
+                            <div className="flex gap-1">
+                              <button 
+                                onClick={() => {
+                                  setEditingId(img.id);
+                                  setEditForm({ title: img.title || "", description: img.description || "" });
+                                }}
+                                className="p-1.5 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </button>
+                              <button 
+                                onClick={() => handleDelete(img.id, img.image_url)}
+                                className="p-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                          
+                          {editingId === img.id ? (
+                            <div className="space-y-1 bg-black/40 p-2 rounded-lg backdrop-blur-sm border border-white/10" onClick={(e) => e.stopPropagation()}>
+                              <Input 
+                                size={1}
+                                value={editForm.title}
+                                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                                className="h-6 text-[10px] bg-white/20 border-white/20 text-white placeholder:text-white/50"
+                                placeholder="Title"
+                              />
+                              <Input 
+                                size={1}
+                                value={editForm.description}
+                                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                                className="h-6 text-[10px] bg-white/20 border-white/20 text-white placeholder:text-white/50"
+                                placeholder="Description"
+                              />
+                              <div className="flex gap-1 pt-1">
+                                <Button 
+                                  size="sm" 
+                                  className="h-6 flex-1 text-[8px] bg-green-500 hover:bg-green-600 text-white"
+                                  onClick={() => handleUpdate(img.id)}
+                                  disabled={isSaving}
+                                >
+                                  {isSaving ? <Loader2 className="w-2 h-2 animate-spin" /> : <Check className="w-2 h-2 mr-1" />}
+                                  {t("Save")}
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost"
+                                  className="h-6 flex-1 text-[8px] bg-white/10 hover:bg-white/20 text-white"
+                                  onClick={() => setEditingId(null)}
+                                >
+                                  {t("Cancel")}
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-white">
+                              <p className="text-xs font-bold truncate">{img.title || "Untitled"}</p>
+                              <p className="text-[10px] opacity-70 line-clamp-2">{img.description}</p>
+                            </div>
+                          )}
                         </div>
-                        <div className="text-white">
-                          <p className="text-xs font-bold truncate">{img.title || "Untitled"}</p>
-                          <p className="text-[10px] opacity-70 line-clamp-2">{img.description}</p>
-                        </div>
-                      </div>
+
                     </motion.div>
                   ))}
                 </AnimatePresence>
