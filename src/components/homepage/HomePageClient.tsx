@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import NextImage from "next/image";
 import dynamic from "next/dynamic";
-// Standardized icons - Updated 2026-03-04-T00:30
+// Standardized icons - Updated 2026-03-04-T00:55 - Re-built for HMR stability
 import { Star, Moon, Sun, Sparkles, Home, Video, ChevronRight, ChevronDown, Calendar, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -52,10 +52,11 @@ interface LatestPost {
 
 interface HomePageClientProps {
   initialLatestPosts: LatestPost[];
+  hasTodayPosts?: boolean;
 }
 
-// Updated at 2026-03-03-T23:06 - Force clean reload to clear HMR cache
-export default function HomePageClient({ initialLatestPosts }: HomePageClientProps) {
+// Updated at 2026-03-04-T00:55 - Force clean reload to clear HMR cache
+export default function HomePageClient({ initialLatestPosts, hasTodayPosts }: HomePageClientProps) {
   const [mounted, setMounted] = useState(false);
   const { theme } = useTheme();
   const { language } = useTranslation();
@@ -463,12 +464,16 @@ export default function HomePageClient({ initialLatestPosts }: HomePageClientPro
               <div className="flex justify-center gap-2 mb-4">
                 <Newspaper className="w-8 h-8 text-[#ff6b35]" />
               </div>
-              <h2 className="font-[family-name:var(--font-cinzel)] text-3xl md:text-4xl font-bold mb-3 text-gradient-ancient">
-                {language === 'gu' ? 'તાજા લેખ' : language === 'hi' ? 'ताज़े लेख' : 'Latest from the Blog'}
-              </h2>
-              <p className={`text-lg ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
-                {language === 'gu' ? 'જ્યોતિષ, ધર્મ અને આધ્યાત્મિકતા પર નવા લેખ' : language === 'hi' ? 'ज्योतिष, धर्म और आध्यात्मिकता पर नए लेख' : 'Fresh insights on astrology, dharma & spirituality'}
-              </p>
+                <h2 className="font-[family-name:var(--font-cinzel)] text-3xl md:text-4xl font-bold mb-3 text-gradient-ancient">
+                  {hasTodayPosts 
+                    ? (language === 'gu' ? 'આજના ખાસ લેખ' : language === 'hi' ? 'आज के विशेष लेख' : "Today's Special Insights")
+                    : (language === 'gu' ? 'તાજા લેખ' : language === 'hi' ? 'ताज़े लेख' : 'Latest from the Blog')}
+                </h2>
+                <p className={`text-lg ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
+                  {hasTodayPosts
+                    ? (language === 'gu' ? 'આજના દિવસ માટે વિશેષ જ્યોતિષ માર્ગદર્શન' : language === 'hi' ? 'आज के दिन के लिए विशेष ज्योतिष मार्गदर्शन' : "Special astrological guidance for today")
+                    : (language === 'gu' ? 'જ્યોતિષ, ધર્મ અને આધ્યાત્મિકતા પર નવા લેખ' : language === 'hi' ? 'ज्योतिष, धर्म और आध्यात्मिकता पर नए लेख' : 'Fresh insights on astrology, dharma & spirituality')}
+                </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8 mb-10">
@@ -487,13 +492,20 @@ export default function HomePageClient({ initialLatestPosts }: HomePageClientPro
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                       </div>
                     )}
-                    <CardContent className="p-5">
-                      <p className={`text-xs font-semibold uppercase tracking-wider mb-2 ${theme === 'dark' ? 'text-[#ff8c5e]' : 'text-[#ff6b35]'}`}>
-                        {new Date(post.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                      </p>
-                      <h3 className={`font-[family-name:var(--font-cinzel)] font-bold text-lg mb-2 line-clamp-2 group-hover:text-[#ff6b35] transition-colors ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
-                        {post.title}
-                      </h3>
+                      <CardContent className="p-5">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className={`text-xs font-semibold uppercase tracking-wider ${theme === 'dark' ? 'text-[#ff8c5e]' : 'text-[#ff6b35]'}`}>
+                            {new Date(post.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </p>
+                          {new Date(post.created_at).toISOString().split('T')[0] === new Date().toISOString().split('T')[0] && (
+                            <span className="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded-full font-bold animate-pulse">
+                              {language === 'gu' ? 'નવું' : language === 'hi' ? 'નયા' : 'NEW'}
+                            </span>
+                          )}
+                        </div>
+                        <h3 className={`font-[family-name:var(--font-cinzel)] font-bold text-lg mb-2 line-clamp-2 group-hover:text-[#ff6b35] transition-colors ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
+                          {post.title}
+                        </h3>
                       {post.excerpt && (
                         <p className={`text-sm line-clamp-2 ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
                           {post.excerpt}

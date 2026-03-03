@@ -63,17 +63,34 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
   export default async function HomePage() {
+    const todayStr = new Date().toISOString().split('T')[0];
+    
+    // Fetch today's blogs first
+    const { data: todayPosts } = await supabaseAdmin
+      .from("blog_posts")
+      .select("id, title, slug, excerpt, featured_image, created_at, category")
+      .eq("is_published", true)
+      .gte("created_at", `${todayStr}T00:00:00Z`)
+      .lte("created_at", `${todayStr}T23:59:59Z`)
+      .order("created_at", { ascending: false });
+
+    // Fetch latest blogs as fallback or additional
     const { data: latestPosts } = await supabaseAdmin
       .from("blog_posts")
-      .select("id, title, slug, excerpt, featured_image, created_at")
+      .select("id, title, slug, excerpt, featured_image, created_at, category")
       .eq("is_published", true)
       .order("created_at", { ascending: false })
       .limit(3);
-  
+
+    // If there are today's blogs, prioritize them. 
+    // If not, use latest blogs.
+    const hasTodayPosts = todayPosts && todayPosts.length > 0;
+    const displayPosts = hasTodayPosts ? todayPosts : latestPosts;
+    
     const schema = generateSchemaMarkup("/", undefined, { 
       galleryImages: [] 
     });
-  
+    
     return (
       <>
         {/* Server-rendered structured data for SEO crawlers */}
@@ -81,7 +98,7 @@ export async function generateMetadata(): Promise<Metadata> {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
         />
-  
+    
         {/* Hidden SEO content visible to crawlers but not disruptive to users */}
         <div className="sr-only">
           <h1>Katyaayani Astrologer - Best Vedic Astrologer for Kundali, Horoscope & Jyotish Consultation</h1>
@@ -120,11 +137,13 @@ export async function generateMetadata(): Promise<Metadata> {
             राशिफल, वास्तु शास्त्र और व्यक्तिगत उपाय प्रदान करते हैं।
           </p>
         </div>
-  
+    
         {/* Interactive client-side homepage */}
         <HomePageClient 
-          initialLatestPosts={latestPosts || []} 
+          initialLatestPosts={displayPosts || []} 
+          hasTodayPosts={hasTodayPosts}
         />
       </>
     );
   }
+

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Moon, X, ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
+import { Moon, X, ChevronDown, ChevronUp, AlertCircle, ArrowRight } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
+import Link from "next/link";
 
 const content = {
   hi: {
@@ -137,7 +138,27 @@ export default function ChandraGrahanBanner() {
   const [expanded, setExpanded] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
-  if (dismissed) return null;
+  // Auto-hide if date has passed (March 3, 2026 is the event date)
+  // We keep it visible ON March 3rd, and hide it on March 4th or later.
+  const [shouldShow, setShouldShow] = useState(true);
+
+  useEffect(() => {
+    const checkDate = () => {
+      if (typeof window !== "undefined") {
+        const today = new Date();
+        const eventDate = new Date("2026-03-03T23:59:59");
+        if (today > eventDate) {
+          setShouldShow(false);
+        }
+      }
+    };
+    checkDate();
+    // Check every 30 minutes
+    const interval = setInterval(checkDate, 30 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (dismissed || !shouldShow) return null;
 
   const lang = (language as keyof typeof content) in content ? (language as keyof typeof content) : "en";
   const c = content[lang];
@@ -249,8 +270,23 @@ export default function ChandraGrahanBanner() {
           ))}
         </div>
 
-        {/* Expanded Section */}
-        {expanded && (
+          {/* Read Full Article Link */}
+          <div className="mt-4 flex justify-end">
+            <Link 
+              href="/blog/chandra-grahan-2026-kab-hai-samay-upay"
+              className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border transition-all hover:scale-[1.02] active:scale-95 ${
+                isDark 
+                  ? "bg-[#ff6b35] border-[#ff6b35] text-white hover:bg-[#ff8c5e]" 
+                  : "bg-[#ff6b35] border-[#ff6b35] text-white hover:bg-[#ff8c5e]"
+              }`}
+            >
+              {language === 'gu' ? 'વિગતવાર લેખ વાંચો' : language === 'hi' ? 'पूरा लेख पढ़ें' : 'Read Full Article'}
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Expanded Section */}
+          {expanded && (
           <div className="mt-5 space-y-5 border-t border-[#ff6b35]/15 pt-5">
             {/* Sutak */}
             <div
