@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Calendar, Eye, ArrowLeft, Share2, User, X, Check, Link as LinkIcon } from "lucide-react";
+import { Calendar, Eye, ArrowLeft, Share2, User, X, Check, Link as LinkIcon, Tag, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
@@ -39,6 +39,7 @@ export default function BlogPostPage() {
   const slug = params.slug as string;
   
   const [post, setPost] = useState<BlogPost | null>(null);
+  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -55,11 +56,24 @@ export default function BlogPostPage() {
       const data = await res.json();
       if (data.success) {
         setPost(data.data);
+        fetchRelatedPosts(data.data.category, data.data.id);
       }
     } catch (error) {
       console.error('Failed to fetch blog post:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchRelatedPosts = async (category: string, currentId: string) => {
+    try {
+      const res = await fetch(`/api/blog?category=${encodeURIComponent(category)}&limit=4`);
+      const data = await res.json();
+      if (data.success) {
+        setRelatedPosts(data.data.filter((p: BlogPost) => p.id !== currentId).slice(0, 3));
+      }
+    } catch (error) {
+      console.error('Failed to fetch related posts:', error);
     }
   };
 
@@ -83,6 +97,12 @@ export default function BlogPostPage() {
     return p.title;
   };
 
+  const getPostExcerpt = (p: BlogPost) => {
+    if (language === 'gu' && p.excerpt_gujarati) return p.excerpt_gujarati;
+    if (language === 'hi' && p.excerpt_hindi) return p.excerpt_hindi;
+    return p.excerpt;
+  };
+
   const getPostContent = (p: BlogPost) => {
     if (language === 'gu' && p.content_gujarati) return p.content_gujarati;
     if (language === 'hi' && p.content_hindi) return p.content_hindi;
@@ -91,7 +111,7 @@ export default function BlogPostPage() {
 
   const getShareUrl = () => typeof window !== 'undefined' ? window.location.href : '';
   const getShareTitle = () => post ? getPostTitle(post) : '';
-  const getShareText = () => post?.excerpt || '';
+  const getShareText = () => post ? getPostExcerpt(post) : '';
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(getShareUrl());
@@ -158,7 +178,7 @@ export default function BlogPostPage() {
           <Link href="/blog">
             <Button className="bg-[#ff6b35] hover:bg-[#ff8c5e]">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              {language === 'gu' ? 'બ્લોગ પર પાછા જાઓ' : language === 'hi' ? 'ब्लॉग पर वापस जाएं' : 'Back to Blog'}
+              {language === 'gu' ? 'બ્લોગ પર પાછા જાઓ' : language === 'hi' ? 'બ્લૉગ પર પાછા જાઓ' : 'Back to Blog'}
             </Button>
           </Link>
         </div>
@@ -179,7 +199,7 @@ export default function BlogPostPage() {
           className="mb-8 text-[#ff6b35] hover:bg-[#ff6b35]/10"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          {language === 'gu' ? 'પાછા જાઓ' : language === 'hi' ? 'वापस जाएं' : 'Go Back'}
+          {language === 'gu' ? 'પાછા જાઓ' : language === 'hi' ? 'વાપસ जाएं' : 'Go Back'}
         </Button>
 
         <motion.article
@@ -336,7 +356,7 @@ export default function BlogPostPage() {
                 <Link href="/blog">
                   <Button variant="outline" className="w-full border-[#ff6b35]/30 text-[#ff6b35] hover:bg-[#ff6b35]/10">
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    {language === 'gu' ? 'વધુ બ્લોગ પોસ્ટ' : language === 'hi' ? 'और ब्लॉग पोस्ट' : 'More Blog Posts'}
+                    {language === 'gu' ? 'વધુ બ્લોગ પોસ્ટ' : language === 'hi' ? 'और ब्लॉग પોસ્ટ' : 'More Blog Posts'}
                   </Button>
                 </Link>
               </div>
@@ -345,16 +365,110 @@ export default function BlogPostPage() {
 
           {/* RIGHT CONTENT — title + full article */}
           <div className="flex-1 min-w-0">
-            <h1 className="font-[family-name:var(--font-cinzel)] text-3xl md:text-4xl lg:text-5xl font-bold mb-8 leading-tight">
-              {getPostTitle(post)}
-            </h1>
+            <header className="mb-10">
+              <div className="flex items-center gap-2 text-[#ff6b35] font-bold text-sm uppercase tracking-widest mb-4">
+                <span className="bg-[#ff6b35]/10 px-3 py-1 rounded-md">{post.category}</span>
+              </div>
+              
+              <h1 className="font-[family-name:var(--font-cinzel)] text-[32px] md:text-[40px] font-extrabold mb-6 leading-tight">
+                {getPostTitle(post)}
+              </h1>
+
+              <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground font-medium">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-[#ff6b35]/20 flex items-center justify-center text-[#ff6b35]">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <span>{post.author_name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  <span>{formatDate(post.published_at)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  <span>5 min read</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Eye className="w-4 h-4" />
+                  <span>{post.view_count} views</span>
+                </div>
+              </div>
+            </header>
 
             <div className={`blog-content-wrapper ${theme === 'dark' ? 'blog-dark' : 'blog-light'}`}>
               <div
-                className={`prose prose-lg max-w-none whitespace-pre-line ${theme === 'dark' ? 'prose-invert' : ''}`}
+                className={`premium-blog-content prose prose-lg max-w-none whitespace-pre-line ${theme === 'dark' ? 'prose-invert' : ''}`}
                 dangerouslySetInnerHTML={{ __html: getPostContent(post) }}
               />
             </div>
+
+            {/* Tags (Bottom) */}
+            {post.tags && post.tags.length > 0 && (
+              <div className="mt-12 pt-8 border-t border-border">
+                <div className="flex items-center gap-2 mb-4 text-sm font-bold uppercase tracking-widest opacity-60">
+                  <Tag className="w-4 h-4" />
+                  {language === 'gu' ? 'ટૅગ્સ' : language === 'hi' ? 'ટૅગ્સ' : 'Tags'}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {post.tags.map((tag) => (
+                    <Link
+                      key={tag}
+                      href={`/blog?tag=${encodeURIComponent(tag)}`}
+                      className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all hover:scale-105 ${
+                        theme === 'dark' ? 'bg-white/5 hover:bg-[#ff6b35] hover:text-white border border-white/10' : 'bg-gray-100 hover:bg-[#ff6b35] hover:text-white border border-gray-200'
+                      }`}
+                    >
+                      {tag}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Related Posts Section */}
+            {relatedPosts.length > 0 && (
+              <section className="mt-20 pt-12 border-t border-border">
+                <h3 className="font-[family-name:var(--font-cinzel)] text-2xl font-bold mb-8">
+                  {language === 'gu' ? 'સંબંધિત પોસ્ટ્સ' : language === 'hi' ? 'संबंधित पोस्ट' : 'Related Posts'}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {relatedPosts.map((rp) => (
+                    <Link key={rp.id} href={`/blog/${rp.slug}`} className="group">
+                      <div className={`h-full rounded-2xl overflow-hidden border transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1 ${
+                        theme === 'dark' ? 'bg-[#12121a] border-white/5' : 'bg-white border-gray-100'
+                      }`}>
+                        <div className="aspect-video relative overflow-hidden">
+                          {rp.featured_image && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={rp.featured_image}
+                              alt={getPostTitle(rp)}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            />
+                          )}
+                        </div>
+                        <div className="p-4">
+                          <span className="text-[10px] uppercase tracking-widest text-[#ff6b35] font-bold">
+                            {rp.category}
+                          </span>
+                          <h4 className="font-bold mt-1 line-clamp-2 leading-snug group-hover:text-[#ff6b35] transition-colors">
+                            {getPostTitle(rp)}
+                          </h4>
+                          <div className="mt-3 flex items-center justify-between text-[10px] opacity-60">
+                            <span>{formatDate(rp.published_at)}</span>
+                            <div className="flex items-center gap-1">
+                              <Eye className="w-3 h-3" />
+                              <span>{rp.view_count}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Back to Blog (mobile) */}
             <div className="mt-12 text-center lg:hidden">
