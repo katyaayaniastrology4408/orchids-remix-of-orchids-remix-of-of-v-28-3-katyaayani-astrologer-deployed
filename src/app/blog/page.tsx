@@ -8,9 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogPage() {
-  const { data: posts } = await supabaseAdmin
-    .from("blog")
-    .select("*")
+    const { data: posts } = await supabaseAdmin
+      .from("blog_posts")
+      .select("*")
     .eq("is_published", true)
     .order("created_at", { ascending: false })
     .limit(20);

@@ -64,7 +64,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   export default async function HomePage() {
     const { data: latestPosts } = await supabaseAdmin
-      .from("blog")
+      .from("blog_posts")
       .select("id, title, slug, excerpt, featured_image, created_at")
       .eq("is_published", true)
       .order("created_at", { ascending: false })

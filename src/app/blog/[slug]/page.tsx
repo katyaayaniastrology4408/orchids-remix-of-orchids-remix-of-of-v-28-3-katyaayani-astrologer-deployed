@@ -10,7 +10,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const { data: post } = await supabaseAdmin
-    .from("blog")
+    .from("blog_posts")
     .select("*")
     .eq("slug", slug)
     .single();
@@ -30,7 +30,7 @@ export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
 
   const { data: post } = await supabaseAdmin
-    .from("blog")
+    .from("blog_posts")
     .select("*")
     .eq("slug", slug)
     .single();
@@ -41,7 +41,7 @@ export default async function BlogPostPage({ params }: Props) {
 
   // Fetch related posts
   const { data: relatedPosts } = await supabaseAdmin
-    .from("blog")
+    .from("blog_posts")
     .select("*")
     .eq("category", post.category)
     .eq("is_published", true)
