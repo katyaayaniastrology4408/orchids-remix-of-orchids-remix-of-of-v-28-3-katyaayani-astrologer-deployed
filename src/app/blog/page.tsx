@@ -34,21 +34,17 @@ interface BlogPost {
   view_count: number;
 }
 
-const ALL_CATEGORIES = [
-  { value: 'all', label: { en: 'All Posts', gu: 'બધી પોસ્ટ', hi: 'सभी पोस्ट' }, icon: '📚' },
-  { value: 'festivals', label: { en: 'Festivals', gu: 'તહેવાર', hi: 'त्योहार' }, icon: '🎉' },
-  { value: 'grahan', label: { en: 'Grahan', gu: 'ગ્રહણ', hi: 'ग्रहण' }, icon: '🌑' },
-  { value: 'muhurat', label: { en: 'Muhurat', gu: 'મુહૂર્ત', hi: 'मुहूर्त' }, icon: '⏰' },
-  { value: 'astrology', label: { en: 'Astrology', gu: 'જ્યોતિષ', hi: 'ज्योतिष' }, icon: '⭐' },
-  { value: 'rashifal', label: { en: 'Rashifal', gu: 'રાશિફળ', hi: 'राशिफल' }, icon: '♈' },
-  { value: 'puja', label: { en: 'Puja & Vidhi', gu: 'પૂજા', hi: 'पूजा' }, icon: '🪔' },
-  { value: 'vrat', label: { en: 'Vrat & Calendar', gu: 'વ્રત', hi: 'व्रत' }, icon: '📅' },
-  { value: 'vastu', label: { en: 'Vastu', gu: 'વાસ્તુ', hi: 'वास्तु' }, icon: '🏠' },
-  { value: 'remedies', label: { en: 'Remedies', gu: 'ઉપાય', hi: 'उपाय' }, icon: '🌿' },
-  { value: 'kundli', label: { en: 'Kundli', gu: 'કુંડળી', hi: 'कुंडली' }, icon: '🔮' },
-  { value: 'numerology', label: { en: 'Numerology', gu: 'અંકશાસ્ત્ર', hi: 'अंकशास्त्र' }, icon: '🔢' },
-  { value: 'spirituality', label: { en: 'Spirituality', gu: 'અધ્યાત્મ', hi: 'आध्यात्म' }, icon: '🕉️' },
-];
+interface BlogCategory {
+  id: string;
+  value: string;
+  label_en: string;
+  label_gu: string;
+  label_hi: string;
+  icon: string;
+  sort_order: number;
+}
+
+const ALL_POSTS_CAT = { value: 'all', label_en: 'All Posts', label_gu: 'બધી પોસ્ટ', label_hi: 'सभी पोस्ट', icon: '📚' };
 
 const RASHI_DATA = [
   { english: 'aries', gujarati: 'મેષ', icon: GiRam },
@@ -71,10 +67,20 @@ export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [categories, setCategories] = useState<BlogCategory[]>([]);
 
   useEffect(() => {
     fetchPosts();
+    fetchCategories();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch('/api/blog/categories');
+      const data = await res.json();
+      if (data.success) setCategories(data.data || []);
+    } catch {}
+  };
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -117,11 +123,13 @@ export default function BlogPage() {
     return post.excerpt;
   };
 
-  const getCategoryLabel = (cat: typeof ALL_CATEGORIES[0]) => {
-    if (language === 'gu') return cat.label.gu;
-    if (language === 'hi') return cat.label.hi;
-    return cat.label.en;
+  const getCategoryLabel = (cat: BlogCategory | typeof ALL_POSTS_CAT) => {
+    if (language === 'gu') return cat.label_gu;
+    if (language === 'hi') return cat.label_hi;
+    return cat.label_en;
   };
+
+  const allSidebarCats = [ALL_POSTS_CAT, ...categories];
 
   const filteredPosts = selectedCategory === 'all'
     ? posts
@@ -159,10 +167,10 @@ export default function BlogPage() {
               <p className={`text-xs font-bold uppercase tracking-widest mb-4 ${theme === 'dark' ? 'text-[#ff6b35]' : 'text-[#cc4400]'}`}>
                 {language === 'gu' ? 'વિભાગ' : language === 'hi' ? 'श्रेणी' : 'Categories'}
               </p>
-              <div className="flex flex-col gap-1">
-                {ALL_CATEGORIES.map((cat) => {
-                  const count = cat.value === 'all' ? posts.length : (categoryCounts[cat.value] || 0);
-                  const isActive = selectedCategory === cat.value;
+                <div className="flex flex-col gap-1">
+                  {allSidebarCats.map((cat) => {
+                    const count = cat.value === 'all' ? posts.length : (categoryCounts[cat.value] || 0);
+                    const isActive = selectedCategory === cat.value;
                   // Only show categories that have posts, plus 'all' and categories with 0 posts still shown (greyed)
                   return (
                     <button
@@ -303,11 +311,11 @@ export default function BlogPage() {
             </Link>
 
             {/* Category heading */}
-            {selectedCategory !== 'all' && (
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-2xl">{ALL_CATEGORIES.find(c => c.value === selectedCategory)?.icon}</span>
-                <h2 className={`font-[family-name:var(--font-cinzel)] text-xl font-bold ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#3d1c00]'}`}>
-                  {getCategoryLabel(ALL_CATEGORIES.find(c => c.value === selectedCategory)!)}
+              {selectedCategory !== 'all' && (
+                <div className="flex items-center gap-3 mb-6">
+                  <span className="text-2xl">{allSidebarCats.find(c => c.value === selectedCategory)?.icon}</span>
+                  <h2 className={`font-[family-name:var(--font-cinzel)] text-xl font-bold ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#3d1c00]'}`}>
+                    {getCategoryLabel(allSidebarCats.find(c => c.value === selectedCategory) || ALL_POSTS_CAT)}
                 </h2>
                 <span className={`text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
                   ({filteredPosts.length} {language === 'gu' ? 'પોસ્ટ' : language === 'hi' ? 'पोस्ट' : 'posts'})

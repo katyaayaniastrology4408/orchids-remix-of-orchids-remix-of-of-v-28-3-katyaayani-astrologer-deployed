@@ -4344,45 +4344,80 @@ function BlogManager({ isDark, t, isActionLoading, setIsActionLoading, setSucces
   setError: (v: string) => void;
 }) {
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [showForm, setShowForm] = useState(false);
-      const [editingPost, setEditingPost] = useState<any>(null);
-      const [uploading, setUploading] = useState(false);
-      const [sendingBlogEmail, setSendingBlogEmail] = useState<string | null>(null);
-    const [blogForm, setBlogForm] = useState({
-    title: '',
-    title_gujarati: '',
-    title_hindi: '',
-    slug: '',
-    excerpt: '',
-    excerpt_gujarati: '',
-    excerpt_hindi: '',
-    content: '',
-    content_gujarati: '',
-    content_hindi: '',
-    category: 'astrology',
-    featured_image: '',
-    is_published: true,
-  });
+      const [loading, setLoading] = useState(false);
+      const [showForm, setShowForm] = useState(false);
+        const [editingPost, setEditingPost] = useState<any>(null);
+        const [uploading, setUploading] = useState(false);
+        const [sendingBlogEmail, setSendingBlogEmail] = useState<string | null>(null);
+        const [blogTab, setBlogTab] = useState<'posts' | 'categories'>('posts');
 
-  const BLOG_CATEGORIES = [
-      { value: 'astrology', label: 'Astrology / જ્યોતિષ' },
-      { value: 'festivals', label: 'Festivals / તહેવાર' },
-      { value: 'grahan', label: 'Grahan / ગ્રહણ' },
-      { value: 'muhurat', label: 'Muhurat / મુહૂર્ત' },
-      { value: 'rashifal', label: 'Rashifal / રાશિફળ' },
-      { value: 'vastu', label: 'Vastu / વાસ્તુ' },
-      { value: 'numerology', label: 'Numerology / અંકશાસ્ત્ર' },
-      { value: 'spirituality', label: 'Spirituality / અધ્યાત્મ' },
-      { value: 'puja', label: 'Puja & Vidhi / પૂજા' },
-      { value: 'remedies', label: 'Remedies / ઉપાય' },
-      { value: 'kundli', label: 'Kundli / કુંડળી' },
-      { value: 'vrat', label: 'Vrat & Calendar / વ્રત' },
-    ];
+      // Dynamic categories from DB
+      const [BLOG_CATEGORIES, setBlogCategories] = useState<{id: string; value: string; label_en: string; label_gu: string; label_hi: string; icon: string; sort_order: number}[]>([]);
+      const [catLoading, setCatLoading] = useState(false);
+      const [newCat, setNewCat] = useState({ value: '', label_en: '', label_gu: '', label_hi: '', icon: '📝' });
 
-  useEffect(() => {
-      fetchBlogPosts();
-    }, []);
+      const fetchCategories = async () => {
+        setCatLoading(true);
+        try {
+          const res = await fetch('/api/blog/categories');
+          const data = await res.json();
+          if (data.success) setBlogCategories(data.data || []);
+        } catch {}
+        finally { setCatLoading(false); }
+      };
+
+      const handleAddCategory = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newCat.value || !newCat.label_en) { setError('Slug and English name are required'); return; }
+        setIsActionLoading(true);
+        try {
+          const res = await fetch('/api/blog/categories', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newCat),
+          });
+          const data = await res.json();
+          if (data.success) {
+            setSuccess('Category added!');
+            setNewCat({ value: '', label_en: '', label_gu: '', label_hi: '', icon: '📝' });
+            fetchCategories();
+          } else { setError(data.error || 'Failed'); }
+        } catch { setError('An error occurred'); }
+        finally { setIsActionLoading(false); }
+      };
+
+      const handleDeleteCategory = async (id: string, label: string) => {
+        if (!confirm(`Delete category "${label}"? Posts with this category won't be changed.`)) return;
+        setIsActionLoading(true);
+        try {
+          const res = await fetch(`/api/blog/categories?id=${id}`, { method: 'DELETE' });
+          const data = await res.json();
+          if (data.success) { setSuccess('Category deleted!'); fetchCategories(); }
+          else { setError(data.error || 'Failed'); }
+        } catch { setError('An error occurred'); }
+        finally { setIsActionLoading(false); }
+      };
+
+      const [blogForm, setBlogForm] = useState({
+      title: '',
+      title_gujarati: '',
+      title_hindi: '',
+      slug: '',
+      excerpt: '',
+      excerpt_gujarati: '',
+      excerpt_hindi: '',
+      content: '',
+      content_gujarati: '',
+      content_hindi: '',
+      category: 'astrology',
+      featured_image: '',
+      is_published: true,
+    });
+
+    useEffect(() => {
+        fetchBlogPosts();
+        fetchCategories();
+      }, []);
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -4553,43 +4588,162 @@ function BlogManager({ isDark, t, isActionLoading, setIsActionLoading, setSucces
           <h2 className="font-[family-name:var(--font-cinzel)] text-2xl font-bold text-[#ff6b35]">{t("Blog Management")}</h2>
           <p className="text-sm text-muted-foreground">{t("Create and manage blog posts in multiple languages")}</p>
         </div>
-        <Button 
-          onClick={() => {
-            setShowForm(!showForm);
-            if (showForm) {
-              setEditingPost(null);
-              setBlogForm({
-                title: '',
-                title_gujarati: '',
-                title_hindi: '',
-                slug: '',
-                excerpt: '',
-                excerpt_gujarati: '',
-                excerpt_hindi: '',
-                content: '',
-                content_gujarati: '',
-                content_hindi: '',
-                category: 'astrology',
-                featured_image: '',
-                is_published: true,
-              });
-            }
-          }}
-          className="bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white"
-        >
-          {showForm ? <><ChevronRight className="w-4 h-4 mr-2 rotate-90" /> {t("Close Form")}</> : <><Plus className="w-4 h-4 mr-2" /> {t("New Post")}</>}
-        </Button>
-      </div>
+          <div className="flex items-center gap-2">
+            {/* Tab switcher */}
+            <div className={`flex rounded-xl border overflow-hidden ${isDark ? 'border-[#ff6b35]/20' : 'border-[#ff6b35]/30'}`}>
+              <button
+                onClick={() => setBlogTab('posts')}
+                className={`px-4 py-2 text-sm font-bold transition-colors ${blogTab === 'posts' ? 'bg-[#ff6b35] text-white' : isDark ? 'text-gray-400 hover:text-white' : 'text-[#6b5847] hover:text-[#ff6b35]'}`}
+              >
+                <FileText className="w-4 h-4 inline mr-1" /> Posts
+              </button>
+              <button
+                onClick={() => setBlogTab('categories')}
+                className={`px-4 py-2 text-sm font-bold transition-colors ${blogTab === 'categories' ? 'bg-[#ff6b35] text-white' : isDark ? 'text-gray-400 hover:text-white' : 'text-[#6b5847] hover:text-[#ff6b35]'}`}
+              >
+                <Tag className="w-4 h-4 inline mr-1" /> Categories
+              </button>
+            </div>
+            {blogTab === 'posts' && (
+              <Button 
+                onClick={() => {
+                  setShowForm(!showForm);
+                  if (showForm) {
+                    setEditingPost(null);
+                    setBlogForm({
+                      title: '', title_gujarati: '', title_hindi: '',
+                      slug: '', excerpt: '', excerpt_gujarati: '', excerpt_hindi: '',
+                      content: '', content_gujarati: '', content_hindi: '',
+                      category: 'astrology', featured_image: '', is_published: true,
+                    });
+                  }
+                }}
+                className="bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white"
+              >
+                {showForm ? <><ChevronRight className="w-4 h-4 mr-2 rotate-90" /> {t("Close Form")}</> : <><Plus className="w-4 h-4 mr-2" /> {t("New Post")}</>}
+              </Button>
+            )}
+          </div>
+        </div>
 
-      {showForm && (
-        <Card className={isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}>
-          <CardHeader>
-            <CardTitle className="text-[#ff6b35] flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              {editingPost ? t("Edit Blog Post") : t("Create New Blog Post")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        {/* Category Manager Tab */}
+        {blogTab === 'categories' && (
+          <div className="space-y-6">
+            {/* Add category form */}
+            <Card className={isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}>
+              <CardHeader>
+                <CardTitle className="text-[#ff6b35] flex items-center gap-2"><Tag className="w-5 h-5" /> Add New Category</CardTitle>
+                <CardDescription>Create a custom blog category that will appear in the dropdown and sidebar</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleAddCategory} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div className="space-y-1">
+                      <Label className="text-xs font-bold uppercase">Icon (Emoji)</Label>
+                      <Input
+                        placeholder="📝"
+                        value={newCat.icon}
+                        onChange={(e) => setNewCat({...newCat, icon: e.target.value})}
+                        className={`text-center text-xl ${isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}`}
+                        maxLength={4}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs font-bold uppercase">Slug (URL key) *</Label>
+                      <Input
+                        placeholder="e.g. festivals"
+                        value={newCat.value}
+                        onChange={(e) => setNewCat({...newCat, value: e.target.value.toLowerCase().replace(/\s+/g,'-')})}
+                        className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs font-bold uppercase">English Name *</Label>
+                      <Input
+                        placeholder="Festivals"
+                        value={newCat.label_en}
+                        onChange={(e) => setNewCat({...newCat, label_en: e.target.value})}
+                        className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs font-bold uppercase">ગુજરાતી નામ</Label>
+                      <Input
+                        placeholder="તહેવાર"
+                        value={newCat.label_gu}
+                        onChange={(e) => setNewCat({...newCat, label_gu: e.target.value})}
+                        className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs font-bold uppercase">हिंदी नाम</Label>
+                      <Input
+                        placeholder="त्योहार"
+                        value={newCat.label_hi}
+                        onChange={(e) => setNewCat({...newCat, label_hi: e.target.value})}
+                        className={isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}
+                      />
+                    </div>
+                  </div>
+                  <Button type="submit" className="bg-[#ff6b35] hover:bg-[#ff6b35]/90 text-white font-bold" disabled={isActionLoading}>
+                    {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                    Add Category
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Existing categories list */}
+            <Card className={isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}>
+              <CardHeader>
+                <CardTitle className="text-[#ff6b35]">All Categories</CardTitle>
+                <CardDescription>{BLOG_CATEGORIES.length} categories</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {catLoading ? (
+                  <div className="py-8 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-[#ff6b35]" /></div>
+                ) : BLOG_CATEGORIES.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">No categories found</p>
+                ) : (
+                  <div className="space-y-2">
+                    {BLOG_CATEGORIES.map((cat) => (
+                      <div key={cat.id} className={`flex items-center justify-between p-3 rounded-xl border ${isDark ? 'border-[#ff6b35]/10 bg-white/5' : 'border-[#ff6b35]/10 bg-orange-50/50'}`}>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xl">{cat.icon}</span>
+                          <div>
+                            <p className="font-bold text-sm">{cat.label_en}</p>
+                            <p className="text-xs text-muted-foreground">{cat.label_gu} · {cat.label_hi} · <code className="text-[10px] bg-black/10 px-1 rounded">{cat.value}</code></p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteCategory(cat.id, cat.label_en)}
+                          className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                          disabled={isActionLoading}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {blogTab === 'posts' && showForm && (
+          <Card className={isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}>
+            <CardHeader>
+              <CardTitle className="text-[#ff6b35] flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                {editingPost ? t("Edit Blog Post") : t("Create New Blog Post")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
             <form onSubmit={handleSaveBlog} className="space-y-6">
               {/* Titles */}
               <div className="space-y-4">
@@ -4721,9 +4875,9 @@ function BlogManager({ isDark, t, isActionLoading, setIsActionLoading, setSucces
                     onChange={(e) => setBlogForm({...blogForm, category: e.target.value})}
                     className={`w-full h-10 px-3 rounded-md border text-sm ${isDark ? 'bg-[#1a1a2e] border-[#ff6b35]/10 text-white' : 'bg-white border-[#ff6b35]/20 text-black'}`}
                   >
-                    {BLOG_CATEGORIES.map((cat) => (
-                      <option key={cat.value} value={cat.value}>{cat.label}</option>
-                    ))}
+                      {BLOG_CATEGORIES.map((cat) => (
+                        <option key={cat.value} value={cat.value}>{cat.icon} {cat.label_en} / {cat.label_gu}</option>
+                      ))}
                   </select>
                 </div>
                 <div className="space-y-2">
@@ -4807,8 +4961,8 @@ function BlogManager({ isDark, t, isActionLoading, setIsActionLoading, setSucces
         </Card>
       )}
 
-      {/* Blog Posts List */}
-      <Card className={isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}>
+        {/* Blog Posts List */}
+        {blogTab === 'posts' && <Card className={isDark ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/20'}>
         <CardHeader>
           <CardTitle className="text-[#ff6b35]">{t("All Blog Posts")}</CardTitle>
           <CardDescription>{blogPosts.length} {t("posts")}</CardDescription>
@@ -4868,7 +5022,7 @@ function BlogManager({ isDark, t, isActionLoading, setIsActionLoading, setSucces
               </div>
             )}
           </CardContent>
-        </Card>
+        </Card>}
       </div>
     );
 }
