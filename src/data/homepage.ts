@@ -15,9 +15,10 @@ export const nakshatraSymbols = [
 
 export const testimonialsData = {
     hi: [
-      { name: "वनिताबेन पटेल", text: "ज्योतिष परामर्श का अद्भुत अनुभव रहा। मार्गदर्शन स्पष्ट, व्यावहारिक और सांत्वना देने वाला था।", rating: 5 },
+      { name: "अपूर्वसिंह सोलंकी", text: "ज्योतिष परामर्श का अद्भुत अनुभव रहा। मार्गदर्शन स्पष्ट, व्यावहारिक और सांत्वना देने वाला था।", rating: 5, date: "2 महीने पहले", badge: "Local Guide" },
+      { name: "वनिताबेन पटेल", text: "ज्योतिष परामर्श का अद्भुत अनुभव रहा। मार्गदर्शन स्पष्ट, व्यावहारिक और सांत्वना देने वाला था।", rating: 5, date: "1 महीना पहले", badge: "Verified Buyer" },
+      { name: "चेतनकुमार पंचाल", text: "घर पर परामर्श उत्कृष्ट रहा। उपाय वास्तव में मेरे लिए कारगर साबित हुए।", rating: 5, date: "3 सप्ताह पहले", badge: "Local Guide" },
       { name: "जील पंचाल", text: "ऑनलाइन परामर्श सुविधाजनक और ज्ञानवर्धक रहा। उपाय आसानी से पालन करने योग्य थे।", rating: 5 },
-      { name: "चेतनकुमार पंचाल", text: "घर पर परामर्श उत्कृष्ट रहा। उपाय वास्तव में मेरे लिए कारगर साबित हुए।", rating: 5 },
       { name: "अपूर्वसिंह सोलंकी", text: "विश्वसनीय ज्योतिष सेवा। सच्चा और सहायक परामर्श।", rating: 5 },
       { name: "कनुभाई पंचाल", text: "विस्तृत भविष्यवाणी और उपायों ने मुझे मन की शांति दी।", rating: 5 },
       { name: "खुशी पटेल", text: "ऑनलाइन परामर्श शेड्यूल करना आसान था और सहायक रहा।", rating: 4 },
@@ -54,9 +55,10 @@ export const testimonialsData = {
       { name: "झलक खापेरकर", text: "उत्कृष्ट मार्गदर्शन। उपाय सरल और व्यावहारिक थे।", rating: 5 },
     ],
     gu: [
-      { name: "વનિતાબેન પટેલ", text: "અદ્ભુત અનુભવ રહ્યો. માર્ગદર્શન સ્પષ્ટ, વ્યવહારુ અને સાંત્વન આપનારું હતું.", rating: 5 },
+      { name: "અપૂર્વસિંહ સોલંકી", text: "જ્યોતિષ પરામર્શનો અદ્ભુત અનુભવ રહ્યો. માર્ગદર્શન સ્પષ્ટ, વ્યવહારુ અને સાંત્વના આપનારું હતું.", rating: 5, date: "2 મહિના પહેલા", badge: "Local Guide" },
+      { name: "વનિતાબેન પટેલ", text: "અદ્ભુત અનુભવ રહ્યો. માર્ગદર્શન સ્પષ્ટ, વ્યવહારુ અને સાંત્વના આપનારું હતું.", rating: 5, date: "1 મહિનો પહેલા", badge: "Verified Buyer" },
+      { name: "ચેતનકુમાર પંચાલ", text: "હોમ વિઝિટ પરામર્શ ઉત્તમ રહ્યો. ઉપાય ખરેખર કારગર સાબિત થયા.", rating: 5, date: "3 અઠવાડિયા પહેલા", badge: "Local Guide" },
       { name: "ઝીલ પંચાલ", text: "ઑનલાઇન પરામર્શ સરળ અને જ્ઞાનવર્ધક રહ્યો. ઉપાય સરળતાથી અનુસરવા જેવા હતા.", rating: 5 },
-      { name: "ચેતનકુમાર પંચાલ", text: "હોમ વિઝિટ પરામર્શ ઉત્તમ રહ્યો. ઉપાય ખરેખર કારગર સાબિત થયા.", rating: 5 },
       { name: "અપૂર્વસિંહ સોલંકી", text: "વિશ્વસનીય જ્યોતિષ સેવા. સાચો અને સહાયક પરામર્શ.", rating: 5 },
       { name: "કનુભાઈ પંચાલ", text: "વિગતવાર ભવિષ્યવાણી અને ઉપાયોએ મને મનની શાંતિ આપી.", rating: 5 },
       { name: "ખુશી પટેલ", text: "ઑનલાઇન પરામર્શ સરળતાથી શેડ્યૂલ કરી શકાયો અને સહાયક રહ્યો.", rating: 4 },
@@ -93,9 +95,10 @@ export const testimonialsData = {
       { name: "ઝલક ખાપેરકર", text: "ઉત્તમ માર્ગદર્શન. ઉપાય સરળ અને વ્યવહારુ હતા.", rating: 5 },
     ],
     en: [
-      { name: "VanitaBen Patel", text: "Wonderful experience with astrology consultation. Clear, practical, and comforting guidance.", rating: 5 },
+      { name: "Apuravsingh Solanki", text: "Wonderful experience with astrology consultation. Clear, practical, and comforting guidance.", rating: 5, date: "2 months ago", badge: "Local Guide" },
+      { name: "VanitaBen Patel", text: "Wonderful experience with astrology consultation. Clear, practical, and comforting guidance.", rating: 5, date: "1 month ago", badge: "Verified" },
+      { name: "Chetankumar Panchal", text: "Home visit consultation was excellent. Remedies truly worked for me.", rating: 5, date: "3 weeks ago", badge: "Local Guide" },
       { name: "Zeel Panchal", text: "Online consultation was convenient and insightful. Remedies were easy to follow.", rating: 5 },
-      { name: "Chetankumar Panchal", text: "Home visit consultation was excellent. Remedies truly worked for me.", rating: 5 },
       { name: "Apuravsingh Solanki", text: "Reliable astrology service. Genuine and supportive consultation.", rating: 5 },
       { name: "Kanubhai Panchal", text: "Detailed predictions and remedies gave me peace of mind.", rating: 5 },
       { name: "Khushi Patel", text: "Online consultation was easy to schedule and helpful.", rating: 4 },

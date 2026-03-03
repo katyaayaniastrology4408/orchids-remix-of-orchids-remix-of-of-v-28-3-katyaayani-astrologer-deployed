@@ -537,29 +537,42 @@ export default function HomePageClient() {
           </div>
 
           {/* First 3 reviews always visible */}
-          <div className="grid md:grid-cols-3 gap-8 mb-4">
-            {testimonials.slice(0, 3).map((testimonial) => (
-              <div key={testimonial.name}>
-                <Card className={`${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20' : 'bg-[#f8f4ee] border-[#ff6b35]/30'} h-full`}>
-                  <CardContent className="p-8">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div>
-                        <div className="flex gap-0.5 mb-1">
-                          {Array.from({ length: testimonial.rating }).map((_, i) => (
-                            <Star key={i} className="w-4 h-4 fill-[#ff6b35] text-[#ff6b35]" />
-                          ))}
-                        </div>
-                        <p className={`font-[family-name:var(--font-cinzel)] font-semibold text-sm ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
-                          {testimonial.name}
-                        </p>
-                      </div>
+            <div className="grid md:grid-cols-3 gap-8 mb-4">
+              {testimonials.slice(0, 3).map((testimonial) => (
+                <div key={testimonial.name}>
+                  <Card className={`${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20' : 'bg-[#f8f4ee] border-[#ff6b35]/30'} h-full relative overflow-hidden group`}>
+                    <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
+                      <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="G" className="h-3" />
                     </div>
-                    <p className={`italic text-sm ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>&ldquo;{testimonial.text}&rdquo;</p>
-                  </CardContent>
-                </Card>
-              </div>
-            ))}
-          </div>
+                    <CardContent className="p-8">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div>
+                          <div className="flex gap-0.5 mb-1">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star key={i} className={`w-4 h-4 ${i < testimonial.rating ? 'fill-[#FBBC05] text-[#FBBC05]' : 'text-gray-300'}`} />
+                            ))}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <p className={`font-[family-name:var(--font-cinzel)] font-semibold text-sm ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
+                              {testimonial.name}
+                            </p>
+                            {(testimonial as any).badge && (
+                              <span className="text-[8px] bg-[#4285F4]/10 text-[#4285F4] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-tighter">
+                                {(testimonial as any).badge}
+                              </span>
+                            )}
+                          </div>
+                          {(testimonial as any).date && (
+                            <p className="text-[10px] opacity-40 font-bold uppercase tracking-widest mt-0.5">{(testimonial as any).date}</p>
+                          )}
+                        </div>
+                      </div>
+                      <p className={`italic text-sm leading-relaxed ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>&ldquo;{testimonial.text}&rdquo;</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+            </div>
 
           {/* Remaining reviews - blurred preview row + link to /reviews */}
           <div className="relative">
@@ -567,21 +580,34 @@ export default function HomePageClient() {
             <div className="grid md:grid-cols-3 gap-8 blur-[1px] pointer-events-none select-none">
               {testimonials.slice(3, 6).map((testimonial) => (
                 <div key={testimonial.name}>
-                  <Card className={`${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20' : 'bg-[#f8f4ee] border-[#ff6b35]/30'} h-full`}>
+                  <Card className={`${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20 shadow-lg shadow-[#ff6b35]/5' : 'bg-[#f8f4ee] border-[#ff6b35]/30'} h-full relative overflow-hidden group`}>
+                    <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
+                      <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="G" className="h-3" />
+                    </div>
                     <CardContent className="p-8">
                       <div className="flex items-center gap-4 mb-4">
                         <div>
                           <div className="flex gap-0.5 mb-1">
                             {Array.from({ length: testimonial.rating }).map((_, i) => (
-                              <Star key={i} className="w-4 h-4 fill-[#ff6b35] text-[#ff6b35]" />
+                              <Star key={i} className="w-4 h-4 fill-[#FBBC05] text-[#FBBC05]" />
                             ))}
                           </div>
-                          <p className={`font-[family-name:var(--font-cinzel)] font-semibold text-sm ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
-                            {testimonial.name}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className={`font-[family-name:var(--font-cinzel)] font-semibold text-sm ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
+                              {testimonial.name}
+                            </p>
+                            {(testimonial as any).badge && (
+                              <span className="text-[8px] bg-[#4285F4]/10 text-[#4285F4] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-tighter">
+                                {(testimonial as any).badge}
+                              </span>
+                            )}
+                          </div>
+                          {(testimonial as any).date && (
+                            <p className="text-[10px] opacity-40 font-bold uppercase tracking-widest mt-0.5">{(testimonial as any).date}</p>
+                          )}
                         </div>
                       </div>
-                      <p className={`italic text-sm ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>&ldquo;{testimonial.text}&rdquo;</p>
+                      <p className={`italic text-sm leading-relaxed ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>&ldquo;{testimonial.text}&rdquo;</p>
                     </CardContent>
                   </Card>
                 </div>

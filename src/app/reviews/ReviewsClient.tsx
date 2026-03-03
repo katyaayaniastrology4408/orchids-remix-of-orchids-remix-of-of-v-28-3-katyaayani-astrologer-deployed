@@ -197,35 +197,46 @@ export default function ReviewsClient() {
                           <Quote className="w-24 h-24 rotate-12" />
                         </div>
                         <CardContent className="p-8 flex flex-col h-full relative z-10">
-                          <div className="flex gap-0.5 mb-4">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <Star 
-                                key={i} 
-                                className={`w-4 h-4 ${i < review.rating ? 'fill-[#ff6b35] text-[#ff6b35]' : 'text-gray-300'}`} 
-                              />
-                            ))}
-                          </div>
-                          
-                          <p className={`italic mb-6 flex-grow leading-relaxed ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
-                            &ldquo;{review.text}&rdquo;
-                          </p>
-
-                          <div className="flex items-center gap-3 pt-6 border-t border-[#ff6b35]/10">
-                            <div className="w-10 h-10 rounded-full bg-[#ff6b35]/10 flex items-center justify-center">
-                              <User className="w-5 h-5 text-[#ff6b35]" />
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex gap-0.5">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <Star 
+                                    key={i} 
+                                    className={`w-4 h-4 ${i < review.rating ? 'fill-[#FBBC05] text-[#FBBC05]' : 'text-gray-300'}`} 
+                                  />
+                                ))}
+                              </div>
+                              <div className="flex items-center gap-1.5 opacity-60">
+                                <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="G" className="h-3" />
+                                <span className="text-[10px] font-bold uppercase tracking-widest">{t('Google', 'गूगल', 'ગૂગલ')}</span>
+                              </div>
                             </div>
-                            <div>
-                              <p className={`font-[family-name:var(--font-cinzel)] font-bold text-sm ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
-                                {review.name}
-                              </p>
-                              {review.created_at && (
+                            
+                            <p className={`italic mb-6 flex-grow leading-relaxed ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
+                              &ldquo;{review.text}&rdquo;
+                            </p>
+  
+                            <div className="flex items-center gap-3 pt-6 border-t border-[#ff6b35]/10">
+                              <div className="w-10 h-10 rounded-full bg-[#ff6b35]/10 flex items-center justify-center overflow-hidden border border-[#ff6b35]/20">
+                                <User className="w-5 h-5 text-[#ff6b35]" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className={`font-[family-name:var(--font-cinzel)] font-bold text-sm ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
+                                    {review.name}
+                                  </p>
+                                  {(review as any).badge && (
+                                    <span className="text-[8px] bg-[#4285F4]/10 text-[#4285F4] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-tighter">
+                                      {(review as any).badge}
+                                    </span>
+                                  )}
+                                </div>
                                 <p className="text-[10px] uppercase tracking-widest opacity-40 font-bold flex items-center gap-1">
                                   <Calendar className="w-3 h-3" />
-                                  {new Date(review.created_at).toLocaleDateString()}
+                                  {(review as any).date || (review.created_at ? new Date(review.created_at).toLocaleDateString() : 'Recent')}
                                 </p>
-                              )}
+                              </div>
                             </div>
-                          </div>
                         </CardContent>
                       </Card>
                     </motion.div>
@@ -360,13 +371,13 @@ export default function ReviewsClient() {
                   </a>
                 </div>
               
-              <p className="text-xs opacity-50 max-w-md mx-auto leading-relaxed">
-                {t(
-                  'Your reviews are automatically synced with our system via Google Business Profile to ensure transparency and trust.',
-                  'आपकी समीक्षाएं पारदर्शिता और विश्वास सुनिश्चित करने के लिए Google Business Profile के माध्यम से हमारे सिस्टम के साथ स्वचालित रूप से सिंक की जाती हैं।',
-                  'તમારા પ્રતિસાદો પારદર્શિતા અને વિશ્વાસ સુનિશ્ચિત કરવા માટે Google Business Profile દ્વારા અમારી સિસ્ટમ સાથે આપમેળે સમન્વયિત થાય છે.'
-                )}
-              </p>
+                <p className="text-xs opacity-50 max-w-md mx-auto leading-relaxed">
+                  {t(
+                    'Our Google reviews are manually verified and updated from our official Business Profile to ensure transparency and trust.',
+                    'हमारी गूगल समीक्षाएं पारदर्शिता और विश्वास सुनिश्चित करने के लिए हमारे आधिकारिक बिजनेस प्रोफाइल से मैन्युअल रूप से सत्यापित और अपडेट की जाती हैं।',
+                    'અમારી Google સમીક્ષાઓ પારદર્શિતા અને વિશ્વાસ સુનિશ્ચિત કરવા માટે અમારી સત્તાવાર બિઝનેસ પ્રોફાઇલમાંથી મેન્યુઅલી ચકાસવામાં આવે છે અને અપડેટ કરવામાં આવે છે.'
+                  )}
+                </p>
             </motion.div>
           </div>
         </section>
