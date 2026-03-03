@@ -15,6 +15,7 @@ const CosmicInsights = dynamic(() => import("@/components/homepage/CosmicInsight
 const StarField = dynamic(() => import("@/components/homepage/StarField"), { ssr: false });
 const RashifalSection = dynamic(() => import("@/components/homepage/RashifalSection"), { ssr: false });
 const AstrologerTip = dynamic(() => import("@/components/homepage/AstrologerTip"), { ssr: false });
+const ChandraGrahanBanner = dynamic(() => import("@/components/homepage/ChandraGrahanBanner"), { ssr: false });
 import { testimonialsData, contentData } from "@/data/homepage";
 import "@/styles/homepage.css";
 
@@ -90,8 +91,25 @@ export default function HomePageClient() {
       }
     }, 60 * 1000);
     const refreshId = setInterval(fetchPanchangData, 30 * 60 * 1000);
-    return () => { clearInterval(intervalId); clearInterval(refreshId); };
-  }, [language]);
+      return () => { clearInterval(intervalId); clearInterval(refreshId); };
+    }, [language]);
+
+  // Chandra Grahan 2026 — schedule email blast 1 hour after page first load
+  useEffect(() => {
+    const GRAHAN_KEY = 'grahan_email_sent_2026_03_03';
+    if (sessionStorage.getItem(GRAHAN_KEY)) return;
+    sessionStorage.setItem(GRAHAN_KEY, 'scheduled');
+    const timer = setTimeout(() => {
+      fetch('/api/grahan/send-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+        .then(() => sessionStorage.setItem(GRAHAN_KEY, 'sent'))
+        .catch(() => {});
+    }, 60 * 60 * 1000); // 1 hour
+    return () => clearTimeout(timer);
+  }, []);
 
   if (!mounted) {
     // Render a minimal skeleton to avoid blank screen and improve LCP
@@ -131,6 +149,8 @@ export default function HomePageClient() {
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-[#0a0a0f] text-[#f5f0e8]' : 'bg-[#fdfbf7] text-[#4a3f35]'}`}>
       <Navbar />
+
+      <ChandraGrahanBanner />
 
       <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden py-24">
         <StarField />
