@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { Star, Moon, Sun, Sparkles, Home, Video, ChevronRight, ChevronDown, Calendar } from "lucide-react";
+import { Star, Moon, Sun, Sparkles, Home, Video, ChevronRight, ChevronDown, Calendar, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -29,6 +29,7 @@ export default function HomePageClient() {
   const [hinduCalendar, setHinduCalendar] = useState({ month: "--", tithi: "--", vaara: "--", paksha: "--" });
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [dbReviews, setDbReviews] = useState<{ name: string; text: string; rating: number }[]>([]);
+  const [latestPosts, setLatestPosts] = useState<{ id: string; title: string; slug: string; excerpt: string; featured_image: string; created_at: string }[]>([]);
 
   useEffect(() => {
     setMounted(true);
@@ -39,6 +40,16 @@ export default function HomePageClient() {
       .then(json => {
         if (json.success && Array.isArray(json.data)) {
           setDbReviews(json.data.map((f: any) => ({ name: f.name, text: f.comment, rating: f.rating })));
+        }
+      })
+      .catch(() => {});
+
+    // Fetch latest 3 blog posts
+    fetch('/api/blog?limit=3&published=true')
+      .then(r => r.json())
+      .then(json => {
+        if (json.success && Array.isArray(json.data)) {
+          setLatestPosts(json.data.slice(0, 3));
         }
       })
       .catch(() => {});
@@ -397,6 +408,72 @@ export default function HomePageClient() {
       <RashifalSection />
 
       <AstrologerTip />
+
+      {/* Latest Blog Posts */}
+      {latestPosts.length > 0 && (
+        <section className={`py-20 px-6 ${theme === 'dark' ? 'bg-[#0a0a0f]' : 'bg-[#fdfbf7]'}`}>
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <div className="flex justify-center gap-2 mb-4">
+                <Newspaper className="w-8 h-8 text-[#ff6b35]" />
+              </div>
+              <h2 className="font-[family-name:var(--font-cinzel)] text-3xl md:text-4xl font-bold mb-3 text-gradient-ancient">
+                {language === 'gu' ? 'તાજા લેખ' : language === 'hi' ? 'ताज़े लेख' : 'Latest from the Blog'}
+              </h2>
+              <p className={`text-lg ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
+                {language === 'gu' ? 'જ્યોતિષ, ધર્મ અને આધ્યાત્મિકતા પર નવા લેખ' : language === 'hi' ? 'ज्योतिष, धर्म और आध्यात्मिकता पर नए लेख' : 'Fresh insights on astrology, dharma & spirituality'}
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8 mb-10">
+              {latestPosts.map((post) => (
+                <Link key={post.id} href={`/blog/${post.slug}`} className="no-underline group">
+                  <Card className={`overflow-hidden h-full transition-all duration-300 group-hover:shadow-xl group-hover:shadow-[#ff6b35]/10 group-hover:-translate-y-1 ${theme === 'dark' ? 'bg-[#12121a] border-[#ff6b35]/20' : 'bg-[#fffdf9] border-[#ff6b35]/20'}`}>
+                    {post.featured_image && (
+                      <div className="relative h-48 overflow-hidden">
+                        <img
+                          src={post.featured_image}
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                      </div>
+                    )}
+                    <CardContent className="p-5">
+                      <p className={`text-xs font-semibold uppercase tracking-wider mb-2 ${theme === 'dark' ? 'text-[#ff8c5e]' : 'text-[#ff6b35]'}`}>
+                        {new Date(post.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </p>
+                      <h3 className={`font-[family-name:var(--font-cinzel)] font-bold text-lg mb-2 line-clamp-2 group-hover:text-[#ff6b35] transition-colors ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
+                        {post.title}
+                      </h3>
+                      {post.excerpt && (
+                        <p className={`text-sm line-clamp-2 ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
+                          {post.excerpt}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-1 mt-3">
+                        <span className="text-[#ff6b35] text-xs font-semibold">
+                          {language === 'gu' ? 'વધુ વાંચો' : language === 'hi' ? 'पढ़ते रहें' : 'Read more'}
+                        </span>
+                        <ChevronRight className="w-3 h-3 text-[#ff6b35] group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+
+            <div className="text-center">
+              <Button asChild size="lg" variant="outline" className="cursor-pointer border-[#ff6b35] text-[#ff6b35] hover:bg-[#ff6b35]/10 text-lg px-8 py-5">
+                <Link href="/blog" className="no-underline">
+                  {language === 'gu' ? 'બધા લેખ જુઓ' : language === 'hi' ? 'सभी लेख देखें' : 'View All Posts'}
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className={`py-24 px-6 ${theme === 'dark' ? 'bg-[#12121a]' : 'bg-[#fffdf9]'}`}>
         <div className="max-w-7xl mx-auto">
