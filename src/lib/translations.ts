@@ -415,7 +415,7 @@ export const dictionary: Record<string, { hi: string; gu: string }> = {
   "Show Less": { hi: "कम दिखाएं", gu: "ઓછું બતાવો" },
   "Explore": { hi: "अन्वेषण करें", gu: "શોધખોળ કરો" },
   "Get Started": { hi: "शुरू करें", gu: "શરૂ કરો" },
-  "Contact Us": { hi: "हमसे संपर्क करें", gu: "અમારો સંપર્ક કરો" },
+    "Contact Us": { hi: "संपर्क", gu: "સંપર્ક" },
   "Call Now": { hi: "अभी कॉल करें", gu: "હવે કૉલ કરો" },
   "WhatsApp": { hi: "व्हाट्सएप", gu: "વૉટ્સએપ" },
   "Chat on WhatsApp": { hi: "व्हाट्सएप पर चैट करें", gu: "વૉટ્સએપ પર ચેટ કરો" },

@@ -349,9 +349,9 @@ export default function AboutPage() {
           <section className="py-16 px-6">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
-                <h2 className="font-[family-name:var(--font-cinzel)] text-3xl md:text-4xl font-bold mb-4 text-gradient-ancient">
-                  {language === 'hi' ? "हमसे संपर्क करें" : language === 'gu' ? "અમારો સંપર્ક કરો" : "Contact Us"}
-                </h2>
+                  <h2 className="font-[family-name:var(--font-cinzel)] text-3xl md:text-4xl font-bold mb-4 text-gradient-ancient">
+                    {language === 'hi' ? "संपर्क" : language === 'gu' ? "સંપર્ક" : "Contact"}
+                  </h2>
                 <p className={`text-xl ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'}`}>
                   {language === 'hi' ? "कोई प्रश्न है? हमें अपनी जानकारी भेजें और हम आपसे संपर्क करेंगे।" : 
                    language === 'gu' ? "કોઈ પ્રશ્ન છે? અમને તમારી વિગતો મોકલો અને અમે તમારો સંપર્ક કરીશું." : 

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Star, Phone, Mail, MapPin, Clock, MessageCircle } from "lucide-react";
+import { Star, Phone, Mail, MapPin, Clock, MessageCircle, Instagram } from "lucide-react";
 import Navbar from "@/components/homepage/Navbar";
 import Footer from "@/components/homepage/Footer";
 import EnquiryForm from "@/components/EnquiryForm";
@@ -15,60 +15,60 @@ export default function ContactPage() {
   const t = (en: string, hi: string, gu: string) =>
     language === "hi" ? hi : language === "gu" ? gu : en;
 
-  const contactInfo = [
-    {
-      icon: Phone,
-      label: t("Phone / WhatsApp", "फ़ोन / व्हाट्सएप", "ફોન / વ્હૉટ્સએપ"),
-      value: "+91 98765 43210",
-      link: "tel:+919876543210",
-    },
-    {
-      icon: Mail,
-      label: t("Email", "ईमेल", "ઇમેઇલ"),
-      value: "katyaayaniastrologer01@gmail.com",
-      link: "mailto:katyaayaniastrologer01@gmail.com",
-    },
-    {
-      icon: MapPin,
-      label: t("Location", "स्थान", "સ્થળ"),
-      value: t("Vastral, Ahmedabad, Gujarat, India", "वस्त्राल, अहमदाबाद, गुजरात, भारत", "વસ્ત્રાલ, અમદાવાદ, ગુજરાત, ભારત"),
-      link: "https://maps.google.com/?q=Vastral+Ahmedabad",
-    },
-    {
-      icon: Clock,
-      label: t("Consultation Hours", "परामर्श समय", "પરામર્શ સમય"),
-      value: t("Mon–Sat: 9 AM – 7 PM", "सोम–शनि: सुबह 9 – शाम 7", "સોમ–શનિ: સવારે 9 – સાંજ 7"),
-      link: null,
-    },
-  ];
+    const contactInfo = [
+      {
+        icon: Phone,
+        label: t("Phone / WhatsApp", "फ़ोन / व्हाट्सएप", "ફોન / વ્હૉટ્સએપ"),
+        value: "+91 98249 29588",
+        link: "https://wa.me/919824929588",
+      },
+      {
+        icon: Instagram,
+        label: t("Instagram", "इंस्टाग्राम", "ઇન્સ્ટાગ્રામ"),
+        value: "@katyaayani_astrologer",
+        link: "https://www.instagram.com/katyaayani_astrologer",
+      },
+      {
+        icon: Mail,
+        label: t("Email", "ईमेल", "ઇમેઇલ"),
+        value: "katyaayaniastrologer01@gmail.com",
+        link: "mailto:katyaayaniastrologer01@gmail.com",
+      },
+      {
+        icon: MapPin,
+        label: t("Location", "स्थान", "સ્થળ"),
+        value: t("Vastral, Ahmedabad, Gujarat, India", "वस्त्राल, अहमदाबाद, गुजरात, भारत", "વસ્ત્રાલ, અમદાવાદ, ગુજરાત, ભારત"),
+        link: "https://maps.google.com/?q=Vastral+Ahmedabad",
+      },
+    ];
 
-  return (
-    <div className={`min-h-screen ${theme === "dark" ? "bg-[#0a0a0f] text-[#f5f0e8]" : "bg-background text-[#2d1810]"}`}>
-      <Navbar />
+    return (
+      <div className={`min-h-screen ${theme === "dark" ? "bg-[#0a0a0f] text-[#f5f0e8]" : "bg-background text-[#2d1810]"}`}>
+        <Navbar />
 
-      <main className="pt-24">
-        {/* Hero */}
-        <section className={`py-16 px-6 ${theme === "dark" ? "bg-gradient-to-b from-[#1e1b4b]/30 to-[#0a0a0f]" : "bg-gradient-to-b from-[#fff4e6] to-[#fef7ed]"}`}>
-          <div className="max-w-4xl mx-auto text-center">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <div className="flex justify-center gap-2 mb-6">
-                <Star className="w-8 h-8 text-[#ff6b35]" />
-                <MessageCircle className="w-8 h-8 text-[#ff8c5e]" />
-                <Star className="w-8 h-8 text-[#ff6b35]" />
-              </div>
-              <h1 className="font-[family-name:var(--font-cinzel)] text-4xl md:text-5xl font-bold mb-4 text-gradient-ancient">
-                {t("Contact Us", "संपर्क करें", "સંપર્ક કરો")}
-              </h1>
-              <p className={`text-xl leading-relaxed ${theme === "dark" ? "text-[#a0998c]" : "text-[#6b5847]"}`}>
-                {t(
-                  "Reach out to Katyaayani Astrologer for consultations, enquiries, or spiritual guidance.",
-                  "परामर्श, प्रश्नों या आध्यात्मिक मार्गदर्शन के लिए कात्यायनी ज्योतिषी से संपर्क करें।",
-                  "પરામર્શ, પ્રશ્નો અથવા આધ્યાત્મિક માર્ગદર્શન માટે કાત્યાયની જ્યોતિષ સાથે સંપર્ક કરો."
-                )}
-              </p>
-            </motion.div>
-          </div>
-        </section>
+        <main className="pt-24">
+          {/* Hero */}
+          <section className={`py-16 px-6 ${theme === "dark" ? "bg-gradient-to-b from-[#1e1b4b]/30 to-[#0a0a0f]" : "bg-gradient-to-b from-[#fff4e6] to-[#fef7ed]"}`}>
+            <div className="max-w-4xl mx-auto text-center">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                <div className="flex justify-center gap-2 mb-6">
+                  <Star className="w-8 h-8 text-[#ff6b35]" />
+                  <MessageCircle className="w-8 h-8 text-[#ff8c5e]" />
+                  <Star className="w-8 h-8 text-[#ff6b35]" />
+                </div>
+                <h1 className="font-[family-name:var(--font-cinzel)] text-4xl md:text-5xl font-bold mb-4 text-gradient-ancient">
+                  {t("Contact", "संपर्क", "સંપર્ક")}
+                </h1>
+                <p className={`text-xl leading-relaxed ${theme === "dark" ? "text-[#a0998c]" : "text-[#6b5847]"}`}>
+                  {t(
+                    "Reach out to Katyaayani Astrologer for consultations, enquiries, or spiritual guidance.",
+                    "परामर्श, प्रश्नों या आध्यात्मिक मार्गदर्शन के लिए कात्यायनी ज्योतिषी से संपर्क करें।",
+                    "પરામર્શ, પ્રશ્નો અથવા આધ્યાત્મિક માર્ગદર્શન માટે કાત્યાયની જ્યોતિષ સાથે સંપર્ક કરો."
+                  )}
+                </p>
+              </motion.div>
+            </div>
+          </section>
 
         {/* Contact Info Cards */}
         <section className="py-12 px-6">
