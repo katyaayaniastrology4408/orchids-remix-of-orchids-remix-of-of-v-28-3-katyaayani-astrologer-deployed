@@ -222,7 +222,7 @@ export default function RootLayout({
     return (
         <html lang="en" className={`${openSans.variable} ${cinzel.variable}`} suppressHydrationWarning>
         <head>
-          {/* Preload logo for LCP - Updated 2026-03-03-T23:05 */}
+          {/* Preload logo for LCP - Standardized fetchPriority for React 19 / Next.js 15+ */}
           <link rel="preload" href="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=112&height=112&resize=contain" as="image" fetchPriority="high" />
         </head>
           <body className="antialiased" suppressHydrationWarning>
