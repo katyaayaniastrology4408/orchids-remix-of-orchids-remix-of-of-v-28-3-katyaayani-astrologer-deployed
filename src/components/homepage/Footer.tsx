@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Phone, Mail, MapPin, Send, Loader2, CheckCircle, Instagram, Star, ChevronRight } from "lucide-react";
+import { Phone, Mail, MapPin, Send, Loader2, CheckCircle, Star, ChevronRight } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 import { contentData } from "@/data/homepage";
@@ -152,10 +152,10 @@ export default function Footer() {
                   <Link href="/refund-policy" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Refund Policy")}</Link>
                   <Link href="/disclaimer" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Disclaimer")}</Link>
                     <div className="mt-4 pt-2 border-t border-[#ff6b35]/10">
-                      <Link href="/contact" className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest ${theme === 'dark' ? 'text-[#ff8c5e]' : 'text-[#ff6b35]'} hover:opacity-80 transition-opacity`}>
-                        <Mail className="w-4 h-4" />
-                        {language === 'gu' ? 'અમારો સંપર્ક કરો' : language === 'hi' ? 'हमसे संपर्क करें' : 'Contact Us'}
-                      </Link>
+                        <Link href="/contact" className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest ${theme === 'dark' ? 'text-[#ff8c5e]' : 'text-[#ff6b35]'} hover:opacity-80 transition-opacity`}>
+                          <Mail className="w-4 h-4" />
+                          {language === 'gu' ? 'સંપર્ક' : language === 'hi' ? 'संपર્ક' : 'Contact'}
+                        </Link>
                     </div>
                 </div>
               </div>
@@ -184,7 +184,31 @@ export default function Footer() {
                     <span>Ahmedabad, Gujarat</span>
                   </div>
                     <div className={`flex items-center gap-2 ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'}`}>
-                      <Instagram className="w-4 h-4 text-[#ff6b35]" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        width="16"
+                        height="16"
+                        className="w-4 h-4"
+                      >
+                        <defs>
+                          <radialGradient id="rg" cx="0.3" cy="1" r="1.1">
+                            <stop offset="0%" stopColor="#fdf497" />
+                            <stop offset="5%" stopColor="#fdf497" />
+                            <stop offset="45%" stopColor="#fd5949" />
+                            <stop offset="60%" stopColor="#d6249f" />
+                            <stop offset="90%" stopColor="#285AEB" />
+                          </radialGradient>
+                        </defs>
+                        <rect width="20" height="20" x="2" y="2" rx="5" ry="5" fill="url(#rg)" />
+                        <path
+                          d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"
+                          stroke="white"
+                          strokeWidth="1.5"
+                          fill="none"
+                        />
+                        <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                      </svg>
                       <a
                         href="https://www.instagram.com/katyaayani_astrologer"
                         target="_blank"
