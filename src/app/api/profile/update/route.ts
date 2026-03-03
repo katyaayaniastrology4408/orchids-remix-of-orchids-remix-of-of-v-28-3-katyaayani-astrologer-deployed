@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, dob, tob, pob, phone, gender } = await req.json();
+    const { name, dob, tob, pob, phone, gender, address } = await req.json();
 
     // 1. Update Supabase Profile
     const { error: profileError } = await supabaseAdmin
@@ -39,7 +39,8 @@ export async function POST(req: Request) {
         tob,
         pob,
         phone,
-        gender
+        gender,
+        address
       })
       .eq('id', user.id);
 

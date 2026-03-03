@@ -40,7 +40,8 @@ export default function ProfilePage() {
     tob: "",
     pob: "",
     phone: "",
-    gender: ""
+    gender: "",
+    address: ""
   });
   const router = useRouter();
   const { theme } = useTheme();
@@ -203,17 +204,18 @@ export default function ProfilePage() {
           console.error("Error fetching profile:", profileError);
         }
 
-        if (profileData) {
-          setProfile(profileData);
-          setEditForm({
-            name: profileData.name || user.user_metadata?.full_name || "",
-            dob: profileData.dob || user.user_metadata?.dob || "",
-            tob: profileData.tob || user.user_metadata?.tob || "",
-            pob: profileData.pob || user.user_metadata?.pob || "",
-            phone: profileData.phone || user.user_metadata?.phone_number || "",
-            gender: profileData.gender || user.user_metadata?.gender || ""
-          });
-        }
+          if (profileData) {
+            setProfile(profileData);
+            setEditForm({
+              name: profileData.name || user.user_metadata?.full_name || "",
+              dob: profileData.dob || user.user_metadata?.dob || "",
+              tob: profileData.tob || user.user_metadata?.tob || "",
+              pob: profileData.pob || user.user_metadata?.pob || "",
+              phone: profileData.phone || user.user_metadata?.phone_number || "",
+              gender: profileData.gender || user.user_metadata?.gender || "",
+              address: profileData.address || ""
+            });
+          }
       } catch (err) {
         console.error("Unexpected error:", err);
       } finally {
@@ -504,16 +506,41 @@ export default function ProfilePage() {
                           onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
                         />
                       </div>
-                      <div className="space-y-2 sm:space-y-3">
-                        <Label className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-60 ml-2">{t("Birth Date")}</Label>
-                        <Input 
-                          type="date"
-                          className="h-12 sm:h-14 rounded-xl sm:rounded-2xl border-2 focus:border-[#ff6b35]"
-                          value={editForm.dob}
-                          onChange={(e) => setEditForm({...editForm, dob: e.target.value})}
-                        />
+                        <div className="space-y-2 sm:space-y-3">
+                          <Label className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-60 ml-2">{t("Birth Date")}</Label>
+                          <Input 
+                            type="date"
+                            className="h-12 sm:h-14 rounded-xl sm:rounded-2xl border-2 focus:border-[#ff6b35]"
+                            value={editForm.dob}
+                            onChange={(e) => setEditForm({...editForm, dob: e.target.value})}
+                          />
+                        </div>
+                        <div className="space-y-2 sm:space-y-3">
+                          <Label className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-60 ml-2">{t("Birth Time")}</Label>
+                          <Input 
+                            type="time"
+                            className="h-12 sm:h-14 rounded-xl sm:rounded-2xl border-2 focus:border-[#ff6b35]"
+                            value={editForm.tob}
+                            onChange={(e) => setEditForm({...editForm, tob: e.target.value})}
+                          />
+                        </div>
+                        <div className="space-y-2 sm:space-y-3">
+                          <Label className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-60 ml-2">{t("Birth Place")}</Label>
+                          <Input 
+                            className="h-12 sm:h-14 rounded-xl sm:rounded-2xl border-2 focus:border-[#ff6b35]"
+                            value={editForm.pob}
+                            onChange={(e) => setEditForm({...editForm, pob: e.target.value})}
+                          />
+                        </div>
+                        <div className="space-y-2 sm:space-y-3 sm:col-span-1">
+                          <Label className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-60 ml-2">{t("Address")}</Label>
+                          <Input 
+                            className="h-12 sm:h-14 rounded-xl sm:rounded-2xl border-2 focus:border-[#ff6b35]"
+                            value={editForm.address}
+                            onChange={(e) => setEditForm({...editForm, address: e.target.value})}
+                          />
+                        </div>
                       </div>
-                    </div>
                     <Button type="submit" className="w-full bg-[#ff6b35] hover:bg-[#ff8c5e] h-12 sm:h-16 rounded-xl sm:rounded-2xl text-white text-sm sm:text-base font-black uppercase tracking-widest shadow-xl shadow-[#ff6b35]/30">
                       {t("Save Cosmic Identity")}
                     </Button>
@@ -534,14 +561,18 @@ export default function ProfilePage() {
                       <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Gender")}</span>
                       <span className="font-bold text-sm sm:text-base capitalize">{profileGender}</span>
                     </div>
-                    <div className="flex justify-between items-center py-2 sm:py-3 border-b border-[#ff6b35]/5">
-                      <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Status")}</span>
-                      <span className="text-[10px] sm:text-xs font-black text-[#ff6b35] uppercase">{t("Active Seeker")}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 sm:py-3">
-                      <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Joined")}</span>
-                      <span className="font-bold text-sm sm:text-base">{new Date(user?.created_at).toLocaleDateString()}</span>
-                    </div>
+                      <div className="flex justify-between items-center py-2 sm:py-3 border-b border-[#ff6b35]/5">
+                        <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Status")}</span>
+                        <span className="text-[10px] sm:text-xs font-black text-[#ff6b35] uppercase">{t("Active Seeker")}</span>
+                      </div>
+                      <div className="flex justify-between items-start py-2 sm:py-3 border-b border-[#ff6b35]/5">
+                        <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40 mt-1">{t("Address")}</span>
+                        <span className="font-bold text-xs sm:text-sm text-right max-w-[150px] break-words">{profile?.address || "Not specified"}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 sm:py-3">
+                        <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Joined")}</span>
+                        <span className="font-bold text-sm sm:text-base">{new Date(user?.created_at).toLocaleDateString()}</span>
+                      </div>
                   </CardContent>
                 </Card>
 
@@ -557,14 +588,18 @@ export default function ProfilePage() {
                       <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Date")}</span>
                       <span className="font-bold text-sm sm:text-base">{birthDate}</span>
                     </div>
-                    <div className="flex justify-between items-center py-2 sm:py-3 border-b border-purple-500/5">
-                      <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Time")}</span>
-                      <span className="font-bold text-sm sm:text-base">{birthTime || "Not specified"}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 sm:py-3">
-                      <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Sign")}</span>
-                      <Badge className="bg-indigo-500 text-white capitalize text-xs sm:text-sm">{t(zodiacSign || "Unknown")}</Badge>
-                    </div>
+                      <div className="flex justify-between items-center py-2 sm:py-3 border-b border-purple-500/5">
+                        <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Time")}</span>
+                        <span className="font-bold text-sm sm:text-base">{birthTime || "Not specified"}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 sm:py-3 border-b border-purple-500/5">
+                        <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Place")}</span>
+                        <span className="font-bold text-sm sm:text-base capitalize">{profile?.pob || "Not specified"}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 sm:py-3">
+                        <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Sign")}</span>
+                        <Badge className="bg-indigo-500 text-white capitalize text-xs sm:text-sm">{t(zodiacSign || "Unknown")}</Badge>
+                      </div>
                   </CardContent>
                 </Card>
               </div>

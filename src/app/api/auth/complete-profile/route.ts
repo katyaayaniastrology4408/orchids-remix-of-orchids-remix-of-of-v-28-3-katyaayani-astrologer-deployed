@@ -8,7 +8,7 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: Request) {
   try {
-    const { id, phone, gender, dob, tob, pob, clear_password } = await req.json();
+    const { id, name, phone, address, gender, dob, tob, pob, clear_password } = await req.json();
 
     if (!id) {
       return NextResponse.json({ success: false, error: "User ID required" }, { status: 400 });
@@ -18,7 +18,9 @@ export async function POST(req: Request) {
       .from("profiles")
       .upsert({
         id,
+        name: name || null,
         phone: phone || null,
+        address: address || null,
         gender: gender || null,
         dob: dob || null,
         tob: tob || null,

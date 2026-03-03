@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2, MapPin, Calendar, Clock, Phone,
   Lock, Eye, EyeOff, CheckCircle2, ChevronRight, ChevronLeft,
+  User, Home
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,13 +29,17 @@ export default function CompleteProfilePage() {
   const [error, setError] = useState("");
 
   // Step 1 fields
+  const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+
+  // Step 2 fields
   const [gender, setGender] = useState("");
   const [dob, setDob] = useState("");
   const [tob, setTob] = useState("");
   const [pob, setPob] = useState("");
 
-  // Step 2 fields
+  // Step 3 fields
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
@@ -47,6 +52,7 @@ export default function CompleteProfilePage() {
         return;
       }
       setUser(data.user);
+      setName(data.user.user_metadata?.full_name || data.user.user_metadata?.name || "");
       setLoading(false);
     });
   }, [router]);
@@ -60,16 +66,25 @@ export default function CompleteProfilePage() {
   const handleStep1 = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (!name.trim()) { setError("Name is required."); return; }
     if (!phone.trim()) { setError("Phone number is required."); return; }
-    if (!gender) { setError("Please select your gender."); return; }
-    if (!dob) { setError("Please enter your birth date."); return; }
-    if (!tob) { setError("Please enter your birth time."); return; }
-    if (!pob.trim()) { setError("Please enter your birth place."); return; }
+    if (!address.trim()) { setError("Address is required."); return; }
     setStep(2);
   };
 
   // ── Step 2 submit ──
-  const handleStep2 = async (e: React.FormEvent) => {
+  const handleStep2 = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (!gender) { setError("Please select your gender."); return; }
+    if (!dob) { setError("Please enter your birth date."); return; }
+    if (!tob) { setError("Please enter your birth time."); return; }
+    if (!pob.trim()) { setError("Please enter your birth place."); return; }
+    setStep(3);
+  };
+
+  // ── Step 3 submit ──
+  const handleStep3 = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!pwdValid(password)) {
@@ -89,7 +104,9 @@ export default function CompleteProfilePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: user.id,
+          name,
           phone,
+          address,
           gender,
           dob,
           tob,
@@ -110,15 +127,12 @@ export default function CompleteProfilePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: user.email,
-          name:
-            user.user_metadata?.full_name ||
-            user.user_metadata?.name ||
-            "Seeker",
+          name: name || "Seeker",
           password,
         }),
       });
 
-      setStep(3);
+      router.replace("/"); // Redirect to home page as requested
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -186,327 +200,348 @@ export default function CompleteProfilePage() {
             </p>
           </div>
 
-          {/* Step pills */}
-          {step !== 3 && (
-            <div className="flex items-center justify-center gap-3 mb-7">
-              {[
-                { n: 1, label: "Birth Details" },
-                { n: 2, label: "Set Password" },
-              ].map(({ n, label }, i) => (
-                <div key={n} className="flex items-center gap-2">
-                  {i > 0 && (
-                    <div
-                      className={`w-8 h-px ${
-                        step > 1 ? "bg-[#ff6b35]" : "bg-gray-600"
-                      }`}
-                    />
-                  )}
-                  <div className="flex items-center gap-1.5">
-                    <div
-                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                        step > n
-                          ? "bg-green-500 text-white"
-                          : step === n
-                          ? "bg-[#ff6b35] text-white"
-                          : dark
-                          ? "bg-white/10 text-gray-500"
-                          : "bg-gray-100 text-gray-400"
-                      }`}
-                    >
-                      {step > n ? <CheckCircle2 className="w-3.5 h-3.5" /> : n}
-                    </div>
-                    <span
-                      className={`text-xs font-medium hidden sm:block ${
-                        step >= n ? "text-[#ff6b35]" : "text-gray-500"
-                      }`}
-                    >
-                      {label}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Error */}
-          {error && (
-            <div className="mb-5 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
-              {error}
-            </div>
-          )}
-
-          <AnimatePresence mode="wait">
-            {/* ───────────── STEP 1: Birth Details ───────────── */}
-            {step === 1 && (
-              <motion.form
-                key="step1"
-                initial={{ opacity: 0, x: 40 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -40 }}
-                transition={{ duration: 0.25 }}
-                onSubmit={handleStep1}
-                className="space-y-4"
-              >
-                {/* Phone */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                    Phone Number
-                  </Label>
-                  <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    <Input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      required
-                      placeholder="+91 98765 43210"
-                      className="pl-10 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
-                    />
-                  </div>
-                </div>
-
-                {/* Gender */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                    Gender
-                  </Label>
-                  <div className="flex gap-3">
-                    {["Male", "Female", "Other"].map((g) => (
-                      <label
-                        key={g}
-                        className={`flex-1 flex items-center justify-center py-3 rounded-xl border cursor-pointer transition-all text-sm font-semibold ${
-                          gender === g.toLowerCase()
-                            ? "bg-[#ff6b35] border-[#ff6b35] text-white"
+            {/* Step pills */}
+            {step !== 3 && (
+              <div className="flex items-center justify-center gap-3 mb-7">
+                {[
+                  { n: 1, label: "Basic Info" },
+                  { n: 2, label: "Birth Details" },
+                  { n: 3, label: "Set Password" },
+                ].map(({ n, label }, i) => (
+                  <div key={n} className="flex items-center gap-2">
+                    {i > 0 && (
+                      <div
+                        className={`w-8 h-px ${
+                          step > n ? "bg-[#ff6b35]" : "bg-gray-600"
+                        }`}
+                      />
+                    )}
+                    <div className="flex items-center gap-1.5">
+                      <div
+                        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                          step > n
+                            ? "bg-green-500 text-white"
+                            : step === n
+                            ? "bg-[#ff6b35] text-white"
                             : dark
-                            ? "border-[#ff6b35]/30 text-gray-400 hover:border-[#ff6b35]/60"
-                            : "border-[#ff6b35]/30 text-gray-500 hover:border-[#ff6b35]/60"
+                            ? "bg-white/10 text-gray-500"
+                            : "bg-gray-100 text-gray-400"
                         }`}
                       >
-                        <input
-                          type="radio"
-                          name="gender"
-                          value={g.toLowerCase()}
-                          checked={gender === g.toLowerCase()}
-                          onChange={(e) => setGender(e.target.value)}
-                          className="hidden"
-                        />
-                        {g}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* DOB + TOB */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                      Birth Date
-                    </Label>
-                    <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                      <Input
-                        type="date"
-                        value={dob}
-                        onChange={(e) => setDob(e.target.value)}
-                        required
-                        className="pl-9 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
-                      />
+                        {step > n ? <CheckCircle2 className="w-3.5 h-3.5" /> : n}
+                      </div>
+                      <span
+                        className={`text-xs font-medium hidden sm:block ${
+                          step >= n ? "text-[#ff6b35]" : "text-gray-500"
+                        }`}
+                      >
+                        {label}
+                      </span>
                     </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                      Birth Time
-                    </Label>
-                    <div className="relative">
-                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                      <Input
-                        type="time"
-                        value={tob}
-                        onChange={(e) => setTob(e.target.value)}
-                        required
-                        className="pl-9 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* POB */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                    Birth Place
-                  </Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    <Input
-                      value={pob}
-                      onChange={(e) => setPob(e.target.value)}
-                      required
-                      placeholder="e.g. Surat, Gujarat"
-                      className="pl-10 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
-                    />
-                  </div>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full h-12 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-base font-bold shadow-lg shadow-[#ff6b35]/20 flex items-center justify-center gap-2 mt-2"
-                >
-                  Next: Set Password <ChevronRight className="w-5 h-5" />
-                </Button>
-              </motion.form>
+                ))}
+              </div>
             )}
 
-            {/* ───────────── STEP 2: Set Password ───────────── */}
-            {step === 2 && (
-              <motion.form
-                key="step2"
-                initial={{ opacity: 0, x: 40 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -40 }}
-                transition={{ duration: 0.25 }}
-                onSubmit={handleStep2}
-                className="space-y-5"
-              >
-                <p className={`text-sm text-center -mt-2 ${dark ? "text-gray-400" : "text-gray-500"}`}>
-                  Create a password so you can also sign in with your email later.
-                </p>
+            {/* Error */}
+            {error && (
+              <div className="mb-5 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+                {error}
+              </div>
+            )}
 
-                {/* Password */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                    Create Password
-                  </Label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    <Input
-                      type={showPwd ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      placeholder="e.g. Astro@2025"
-                      className="pl-10 pr-12 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPwd(!showPwd)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#ff6b35]"
-                    >
-                      {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+            <AnimatePresence mode="wait">
+              {/* ───────────── STEP 1: Basic Info ───────────── */}
+              {step === 1 && (
+                <motion.form
+                  key="step1"
+                  initial={{ opacity: 0, x: 40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -40 }}
+                  transition={{ duration: 0.25 }}
+                  onSubmit={handleStep1}
+                  className="space-y-4"
+                >
+                  {/* Name */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                      Full Name
+                    </Label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      <Input
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                        placeholder="Your full name"
+                        className="pl-10 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
+                      />
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-400 pl-1">
-                    8+ characters · 1 capital letter · 1 number or symbol
-                  </p>
-                  {password && (
-                    <p className={`text-xs pl-1 ${pwdValid(password) ? "text-green-500" : "text-red-400"}`}>
-                      {pwdValid(password) ? "✓ Strong password" : "✗ Doesn't meet requirements"}
-                    </p>
-                  )}
-                </div>
 
-                {/* Confirm Password */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
-                    Confirm Password
-                  </Label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    <Input
-                      type={showConfirm ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      placeholder="Re-enter your password"
-                      className={`pl-10 pr-12 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35] ${
-                        confirmPassword && !pwdMatch ? "border-red-400 focus:border-red-400" : ""
-                      } ${confirmPassword && pwdMatch ? "border-green-500 focus:border-green-500" : ""}`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirm(!showConfirm)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#ff6b35]"
-                    >
-                      {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+                  {/* Phone */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                      Phone Number
+                    </Label>
+                    <div className="relative">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      <Input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        required
+                        placeholder="+91 98765 43210"
+                        className="pl-10 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
+                      />
+                    </div>
                   </div>
-                  {confirmPassword && !pwdMatch && (
-                    <p className="text-xs text-red-400 pl-1">✗ Passwords do not match</p>
-                  )}
-                  {confirmPassword && pwdMatch && (
-                    <p className="text-xs text-green-500 pl-1">✓ Passwords match</p>
-                  )}
-                </div>
 
-                <div className="flex gap-3 pt-1">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => { setStep(1); setError(""); }}
-                    className="flex-1 h-12 rounded-2xl border-[#ff6b35]/40 text-[#ff6b35] hover:bg-[#ff6b35]/10 flex items-center justify-center gap-1"
-                  >
-                    <ChevronLeft className="w-4 h-4" /> Back
-                  </Button>
+                  {/* Address */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                      Address
+                    </Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      <Input
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        required
+                        placeholder="Your residential address"
+                        className="pl-10 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
+                      />
+                    </div>
+                  </div>
+
                   <Button
                     type="submit"
-                    disabled={submitting}
-                    className="flex-[2] h-12 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-base font-bold shadow-lg shadow-[#ff6b35]/20"
+                    className="w-full h-12 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-base font-bold shadow-lg shadow-[#ff6b35]/20 flex items-center justify-center gap-2 mt-2"
                   >
-                    {submitting ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      "Complete Setup ✓"
-                    )}
+                    Next: Birth Details <ChevronRight className="w-5 h-5" />
                   </Button>
-                </div>
-              </motion.form>
-            )}
+                </motion.form>
+              )}
 
-            {/* ───────────── STEP 3: All Done ───────────── */}
-            {step === 3 && (
-              <motion.div
-                key="step3"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-                className="text-center py-4"
-              >
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", bounce: 0.55, delay: 0.15 }}
-                  className="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-5"
+              {/* ───────────── STEP 2: Birth Details ───────────── */}
+              {step === 2 && (
+                <motion.form
+                  key="step2"
+                  initial={{ opacity: 0, x: 40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -40 }}
+                  transition={{ duration: 0.25 }}
+                  onSubmit={handleStep2}
+                  className="space-y-4"
                 >
-                  <CheckCircle2 className="w-12 h-12 text-green-500" />
-                </motion.div>
+                  {/* Gender */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                      Gender
+                    </Label>
+                    <div className="flex gap-3">
+                      {["Male", "Female", "Other"].map((g) => (
+                        <label
+                          key={g}
+                          className={`flex-1 flex items-center justify-center py-3 rounded-xl border cursor-pointer transition-all text-sm font-semibold ${
+                            gender === g.toLowerCase()
+                              ? "bg-[#ff6b35] border-[#ff6b35] text-white"
+                              : dark
+                              ? "border-[#ff6b35]/30 text-gray-400 hover:border-[#ff6b35]/60"
+                              : "border-[#ff6b35]/30 text-gray-500 hover:border-[#ff6b35]/60"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="gender"
+                            value={g.toLowerCase()}
+                            checked={gender === g.toLowerCase()}
+                            onChange={(e) => setGender(e.target.value)}
+                            className="hidden"
+                          />
+                          {g}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
 
-                <h2
-                  className={`text-2xl font-bold font-[family-name:var(--font-cinzel)] mb-2 ${
-                    dark ? "text-white" : "text-[#2d1810]"
-                  }`}
-                >
-                  Profile Complete!
-                </h2>
-                <p className={`text-sm mb-1 ${dark ? "text-gray-400" : "text-gray-500"}`}>
-                  A confirmation email has been sent to:
-                </p>
-                <p className="text-[#ff6b35] font-semibold text-sm mb-3">
-                  {user?.email}
-                </p>
-                <p className={`text-xs mb-7 max-w-xs mx-auto ${dark ? "text-gray-500" : "text-gray-400"}`}>
-                  You can now sign in with your Google account or with your email &amp; password.
-                </p>
+                  {/* DOB + TOB */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                        Birth Date
+                      </Label>
+                      <div className="relative">
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                        <Input
+                          type="date"
+                          value={dob}
+                          onChange={(e) => setDob(e.target.value)}
+                          required
+                          className="pl-9 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                        Birth Time
+                      </Label>
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                        <Input
+                          type="time"
+                          value={tob}
+                          onChange={(e) => setTob(e.target.value)}
+                          required
+                          className="pl-9 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
+                        />
+                      </div>
+                    </div>
+                  </div>
 
-                <Button
-                  onClick={() => router.replace("/profile")}
-                  className="w-full h-12 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-base font-bold shadow-lg shadow-[#ff6b35]/20"
+                  {/* POB */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                      Birth Place
+                    </Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      <Input
+                        value={pob}
+                        onChange={(e) => setPob(e.target.value)}
+                        required
+                        placeholder="e.g. Surat, Gujarat"
+                        className="pl-10 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => { setStep(1); setError(""); }}
+                      className="flex-1 h-12 rounded-2xl border-[#ff6b35]/40 text-[#ff6b35] hover:bg-[#ff6b35]/10 flex items-center justify-center gap-1"
+                    >
+                      <ChevronLeft className="w-4 h-4" /> Back
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="flex-[2] h-12 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-base font-bold shadow-lg shadow-[#ff6b35]/20 flex items-center justify-center gap-2"
+                    >
+                      Next: Set Password <ChevronRight className="w-5 h-5" />
+                    </Button>
+                  </div>
+                </motion.form>
+              )}
+
+              {/* ───────────── STEP 3: Set Password ───────────── */}
+              {step === 3 && (
+                <motion.form
+                  key="step3"
+                  initial={{ opacity: 0, x: 40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -40 }}
+                  transition={{ duration: 0.25 }}
+                  onSubmit={handleStep3}
+                  className="space-y-5"
                 >
-                  Go to My Dashboard →
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </motion.div>
-    </div>
+                  <p className={`text-sm text-center -mt-2 ${dark ? "text-gray-400" : "text-gray-500"}`}>
+                    Create a password so you can also sign in with your email later.
+                  </p>
+
+                  {/* Password */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                      Create Password
+                    </Label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      <Input
+                        type={showPwd ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        placeholder="e.g. Astro@2025"
+                        className="pl-10 pr-12 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPwd(!showPwd)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#ff6b35]"
+                      >
+                        {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-400 pl-1">
+                      8+ characters · 1 capital letter · 1 number or symbol
+                    </p>
+                    {password && (
+                      <p className={`text-xs pl-1 ${pwdValid(password) ? "text-green-500" : "text-red-400"}`}>
+                        {pwdValid(password) ? "✓ Strong password" : "✗ Doesn't meet requirements"}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                      Confirm Password
+                    </Label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      <Input
+                        type={showConfirm ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        placeholder="Re-enter your password"
+                        className={`pl-10 pr-12 h-12 rounded-xl border-[#ff6b35]/30 focus:border-[#ff6b35] ${
+                          confirmPassword && !pwdMatch ? "border-red-400 focus:border-red-400" : ""
+                        } ${confirmPassword && pwdMatch ? "border-green-500 focus:border-green-500" : ""}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirm(!showConfirm)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#ff6b35]"
+                      >
+                        {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {confirmPassword && !pwdMatch && (
+                      <p className="text-xs text-red-400 pl-1">✗ Passwords do not match</p>
+                    )}
+                    {confirmPassword && pwdMatch && (
+                      <p className="text-xs text-green-500 pl-1">✓ Passwords match</p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-3 pt-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => { setStep(2); setError(""); }}
+                      className="flex-1 h-12 rounded-2xl border-[#ff6b35]/40 text-[#ff6b35] hover:bg-[#ff6b35]/10 flex items-center justify-center gap-1"
+                    >
+                      <ChevronLeft className="w-4 h-4" /> Back
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={submitting}
+                      className="flex-[2] h-12 bg-[#ff6b35] hover:bg-[#ff8c5e] text-white rounded-2xl text-base font-bold shadow-lg shadow-[#ff6b35]/20 flex items-center justify-center gap-2"
+                    >
+                      {submitting ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <>Complete Setup & Home <Home className="w-4 h-4" /></>
+                      )}
+                    </Button>
+                  </div>
+                </motion.form>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      </div>
   );
 }

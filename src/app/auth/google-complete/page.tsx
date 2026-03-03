@@ -26,16 +26,16 @@ function GoogleCompleteInner() {
       // Check profile completeness
       const { data: profile } = await (supabase as any)
         .from("profiles")
-        .select("dob, pob, phone, gender")
+        .select("dob, pob, phone, gender, address")
         .eq("id", user.id)
         .maybeSingle();
 
-      const isComplete = profile?.dob && profile?.pob && profile?.phone && profile?.gender;
+      const isComplete = profile?.dob && profile?.pob && profile?.phone && profile?.gender && profile?.address;
 
       if (!isComplete) {
         router.replace("/complete-profile");
       } else {
-        router.replace("/profile");
+        router.replace("/");
       }
     };
 
