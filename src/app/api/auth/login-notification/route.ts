@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { sendLoginNotification } from "@/lib/email";
+import { sendLoginNotification, sendWelcomeBackEmail } from "@/lib/email";
 export const dynamic = 'force-dynamic' ; 
 
 export async function POST(req: Request) {
@@ -10,7 +10,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Email is required" }, { status: 400 });
     }
 
-    await sendLoginNotification({
+    // Send Welcome Back email
+    await sendWelcomeBackEmail({
       email,
       name: name || "Seeker"
     });

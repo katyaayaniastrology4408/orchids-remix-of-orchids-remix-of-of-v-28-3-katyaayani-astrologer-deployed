@@ -80,17 +80,18 @@ export default function AuthCallbackPage() {
 
           console.log("Auth callback: Profile completeness check", { isComplete });
 
-          if (!isComplete) {
-            // New user or incomplete profile — go fill details
-            router.replace("/complete-profile");
+            if (!isComplete) {
+              // New user or incomplete profile — go fill details
+              router.replace("/complete-profile");
+            } else {
+              // Returning user — go straight to homepage
+              router.replace("/");
+            }
           } else {
-            // Returning user — go straight to profile
-            router.replace("/profile");
+            // Email/password login — go to homepage
+            router.replace("/");
           }
-        } else {
-          // Email/password login — go to profile
-          router.replace("/profile");
-        }
+
       } catch (err: any) {
         console.error("Auth callback unexpected error:", err);
         router.replace("/signin?error=" + encodeURIComponent(err.message || "Unknown error"));

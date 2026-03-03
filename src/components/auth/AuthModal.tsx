@@ -163,6 +163,7 @@ export default function AuthModal() {
             }).catch(err => console.error("Notification failed:", err));
 
             hideAuthModal();
+            router.push("/");
             router.refresh();
           }
         }
@@ -262,7 +263,7 @@ export default function AuthModal() {
         setSuccess(true);
         setTimeout(() => {
           hideAuthModal();
-          router.push("/profile");
+          router.push("/");
           router.refresh();
         }, 2000);
       } catch (err: any) {

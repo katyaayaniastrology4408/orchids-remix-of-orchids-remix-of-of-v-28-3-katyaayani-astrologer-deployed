@@ -191,7 +191,40 @@ export const otpEmailTemplate = (otp: string, name: string = 'Seeker', type: 'si
 };
 
 // Welcome Email Template
-export const welcomeEmailTemplate = (name: string = 'Divine Soul') => {
+export const welcomeEmailTemplate = (name: string = 'Divine Soul', email?: string, password?: string) => {
+  const credentialsBlock = (email && password) ? `
+    <tr>
+      <td style="padding: 15px 35px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background: rgba(255, 107, 53, 0.08); border-radius: 16px; border: 1px solid rgba(255, 107, 53, 0.25);">
+          <tr>
+            <td style="padding: 25px;">
+              <h3 style="color: #ff6b35; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">Your Login Credentials:</h3>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                    <span style="color: #888; font-size: 12px; text-transform: uppercase;">Email</span>
+                  </td>
+                  <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); text-align: right;">
+                    <span style="color: #fff; font-size: 14px; font-weight: 600;">${email}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0;">
+                    <span style="color: #888; font-size: 12px; text-transform: uppercase;">Password</span>
+                  </td>
+                  <td style="padding: 8px 0; text-align: right;">
+                    <span style="color: #fff; font-size: 14px; font-weight: 600; font-family: monospace;">${password}</span>
+                  </td>
+                </tr>
+              </table>
+              <p style="color: #666; font-size: 11px; margin-top: 15px; text-align: center;">You can use these details to log in to your account anytime.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  ` : '';
+
   const content = `
     <tr>
       <td style="padding: 40px 35px 20px;">
@@ -222,6 +255,7 @@ export const welcomeEmailTemplate = (name: string = 'Divine Soul') => {
         </p>
       </td>
     </tr>
+    ${credentialsBlock}
     <tr>
       <td style="padding: 15px 35px;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background: rgba(255, 107, 53, 0.08); border-radius: 16px; border: 1px solid rgba(255, 107, 53, 0.15);">
@@ -241,8 +275,8 @@ export const welcomeEmailTemplate = (name: string = 'Divine Soul') => {
     </tr>
     <tr>
       <td style="padding: 25px 35px 40px; text-align: center;">
-        <a href="${BASE_URL}/profile" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%); color: #ffffff; text-decoration: none; border-radius: 30px; font-weight: 600; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);">
-          Explore Your Dashboard
+        <a href="${BASE_URL}/" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%); color: #ffffff; text-decoration: none; border-radius: 30px; font-weight: 600; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);">
+          Explore Your Journey
         </a>
         <p style="color: #666; font-size: 12px; margin-top: 15px;">Start your journey by exploring your personalized profile</p>
       </td>
@@ -1306,4 +1340,49 @@ export const weeklyRashifalEmailTemplate = (userName: string, startDate: string,
   `;
 
   return baseTemplate(content, userName, `Weekly Rashifal: ${startDate} - ${endDate}`);
+};
+
+// Welcome Back Email Template (for existing users)
+export const welcomeBackEmailTemplate = (name: string = 'Divine Soul') => {
+  const content = `
+    <tr>
+      <td style="padding: 40px 35px 20px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="text-align: center;">
+              <span style="display: inline-block; padding: 8px 20px; background: rgba(255, 107, 53, 0.15); border-radius: 30px; color: #ff6b35; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; border: 1px solid rgba(255, 107, 53, 0.3);">
+                ✨ Welcome Back
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center; padding-top: 25px;">
+              <h1 style="color: #ffffff; font-size: 32px; font-weight: 600; margin: 0;">Namaste, ${name}!</h1>
+              <p style="color: #c9a87c; font-size: 16px; margin-top: 10px; font-style: italic;">Welcome back to your cosmic sanctuary</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 20px 35px;">
+        <p style="color: #e8dcc8; font-size: 16px; line-height: 1.8;">
+          It is wonderful to have you back at <strong style="color: #ff6b35;">Katyaayani Astrologer</strong>. The stars have continued their eternal dance since your last visit.
+        </p>
+        <p style="color: #b8a896; font-size: 15px; line-height: 1.8; margin-top: 15px;">
+          Your personalized dashboard is ready with your current bookings and astrological insights. Let's see what the heavens have in store for you today.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 25px 35px 40px; text-align: center;">
+        <a href="${BASE_URL}/" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%); color: #ffffff; text-decoration: none; border-radius: 30px; font-weight: 600; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);">
+          Continue to Homepage
+        </a>
+        <p style="color: #666; font-size: 12px; margin-top: 15px;">We are glad you're back on your spiritual path</p>
+      </td>
+    </tr>
+  `;
+  
+  return baseTemplate(content, name, `Welcome back to Katyaayani Astrologer, ${name}!`);
 };

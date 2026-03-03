@@ -77,12 +77,13 @@ export async function POST(req: Request) {
           // Sync to newsletter_subscribers for unified mailing list (but not for newsletter specifically)
           await syncToSubscribers(email, fullName, 'profile_signup', false);
 
-          // 5. Send Welcome Email
-          try {
-            await sendWelcomeEmail({ email, name: fullName });
-          } catch (e) {
-            console.error("Error sending welcome email:", e);
-          }
+            // 5. Send Welcome Email
+            try {
+              await sendWelcomeEmail({ email, name: fullName, password });
+            } catch (e) {
+              console.error("Error sending welcome email:", e);
+            }
+
         }
 
       return NextResponse.json({ success: true, user });

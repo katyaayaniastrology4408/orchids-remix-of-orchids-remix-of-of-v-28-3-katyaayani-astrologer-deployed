@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendEmail } from "@/lib/email.config";
-import { welcomeEmailTemplate } from "@/lib/email-templates";
+import { welcomeEmailTemplate, welcomeBackEmailTemplate } from "@/lib/email-templates";
 import { syncToSubscribers } from "@/lib/subscribers";
 
 const supabaseAdmin = createClient(
@@ -121,14 +121,16 @@ export async function GET(req: Request) {
     // Sync to newsletter subscribers
     await syncToSubscribers(googleUser.email, googleUser.name || "", "google_signup", false).catch(() => {});
 
-    // Send welcome email for new users
-    if (isNew) {
+    // Send welcome back email for existing users
+    if (!isNew) {
       sendEmail({
         to: googleUser.email,
-        subject: "Welcome to Katyaayani Astrologer ✨",
-        html: welcomeEmailTemplate(googleUser.name || "Seeker"),
+        subject: "Welcome back to Katyaayani Astrologer ✨",
+        html: welcomeBackEmailTemplate(googleUser.name || "Seeker"),
       }).catch(() => {});
     }
+    // For new users, we will send the welcome email with credentials 
+    // after they complete their profile in /complete-profile
 
     // Create a magic link session for the user so Supabase client picks up the session
     const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({

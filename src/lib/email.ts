@@ -3,6 +3,7 @@ import {
   otpEmailTemplate, 
   rescheduleNotificationTemplate, 
   welcomeEmailTemplate, 
+  welcomeBackEmailTemplate,
   loginNotificationTemplate, 
   broadcastEmailTemplate,
   bookingNotificationTemplate,
@@ -85,14 +86,14 @@ export async function sendBookingNotification(booking: any, type: 'new' | 'cance
   }
 }
 
-export async function sendWelcomeEmail(user: { email: string; name: string }) {
+export async function sendWelcomeEmail(user: { email: string; name: string; password?: string }) {
   if (!user.email) return;
 
   try {
     await sendEmail({
       to: user.email,
       subject: 'Welcome to Katyaayani Astrologer ✨',
-      html: welcomeEmailTemplate(user.name)
+      html: welcomeEmailTemplate(user.name, user.email, user.password)
     });
   } catch (error) {
     console.error('Exception sending welcome email:', error);
@@ -123,5 +124,19 @@ export async function sendLoginNotification(user: { email: string; name: string 
     });
   } catch (error) {
     console.error('Exception sending login notification:', error);
+  }
+}
+
+export async function sendWelcomeBackEmail(user: { email: string; name: string }) {
+  if (!user.email) return;
+
+  try {
+    await sendEmail({
+      to: user.email,
+      subject: 'Welcome back to Katyaayani Astrologer ✨',
+      html: welcomeBackEmailTemplate(user.name)
+    });
+  } catch (error) {
+    console.error('Exception sending welcome back email:', error);
   }
 }
