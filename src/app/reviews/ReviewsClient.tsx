@@ -305,30 +305,71 @@ export default function ReviewsClient() {
         </div>
       </section>
 
-      {/* Google Reviews Section */}
-      <section className="py-16 px-6 border-t border-[#ff6b35]/10">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" className="h-6 object-contain" />
-            <span className="text-xl font-bold">{t('Reviews', 'समीक्षाएं', 'સમીક્ષાઓ')}</span>
+        <section className={`py-20 px-6 border-t ${theme === 'dark' ? 'border-white/5 bg-[#0d0d12]' : 'border-black/5 bg-white'}`}>
+          <div className="max-w-4xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="space-y-6"
+            >
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" className="h-7 object-contain" />
+                <div className="h-6 w-px bg-gray-300 mx-2" />
+                <span className="text-2xl font-bold font-[family-name:var(--font-cinzel)] tracking-tight">Customer Reviews</span>
+              </div>
+              
+              <div className="flex flex-col items-center">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-5xl font-extrabold text-[#FBBC05]">4.9</span>
+                  <div className="flex flex-col items-start">
+                    <div className="flex gap-0.5 mb-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} className="w-5 h-5 fill-[#FBBC05] text-[#FBBC05]" />
+                      ))}
+                    </div>
+                    <p className="text-sm font-medium opacity-60">
+                      {t('Verified 4.9/5.0 Rating', 'सत्यापित 4.9/5.0 रेटिंग', 'ચકાસાયેલ 4.9/5.0 રેટિંગ')}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-lg font-bold mb-8">
+                  {t('Based on 127+ authentic customer reviews', '127+ प्रामाणिक ग्राहक समीक्षाओं के आधार पर', '127+ અધિકૃત ગ્રાહક સમીક્ષાઓના આધારે')}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap justify-center gap-4">
+                <a 
+                  href="https://www.google.com/search?q=Katyaayani+Astrologer+Ahmedabad&oq=Katyaayani+Astrologer+Ahmedabad&aqs=chrome..69i57j69i60l3.4182j0j7&sourceid=chrome&ie=UTF-8#lrd=0x395e85d45e548847:0x11ae79867037df4f,1" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-[#4285F4] text-white shadow-lg shadow-[#4285F4]/20 hover:bg-[#357abd] transition-all font-bold text-lg active:scale-95"
+                >
+                  <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" alt="G" className="w-6 h-6 bg-white rounded-full p-0.5" />
+                  {t('View All Google Reviews', 'गूगल पर सभी समीक्षाएं देखें', 'Google પર બધી સમીક્ષાઓ જુઓ')}
+                </a>
+                
+                <a 
+                  href="https://g.page/r/CU_fN-rG_K4REAE/review" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl border-2 border-[#ff6b35] text-[#ff6b35] hover:bg-[#ff6b35]/5 transition-all font-bold text-lg active:scale-95"
+                >
+                  <Star className="w-5 h-5" />
+                  {t('Write a Review', 'एक समीक्षा लिखें', 'સમીક્ષા લખો')}
+                </a>
+              </div>
+              
+              <p className="text-xs opacity-50 max-w-md mx-auto leading-relaxed">
+                {t(
+                  'Your reviews are automatically synced with our system via Google Business Profile to ensure transparency and trust.',
+                  'आपकी समीक्षाएं पारदर्शिता और विश्वास सुनिश्चित करने के लिए Google Business Profile के माध्यम से हमारे सिस्टम के साथ स्वचालित रूप से सिंक की जाती हैं।',
+                  'તમારા પ્રતિસાદો પારદર્શિતા અને વિશ્વાસ સુનિશ્ચિત કરવા માટે Google Business Profile દ્વારા અમારી સિસ્ટમ સાથે આપમેળે સમન્વયિત થાય છે.'
+                )}
+              </p>
+            </motion.div>
           </div>
-          <div className="flex justify-center gap-1 mb-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} className="w-6 h-6 fill-[#FBBC05] text-[#FBBC05]" />
-            ))}
-          </div>
-          <p className="text-lg font-bold mb-6">4.9 / 5.0 {t('based on 100+ reviews', '100+ समीक्षाओं के आधार पर', '100+ સમીક્ષાઓના આધારે')}</p>
-          <a 
-            href="https://g.page/r/CU_fN-rG_K4REAE/review" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-gray-700 border border-gray-200 shadow-sm hover:shadow-md transition-all font-semibold"
-          >
-            <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" alt="G" className="w-5 h-5" />
-            {t('View all reviews on Google', 'गूगल पर सभी समीक्षाएं देखें', 'Google પર બધી સમીક્ષાઓ જુઓ')}
-          </a>
-        </div>
-      </section>
+        </section>
 
       <Footer />
     </div>

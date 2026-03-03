@@ -126,14 +126,12 @@ export default function Footer() {
                   <Link href="/privacy" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Privacy")}</Link>
                   <Link href="/refund-policy" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Refund Policy")}</Link>
                   <Link href="/disclaimer" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Disclaimer")}</Link>
-                  <div className="mt-2 pt-2 border-t border-[#ff6b35]/10">
-                    <p className={`text-[10px] uppercase tracking-widest font-bold mb-1 ${theme === 'dark' ? 'text-[#ff8c5e]' : 'text-[#ff6b35]'}`}>
-                      {language === 'gu' ? 'અમારી સાથે જોડાઓ' : language === 'hi' ? 'हमारे साथ जुड़ें' : 'Partner with us'}
-                    </p>
-                    <Link href="/contact?subject=Backlink%20Exchange" className={`text-xs ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors underline decoration-[#ff6b35]/30 underline-offset-4`}>
-                      {language === 'gu' ? 'લિંક એક્સચેન્જ' : language === 'hi' ? 'लिंक एक्सचेंज' : 'Backlink Exchange'}
-                    </Link>
-                  </div>
+                    <div className="mt-4 pt-2 border-t border-[#ff6b35]/10">
+                      <Link href="/contact" className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest ${theme === 'dark' ? 'text-[#ff8c5e]' : 'text-[#ff6b35]'} hover:opacity-80 transition-opacity`}>
+                        <Mail className="w-4 h-4" />
+                        {language === 'gu' ? 'અમારો સંપર્ક કરો' : language === 'hi' ? 'हमसे संपर्क करें' : 'Contact Us'}
+                      </Link>
+                    </div>
                 </div>
               </div>
           <div>
@@ -160,28 +158,17 @@ export default function Footer() {
                     <MapPin className="w-4 h-4 text-[#ff6b35]" />
                     <span>Ahmedabad, Gujarat</span>
                   </div>
-                  <div className={`flex items-center gap-2 ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'}`}>
-                    <Globe className="w-4 h-4 text-[#ff6b35]" />
-                    <a
-                      href="https://www.katyaayaniastrologer.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-[#ff6b35] transition-colors text-sm"
-                    >
-                      www.katyaayaniastrologer.com
-                    </a>
-                  </div>
-                  <div className={`flex items-center gap-2 ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'}`}>
-                    <Instagram className="w-4 h-4 text-[#ff6b35]" />
-                    <a
-                      href="https://www.instagram.com/katyaayani_astrologer"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-[#ff6b35] transition-colors text-sm"
-                    >
-                      @katyaayani_astrologer
-                    </a>
-                  </div>
+                    <div className={`flex items-center gap-2 ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'}`}>
+                      <Instagram className="w-4 h-4 text-[#ff6b35]" />
+                      <a
+                        href="https://www.instagram.com/katyaayani_astrologer"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-[#ff6b35] transition-colors text-sm"
+                      >
+                        @katyaayani_astrologer
+                      </a>
+                    </div>
               </div>
           </div>
           <div>
