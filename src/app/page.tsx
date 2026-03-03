@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { getSeoMetadata, generateSchemaMarkup } from "@/lib/seo";
 import HomePageClient from "@/components/homepage/HomePageClient";
+import { supabaseAdmin } from "@/lib/supabase";
 
 const SITE_URL = "https://www.katyaayaniastrologer.com";
 
@@ -61,8 +62,19 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function HomePage() {
-  const schema = generateSchemaMarkup("/");
+export default async function HomePage() {
+  const { data: galleryImages } = await supabaseAdmin
+    .from("gallery")
+    .select("image_url, title, description")
+    .eq("is_active", true);
+
+  const schema = generateSchemaMarkup("/", undefined, { 
+    galleryImages: (galleryImages || []).map(img => ({
+      image_url: img.image_url,
+      title: img.title || "Sacred Visual",
+      description: img.description || "Vedic spiritual visual by Katyaayani Astrologer"
+    })) 
+  });
 
   return (
     <>

@@ -145,7 +145,11 @@ const PAGE_DEFAULTS: Record<string, { title: string; description: string; keywor
   };
 
 // ─── Schema.org Generator ───
-export function generateSchemaMarkup(pagePath: string, seoData?: { meta_title?: string; meta_description?: string; og_image?: string }): Record<string, unknown> {
+export function generateSchemaMarkup(
+  pagePath: string, 
+  seoData?: { meta_title?: string; meta_description?: string; og_image?: string },
+  additionalData?: { galleryImages?: { image_url: string; title: string; description: string }[] }
+): Record<string, unknown> {
   const title = seoData?.meta_title || PAGE_DEFAULTS[pagePath]?.title || SITE_NAME;
   const description = seoData?.meta_description || PAGE_DEFAULTS[pagePath]?.description || "";
   const image = seoData?.og_image || "https://eochjxjoyibtjawzgauk.supabase.co/storage/v1/object/public/blog-images/og/og-home-1771646111561.png";
@@ -168,60 +172,78 @@ export function generateSchemaMarkup(pagePath: string, seoData?: { meta_title?: 
   };
 
   if (pagePath === "/") {
-    return {
-      "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "WebSite",
+    const graph: any[] = [
+      {
+        "@type": "WebSite",
+        name: SITE_NAME,
+        alternateName: ["Katyaayani Jyotish", "કાત્યાયની જ્યોતિષ", "कात्यायनी ज्योतिष"],
+        url: SITE_URL,
+        description,
+        inLanguage: ["en", "hi", "gu"],
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${SITE_URL}/blog?q={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
+      },
+      organization,
+      {
+        "@type": "ProfessionalService",
           name: SITE_NAME,
-          alternateName: ["Katyaayani Jyotish", "કાત્યાયની જ્યોતિષ", "कात्यायनी ज्योतिष"],
-          url: SITE_URL,
+          alternateName: "Katyaayani Jyotish",
           description,
-          inLanguage: ["en", "hi", "gu"],
-          potentialAction: {
-            "@type": "SearchAction",
-            target: `${SITE_URL}/blog?q={search_term_string}`,
-            "query-input": "required name=search_term_string",
-          },
-        },
-        organization,
-        {
-          "@type": "ProfessionalService",
-            name: SITE_NAME,
-            alternateName: "Katyaayani Jyotish",
-            description,
-            url: SITE_URL,
-            image: LOGO_IMAGE,
-          priceRange: "$$",
-          serviceType: ["Ancient Astrology Consultation", "Kundali Analysis", "Horoscope Reading", "Vastu Shastra", "Marriage Matching"],
-          areaServed: {
-            "@type": "Country",
-            name: "India",
-          },
-          hasOfferCatalog: {
-            "@type": "OfferCatalog",
-            name: "Astrology Services",
-            itemListElement: [
-                { "@type": "Offer", itemOffered: { "@type": "Service", name: "Ancient Kundali Analysis" } },
-              { "@type": "Offer", itemOffered: { "@type": "Service", name: "Horoscope & Rashifal Reading" } },
-              { "@type": "Offer", itemOffered: { "@type": "Service", name: "Kundali Matching for Marriage" } },
-              { "@type": "Offer", itemOffered: { "@type": "Service", name: "Vastu Shastra Consultation" } },
-              { "@type": "Offer", itemOffered: { "@type": "Service", name: "Online Video Call Consultation" } },
-              { "@type": "Offer", itemOffered: { "@type": "Service", name: "Home Visit Astrology Session" } },
-            ],
-          },
-        },
-        {
-          "@type": "Person",
-          name: "Rudram Joshi",
-          alternateName: "Katyaayani Astrologer",
-          jobTitle: "Ancient Astrologer",
           url: SITE_URL,
           image: LOGO_IMAGE,
-          knowsAbout: ["Ancient Astrology", "Jyotish Shastra", "Kundali Analysis", "Vastu Shastra", "Horoscope Reading"],
-          worksFor: organization,
+        priceRange: "$$",
+        serviceType: ["Ancient Astrology Consultation", "Kundali Analysis", "Horoscope Reading", "Vastu Shastra", "Marriage Matching"],
+        areaServed: {
+          "@type": "Country",
+          name: "India",
         },
-      ],
+        hasOfferCatalog: {
+          "@type": "OfferCatalog",
+          name: "Astrology Services",
+          itemListElement: [
+              { "@type": "Offer", itemOffered: { "@type": "Service", name: "Ancient Kundali Analysis" } },
+            { "@type": "Offer", itemOffered: { "@type": "Service", name: "Horoscope & Rashifal Reading" } },
+            { "@type": "Offer", itemOffered: { "@type": "Service", name: "Kundali Matching for Marriage" } },
+            { "@type": "Offer", itemOffered: { "@type": "Service", name: "Vastu Shastra Consultation" } },
+            { "@type": "Offer", itemOffered: { "@type": "Service", name: "Online Video Call Consultation" } },
+            { "@type": "Offer", itemOffered: { "@type": "Service", name: "Home Visit Astrology Session" } },
+          ],
+        },
+      },
+      {
+        "@type": "Person",
+        name: "Rudram Joshi",
+        alternateName: "Katyaayani Astrologer",
+        jobTitle: "Ancient Astrologer",
+        url: SITE_URL,
+        image: LOGO_IMAGE,
+        knowsAbout: ["Ancient Astrology", "Jyotish Shastra", "Kundali Analysis", "Vastu Shastra", "Horoscope Reading"],
+        worksFor: organization,
+      },
+    ];
+
+    // Add ImageGallery if images exist
+    if (additionalData?.galleryImages && additionalData.galleryImages.length > 0) {
+      graph.push({
+        "@type": "ImageGallery",
+        "name": "Katyaayani Astrologer Sacred Gallery",
+        "description": "Collection of sacred Vedic, spiritual, and astrological pictures curated by Katyaayani Astrologer.",
+        "image": additionalData.galleryImages.map(img => ({
+          "@type": "ImageObject",
+          "contentUrl": img.image_url,
+          "name": img.title,
+          "description": img.description,
+          "author": "Katyaayani Astrologer"
+        }))
+      });
+    }
+
+    return {
+      "@context": "https://schema.org",
+      "@graph": graph,
     };
   }
 

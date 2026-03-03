@@ -19,8 +19,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = getSupabase();
 
   // --- Static Pages ---
+  // Fetch gallery images for homepage image sitemap support
+  let galleryImages: string[] = [];
+  try {
+    const { data: gallery } = await supabase
+      .from("gallery")
+      .select("image_url")
+      .eq("is_active", true);
+    galleryImages = (gallery || []).map((img) => img.image_url);
+  } catch (e) {
+    console.error("Sitemap gallery error:", e);
+  }
+
   const staticPages: MetadataRoute.Sitemap = [
-    { url: baseUrl, lastModified: new Date(), changeFrequency: "daily", priority: 1.0 },
+    { 
+      url: baseUrl, 
+      lastModified: new Date(), 
+      changeFrequency: "daily", 
+      priority: 1.0,
+      images: galleryImages, // Add images for homepage SEO
+    },
     { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
     { url: `${baseUrl}/services`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
     { url: `${baseUrl}/booking`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
