@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import { Open_Sans, Cinzel } from "next/font/google";
 import "./globals.css";
-import { VisualEditsMessenger } from "orchids-visual-edits";
 import ErrorReporter from "@/components/ErrorReporter";
+import dynamic from "next/dynamic";
+
+const VisualEditsMessengerClient = dynamic(() => import("@/components/VisualEditsMessengerClient"), { ssr: false });
 import Script from "next/script";
 import { Providers } from "@/components/Providers";
 import UnifiedLoginPopup from "@/components/auth/UnifiedLoginPopup";
 import EnquiryPopup from "@/components/EnquiryPopup";
 import FloatingEnquiry from "@/components/FloatingEnquiry";
-import GoogleTranslateWidget from "@/components/GoogleTranslateWidget";
 import UserAlertsPopup from "@/components/UserAlertsPopup";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import PageViewTracker from "@/components/PageViewTracker";
@@ -312,7 +313,7 @@ gtag('config', 'G-D13ED7NS0T');`}
                         </Providers>
             <Analytics />
             <SpeedInsights />
-          <VisualEditsMessenger />
+            <VisualEditsMessengerClient />
       </body>
     </html>
   );
