@@ -32,13 +32,13 @@ const cityData: Record<string, { gu: string, hi: string, description: string, ti
   },
   "vadodara": { 
     gu: "વડોદરા", 
-    hi: "वडोदरा", 
+    hi: "वडોદરા", 
     title: "Trusted Astrologer in Vadodara",
     description: "Professional Astrology consultation in Vadodara. Specialized in Career, Marriage, and Health predictions." 
   },
   "rajkot": { 
     gu: "રાજકોટ", 
-    hi: "રાજકોટ", 
+    hi: "राजकोट", 
     title: "Famous Astrologer in Rajkot",
     description: "Famous Astrologer in Rajkot providing ancient Vedic wisdom for modern problems by Rudram Joshi." 
   },
@@ -60,6 +60,78 @@ const cityData: Record<string, { gu: string, hi: string, description: string, ti
     title: "Trusted Astrologer in Gandhinagar",
     description: "Trusted Astrology consultation in Gandhinagar. Expertise in Vastu, Kundali, and astrological remedies." 
   },
+  "bangalore": {
+    gu: "બેંગલુરુ",
+    hi: "बेंगलुरु",
+    title: "Best Astrologer in Bangalore",
+    description: "Top Vedic Astrology services in Bangalore. Specialized in career growth and life problem solutions."
+  },
+  "pune": {
+    gu: "પુણે",
+    hi: "पुणे",
+    title: "Expert Astrologer in Pune",
+    description: "Connect with the best astrologer in Pune for accurate future predictions and effective Vedic remedies."
+  },
+  "hyderabad": {
+    gu: "હૈદરાબાદ",
+    hi: "हैदराबाद",
+    title: "Trusted Astrologer in Hyderabad",
+    description: "Experienced Vedic Astrologer in Hyderabad offering Kundali matching and life guidance consultations."
+  },
+  "kolkata": {
+    gu: "કોલકાતા",
+    hi: "कोलकाता",
+    title: "Famous Astrologer in Kolkata",
+    description: "Renowned Astrology services in Kolkata for health, wealth, and family harmony using ancient wisdom."
+  },
+  "jaipur": {
+    gu: "જયપુર",
+    hi: "जयपुर",
+    title: "Best Astrologer in Jaipur",
+    description: "Get expert astrology advice in Jaipur. Specialized in traditional Vedic Jyotish and Vastu consultations."
+  },
+  "lucknow": {
+    gu: "લખનૌ",
+    hi: "लखनऊ",
+    title: "Expert Astrologer in Lucknow",
+    description: "Professional Vedic Astrology in Lucknow. Find solutions for marriage, career, and business growth."
+  },
+  "indore": {
+    gu: "ઈન્દોર",
+    hi: "इंदौर",
+    title: "Famous Astrologer in Indore",
+    description: "Top-rated astrologer in Indore providing personalized horoscope readings and effective remedies."
+  },
+  "bhavnagar": {
+    gu: "ભાવનગર",
+    hi: "भावनगर",
+    title: "Best Astrologer in Bhavnagar",
+    description: "Trusted Vedic Astrology services in Bhavnagar. Expertise in Kundali analysis and Vastu Shastra."
+  },
+  "jamnagar": {
+    gu: "જામનગર",
+    hi: "जामनगर",
+    title: "Expert Astrologer in Jamnagar",
+    description: "Accurate predictions and life guidance in Jamnagar by experienced Katyaayani Astrologer."
+  },
+  "junagadh": {
+    gu: "જૂનાગઢ",
+    hi: "जूनागढ़",
+    title: "Famous Astrologer in Junagadh",
+    description: "Connect with the best astrologer in Junagadh for spiritual growth and astrological solutions."
+  },
+  "anand": {
+    gu: "આણંદ",
+    hi: "आणंद",
+    title: "Trusted Astrologer in Anand",
+    description: "Top Vedic Astrology consultation in Anand. Get personalized remedies for your life challenges."
+  },
+  "nadiad": {
+    gu: "નડિયાદ",
+    hi: "नडियाद",
+    title: "Best Astrologer in Nadiad",
+    description: "Expert Astrology services in Nadiad. Accurate horoscope analysis and Vedic guidance since 2007."
+  }
 };
 
 export default function CitySEOPage() {

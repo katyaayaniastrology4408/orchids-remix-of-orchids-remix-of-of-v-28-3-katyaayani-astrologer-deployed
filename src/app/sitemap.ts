@@ -108,7 +108,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     } catch (e) { console.error("Sitemap custom error:", e); }
 
     // --- City SEO Pages ---
-    const cities = ["ahmedabad", "surat", "vadodara", "rajkot", "mumbai", "delhi", "gandhinagar"];
+    const cities = [
+      "ahmedabad", "surat", "vadodara", "rajkot", "mumbai", "delhi", "gandhinagar",
+      "bangalore", "pune", "hyderabad", "kolkata", "chennai", "jaipur", "lucknow", 
+      "indore", "nagpur", "bhavnagar", "jamnagar", "junagadh", "anand", "nadiad"
+    ];
     const cityPages: MetadataRoute.Sitemap = cities.map((city) => ({
       url: `${baseUrl}/astrologer-in/${city}`,
       lastModified: new Date(),

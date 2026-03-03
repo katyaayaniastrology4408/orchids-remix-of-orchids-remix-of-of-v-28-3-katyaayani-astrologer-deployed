@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { Star, Moon, Sun, Sparkles, Home, Video, ChevronRight, ChevronDown, Calendar, Newspaper, ImageIcon } from "lucide-react";
+import { Star, Moon, Sun, Sparkles, Home, Video, ChevronRight, ChevronDown, Calendar, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -39,14 +39,6 @@ const ChandraGrahanBanner = dynamic(() => import("@/components/homepage/ChandraG
 import { testimonialsData, contentData } from "@/data/homepage";
 import "@/styles/homepage.css";
 
-interface GalleryImage {
-  id: string;
-  image_url: string;
-  title: string;
-  description: string;
-  created_at: string;
-}
-
 interface LatestPost {
   id: string;
   title: string;
@@ -57,57 +49,43 @@ interface LatestPost {
 }
 
 interface HomePageClientProps {
-  initialGalleryImages: GalleryImage[];
   initialLatestPosts: LatestPost[];
 }
 
-export default function HomePageClient({ initialGalleryImages, initialLatestPosts }: HomePageClientProps) {
+export default function HomePageClient({ initialLatestPosts }: HomePageClientProps) {
   const [mounted, setMounted] = useState(false);
   const { theme } = useTheme();
   const { language } = useTranslation();
   const { user, showAuthModal, showEnquiryModal } = useAuth();
   const [panchangTimes, setPanchangTimes] = useState({ sunrise: "--", sunset: "--" });
   const [panchangApiData, setPanchangApiData] = useState<any>(null);
-  const [hinduCalendar, setHinduCalendar] = useState({ month: "--", tithi: "--", vaara: "--", paksha: "--" });
-  const [dbReviews, setDbReviews] = useState<{ name: string; text: string; rating: number }[]>([]);
-  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(initialGalleryImages);
-  const [latestPosts, setLatestPosts] = useState<LatestPost[]>(initialLatestPosts);
+    const [hinduCalendar, setHinduCalendar] = useState({ month: "--", tithi: "--", vaara: "--", paksha: "--" });
+    const [dbReviews, setDbReviews] = useState<{ name: string; text: string; rating: number }[]>([]);
+    const [latestPosts, setLatestPosts] = useState<LatestPost[]>(initialLatestPosts);
 
-  useEffect(() => {
-    setMounted(true);
+    useEffect(() => {
+      setMounted(true);
 
-    // Fetch approved DB reviews (3+ stars)
-    fetch('/api/feedback?minRating=3')
-      .then(r => r.json())
-      .then(json => {
-        if (json.success && Array.isArray(json.data)) {
-          setDbReviews(json.data.map((f: any) => ({ name: f.name, text: f.comment, rating: f.rating })));
-        }
-      })
-      .catch(() => {});
-
-    // Refresh data if needed (though it's fetched on server)
-    if (initialGalleryImages.length === 0) {
-      fetch('/api/gallery')
+      // Fetch approved DB reviews (3+ stars)
+      fetch('/api/feedback?minRating=3')
         .then(r => r.json())
         .then(json => {
           if (json.success && Array.isArray(json.data)) {
-            setGalleryImages(json.data);
+            setDbReviews(json.data.map((f: any) => ({ name: f.name, text: f.comment, rating: f.rating })));
           }
         })
         .catch(() => {});
-    }
 
-    if (initialLatestPosts.length === 0) {
-      fetch('/api/blog?limit=3&published=true')
-        .then(r => r.json())
-        .then(json => {
-          if (json.success && Array.isArray(json.data)) {
-            setLatestPosts(json.data.slice(0, 3));
-          }
-        })
-        .catch(() => {});
-    }
+      if (initialLatestPosts.length === 0) {
+        fetch('/api/blog?limit=3&published=true')
+          .then(r => r.json())
+          .then(json => {
+            if (json.success && Array.isArray(json.data)) {
+              setLatestPosts(json.data.slice(0, 3));
+            }
+          })
+          .catch(() => {});
+      }
     
     let lastFetchDate = '';
 
@@ -470,56 +448,6 @@ export default function HomePageClient({ initialGalleryImages, initialLatestPost
 
       <AstrologerTip />
       
-      {/* Gallery Section */}
-      {galleryImages.length > 0 && (
-        <section className={`py-24 px-6 ${theme === 'dark' ? 'bg-[#0a0a0f]' : 'bg-[#fcfaf7]'}`}>
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <div className="flex justify-center gap-2 mb-4">
-                <ImageIcon className="w-8 h-8 text-[#ff6b35]" />
-              </div>
-              <h2 className="font-[family-name:var(--font-cinzel)] text-4xl md:text-5xl font-bold mb-4 text-gradient-ancient">
-                {language === 'gu' ? 'પવિત્ર ગેલેરી' : language === 'hi' ? 'पवित्र गैलरी' : 'Sacred Gallery'}
-              </h2>
-              <p className={`text-xl max-w-2xl mx-auto ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
-                {language === 'gu' ? 'કાત્યાયની જ્યોતિષ દ્વારા પસંદ કરવામાં આવેલા પવિત્ર વૈદિક, આધ્યાત્મિક અને જ્યોતિષીય ચિત્રોનો અમારો સંગ્રહ જુઓ.' : 
-                 language === 'hi' ? 'कात्यायनी ज्योतिष द्वारा क्यूरेट किए गए पवित्र वैदिक, आध्यात्मिक और ज्योतिषीय चित्रों का हमारा संग्रह देखें।' : 
-                 'Explore our collection of sacred Vedic, spiritual, and astrological pictures curated by Katyaayani Astrologer.'}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {galleryImages.map((img) => (
-                <div 
-                  key={img.id}
-                  className="group relative flex flex-col bg-white dark:bg-[#12121a] rounded-3xl overflow-hidden border border-[#ff6b35]/10 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
-                >
-                  <div className="aspect-[4/5] relative overflow-hidden bg-black/5">
-                    <Image 
-                      src={img.image_url} 
-                      alt={img.description || img.title}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  </div>
-                  
-                  <div className="p-6">
-                    <h3 className="font-[family-name:var(--font-cinzel)] text-lg font-bold text-[#ff6b35] mb-2 group-hover:translate-x-1 transition-transform">
-                      {img.title || "Untitiled Visual"}
-                    </h3>
-                    <p className={`text-xs line-clamp-3 leading-relaxed ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
-                      {img.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* Latest Blog Posts */}
       {latestPosts.length > 0 && (
         <section className={`py-20 px-6 ${theme === 'dark' ? 'bg-[#0a0a0f]' : 'bg-[#fdfbf7]'}`}>
