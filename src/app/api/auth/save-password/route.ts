@@ -11,10 +11,10 @@ export async function POST(req: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Update the profile with the cleartext password
+    // Clear the existing cleartext password for security
     const { error } = await supabaseAdmin
       .from('profiles')
-      .update({ clear_password: password })
+      .update({ clear_password: null })
       .eq('email', email);
 
     if (error) throw error;

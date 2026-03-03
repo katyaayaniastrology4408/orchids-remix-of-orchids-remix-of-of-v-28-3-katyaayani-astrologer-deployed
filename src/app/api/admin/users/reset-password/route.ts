@@ -55,12 +55,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Failed to update authentication record" }, { status: 500 });
     }
 
-    // 5. Update profiles table with hashed password AND cleartext password
+    // 5. Update profiles table with hashed password
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
       .update({ 
-        password: hashedPassword,
-        clear_password: newPassword // Keep cleartext password in sync
+        password: hashedPassword
       })
       .eq('id', profile.id);
 

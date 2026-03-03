@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2, MapPin, Calendar, Clock, Phone,
   Lock, Eye, EyeOff, CheckCircle2, ChevronRight, ChevronLeft,
-  User, Home
+  User, Home, AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -135,8 +135,7 @@ export default function CompleteProfilePage() {
             gender,
             dob,
             tob,
-            pob,
-            clear_password: password,
+            pob
           }),
       });
       const data = await res.json();
@@ -152,8 +151,7 @@ export default function CompleteProfilePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: user.email,
-          name: name || "Seeker",
-          password,
+          name: name || "Seeker"
         }),
       });
 
@@ -204,76 +202,76 @@ export default function CompleteProfilePage() {
           />
         </div>
 
-        <div className="p-8">
-          {/* Logo + title */}
-          <div className="text-center mb-6">
-            <img
-              src={LOGO_URL}
-              alt="Katyaayani"
-              className="w-14 h-14 rounded-full border-2 border-[#ff6b35] mx-auto mb-3 object-contain"
-            />
-            <h1
-              className={`text-2xl font-bold font-[family-name:var(--font-cinzel)] ${
-                dark ? "text-white" : "text-[#2d1810]"
-              }`}
-            >
-              {step === 3 ? "You're All Set!" : "Complete Your Profile"}
-            </h1>
-            <p className={`mt-1 text-sm ${dark ? "text-gray-400" : "text-gray-500"}`}>
-              Welcome,{" "}
-              <span className="text-[#ff6b35] font-semibold">{userName}</span>!
-            </p>
-          </div>
+          {/* Error Banner at Top (if any) */}
+          {error && (
+            <div className="mx-8 mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center font-bold">
+              {error}
+            </div>
+          )}
 
-            {/* Step pills */}
-            {step !== 3 && (
-              <div className="flex items-center justify-center gap-3 mb-7">
-                {[
-                  { n: 1, label: "Basic Info" },
-                  { n: 2, label: "Birth Details" },
-                  { n: 3, label: "Set Password" },
-                ].map(({ n, label }, i) => (
-                  <div key={n} className="flex items-center gap-2">
-                    {i > 0 && (
-                      <div
-                        className={`w-8 h-px ${
-                          step > n ? "bg-[#ff6b35]" : "bg-gray-600"
-                        }`}
-                      />
-                    )}
-                    <div className="flex items-center gap-1.5">
-                      <div
-                        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                          step > n
-                            ? "bg-green-500 text-white"
-                            : step === n
-                            ? "bg-[#ff6b35] text-white"
-                            : dark
-                            ? "bg-white/10 text-gray-500"
-                            : "bg-gray-100 text-gray-400"
-                        }`}
-                      >
-                        {step > n ? <CheckCircle2 className="w-3.5 h-3.5" /> : n}
+          <div className="p-8">
+            {/* Logo + title */}
+            <div className="text-center mb-6">
+              <img
+                src={LOGO_URL}
+                alt="Katyaayani"
+                className="w-14 h-14 rounded-full border-2 border-[#ff6b35] mx-auto mb-3 object-contain"
+              />
+              <h1
+                className={`text-2xl font-bold font-[family-name:var(--font-cinzel)] ${
+                  dark ? "text-white" : "text-[#2d1810]"
+                }`}
+              >
+                {step === 3 ? "You're All Set!" : "Complete Your Profile"}
+              </h1>
+              <p className={`mt-1 text-sm ${dark ? "text-gray-400" : "text-gray-500"}`}>
+                Welcome,{" "}
+                <span className="text-[#ff6b35] font-semibold">{userName}</span>!
+              </p>
+            </div>
+
+              {/* Step pills */}
+              {step !== 3 && (
+                <div className="flex items-center justify-center gap-3 mb-7">
+                  {[
+                    { n: 1, label: "Basic Info" },
+                    { n: 2, label: "Birth Details" },
+                    { n: 3, label: "Set Password" },
+                  ].map(({ n, label }, i) => (
+                    <div key={n} className="flex items-center gap-2">
+                      {i > 0 && (
+                        <div
+                          className={`w-8 h-px ${
+                            step > n ? "bg-[#ff6b35]" : "bg-gray-600"
+                          }`}
+                        />
+                      )}
+                      <div className="flex items-center gap-1.5">
+                        <div
+                          className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                            step > n
+                              ? "bg-green-500 text-white"
+                              : step === n
+                              ? "bg-[#ff6b35] text-white"
+                              : dark
+                              ? "bg-white/10 text-gray-500"
+                              : "bg-gray-100 text-gray-400"
+                          }`}
+                        >
+                          {step > n ? <CheckCircle2 className="w-3.5 h-3.5" /> : n}
+                        </div>
+                        <span
+                          className={`text-xs font-medium hidden sm:block ${
+                            step >= n ? "text-[#ff6b35]" : "text-gray-500"
+                          }`}
+                        >
+                          {label}
+                        </span>
                       </div>
-                      <span
-                        className={`text-xs font-medium hidden sm:block ${
-                          step >= n ? "text-[#ff6b35]" : "text-gray-500"
-                        }`}
-                      >
-                        {label}
-                      </span>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Error */}
-            {error && (
-              <div className="mb-5 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
-                {error}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
 
             <AnimatePresence mode="wait">
               {/* ───────────── STEP 1: Basic Info ───────────── */}

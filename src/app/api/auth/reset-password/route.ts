@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendEmail } from "@/lib/email.config";
 import { passwordChangedNotificationTemplate } from "@/lib/email-templates";
+import bcrypt from 'bcryptjs';
 export const dynamic = 'force-dynamic' ; 
 
 const supabaseAdmin = createClient(
@@ -20,10 +21,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Get user ID and name by email
+    // 1. Get user ID and current password hash by email
       const { data: userData, error: userError } = await supabaseAdmin
         .from("profiles")
-        .select("id, name")
+        .select("id, name, password")
         .eq("email", email)
         .single();
 
@@ -32,6 +33,17 @@ export async function POST(req: NextRequest) {
         { error: "User not found" },
         { status: 404 }
       );
+    }
+
+    // Check if the new password is the same as the old one
+    if (userData.password) {
+      const isSamePassword = await bcrypt.compare(newPassword, userData.password);
+      if (isSamePassword) {
+        return NextResponse.json(
+          { error: "You cannot use your previous password. Please choose a new one." },
+          { status: 400 }
+        );
+      }
     }
 
       // 2. Update password via Auth Admin API
@@ -44,10 +56,14 @@ export async function POST(req: NextRequest) {
         throw resetError;
       }
 
-      // 3. Update clear_password in profiles
+      // 3. Update hashed password in profiles (clear_password is removed for security)
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
       await supabaseAdmin
         .from("profiles")
-        .update({ clear_password: newPassword })
+        .update({ 
+          password: hashedPassword,
+          clear_password: null // Clear any existing cleartext password
+        })
         .eq("id", userData.id);
 
         // 4. Clean up any used OTPs for this email

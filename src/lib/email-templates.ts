@@ -191,33 +191,25 @@ export const otpEmailTemplate = (otp: string, name: string = 'Seeker', type: 'si
 };
 
 // Welcome Email Template
-export const welcomeEmailTemplate = (name: string = 'Divine Soul', email?: string, password?: string) => {
-  const credentialsBlock = (email && password) ? `
+export const welcomeEmailTemplate = (name: string = 'Divine Soul', email?: string) => {
+  const credentialsBlock = (email) ? `
     <tr>
       <td style="padding: 15px 35px;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background: rgba(255, 107, 53, 0.08); border-radius: 16px; border: 1px solid rgba(255, 107, 53, 0.25);">
           <tr>
             <td style="padding: 25px;">
-              <h3 style="color: #ff6b35; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">Your Login Credentials:</h3>
+              <h3 style="color: #ff6b35; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">Your Account Details:</h3>
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
-                    <span style="color: #888; font-size: 12px; text-transform: uppercase;">Email</span>
+                  <td style="padding: 8px 0;">
+                    <span style="color: #888; font-size: 12px; text-transform: uppercase;">Registered Email</span>
                   </td>
-                  <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); text-align: right;">
+                  <td style="padding: 8px 0; text-align: right;">
                     <span style="color: #fff; font-size: 14px; font-weight: 600;">${email}</span>
                   </td>
                 </tr>
-                <tr>
-                  <td style="padding: 8px 0;">
-                    <span style="color: #888; font-size: 12px; text-transform: uppercase;">Password</span>
-                  </td>
-                  <td style="padding: 8px 0; text-align: right;">
-                    <span style="color: #fff; font-size: 14px; font-weight: 600; font-family: monospace;">${password}</span>
-                  </td>
-                </tr>
               </table>
-              <p style="color: #666; font-size: 11px; margin-top: 15px; text-align: center;">You can use these details to log in to your account anytime.</p>
+              <p style="color: #666; font-size: 11px; margin-top: 15px; text-align: center;">You can use this email to log in to your account anytime. For security, we never send passwords in emails.</p>
             </td>
           </tr>
         </table>

@@ -175,7 +175,6 @@ type UserRecord = {
     phone: string;
     status: string;
     created_at: string;
-    clear_password?: string;
     gender?: string;
     dob?: string;
     tob?: string;
@@ -2243,16 +2242,8 @@ const { data: settings } = await supabase.from('admin_settings').select('*');
                       </div>
                     </div>
                     
-                    {selectedUser.clear_password && (
-                      <div className={`p-4 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#ff6b35]/10 border-[#ff6b35]/20'}`}>
-                        <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground mb-1">{t("Cleartext Password")}</p>
-                        <p className="font-mono font-bold flex items-center gap-2 text-[#ff6b35]"><Lock className="w-4 h-4" /> {selectedUser.clear_password}</p>
-                      </div>
-                    )}
-
-                
-                <div className={`p-4 md:p-6 rounded-2xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
-                  <h3 className="text-sm font-bold mb-4 flex items-center gap-2 text-[#ff6b35]"><Clock className="w-4 h-4" /> {t("Activity History")}</h3>
+                      <div className={`p-4 md:p-6 rounded-2xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-[#fcfaf7] border-[#ff6b35]/10'}`}>
+                    <h3 className="text-sm font-bold mb-4 flex items-center gap-2 text-[#ff6b35]"><Clock className="w-4 h-4" /> {t("Activity History")}</h3>
                   <div className="space-y-6">
                     <div>
                       <p className="text-[10px] uppercase font-black text-muted-foreground mb-2">{t("Bookings")}</p>

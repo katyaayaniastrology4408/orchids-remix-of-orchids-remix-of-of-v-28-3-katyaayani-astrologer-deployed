@@ -8,7 +8,7 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: Request) {
   try {
-    const { id, name, phone, address, city, gender, dob, tob, pob, clear_password } = await req.json();
+    const { id, name, phone, address, city, gender, dob, tob, pob } = await req.json();
   
     if (!id) {
       return NextResponse.json({ success: false, error: "User ID required" }, { status: 400 });
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
         tob: tob || null,
         pob: pob || null,
         email_verified: true,
-        ...(clear_password ? { clear_password } : {}),
+        clear_password: null // Clear any existing cleartext password for security
       }, { onConflict: 'id' });
 
     if (error) throw error;

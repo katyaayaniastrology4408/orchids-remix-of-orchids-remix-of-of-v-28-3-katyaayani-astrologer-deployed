@@ -14,15 +14,15 @@ export async function POST(req: Request) {
 
     await sendEmail({
       to: email,
-      subject: "Welcome to Katyaayani Astrologer ✨ — Your Login Details",
-      html: welcomeEmailTemplate(displayName, email, password),
+      subject: "Welcome to Katyaayani Astrologer ✨",
+      html: welcomeEmailTemplate(displayName, email),
     });
 
     // Also send to admin
     await sendEmail({
       to: process.env.ADMIN_EMAIL!,
       subject: `New Google Signup: ${displayName} (${email})`,
-      html: `<p>New user signed up via Google:</p><ul><li><b>Name:</b> ${displayName}</li><li><b>Email:</b> ${email}</li><li><b>Password set:</b> ${password}</li></ul>`,
+      html: `<p>New user signed up via Google:</p><ul><li><b>Name:</b> ${displayName}</li><li><b>Email:</b> ${email}</li></ul>`,
     });
 
     return NextResponse.json({ success: true });

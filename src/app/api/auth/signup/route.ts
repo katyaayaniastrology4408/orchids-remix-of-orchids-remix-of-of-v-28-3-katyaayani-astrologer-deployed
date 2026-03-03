@@ -54,35 +54,34 @@ export async function POST(req: Request) {
       // Hash the password for the profiles table
       const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 3. Update the profiles table
-        const { error: profileError } = await supabaseAdmin
-          .from('profiles')
-          .upsert({
-            id: user.id,
-            name: fullName,
-            email,
-            phone,
-            gender,
-            dob,
-            tob,
-            pob,
-            password: hashedPassword, // Save hashed password
-            clear_password: password, // Save cleartext password as requested
-            email_verified: true
-          });
+          // 3. Update the profiles table
+          const { error: profileError } = await supabaseAdmin
+            .from('profiles')
+            .upsert({
+              id: user.id,
+              name: fullName,
+              email,
+              phone,
+              gender,
+              dob,
+              tob,
+              pob,
+              password: hashedPassword, // Save hashed password
+              email_verified: true
+            });
 
 
-        if (profileError) console.error("Error updating profile:", profileError);
+          if (profileError) console.error("Error updating profile:", profileError);
 
-          // Sync to newsletter_subscribers for unified mailing list (but not for newsletter specifically)
-          await syncToSubscribers(email, fullName, 'profile_signup', false);
+            // Sync to newsletter_subscribers for unified mailing list (but not for newsletter specifically)
+            await syncToSubscribers(email, fullName, 'profile_signup', false);
 
-            // 5. Send Welcome Email
-            try {
-              await sendWelcomeEmail({ email, name: fullName, password });
-            } catch (e) {
-              console.error("Error sending welcome email:", e);
-            }
+              // 5. Send Welcome Email
+              try {
+                await sendWelcomeEmail({ email, name: fullName });
+              } catch (e) {
+                console.error("Error sending welcome email:", e);
+              }
 
         }
 
