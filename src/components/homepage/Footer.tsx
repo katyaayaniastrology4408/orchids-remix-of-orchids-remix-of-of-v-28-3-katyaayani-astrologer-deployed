@@ -109,8 +109,10 @@ export default function Footer() {
               <div className="flex flex-col gap-2">
                 <Link href="/services" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Services")}</Link>
                   <Link href="/booking" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Book")}</Link>
-                  <Link href="/online-consulting" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Online")}</Link>
-                  <Link href="/feedback" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Feedback")}</Link>
+                    <Link href="/online-consulting" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Online")}</Link>
+                    <Link href="/reviews" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Reviews")}</Link>
+                    <Link href="/feedback" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("Feedback")}</Link>
+
 
                 <Link href="/about" className={`${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'} hover:text-[#ff6b35] transition-colors`}>{t("About")}</Link>
               </div>

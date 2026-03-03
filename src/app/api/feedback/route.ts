@@ -35,8 +35,10 @@ export async function GET(req: NextRequest) {
     const isAdmin = searchParams.get('admin') === 'true';
 
       const minRating = searchParams.get('minRating');
+      const limit = searchParams.get('limit');
+      const offset = searchParams.get('offset');
 
-      let query = supabase.from('feedback').select('*');
+      let query = supabase.from('feedback').select('*', { count: 'exact' });
       
       if (!isAdmin) {
         query = query.eq('is_approved', true);
@@ -45,15 +47,21 @@ export async function GET(req: NextRequest) {
       if (minRating) {
         query = query.gte('rating', parseInt(minRating));
       }
+
+      if (limit) {
+        const l = parseInt(limit);
+        const o = offset ? parseInt(offset) : 0;
+        query = query.range(o, o + l - 1);
+      }
       
-      const { data, error } = await query.order('created_at', { ascending: false });
+      const { data, error, count } = await query.order('created_at', { ascending: false });
 
     if (error) {
       console.error('Supabase error:', error);
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, data }, { status: 200 });
+    return NextResponse.json({ success: true, data, count }, { status: 200 });
   } catch (error) {
     console.error('Server error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

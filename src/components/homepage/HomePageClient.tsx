@@ -25,10 +25,10 @@ export default function HomePageClient() {
   const { language } = useTranslation();
   const { user, showAuthModal, showEnquiryModal } = useAuth();
   const [panchangTimes, setPanchangTimes] = useState({ sunrise: "--", sunset: "--" });
-  const [panchangApiData, setPanchangApiData] = useState<any>(null);
-  const [hinduCalendar, setHinduCalendar] = useState({ month: "--", tithi: "--", vaara: "--", paksha: "--" });
-  const [showAllReviews, setShowAllReviews] = useState(false);
-  const [dbReviews, setDbReviews] = useState<{ name: string; text: string; rating: number }[]>([]);
+    const [panchangApiData, setPanchangApiData] = useState<any>(null);
+    const [hinduCalendar, setHinduCalendar] = useState({ month: "--", tithi: "--", vaara: "--", paksha: "--" });
+    const [dbReviews, setDbReviews] = useState<{ name: string; text: string; rating: number }[]>([]);
+
   const [latestPosts, setLatestPosts] = useState<{ id: string; title: string; slug: string; excerpt: string; featured_image: string; created_at: string }[]>([]);
 
   useEffect(() => {
@@ -516,84 +516,46 @@ export default function HomePageClient() {
             ))}
           </div>
 
-          {/* Remaining reviews - blurred preview row + expand */}
-          {!showAllReviews ? (
-            <div className="relative">
-              {/* Blurred preview of next 3 */}
-                <div className="grid md:grid-cols-3 gap-8 blur-[1px] pointer-events-none select-none">
-                {testimonials.slice(3, 6).map((testimonial) => (
-                  <div key={testimonial.name}>
-                    <Card className={`${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20' : 'bg-[#f8f4ee] border-[#ff6b35]/30'} h-full`}>
-                      <CardContent className="p-8">
-                        <div className="flex items-center gap-4 mb-4">
-                          <div>
-                            <div className="flex gap-0.5 mb-1">
-                              {Array.from({ length: testimonial.rating }).map((_, i) => (
-                                <Star key={i} className="w-4 h-4 fill-[#ff6b35] text-[#ff6b35]" />
-                              ))}
-                            </div>
-                            <p className={`font-[family-name:var(--font-cinzel)] font-semibold text-sm ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
-                              {testimonial.name}
-                            </p>
+          {/* Remaining reviews - blurred preview row + link to /reviews */}
+          <div className="relative">
+            {/* Blurred preview of next 3 */}
+            <div className="grid md:grid-cols-3 gap-8 blur-[1px] pointer-events-none select-none">
+              {testimonials.slice(3, 6).map((testimonial) => (
+                <div key={testimonial.name}>
+                  <Card className={`${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20' : 'bg-[#f8f4ee] border-[#ff6b35]/30'} h-full`}>
+                    <CardContent className="p-8">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div>
+                          <div className="flex gap-0.5 mb-1">
+                            {Array.from({ length: testimonial.rating }).map((_, i) => (
+                              <Star key={i} className="w-4 h-4 fill-[#ff6b35] text-[#ff6b35]" />
+                            ))}
                           </div>
+                          <p className={`font-[family-name:var(--font-cinzel)] font-semibold text-sm ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
+                            {testimonial.name}
+                          </p>
                         </div>
-                        <p className={`italic text-sm ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>&ldquo;{testimonial.text}&rdquo;</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                ))}
-              </div>
-              {/* Gradient overlay + Read More button */}
-              <div className={`absolute inset-0 flex flex-col items-center justify-end pb-4 ${theme === 'dark' ? 'bg-gradient-to-t from-[#12121a] via-[#12121a]/80 to-transparent' : 'bg-gradient-to-t from-[#fffdf9] via-[#fffdf9]/80 to-transparent'}`}>
+                      </div>
+                      <p className={`italic text-sm ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>&ldquo;{testimonial.text}&rdquo;</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+            </div>
+            {/* Gradient overlay + Link button */}
+            <div className={`absolute inset-0 flex flex-col items-center justify-end pb-4 ${theme === 'dark' ? 'bg-gradient-to-t from-[#12121a] via-[#12121a]/80 to-transparent' : 'bg-gradient-to-t from-[#fffdf9] via-[#fffdf9]/80 to-transparent'}`}>
+              <Link href="/reviews" className="no-underline hover:no-underline">
                 <Button
-                  onClick={() => setShowAllReviews(true)}
                   size="lg"
                   className="cursor-pointer bg-[#ff6b35] hover:bg-[#ff8c5e] text-white font-semibold px-8 py-5 shadow-lg shadow-[#ff6b35]/20"
                 >
                   <Star className="w-4 h-4 mr-2 fill-white" />
                     {language === 'gu' ? 'બધી સમીક્ષાઓ વાંચો' : language === 'hi' ? 'सभी समीक्षाएं पढ़ें' : 'Read All Reviews'}
-                  <ChevronDown className="w-4 h-4 ml-2" />
+                  <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
-              </div>
+              </Link>
             </div>
-          ) : (
-            <>
-              <div className="grid md:grid-cols-3 gap-8">
-                {testimonials.slice(3).map((testimonial) => (
-                  <div key={testimonial.name}>
-                    <Card className={`${theme === 'dark' ? 'bg-[#1a1a2e] border-[#ff6b35]/20' : 'bg-[#f8f4ee] border-[#ff6b35]/30'} h-full`}>
-                      <CardContent className="p-8">
-                        <div className="flex items-center gap-4 mb-4">
-                          <div>
-                            <div className="flex gap-0.5 mb-1">
-                              {Array.from({ length: testimonial.rating }).map((_, i) => (
-                                <Star key={i} className="w-4 h-4 fill-[#ff6b35] text-[#ff6b35]" />
-                              ))}
-                            </div>
-                            <p className={`font-[family-name:var(--font-cinzel)] font-semibold text-sm ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
-                              {testimonial.name}
-                            </p>
-                          </div>
-                        </div>
-                        <p className={`italic text-sm ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>&ldquo;{testimonial.text}&rdquo;</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-center mt-8">
-                <Button
-                  onClick={() => setShowAllReviews(false)}
-                  size="lg"
-                  variant="outline"
-                  className="cursor-pointer border-[#ff6b35] text-[#ff6b35] hover:bg-[#ff6b35]/10 px-8 py-5"
-                >
-                  {language === 'gu' ? 'ઓછું જુઓ' : language === 'hi' ? 'कम दिखाएं' : 'Show Less'}
-                  <ChevronDown className="w-4 h-4 ml-2 rotate-180" />
-                </Button>
-              </div>
-            </>
-          )}
+          </div>
 
           <div className="mt-12 scroll-hint mx-auto">
             <span>Scroll</span>

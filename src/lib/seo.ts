@@ -137,6 +137,11 @@ const PAGE_DEFAULTS: Record<string, { title: string; description: string; keywor
       description: "Explore our collection of sacred Vedic, spiritual, and astrological pictures. High-quality images of temples, rituals, and celestial events by Katyaayani Astrologer.",
       keywords: "astrology pictures, vedic gallery, spiritual images, katyaayani gallery, hindu ritual photos, astrology images google",
     },
+    "/reviews": {
+      title: "Client Reviews & Feedback | Katyaayani Astrologer",
+      description: "Read genuine feedback and experiences from our clients worldwide. Hundreds of satisfied clients for astrology consultations, kundali analysis & more. Share your experience with us.",
+      keywords: "astrology reviews, client feedback, katyaayani reviews, rudram joshi reviews, best astrologer testimonials, astrology consultation feedback",
+    },
   };
 
 // ─── Schema.org Generator ───
