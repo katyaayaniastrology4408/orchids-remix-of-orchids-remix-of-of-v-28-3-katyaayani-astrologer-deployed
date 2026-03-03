@@ -354,55 +354,73 @@ export default function BlogPage() {
                   {language === 'gu' ? 'બધી પોસ્ટ જુઓ' : language === 'hi' ? 'सभी पोस्ट देखें' : 'View all posts'}
                 </button>
               </div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="grid md:grid-cols-2 xl:grid-cols-3 gap-6"
-              >
-                {filteredPosts.map((post) => (
-                  <Link key={post.id} href={`/blog/${post.slug}`}>
-                    <Card className={`h-full overflow-hidden cursor-pointer transition-all hover:scale-[1.02] hover:shadow-xl ${
-                      theme === 'dark' ? 'bg-[#12121a]' : 'bg-white'
-                    } border-none shadow-lg`}>
-                      {post.featured_image && (
-                          <div className="relative overflow-hidden">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={post.featured_image}
-                              alt={getPostTitle(post)}
-                              className="w-full h-auto max-h-72 object-contain"
-                            />
-                            <div className="absolute top-3 left-3">
-                              <span className="bg-[#ff6b35] text-white text-xs px-3 py-1 rounded-full capitalize">
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex flex-col gap-5"
+                >
+                  {filteredPosts.map((post) => (
+                    <Link key={post.id} href={`/blog/${post.slug}`}>
+                      <Card className={`overflow-hidden cursor-pointer transition-all hover:scale-[1.01] hover:shadow-xl ${
+                        theme === 'dark' ? 'bg-[#12121a]' : 'bg-white'
+                      } border-none shadow-lg`}>
+                        <div className="flex flex-col sm:flex-row">
+
+                          {/* LEFT — Image with category badge inside at bottom-left */}
+                          {post.featured_image ? (
+                            <div className="relative sm:w-56 md:w-64 flex-shrink-0 overflow-hidden">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={post.featured_image}
+                                alt={getPostTitle(post)}
+                                className="w-full h-48 sm:h-full object-cover"
+                                style={{ minHeight: '160px' }}
+                              />
+                              {/* Category badge — inside image, bottom-left */}
+                              <span className="absolute bottom-3 left-3 bg-[#ff6b35] text-white text-xs px-3 py-1 rounded-full capitalize font-semibold shadow-lg">
                                 {post.category}
                               </span>
                             </div>
+                          ) : (
+                            /* No image fallback — show category badge only */
+                            <div className={`sm:w-56 md:w-64 flex-shrink-0 flex items-end p-4 ${theme === 'dark' ? 'bg-[#1a1a2e]' : 'bg-orange-50'}`}>
+                              <span className="bg-[#ff6b35] text-white text-xs px-3 py-1 rounded-full capitalize font-semibold">
+                                {post.category}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* RIGHT — Title, excerpt, meta — all right-aligned */}
+                          <div className="flex-1 flex flex-col justify-between p-5 text-right">
+                            <div>
+                              <h3 className="font-bold text-lg mb-2 leading-snug line-clamp-2">
+                                {getPostTitle(post)}
+                              </h3>
+                              {getPostExcerpt(post) && (
+                                <p className={`text-sm line-clamp-3 mb-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                  {getPostExcerpt(post)}
+                                </p>
+                              )}
+                            </div>
+                            <div className={`flex items-center justify-end gap-4 text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                              <div className="flex items-center gap-1">
+                                <Eye className="w-3 h-3" />
+                                {post.view_count || 0}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {formatDate(post.published_at)}
+                              </div>
+                            </div>
                           </div>
-                        )}
-                      <CardContent className="p-6">
-                        <h3 className="font-bold text-lg mb-2 line-clamp-2">{getPostTitle(post)}</h3>
-                        {getPostExcerpt(post) && (
-                          <p className={`text-sm line-clamp-2 mb-4 whitespace-pre-line ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {getPostExcerpt(post)}
-                          </p>
-                        )}
-                        <div className={`flex items-center gap-4 text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {formatDate(post.published_at)}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Eye className="w-3 h-3" />
-                            {post.view_count || 0}
-                          </div>
+
                         </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-              </motion.div>
-            )}
+                      </Card>
+                    </Link>
+                  ))}
+                </motion.div>
+              )}
           </div>
         </div>
         </main>
