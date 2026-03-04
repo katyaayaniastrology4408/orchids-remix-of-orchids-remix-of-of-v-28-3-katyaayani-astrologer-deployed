@@ -124,10 +124,10 @@ export default function ZodiacSignForm() {
         </h2>
         <p className={`mb-12 text-lg leading-relaxed opacity-80 ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
           {language === 'gu' 
-            ? 'તમારી જન્મ તારીખ અને સમય દાખલ કરો અને તમારી રાશિ શોધો. તમારા જન્મ ચાર્ટનું વિગતવાર વિશ્લેષણ તમારા ઈમેલ પર મોકલવામાં આવશે.' 
+            ? 'તમારી જન્મ તારીખ અને સમય દાખલ કરો અને તમારી રાશિ શોધો.' 
             : language === 'hi' 
-            ? 'अपनी जन्म तिथि और समय दर्ज करें और अपनी राशि जानें। आपके जन्म चार्ट का विस्तृत विश्लेषण आपकी ईमेल पर भेजा जाएगा।' 
-            : 'Enter your birth details to discover your zodiac sign. A detailed analysis of your birth chart will be sent to your email.'}
+            ? 'अपनी जन्म तिथि और समय दर्ज करें और अपनी राशि जानें।' 
+            : 'Enter your birth details to discover your zodiac sign.'}
         </p>
 
         <Card className={`${theme === 'dark' ? 'bg-[#12121a]/80 backdrop-blur-md border-[#ff6b35]/20' : 'bg-[#fffdf9]/80 backdrop-blur-md border-[#ff6b35]/30'} p-8 md:p-10 rounded-[2.5rem] shadow-2xl shadow-[#ff6b35]/10 border-t-4 border-t-[#ff6b35]`}>
@@ -175,17 +175,14 @@ export default function ZodiacSignForm() {
               <label className="block text-[10px] font-bold uppercase tracking-widest text-[#ff6b35] ml-1">
                 {language === 'gu' ? 'ઈમેઈલ આઈડી (જરૂરી)' : language === 'hi' ? 'ईमेल आईडी (आवश्यक)' : 'Email ID (Important)'}
               </label>
-              <Input 
-                type="email"
-                required
-                placeholder="example@mail.com"
-                className={`bg-transparent border-[#ff6b35]/40 focus:border-[#ff6b35] rounded-2xl h-14 px-5 text-base font-medium focus:ring-1 focus:ring-[#ff6b35]/30 transition-all ${theme === 'dark' ? 'text-white' : 'text-black'}`}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-              />
-              <p className="text-[10px] opacity-40 italic ml-1">
-                {language === 'gu' ? '* તમારા જન્મ ચાર્ટનું વિશ્લેષણ આ ઈમેઈલ પર મોકલવામાં આવશે.' : '* A detailed analysis of your birth chart will be sent to this email.'}
-              </p>
-            </div>
+                <Input 
+                  type="email"
+                  required
+                  placeholder="example@mail.com"
+                  className={`bg-transparent border-[#ff6b35]/40 focus:border-[#ff6b35] rounded-2xl h-14 px-5 text-base font-medium focus:ring-1 focus:ring-[#ff6b35]/30 transition-all ${theme === 'dark' ? 'text-white' : 'text-black'}`}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                />
+              </div>
 
             <Button 
               type="submit"
@@ -211,41 +208,41 @@ export default function ZodiacSignForm() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#ff6b35]/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#ff8c5e]/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
               
-              <div className="relative z-10">
-                <p className="text-xs uppercase tracking-[0.3em] font-bold text-[#ff6b35] mb-4">
-                  {language === 'gu' ? 'તમારી રાશિ છે' : language === 'hi' ? 'आपकी राशि है' : 'Your Zodiac Sign is'}
-                </p>
-                <h3 className="text-5xl md:text-6xl font-[family-name:var(--font-cinzel)] font-bold text-gradient-ancient mb-6">
-                  {getZodiacTranslation(result)}
-                </h3>
-                
-                <div className="max-w-md mx-auto space-y-6">
-                  <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
-                    <p className="text-sm md:text-base font-medium leading-relaxed">
-                      {language === 'gu' 
-                          ? 'તમારા જન્મ ચાર્ટનું વિગતવાર વિશ્લેષણ તમારા ઈમેઈલ પર મોકલવામાં આવશે.' 
-                          : 'A detailed analysis of your birth chart will be sent to your email.'}
-                    </p>
-                  </div>
+                <div className="relative z-10">
+                  <p className="text-xs uppercase tracking-[0.3em] font-bold text-[#ff6b35] mb-4">
+                    {language === 'gu' ? 'તમારી સૂર્ય રાશિ (Sun Sign) છે' : language === 'hi' ? 'आपकी सूर्य राशि है' : 'Your Sun Sign is'}
+                  </p>
+                  <h3 className="text-5xl md:text-6xl font-[family-name:var(--font-cinzel)] font-bold text-gradient-ancient mb-6">
+                    {getZodiacTranslation(result)}
+                  </h3>
+                  
+                  <div className="max-w-md mx-auto space-y-6">
+                    <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
+                      <p className="text-sm md:text-base font-medium leading-relaxed">
+                        {language === 'gu' 
+                            ? 'ચોક્કસ જન્મ રાશિ (Moon Sign) અને સંપૂર્ણ કુંડળી વિશ્લેષણ માટે અમારો સંપર્ક કરો.' 
+                            : 'For accurate Janma Rashi (Moon Sign) and detailed Kundali analysis, please contact us.'}
+                      </p>
+                    </div>
 
-                  <div className="pt-6 border-t border-[#ff6b35]/20">
-                    <p className="text-base font-bold text-[#ff6b35] mb-4">
-                      {language === 'gu' 
-                          ? 'વધુ વિગતો માટે કુંડળી અને મેચમેકિંગ માટે અમારો સંપર્ક કરો.' 
-                          : 'For more details, contact us for Kundali & Matchmaking.'}
-                    </p>
-                    <a 
-                      href="https://wa.me/917383636404" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-[#25D366]/20 active:scale-95"
-                    >
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" className="w-5 h-5 invert" />
-                      {language === 'gu' ? 'વોટ્સએપ પર પૂછો' : 'Ask on WhatsApp'}
-                    </a>
+                    <div className="pt-6 border-t border-[#ff6b35]/20">
+                      <p className="text-base font-bold text-[#ff6b35] mb-4">
+                        {language === 'gu' 
+                            ? 'કુંડળી અને મેચમેકિંગ માટે અત્યારે જ સંપર્ક કરો.' 
+                            : 'Contact now for Kundali & Matchmaking.'}
+                      </p>
+                      <a 
+                        href="https://wa.me/917383636404" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-[#25D366]/20 active:scale-95"
+                      >
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" className="w-5 h-5 invert" />
+                        {language === 'gu' ? 'વોટ્સએપ પર પૂછો' : 'Ask on WhatsApp'}
+                      </a>
+                    </div>
                   </div>
                 </div>
-              </div>
             </div>
           )}
 
