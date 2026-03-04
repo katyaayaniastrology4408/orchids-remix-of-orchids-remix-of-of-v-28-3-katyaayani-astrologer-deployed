@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Open_Sans, Cinzel } from "next/font/google";
+import { Inter, Cinzel, Geist } from "next/font/google";
 import "./globals.css";
 import ErrorReporter from "@/components/ErrorReporter";
 import VisualEditsMessengerClient from "@/components/VisualEditsMessengerClient";
@@ -16,11 +16,17 @@ import SchemaMarkup from "@/components/SchemaMarkup";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-const openSans = Open_Sans({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
   display: "swap",
-  variable: "--font-open-sans-next",
+  variable: "--font-inter",
+});
+
+const geist = Geist({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-geist",
 });
 
 const cinzel = Cinzel({
@@ -220,7 +226,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className={`${openSans.variable} ${cinzel.variable}`} suppressHydrationWarning>
+        <html lang="en" className={`${inter.variable} ${geist.variable} ${cinzel.variable}`} suppressHydrationWarning>
         <head>
           {/* Preload logo for LCP - Standardized fetchPriority for React 19 / Next.js 15+ */}
           <link rel="preload" href="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/c601c1cc-61c8-474d-bbc9-2026bfe37c34/logo_withoutname-removebg-1767251276652.png?width=112&height=112&resize=contain" as="image" fetchPriority="high" />

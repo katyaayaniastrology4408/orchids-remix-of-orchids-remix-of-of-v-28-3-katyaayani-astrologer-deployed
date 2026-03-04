@@ -40,6 +40,10 @@ const RashifalSection = dynamic(() => import("@/components/homepage/RashifalSect
   ssr: true,
   loading: () => <div className="h-[650px] w-full bg-gray-100/5" />
 });
+const ZodiacSignForm = dynamic(() => import("@/components/homepage/ZodiacSignForm"), { 
+  ssr: true,
+  loading: () => <div className="h-[800px] w-full bg-gray-100/5" />
+});
 const AstrologerTip = dynamic(() => import("@/components/homepage/AstrologerTip"), { 
   ssr: true,
   loading: () => <div className="h-[350px] w-full bg-gray-100/5" />
@@ -440,23 +444,26 @@ export default function HomePageClient({ initialLatestPosts, hasTodayPosts, actu
             Sign In Now
           </Button>
         </div>
-      </section>
-
-      <section className={`py-24 px-6 ${theme === 'dark' ? 'bg-gradient-to-b from-[#0a0a0f] to-[#12121a]' : 'bg-gradient-to-b from-[#fdfbf7] to-[#f8f4ee]'}`}>
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="flex justify-center gap-2 mb-6">
-              <Sun className="w-8 h-8 text-[#ff6b35]" />
-              <Star className="w-8 h-8 text-[#ff8c5e]" />
-              <Moon className="w-8 h-8 text-[#ff6b35]" />
+        </section>
+  
+        <RashifalSection />
+        <ZodiacSignForm />
+  
+        <section className={`py-24 px-6 ${theme === 'dark' ? 'bg-gradient-to-b from-[#0a0a0f] to-[#12121a]' : 'bg-gradient-to-b from-[#fdfbf7] to-[#f8f4ee]'}`}>
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="flex justify-center gap-2 mb-6">
+                <Sun className="w-8 h-8 text-[#ff6b35]" />
+                <Star className="w-8 h-8 text-[#ff8c5e]" />
+                <Moon className="w-8 h-8 text-[#ff6b35]" />
+              </div>
+              <h2 className="font-[family-name:var(--font-cinzel)] text-4xl md:text-5xl font-bold mb-4 text-gradient-ancient">
+                {content.servicesTitle}
+              </h2>
+              <p className={`text-xl max-w-2xl mx-auto ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
+                {content.servicesDesc}
+              </p>
             </div>
-            <h2 className="font-[family-name:var(--font-cinzel)] text-4xl md:text-5xl font-bold mb-4 text-gradient-ancient">
-              {content.servicesTitle}
-            </h2>
-            <p className={`text-xl max-w-2xl mx-auto ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
-              {content.servicesDesc}
-            </p>
-          </div>
 
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             <div>
@@ -524,9 +531,7 @@ export default function HomePageClient({ initialLatestPosts, hasTodayPosts, actu
       </section>
 
       <CosmicInsights panchangApiData={panchangApiData} />
-
-      <RashifalSection />
-
+  
       <AstrologerTip />
       
       {/* Latest Blog Posts */}

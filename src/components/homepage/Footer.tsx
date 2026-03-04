@@ -10,6 +10,9 @@ import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import Star from "lucide-react/dist/esm/icons/star";
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 import Instagram from "lucide-react/dist/esm/icons/instagram";
+import Facebook from "lucide-react/dist/esm/icons/facebook";
+import Youtube from "lucide-react/dist/esm/icons/youtube";
+import Twitter from "lucide-react/dist/esm/icons/twitter";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 import { contentData } from "@/data/homepage";
@@ -101,28 +104,28 @@ export default function Footer() {
               <p className={`text-xs mb-3 ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#6b5847]'}`}>
                 {content.newsletterDesc}
               </p>
-              <form onSubmit={handleSubscribe} className="flex gap-2">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={content.newsletterPlaceholder}
-                  required
-                  className={`flex-1 min-w-0 px-3 py-2 text-sm rounded-lg border transition-colors outline-none ${
-                    theme === 'dark'
-                      ? 'bg-[#1a1a2e] border-[#ff6b35]/30 text-[#f5f0e8] placeholder:text-[#6b5847] focus:border-[#ff6b35]'
-                      : 'bg-white border-[#ff6b35]/30 text-[#2d1810] placeholder:text-[#a0998c] focus:border-[#ff6b35]'
-                  }`}
-                />
-                <button
-                  type="submit"
-                  disabled={status === "loading" || status === "success"}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 shrink-0 ${
-                    status === "success"
-                      ? 'bg-green-600 text-white'
-                      : 'bg-[#ff6b35] text-white hover:bg-[#e55a2b] disabled:opacity-60'
-                  }`}
-                >
+                <form onSubmit={handleSubscribe} className="flex gap-2">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={content.newsletterPlaceholder}
+                    required
+                    className={`flex-1 min-w-0 px-3 py-2 text-sm rounded-xl border transition-colors outline-none ${
+                      theme === 'dark'
+                        ? 'bg-[#1a1a2e] border-[#ff6b35]/30 text-[#f5f0e8] placeholder:text-[#6b5847] focus:border-[#ff6b35]'
+                        : 'bg-white border-[#ff6b35]/30 text-[#2d1810] placeholder:text-[#a0998c] focus:border-[#ff6b35]'
+                    }`}
+                  />
+                  <button
+                    type="submit"
+                    disabled={status === "loading" || status === "success"}
+                    className={`px-3 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5 shrink-0 ${
+                      status === "success"
+                        ? 'bg-green-600 text-white'
+                        : 'bg-[#ff6b35] text-white hover:bg-[#e55a2b] disabled:opacity-60'
+                    }`}
+                  >
                   {status === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
                   {status === "success" && <CheckCircle className="w-4 h-4" />}
                   {status === "idle" && <Send className="w-4 h-4" />}
@@ -130,10 +133,45 @@ export default function Footer() {
                   {status === "success" ? content.newsletterSuccess : content.newsletterButton}
                 </button>
               </form>
-              {status === "error" && (
-                <p className="text-red-500 text-xs mt-1">{content.newsletterError}</p>
-              )}
-            </div>
+                {status === "error" && (
+                  <p className="text-red-500 text-xs mt-1">{content.newsletterError}</p>
+                )}
+
+                  <div className="flex gap-3 mt-8">
+                    <a 
+                      href="https://facebook.com/katyaayaniastrologer" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${theme === 'dark' ? 'bg-white/5 hover:bg-[#ff6b35]/20 text-[#f5f0e8]' : 'bg-[#ff6b35]/10 hover:bg-[#ff6b35]/20 text-[#ff6b35]'}`}
+                    >
+                      <Facebook className="w-5 h-5" />
+                    </a>
+                    <a 
+                      href="https://instagram.com/katyaayani_astrologer" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${theme === 'dark' ? 'bg-white/5 hover:bg-[#ff6b35]/20 text-[#f5f0e8]' : 'bg-[#ff6b35]/10 hover:bg-[#ff6b35]/20 text-[#ff6b35]'}`}
+                    >
+                      <Instagram className="w-5 h-5" />
+                    </a>
+                    <a 
+                      href="https://youtube.com/@katyaayaniastrologer" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${theme === 'dark' ? 'bg-white/5 hover:bg-[#ff6b35]/20 text-[#f5f0e8]' : 'bg-[#ff6b35]/10 hover:bg-[#ff6b35]/20 text-[#ff6b35]'}`}
+                    >
+                      <Youtube className="w-5 h-5" />
+                    </a>
+                    <a 
+                      href="https://twitter.com/katyaayani_astro" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${theme === 'dark' ? 'bg-white/5 hover:bg-[#ff6b35]/20 text-[#f5f0e8]' : 'bg-[#ff6b35]/10 hover:bg-[#ff6b35]/20 text-[#ff6b35]'}`}
+                    >
+                      <Twitter className="w-5 h-5" />
+                    </a>
+                  </div>
+              </div>
           </div>
           <div>
               <h4 className={`font-[family-name:var(--font-cinzel)] text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#2d1810]'}`}>

@@ -95,7 +95,7 @@ export default function AstrologerTip() {
         </div>
 
         {/* Tip Card */}
-        <div className={`relative rounded-[32px] border overflow-hidden transition-all duration-300 ${
+        <div className={`relative rounded-[2.5rem] border overflow-hidden transition-all duration-300 ${
           isDark
             ? "bg-[#0d0b1a] border-white/5 shadow-2xl shadow-orange-500/5"
             : "bg-white border-orange-100 shadow-xl shadow-orange-500/5"
@@ -109,7 +109,7 @@ export default function AstrologerTip() {
 
             {/* Category Badge */}
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 rounded-xl bg-orange-500/10 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-2xl bg-orange-500/10 flex items-center justify-center">
                 <Star className="w-4 h-4 text-orange-400" />
               </div>
               <span className={`text-[10px] uppercase tracking-[0.25em] font-bold ${isDark ? "text-orange-400/70" : "text-orange-500/70"}`}>

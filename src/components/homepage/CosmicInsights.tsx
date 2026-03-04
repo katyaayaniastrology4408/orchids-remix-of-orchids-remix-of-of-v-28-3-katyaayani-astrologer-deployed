@@ -136,22 +136,22 @@ export default function CosmicInsights({ panchangApiData }: { panchangApiData?: 
 
             {/* Panchang Details */}
             <div className="space-y-5">
-              <div className={`p-6 rounded-2xl border transition-colors ${theme === 'dark' ? 'border-white/5 bg-white/2 hover:bg-white/5' : 'border-orange-100 hover:bg-orange-50/50'}`}>
+              <div className={`p-6 rounded-3xl border transition-colors ${theme === 'dark' ? 'border-white/5 bg-white/2 hover:bg-white/5' : 'border-orange-100 hover:bg-orange-50/50'}`}>
                 <p className="text-[10px] uppercase tracking-[0.2em] font-bold opacity-50 mb-2">{content.tithiLabel}</p>
                 <p className="text-base font-semibold text-orange-400 leading-relaxed">{panchang.tithi}</p>
               </div>
               
-              <div className={`p-6 rounded-2xl border transition-colors ${theme === 'dark' ? 'border-white/5 bg-white/2 hover:bg-white/5' : 'border-orange-100 hover:bg-orange-50/50'}`}>
+              <div className={`p-6 rounded-3xl border transition-colors ${theme === 'dark' ? 'border-white/5 bg-white/2 hover:bg-white/5' : 'border-orange-100 hover:bg-orange-50/50'}`}>
                 <p className="text-[10px] uppercase tracking-[0.2em] font-bold opacity-50 mb-2">{content.nakshatraLabel}</p>
                 <p className="text-base font-semibold text-orange-400 leading-relaxed">{panchang.nakshatra}</p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className={`p-5 rounded-2xl border transition-colors ${theme === 'dark' ? 'border-white/5 bg-white/2 hover:bg-white/5' : 'border-orange-100 hover:bg-orange-50/50'}`}>
+                <div className={`p-5 rounded-3xl border transition-colors ${theme === 'dark' ? 'border-white/5 bg-white/2 hover:bg-white/5' : 'border-orange-100 hover:bg-orange-50/50'}`}>
                   <p className="text-[10px] uppercase tracking-[0.2em] font-bold opacity-50 mb-2">{content.yogaLabel}</p>
                   <p className="text-xs font-semibold leading-relaxed">{panchang.yoga}</p>
                 </div>
-                <div className={`p-5 rounded-2xl border transition-colors ${theme === 'dark' ? 'border-white/5 bg-white/2 hover:bg-white/5' : 'border-orange-100 hover:bg-orange-50/50'}`}>
+                <div className={`p-5 rounded-3xl border transition-colors ${theme === 'dark' ? 'border-white/5 bg-white/2 hover:bg-white/5' : 'border-orange-100 hover:bg-orange-50/50'}`}>
                   <p className="text-[10px] uppercase tracking-[0.2em] font-bold opacity-50 mb-2">{content.karanaLabel}</p>
                   <p className="text-xs font-semibold leading-relaxed">{panchang.karana}</p>
                 </div>

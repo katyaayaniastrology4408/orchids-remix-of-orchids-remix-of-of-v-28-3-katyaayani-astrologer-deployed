@@ -72,79 +72,99 @@ const rashiData = {
 
 type Rashi = { name: string; symbol: string; color: string; tip: string; lucky: string; number: string };
 
-function RashiModal({ rashi, index, isDark, onClose }: { rashi: Rashi; index: number; isDark: boolean; onClose: () => void }) {
-  const [mounted, setMounted] = useState(false);
-  const Icon = RASHI_ICONS[index];
-
-  useEffect(() => {
-    setMounted(true);
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
-  }, []);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  if (!mounted) return null;
-
-  return createPortal(
-    <div
-      className="fixed inset-0 flex items-center justify-center p-4"
-      style={{ zIndex: 99999 }}
-      onClick={onClose}
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-
-        {/* Modal box */}
-        <div
-          className={`relative w-full max-w-md rounded-[32px] shadow-2xl p-8 md:p-10 ${
-            isDark ? "bg-[#0d0b1a] border border-white/10" : "bg-white border border-orange-100"
-          }`}
-          style={{ zIndex: 100000 }}
-          onClick={e => e.stopPropagation()}
-        >
-          {/* Close */}
-          <button
-            onClick={onClose}
-            className={`absolute top-4 right-4 w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-95 z-[100001] ${
-              isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-black/5 hover:bg-black/10 text-black"
-            }`}
-          >
-            <X className="w-6 h-6" />
-          </button>
-
-          {/* SVG Icon */}
+  function RashiModal({ rashi, index, isDark, onClose }: { rashi: Rashi; index: number; isDark: boolean; onClose: () => void }) {
+    const [mounted, setMounted] = useState(false);
+    const Icon = RASHI_ICONS[index];
+  
+    useEffect(() => {
+      setMounted(true);
+      document.body.style.overflow = "hidden";
+      return () => { document.body.style.overflow = ""; };
+    }, []);
+  
+    useEffect(() => {
+      const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+      window.addEventListener("keydown", onKey);
+      return () => window.removeEventListener("keydown", onKey);
+    }, [onClose]);
+  
+    if (!mounted) return null;
+  
+    return createPortal(
+      <div
+        className="fixed inset-0 flex items-center justify-center p-4"
+        style={{ zIndex: 99999 }}
+        onClick={onClose}
+      >
+        {/* Backdrop */}
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
+  
+          {/* Modal box */}
           <div
-            className="w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6"
-            style={{ background: rashi.color + "18" }}
+            className={`relative w-full max-w-md rounded-[40px] shadow-2xl p-10 md:p-12 overflow-hidden ${
+              isDark ? "bg-[#0d0b1a] border border-white/10" : "bg-white border border-orange-100"
+            }`}
+            style={{ zIndex: 100000 }}
+            onClick={e => e.stopPropagation()}
           >
-            <Icon color={rashi.color} size={64} />
+            {/* Background Glow */}
+            <div 
+              className="absolute -top-20 -right-20 w-40 h-40 blur-[80px] opacity-20 pointer-events-none" 
+              style={{ backgroundColor: rashi.color }}
+            />
+
+            {/* Close */}
+            <button
+              onClick={onClose}
+              className={`absolute top-6 right-6 w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 z-[100001] ${
+                isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-black/5 hover:bg-black/10 text-black"
+              }`}
+            >
+              <X className="w-5 h-5" />
+            </button>
+  
+            {/* SVG Icon */}
+            <div
+              className="w-24 h-24 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-inner"
+              style={{ background: rashi.color + "15" }}
+            >
+              <Icon color={rashi.color} size={64} />
+            </div>
+  
+            {/* Name */}
+            <h3
+              className="text-center text-3xl md:text-4xl font-bold font-[family-name:var(--font-cinzel)] mb-2"
+              style={{ color: rashi.color }}
+            >
+              {rashi.name}
+            </h3>
+            <p className="text-center text-[10px] uppercase tracking-[0.3em] font-bold opacity-40 mb-8">
+              {rashi.symbol} DAILY PREDICTION
+            </p>
+  
+            {/* Divider */}
+            <div className="h-px mb-8" style={{ background: rashi.color + "25" }} />
+  
+            {/* Prediction */}
+            <p className={`text-lg md:text-xl leading-relaxed text-center font-medium ${isDark ? "text-white/80" : "text-black/70"}`}>
+              {rashi.tip}
+            </p>
+
+            <div className="mt-10 grid grid-cols-2 gap-4">
+              <div className={`p-4 rounded-3xl text-center ${isDark ? 'bg-white/5' : 'bg-[#ff6b35]/5'}`}>
+                <p className="text-[9px] uppercase tracking-widest font-bold opacity-40 mb-1">Lucky Color</p>
+                <p className="font-bold text-sm" style={{ color: rashi.color }}>{rashi.lucky}</p>
+              </div>
+              <div className={`p-4 rounded-3xl text-center ${isDark ? 'bg-white/5' : 'bg-[#ff6b35]/5'}`}>
+                <p className="text-[9px] uppercase tracking-widest font-bold opacity-40 mb-1">Lucky Number</p>
+                <p className="font-bold text-sm" style={{ color: rashi.color }}>{rashi.number}</p>
+              </div>
+            </div>
           </div>
-
-          {/* Name */}
-          <h3
-            className="text-center text-3xl md:text-4xl font-bold font-[family-name:var(--font-cinzel)] mb-6"
-            style={{ color: rashi.color }}
-          >
-            {rashi.name}
-          </h3>
-
-          {/* Divider */}
-          <div className="h-px mb-8" style={{ background: rashi.color + "30" }} />
-
-          {/* Prediction */}
-          <p className={`text-lg md:text-xl leading-relaxed text-center font-medium ${isDark ? "text-white/80" : "text-black/70"}`}>
-            {rashi.tip}
-          </p>
-        </div>
-    </div>,
-    document.body
-  );
-}
+      </div>,
+      document.body
+    );
+  }
 
 // ─── Main Section ─────────────────────────────────────────────────────────────
 
@@ -159,48 +179,60 @@ export default function RashifalSection() {
   const [selected, setSelected] = useState<number | null>(null);
 
   return (
-    <section className={`py-20 px-6 ${isDark ? "bg-[#07040e]" : "bg-[#fffaf4]"}`}>
-      <div className="max-w-6xl mx-auto">
+    <section className={`py-24 px-6 relative overflow-hidden ${isDark ? "bg-[#07040e]" : "bg-[#fffaf4]"}`}>
+      {/* Background Decorative Elements */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#ff6b35]/5 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#ff6b35]/5 blur-[120px] rounded-full pointer-events-none translate-y-1/2 -translate-x-1/2" />
+
+      <div className="max-w-6xl mx-auto relative z-10">
 
         {/* Header */}
-        <div className="text-center mb-14">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#ff6b35]/30 bg-[#ff6b35]/5 mb-5">
-            <Sparkles className="w-4 h-4 text-[#ff6b35]" />
-            <span className="text-xs uppercase tracking-[0.2em] font-semibold text-[#ff6b35]">
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-[#ff6b35]/30 bg-[#ff6b35]/10 mb-6 shadow-sm">
+            <Sparkles className="w-4 h-4 text-[#ff6b35] animate-pulse" />
+            <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#ff6b35]">
               {content.badge}
             </span>
           </div>
-          <h2 className="font-[family-name:var(--font-cinzel)] text-2xl md:text-3xl font-bold text-gradient-ancient uppercase tracking-widest mb-3">
+          <h2 className="font-[family-name:var(--font-cinzel)] text-3xl md:text-5xl font-bold text-gradient-ancient uppercase tracking-widest mb-4">
             {content.title}
           </h2>
-          <p className={`text-sm ${isDark ? "text-white/50" : "text-black/40"}`}>
+          <p className={`text-base md:text-lg max-w-2xl mx-auto opacity-70 ${isDark ? "text-white" : "text-black"}`}>
             {content.subtitle}
           </p>
         </div>
 
         {/* 12 Rashi Grid — click opens popup */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
             {content.rashis.map((rashi, i) => {
               const Icon = RASHI_ICONS[i];
               return (
                 <button
                   key={i}
                   onClick={() => setSelected(i)}
-                  className={`rounded-2xl border p-4 flex items-center gap-3 text-left transition-all duration-200 w-full group ${
+                  className={`rounded-[2.5rem] border p-6 flex flex-col items-center gap-4 text-center transition-all duration-500 w-full group relative overflow-hidden ${
                     isDark
-                      ? "bg-[#0d0b1a] border-white/5 hover:border-white/20 hover:bg-white/5"
-                      : "bg-white border-orange-100 hover:border-orange-300 shadow-sm hover:shadow-md"
+                      ? "bg-[#0d0b1a] border-white/5 hover:border-[#ff6b35]/40 hover:bg-white/5 shadow-lg shadow-black/20"
+                      : "bg-white border-orange-100 hover:border-[#ff6b35]/40 shadow-sm hover:shadow-xl hover:shadow-[#ff6b35]/10"
                   }`}
                 >
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                    style={{ background: `radial-gradient(circle at center, ${rashi.color}08 0%, transparent 70%)` }}
+                  />
+
                   <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
-                    style={{ background: rashi.color + "20" }}
+                    className="w-16 h-16 rounded-[1.75rem] flex items-center justify-center flex-shrink-0 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 shadow-inner"
+                    style={{ background: rashi.color + "15" }}
                   >
-                    <Icon color={rashi.color} size={26} />
+                    <Icon color={rashi.color} size={36} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`font-semibold text-sm truncate ${isDark ? "text-white/90" : "text-black/80"}`}>
+                  <div className="space-y-1 relative z-10">
+                    <p className={`font-bold text-lg ${isDark ? "text-white/90" : "text-black/80"}`}>
                       {rashi.name}
+                    </p>
+                    <p className="text-[10px] uppercase tracking-widest font-bold opacity-30 group-hover:opacity-60 transition-opacity">
+                      {language === 'gu' ? 'તમારું ભાગ્ય' : language === 'hi' ? 'आपका भाग्य' : 'View Destiny'}
                     </p>
                   </div>
                 </button>

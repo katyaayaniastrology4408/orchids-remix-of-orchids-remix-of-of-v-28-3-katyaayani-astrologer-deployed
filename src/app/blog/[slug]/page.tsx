@@ -107,10 +107,18 @@ export default async function BlogPostPage({ params }: Props) {
     .neq("id", post.id)
     .limit(3);
 
-  // Increment view count (fire and forget)
-  supabaseAdmin.rpc('increment_view_count', { post_id: post.id }).then(({ error }) => {
-    if (error) console.error('Error incrementing view count:', error);
-  });
+  // Increment view count (safer implementation)
+  try {
+    // We use a separate await to ensure it completes but doesn't block rendering if it fails
+    // However, since this is a server component, we want to be careful.
+    // Using simple update as fallback if RPC is missing/failing
+    await supabaseAdmin
+      .from("blog_posts")
+      .update({ view_count: (post.view_count || 0) + 1 })
+      .eq("id", post.id);
+  } catch (err) {
+    console.error('Error incrementing view count:', err);
+  }
 
   return <BlogPostClient post={post} relatedPosts={relatedPosts || []} />;
 }

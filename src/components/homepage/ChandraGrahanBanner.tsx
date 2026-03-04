@@ -277,174 +277,174 @@ export default function ChandraGrahanBanner() {
           ))}
         </div>
 
-          {/* Read Full Article Link */}
-          <div className="mt-4 flex justify-end">
-            <Link 
-              href="/blog/chandra-grahan-2026-kab-hai-samay-upay"
-              className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border transition-all hover:scale-[1.02] active:scale-95 ${
-                isDark 
-                  ? "bg-[#ff6b35] border-[#ff6b35] text-white hover:bg-[#ff8c5e]" 
-                  : "bg-[#ff6b35] border-[#ff6b35] text-white hover:bg-[#ff8c5e]"
-              }`}
-            >
-              {language === 'gu' ? 'વિગતવાર લેખ વાંચો' : language === 'hi' ? 'पूरा लेख पढ़ें' : 'Read Full Article'}
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {/* Expanded Section */}
-          {expanded && (
-          <div className="mt-5 space-y-5 border-t border-[#ff6b35]/15 pt-5">
-            {/* Sutak */}
-            <div
-              className={`p-4 rounded-xl border ${
-                isDark
-                  ? "bg-[#ff6b35]/5 border-[#ff6b35]/15"
-                  : "bg-[#fff5ee] border-[#ff6b35]/20"
-              }`}
-            >
-              <h4
-                className={`font-semibold text-sm mb-1 ${
-                  isDark ? "text-[#ffa07a]" : "text-[#d4541a]"
+            {/* Read Full Article Link */}
+            <div className="mt-4 flex justify-end">
+              <Link 
+                href="/blog/chandra-grahan-2026-kab-hai-samay-upay"
+                className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-2xl border transition-all hover:scale-[1.02] active:scale-95 ${
+                  isDark 
+                    ? "bg-[#ff6b35] border-[#ff6b35] text-white hover:bg-[#ff8c5e]" 
+                    : "bg-[#ff6b35] border-[#ff6b35] text-white hover:bg-[#ff8c5e]"
                 }`}
               >
-                {c.sutakTitle}
-              </h4>
-              <p
-                className={`text-sm ${
-                  isDark ? "text-[#c4bdb3]" : "text-[#5a4f44]"
-                }`}
-              >
-                {c.sutakText}
-              </p>
+                {language === 'gu' ? 'વિગતવાર લેખ વાંચો' : language === 'hi' ? 'पूरा लेख पढ़ें' : 'Read Full Article'}
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
-
-            {/* Bhadra */}
-            <div
-              className={`p-4 rounded-xl border ${
-                isDark
-                  ? "bg-white/3 border-white/8"
-                  : "bg-white border-[#ff6b35]/10"
-              }`}
-            >
-              <h4
-                className={`font-semibold text-sm mb-1 ${
-                  isDark ? "text-[#f5f0e8]" : "text-[#4a3f35]"
+  
+            {/* Expanded Section */}
+            {expanded && (
+            <div className="mt-5 space-y-5 border-t border-[#ff6b35]/15 pt-5">
+              {/* Sutak */}
+              <div
+                className={`p-5 rounded-[2rem] border ${
+                  isDark
+                    ? "bg-[#ff6b35]/5 border-[#ff6b35]/15"
+                    : "bg-[#fff5ee] border-[#ff6b35]/20"
                 }`}
               >
-                {c.bhadraTitle}
-              </h4>
-              <p
-                className={`text-sm ${
-                  isDark ? "text-[#c4bdb3]" : "text-[#5a4f44]"
+                <h4
+                  className={`font-semibold text-sm mb-1 ${
+                    isDark ? "text-[#ffa07a]" : "text-[#d4541a]"
+                  }`}
+                >
+                  {c.sutakTitle}
+                </h4>
+                <p
+                  className={`text-sm ${
+                    isDark ? "text-[#c4bdb3]" : "text-[#5a4f44]"
+                  }`}
+                >
+                  {c.sutakText}
+                </p>
+              </div>
+  
+              {/* Bhadra */}
+              <div
+                className={`p-5 rounded-[2rem] border ${
+                  isDark
+                    ? "bg-white/3 border-white/8"
+                    : "bg-white border-[#ff6b35]/10"
                 }`}
               >
-                {c.bhadraText}
-              </p>
-            </div>
-
-            {/* Why Special */}
-            <div
-              className={`p-4 rounded-xl border ${
-                isDark
-                  ? "bg-white/3 border-white/8"
-                  : "bg-white border-[#ff6b35]/10"
-              }`}
-            >
-              <h4
-                className={`font-semibold text-sm mb-1 ${
-                  isDark ? "text-[#f5f0e8]" : "text-[#4a3f35]"
+                <h4
+                  className={`font-semibold text-sm mb-1 ${
+                    isDark ? "text-[#f5f0e8]" : "text-[#4a3f35]"
+                  }`}
+                >
+                  {c.bhadraTitle}
+                </h4>
+                <p
+                  className={`text-sm ${
+                    isDark ? "text-[#c4bdb3]" : "text-[#5a4f44]"
+                  }`}
+                >
+                  {c.bhadraText}
+                </p>
+              </div>
+  
+              {/* Why Special */}
+              <div
+                className={`p-5 rounded-[2rem] border ${
+                  isDark
+                    ? "bg-white/3 border-white/8"
+                    : "bg-white border-[#ff6b35]/10"
                 }`}
               >
-                {c.whySpecialTitle}
-              </h4>
-              <p
-                className={`text-sm ${
-                  isDark ? "text-[#c4bdb3]" : "text-[#5a4f44]"
+                <h4
+                  className={`font-semibold text-sm mb-1 ${
+                    isDark ? "text-[#f5f0e8]" : "text-[#4a3f35]"
+                  }`}
+                >
+                  {c.whySpecialTitle}
+                </h4>
+                <p
+                  className={`text-sm ${
+                    isDark ? "text-[#c4bdb3]" : "text-[#5a4f44]"
+                  }`}
+                >
+                  {c.whySpecialText}
+                </p>
+              </div>
+  
+              {/* Where Visible */}
+              <div
+                className={`p-5 rounded-[2rem] border ${
+                  isDark
+                    ? "bg-white/3 border-white/8"
+                    : "bg-white border-[#ff6b35]/10"
                 }`}
               >
-                {c.whySpecialText}
-              </p>
-            </div>
-
-            {/* Where Visible */}
-            <div
-              className={`p-4 rounded-xl border ${
-                isDark
-                  ? "bg-white/3 border-white/8"
-                  : "bg-white border-[#ff6b35]/10"
-              }`}
-            >
-              <h4
-                className={`font-semibold text-sm mb-1 ${
-                  isDark ? "text-[#f5f0e8]" : "text-[#4a3f35]"
+                <h4
+                  className={`font-semibold text-sm mb-1 ${
+                    isDark ? "text-[#f5f0e8]" : "text-[#4a3f35]"
+                  }`}
+                >
+                  {c.whereTitle}
+                </h4>
+                <p
+                  className={`text-sm ${
+                    isDark ? "text-[#c4bdb3]" : "text-[#5a4f44]"
+                  }`}
+                >
+                  {c.whereText}
+                </p>
+              </div>
+  
+              {/* Do Not */}
+              <div
+                className={`p-5 rounded-[2rem] border ${
+                  isDark
+                    ? "bg-red-900/10 border-red-500/15"
+                    : "bg-red-50 border-red-100"
                 }`}
               >
-                {c.whereTitle}
-              </h4>
-              <p
-                className={`text-sm ${
-                  isDark ? "text-[#c4bdb3]" : "text-[#5a4f44]"
+                <h4
+                  className={`font-semibold text-sm mb-2 flex items-center gap-1.5 ${
+                    isDark ? "text-red-400" : "text-red-700"
+                  }`}
+                >
+                  <AlertCircle className="w-4 h-4" />
+                  {c.doNotTitle}
+                </h4>
+                <ul className="space-y-1">
+                  {c.doNotList.map((item, i) => (
+                    <li
+                      key={i}
+                      className={`text-sm flex items-start gap-2 ${
+                        isDark ? "text-[#c4bdb3]" : "text-[#5a4f44]"
+                      }`}
+                    >
+                      <span className="text-red-500 mt-0.5 font-bold text-xs">✗</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+  
+              {/* Astrological Impact */}
+              <div
+                className={`p-5 rounded-[2rem] border ${
+                  isDark
+                    ? "bg-white/3 border-white/8"
+                    : "bg-white border-[#ff6b35]/10"
                 }`}
               >
-                {c.whereText}
-              </p>
-            </div>
-
-            {/* Do Not */}
-            <div
-              className={`p-4 rounded-xl border ${
-                isDark
-                  ? "bg-red-900/10 border-red-500/15"
-                  : "bg-red-50 border-red-100"
-              }`}
-            >
-              <h4
-                className={`font-semibold text-sm mb-2 flex items-center gap-1.5 ${
-                  isDark ? "text-red-400" : "text-red-700"
-                }`}
-              >
-                <AlertCircle className="w-4 h-4" />
-                {c.doNotTitle}
-              </h4>
-              <ul className="space-y-1">
-                {c.doNotList.map((item, i) => (
-                  <li
-                    key={i}
-                    className={`text-sm flex items-start gap-2 ${
-                      isDark ? "text-[#c4bdb3]" : "text-[#5a4f44]"
-                    }`}
-                  >
-                    <span className="text-red-500 mt-0.5 font-bold text-xs">✗</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Astrological Impact */}
-            <div
-              className={`p-4 rounded-xl border ${
-                isDark
-                  ? "bg-white/3 border-white/8"
-                  : "bg-white border-[#ff6b35]/10"
-              }`}
-            >
-              <h4
-                className={`font-semibold text-sm mb-1 ${
-                  isDark ? "text-[#f5f0e8]" : "text-[#4a3f35]"
-                }`}
-              >
-                {c.astroTitle}
-              </h4>
-              <p
-                className={`text-sm ${
-                  isDark ? "text-[#c4bdb3]" : "text-[#5a4f44]"
-                }`}
-              >
-                {c.astroText}
-              </p>
-            </div>
+                <h4
+                  className={`font-semibold text-sm mb-1 ${
+                    isDark ? "text-[#f5f0e8]" : "text-[#4a3f35]"
+                  }`}
+                >
+                  {c.astroTitle}
+                </h4>
+                <p
+                  className={`text-sm ${
+                    isDark ? "text-[#c4bdb3]" : "text-[#5a4f44]"
+                  }`}
+                >
+                  {c.astroText}
+                </p>
+              </div>
 
             {/* Disclaimer */}
             <p

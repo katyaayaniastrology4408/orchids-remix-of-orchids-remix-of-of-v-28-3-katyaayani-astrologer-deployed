@@ -130,7 +130,7 @@ export default function Navbar({ hasNotification = false }: NavbarProps) {
               </Button>
               
               {isMounted && user ? (
-              <div className="hidden md:flex items-center gap-3 px-3 py-1 rounded-2xl bg-[#ff6b35]/5 border border-[#ff6b35]/10">
+              <div className="hidden md:flex items-center gap-3 px-3 py-1 rounded-full bg-[#ff6b35]/5 border border-[#ff6b35]/10">
                 <Link href="/profile" className="w-8 h-8 rounded-full overflow-hidden border border-[#ff6b35]">
                   <Image src={profilePic} alt="Profile" width={32} height={32} className="w-full h-full object-cover" />
                 </Link>

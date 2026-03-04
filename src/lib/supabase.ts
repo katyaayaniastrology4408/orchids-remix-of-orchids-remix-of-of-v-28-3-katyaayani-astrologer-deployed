@@ -24,57 +24,65 @@ export const supabase = new Proxy({} as any, {
         if (prop === 'auth') return noopAuth;
         return () => ({ data: null, error: new Error('Supabase not configured') });
       }
-        supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
-    }
-    return supabaseClient[prop];
-  }
+supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+}
+const value = supabaseClient[prop];
+if (typeof value === 'function') {
+return value.bind(supabaseClient);
+}
+return value;
+}
 });
 
 // Helper for admin client - only call this from server-side code
 export const getSupabaseAdmin = () => {
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_URL is missing');
-  }
-  if (!supabaseServiceRoleKey) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY is missing');
-  }
-  return createClient(supabaseUrl, supabaseServiceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!supabaseUrl) {
+throw new Error('NEXT_PUBLIC_SUPABASE_URL is missing');
+}
+if (!supabaseServiceRoleKey) {
+throw new Error('SUPABASE_SERVICE_ROLE_KEY is missing');
+}
+return createClient(supabaseUrl, supabaseServiceRoleKey, {
+auth: {
+autoRefreshToken: false,
+persistSession: false,
+},
+});
 };
 
 // For backward compatibility in server-side code - lazy initialize to avoid env var issues at build/module load
 let adminClient: any = null;
 export const supabaseAdmin = typeof window === 'undefined' 
-  ? new Proxy({} as any, {
-      get: (target, prop) => {
-        if (!adminClient) {
-          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-          const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-          
-          if (!supabaseUrl || !supabaseServiceRoleKey) {
-            console.error('Missing Supabase Admin credentials:', { 
-              url: !!supabaseUrl, 
-              key: !!supabaseServiceRoleKey 
-            });
-            throw new Error('Supabase Admin client failed to initialize: Missing credentials');
-          }
-          
-            adminClient = createClient(supabaseUrl, supabaseServiceRoleKey, {
-              auth: {
-                autoRefreshToken: false,
-                persistSession: false,
-              },
-            });
-        }
-        return adminClient[prop];
-      }
-    })
-  : null as any;
+? new Proxy({} as any, {
+get: (target, prop) => {
+if (!adminClient) {
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseServiceRoleKey) {
+console.error('Missing Supabase Admin credentials:', { 
+url: !!supabaseUrl, 
+key: !!supabaseServiceRoleKey 
+});
+throw new Error('Supabase Admin client failed to initialize: Missing credentials');
+}
+
+adminClient = createClient(supabaseUrl, supabaseServiceRoleKey, {
+auth: {
+autoRefreshToken: false,
+persistSession: false,
+},
+});
+}
+const value = adminClient[prop];
+if (typeof value === 'function') {
+return value.bind(adminClient);
+}
+return value;
+}
+})
+: null as any;
 
 export type Booking = {
   id?: string;
