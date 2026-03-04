@@ -43,27 +43,15 @@ function rashifalHtml() {
             </table>
           </td>
         </tr>
-        <!-- Lucky Details -->
+        <!-- Period -->
         <tr>
           <td style="padding:0 32px 24px;">
             <table width="100%" cellpadding="0" cellspacing="0">
               <tr>
-                <td width="33%" style="padding:4px;">
-                  <div style="background:#2d1208;border:1px solid #8b3a0f;border-radius:10px;padding:14px;text-align:center;">
-                    <p style="color:#ffd700;font-size:11px;text-transform:uppercase;letter-spacing:2px;margin:0 0 6px;">Lucky Number</p>
-                    <p style="color:#ffb347;font-size:22px;font-weight:bold;margin:0;">{{{LUCKY_NUMBER}}}</p>
-                  </div>
-                </td>
-                <td width="33%" style="padding:4px;">
-                  <div style="background:#2d1208;border:1px solid #8b3a0f;border-radius:10px;padding:14px;text-align:center;">
-                    <p style="color:#ffd700;font-size:11px;text-transform:uppercase;letter-spacing:2px;margin:0 0 6px;">Lucky Color</p>
-                    <p style="color:#ffb347;font-size:15px;font-weight:bold;margin:0;">{{{LUCKY_COLOR}}}</p>
-                  </div>
-                </td>
-                <td width="33%" style="padding:4px;">
+                <td style="padding:4px;">
                   <div style="background:#2d1208;border:1px solid #8b3a0f;border-radius:10px;padding:14px;text-align:center;">
                     <p style="color:#ffd700;font-size:11px;text-transform:uppercase;letter-spacing:2px;margin:0 0 6px;">Period</p>
-                    <p style="color:#ffb347;font-size:12px;font-weight:bold;margin:0;">{{{PERIOD}}}</p>
+                    <p style="color:#ffb347;font-size:14px;font-weight:bold;margin:0;">{{{PERIOD}}}</p>
                   </div>
                 </td>
               </tr>
@@ -270,8 +258,6 @@ export async function POST(request: NextRequest) {
           variables: [
             { key: 'NAME', type: 'string', fallbackValue: 'Devotee' },
             { key: 'RASHIFAL_TEXT', type: 'string', fallbackValue: 'This week brings positive energy. Stay focused on your goals.' },
-            { key: 'LUCKY_NUMBER', type: 'string', fallbackValue: '7' },
-            { key: 'LUCKY_COLOR', type: 'string', fallbackValue: 'Golden' },
             { key: 'PERIOD', type: 'string', fallbackValue: 'This Week' },
             { key: 'UNSUBSCRIBE_URL', type: 'string', fallbackValue: 'https://www.katyaayaniastrologer.com/unsubscribe' },
           ],

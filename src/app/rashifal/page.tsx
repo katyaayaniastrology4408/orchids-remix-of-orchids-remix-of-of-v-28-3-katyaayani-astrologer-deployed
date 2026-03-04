@@ -58,10 +58,6 @@ interface RashifalData {
   content_english: string;
   content_gujarati: string;
   content_hindi: string;
-  lucky_number: string;
-  lucky_color: string;
-  lucky_color_gujarati: string;
-  lucky_color_hindi: string;
   overall_rating: number;
   love_rating: number;
   career_rating: number;

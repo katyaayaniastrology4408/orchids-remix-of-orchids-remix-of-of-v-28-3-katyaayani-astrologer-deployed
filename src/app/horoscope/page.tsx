@@ -204,20 +204,9 @@ export default function HoroscopePage() {
                           {horoscopeData?.horoscope_data || t("The stars are currently recalibrating. Please check back in a moment.")}
                         </p>
                       </div>
-                      
-                        <div className="grid sm:grid-cols-2 gap-6 pt-8 border-t border-gray-500/10">
-                          {viewType === 'daily' ? (
-                            <>
-                              <div className={`p-6 rounded-3xl border transition-all hover:scale-105 ${theme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-orange-50/50 border-orange-100'}`}>
-                                <div className="flex items-center gap-3 mb-2">
-                                  <div className="p-2 rounded-lg bg-orange-500/20"><Star className="w-4 h-4 text-orange-500" /></div>
-                                  <p className="text-xs font-black text-[#a0998c] uppercase tracking-[0.2em]">{t("Lucky Color")}</p>
-                                </div>
-                                <p className="font-bold text-2xl text-gradient-ancient">{t("Golden Saffron")}</p>
-                              </div>
-                            </>
-                          ) : (
-                          <>
+                        
+                          {viewType === 'yearly' && (
+                          <div className="grid sm:grid-cols-2 gap-6 pt-8 border-t border-gray-500/10">
                             <div className={`p-6 rounded-3xl border transition-all hover:scale-105 ${theme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-blue-50/50 border-blue-100'}`}>
                               <div className="flex items-center gap-3 mb-2">
                                 <div className="p-2 rounded-lg bg-blue-500/20"><Calendar className="w-4 h-4 text-blue-500" /></div>
@@ -232,9 +221,9 @@ export default function HoroscopePage() {
                               </div>
                               <p className="font-bold text-2xl text-gradient-ancient">{horoscopeData?.challenging_days || "Few"}</p>
                             </div>
-                          </>
+                          </div>
                         )}
-                      </div>
+
                     </div>
                   )}
                 </CardContent>

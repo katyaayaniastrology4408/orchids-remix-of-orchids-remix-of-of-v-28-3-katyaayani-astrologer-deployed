@@ -1196,10 +1196,6 @@ export const dailyRashifalEmailTemplate = (userName: string, formattedDate: stri
     const name = r.rashi_gujarati ? `${r.rashi.charAt(0).toUpperCase() + r.rashi.slice(1)} (${r.rashi_gujarati})` : r.rashi.charAt(0).toUpperCase() + r.rashi.slice(1);
     const rawContent = r.content_english || r.content_gujarati || '';
     const fullContent = rawContent.length > 120 ? rawContent.substring(0, 120).trim() + '...' : rawContent;
-    const luckyInfo = [
-      r.lucky_number ? `Lucky Number: ${r.lucky_number}` : '',
-      r.lucky_color ? `Lucky Color: ${r.lucky_color}` : '',
-    ].filter(Boolean).join(' | ');
     const dateParam = r.date || '';
     return `
     <tr>
@@ -1212,7 +1208,6 @@ export const dailyRashifalEmailTemplate = (userName: string, formattedDate: stri
             <td style="vertical-align:top;">
               <p style="color:#ff6b35;font-size:15px;font-weight:700;margin:0 0 6px;">${name}</p>
               <p style="color:#e8dcc8;font-size:13px;line-height:1.6;margin:0;">${fullContent}</p>
-              ${luckyInfo ? `<p style="color:#c9a87c;font-size:12px;margin:8px 0 0;font-style:italic;">${luckyInfo}</p>` : ''}
               <a href="${BASE_URL}/rashifal?date=${dateParam}" style="color:#ff6b35;font-size:12px;text-decoration:none;font-weight:600;display:inline-block;margin-top:8px;">See More &rarr;</a>
             </td>
           </tr>
@@ -1272,10 +1267,6 @@ export const weeklyRashifalEmailTemplate = (userName: string, startDate: string,
     const name = r.rashi_gujarati ? `${r.rashi.charAt(0).toUpperCase() + r.rashi.slice(1)} (${r.rashi_gujarati})` : r.rashi.charAt(0).toUpperCase() + r.rashi.slice(1);
     const rawContent = r.content_english || r.content_gujarati || '';
     const fullContent = rawContent.length > 120 ? rawContent.substring(0, 120).trim() + '...' : rawContent;
-    const luckyInfo = [
-      r.lucky_number ? `Lucky Number: ${r.lucky_number}` : '',
-      r.lucky_color ? `Lucky Color: ${r.lucky_color}` : '',
-    ].filter(Boolean).join(' | ');
     return `
     <tr>
       <td style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.05);">
@@ -1287,7 +1278,6 @@ export const weeklyRashifalEmailTemplate = (userName: string, startDate: string,
             <td style="vertical-align:top;">
               <p style="color:#ff6b35;font-size:15px;font-weight:700;margin:0 0 6px;">${name}</p>
               <p style="color:#e8dcc8;font-size:13px;line-height:1.6;margin:0;">${fullContent}</p>
-              ${luckyInfo ? `<p style="color:#c9a87c;font-size:12px;margin:8px 0 0;font-style:italic;">${luckyInfo}</p>` : ''}
               <a href="${BASE_URL}/rashifal?tab=weekly" style="color:#ff6b35;font-size:12px;text-decoration:none;font-weight:600;display:inline-block;margin-top:8px;">See More &rarr;</a>
             </td>
           </tr>
