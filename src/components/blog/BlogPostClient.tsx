@@ -49,14 +49,17 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
     setIsMounted(true);
   }, []);
 
+  // Use a stable language for the first render (matching the server default)
+  const currentLanguage = isMounted ? language : 'en';
+
   const getLocale = () => {
-    if (language === 'gu') return 'gu-IN';
-    if (language === 'hi') return 'hi-IN';
+    if (currentLanguage === 'gu') return 'gu-IN';
+    if (currentLanguage === 'hi') return 'hi-IN';
     return 'en-IN';
   };
 
   const formatDate = (dateStr: string) => {
-    if (!isMounted) return ""; // Avoid hydration mismatch on dates
+    if (!isMounted) return ""; // Still avoid hydration mismatch on dates as they depend on locale
     try {
       return new Date(dateStr).toLocaleDateString(getLocale(), {
         year: 'numeric',
@@ -69,20 +72,20 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
   };
 
   const getPostTitle = (p: BlogPost) => {
-    if (language === 'gu' && p.title_gujarati) return p.title_gujarati;
-    if (language === 'hi' && p.title_hindi) return p.title_hindi;
+    if (currentLanguage === 'gu' && p.title_gujarati) return p.title_gujarati;
+    if (currentLanguage === 'hi' && p.title_hindi) return p.title_hindi;
     return p.title;
   };
 
   const getPostExcerpt = (p: BlogPost) => {
-    if (language === 'gu' && p.excerpt_gujarati) return p.excerpt_gujarati;
-    if (language === 'hi' && p.excerpt_hindi) return p.excerpt_hindi;
+    if (currentLanguage === 'gu' && p.excerpt_gujarati) return p.excerpt_gujarati;
+    if (currentLanguage === 'hi' && p.excerpt_hindi) return p.excerpt_hindi;
     return p.excerpt;
   };
 
   const getPostContent = (p: BlogPost) => {
-    if (language === 'gu' && p.content_gujarati) return p.content_gujarati;
-    if (language === 'hi' && p.content_hindi) return p.content_hindi;
+    if (currentLanguage === 'gu' && p.content_gujarati) return p.content_gujarati;
+    if (currentLanguage === 'hi' && p.content_hindi) return p.content_hindi;
     return p.content;
   };
 

@@ -29,14 +29,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // We use encodeURI to keep the protocol/slashes but encode spaces/etc.
   const encodedImageUrl = rawImageUrl ? encodeURI(rawImageUrl) : '';
 
-  // 3. Optimize for WhatsApp (Must be JPG, <300KB, roughly 1200x630)
+  // 3. Robust OG Image URL (WhatsApp favors JPG/PNG, absolute, <300KB)
+  // We add a version timestamp to bust WhatsApp's cache
+  const cacheBuster = `v=${new Date(post.published_at).getTime()}`;
   let finalOgImageUrl = encodedImageUrl;
+
   if (encodedImageUrl.includes('supabase.co/storage/v1/object/public')) {
-    // Transform to render URL
-    const renderUrl = encodedImageUrl.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
-    const separator = renderUrl.includes('?') ? '&' : '?';
-    // Force JPG, resize to standard OG size
-    finalOgImageUrl = `${renderUrl}${separator}width=1200&height=630&resize=contain&format=jpg&quality=85`;
+    // We try to provide an optimized URL for WhatsApp using standard Supabase transformation params
+    // These work on public URLs too if the project has the feature enabled.
+    // If not, they are ignored or might fail, so we'll be careful.
+    const separator = finalOgImageUrl.includes('?') ? '&' : '?';
+    // We use a slightly smaller width (800) to ensure the file size stays under 300KB for WhatsApp
+    finalOgImageUrl = `${finalOgImageUrl}${separator}width=800&height=420&resize=contain&${cacheBuster}`;
+  } else if (finalOgImageUrl) {
+    const separator = finalOgImageUrl.includes('?') ? '&' : '?';
+    finalOgImageUrl = `${finalOgImageUrl}${separator}${cacheBuster}`;
   }
 
   return {
@@ -54,10 +61,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [
         {
           url: finalOgImageUrl,
-          width: 1200,
-          height: 630,
+          width: 800,
+          height: 420,
           alt: post.title,
-          type: 'image/jpeg',
         },
       ],
       type: "article",
@@ -72,7 +78,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [finalOgImageUrl],
     },
     other: {
-      // Direct meta tags that WhatsApp likes
+      // Direct meta tags that WhatsApp likes (redundant but helpful)
       'og:image:secure_url': finalOgImageUrl,
       'image': finalOgImageUrl,
     }

@@ -36,8 +36,10 @@ export default function Navbar({ hasNotification = false }: NavbarProps) {
   const { language, t } = useTranslation();
   const { user, signOut, showAuthModal } = useAuth();
   const [profile, setProfile] = useState<any>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     async function getProfile() {
       if (!user) return;
       const { data } = await supabase
@@ -127,27 +129,28 @@ export default function Navbar({ hasNotification = false }: NavbarProps) {
                 {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </Button>
               
-            {user ? (
-            <div className="hidden md:flex items-center gap-3 px-3 py-1 rounded-2xl bg-[#ff6b35]/5 border border-[#ff6b35]/10">
-              <Link href="/profile" className="w-8 h-8 rounded-full overflow-hidden border border-[#ff6b35]">
-                <Image src={profilePic} alt="Profile" width={32} height={32} className="w-full h-full object-cover" />
-              </Link>
-              <div className="flex flex-col items-start leading-tight">
-                <span className="text-xs font-bold truncate max-w-[80px]">{profileName.split(' ')[0]}</span>
-                <button onClick={() => signOut()} className="text-[10px] text-red-600 hover:text-red-500 uppercase font-bold">
-                  {t("Log Out")}
-                </button>
+              {isMounted && user ? (
+              <div className="hidden md:flex items-center gap-3 px-3 py-1 rounded-2xl bg-[#ff6b35]/5 border border-[#ff6b35]/10">
+                <Link href="/profile" className="w-8 h-8 rounded-full overflow-hidden border border-[#ff6b35]">
+                  <Image src={profilePic} alt="Profile" width={32} height={32} className="w-full h-full object-cover" />
+                </Link>
+                <div className="flex flex-col items-start leading-tight">
+                  <span className="text-xs font-bold truncate max-w-[80px]">{profileName.split(' ')[0]}</span>
+                  <button onClick={() => signOut()} className="text-[10px] text-red-600 hover:text-red-500 uppercase font-bold">
+                    {t("Log Out")}
+                  </button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <Button 
-              variant="outline" 
-              onClick={() => showAuthModal('signin')}
-              className="hidden md:flex border-[#ff6b35] text-[#ff6b35] hover:bg-[#ff6b35]/10 h-8 text-xs"
-            >
-              {t("Login")}
-            </Button>
-            )}
+            ) : isMounted && !user ? (
+              <Button 
+                variant="outline" 
+                onClick={() => showAuthModal('signin')}
+                className="hidden md:flex border-[#ff6b35] text-[#ff6b35] hover:bg-[#ff6b35]/10 h-8 text-xs"
+              >
+                {t("Login")}
+              </Button>
+              ) : null}
+
   
             <Button
               variant="ghost"

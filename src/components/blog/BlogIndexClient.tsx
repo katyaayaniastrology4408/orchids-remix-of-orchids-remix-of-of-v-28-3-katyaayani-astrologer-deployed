@@ -60,30 +60,43 @@ export default function BlogIndexClient({ initialPosts }: BlogIndexClientProps) 
   const { theme } = useTheme();
   const { language, t } = useTranslation();
   const [posts] = useState<BlogPost[]>(initialPosts);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Use a stable language for the first render
+  const currentLanguage = isMounted ? language : 'en';
 
   const getLocale = () => {
-    if (language === 'gu') return 'gu-IN';
-    if (language === 'hi') return 'hi-IN';
+    if (currentLanguage === 'gu') return 'gu-IN';
+    if (currentLanguage === 'hi') return 'hi-IN';
     return 'en-IN';
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString(getLocale(), {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    if (!isMounted) return "";
+    try {
+      return new Date(dateStr).toLocaleDateString(getLocale(), {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    } catch (e) {
+      return dateStr;
+    }
   };
 
   const getPostTitle = (post: BlogPost) => {
-    if (language === 'gu' && post.title_gujarati) return post.title_gujarati;
-    if (language === 'hi' && post.title_hindi) return post.title_hindi;
+    if (currentLanguage === 'gu' && post.title_gujarati) return post.title_gujarati;
+    if (currentLanguage === 'hi' && post.title_hindi) return post.title_hindi;
     return post.title;
   };
 
   const getPostExcerpt = (post: BlogPost) => {
-    if (language === 'gu' && post.excerpt_gujarati) return post.excerpt_gujarati;
-    if (language === 'hi' && post.excerpt_hindi) return post.excerpt_hindi;
+    if (currentLanguage === 'gu' && post.excerpt_gujarati) return post.excerpt_gujarati;
+    if (currentLanguage === 'hi' && post.excerpt_hindi) return post.excerpt_hindi;
     return post.excerpt;
   };
 

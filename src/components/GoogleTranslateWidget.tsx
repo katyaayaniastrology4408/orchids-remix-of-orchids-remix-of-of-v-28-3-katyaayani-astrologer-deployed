@@ -404,20 +404,27 @@ export function TranslationProvider({
   children: React.ReactNode;
 }) {
   const [language, setLanguage] = useState<Language>("en");
-  const [mounted, setMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-      setMounted(true);
-    }, []);
+    setIsMounted(true);
+    const saved = localStorage.getItem("preferred-language") as Language;
+    if (saved && (saved === "hi" || saved === "gu" || saved === "en")) {
+      setLanguage(saved);
+    }
+  }, []);
 
   const handleSetLanguage = (lang: Language) => {
     setLanguage(lang);
     localStorage.setItem("preferred-language", lang);
   };
 
-    const t = (key: string): string => {
-      if (!key) return "";
-      const lang = language || "en";
+  const t = (key: string): string => {
+    if (!key) return "";
+    // ALWAYS use English during hydration (matching server render)
+    // After mounting, we can use the selected language.
+    const lang = isMounted ? language : "en";
+
       // Check inline translations first
       const langTranslations = translations[lang];
       if (langTranslations && langTranslations[key]) return langTranslations[key];
