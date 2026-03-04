@@ -111,9 +111,7 @@ export default function BlogIndexClient({ initialPosts }: BlogIndexClientProps) 
             {t("Blog")}
           </h1>
           <p className={`text-base md:text-lg max-w-2xl mx-auto ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-            {language === 'gu' ? 'દૈનિક રાશિફળ, હિન્દુ પંચાંગ અને જ્યોતિષ જ્ઞાન' :
-             language === 'hi' ? 'दैनिक राशिफल, हिन्दू पंचांग और ज्योतिष ज्ञान' :
-             'Daily Horoscope, Hindu Calendar and Astrology Knowledge'}
+            {t("Daily Horoscope, Hindu Calendar and Astrology Knowledge")}
           </p>
         </div>
 
@@ -132,15 +130,13 @@ export default function BlogIndexClient({ initialPosts }: BlogIndexClientProps) 
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-orange-500/20' : 'bg-orange-100'}`}>
                     <Star className="w-4 h-4 text-[#ff6b35]" />
                   </div>
-                  <h2 className="font-[family-name:var(--font-cinzel)] text-base font-bold">
-                    {language === 'gu' ? 'દૈનિક રાશિફળ' : language === 'hi' ? 'दैनिक राशिफल' : 'Daily Horoscope'}
-                  </h2>
-                </div>
-                <p className={`text-xs mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {language === 'gu' ? 'આજનું તમારી રાશિનું ભાગ્યફળ જાણો' :
-                    language === 'hi' ? 'आज का अपनी राशि का भाग्यफल जानें' :
-                    'Know your zodiac fortune for today'}
-                </p>
+                    <h2 className="font-[family-name:var(--font-cinzel)] text-base font-bold">
+                      {t("Daily Horoscope")}
+                    </h2>
+                  </div>
+                  <p className={`text-xs mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {t("Know your zodiac fortune for today")}
+                  </p>
                 <div className="flex items-center justify-between">
                   <div className="flex -space-x-1.5">
                     {RASHI_DATA.slice(0, 6).map((rashi) => (
@@ -166,15 +162,13 @@ export default function BlogIndexClient({ initialPosts }: BlogIndexClientProps) 
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-purple-500/20' : 'bg-purple-100'}`}>
                     <Sparkles className="w-4 h-4 text-purple-500" />
                   </div>
-                  <h2 className="font-[family-name:var(--font-cinzel)] text-base font-bold">
-                    {language === 'gu' ? 'સાપ્તાહિક રાશિફળ' : language === 'hi' ? 'સાપ્તાહિક રાશિફળ' : 'Weekly Horoscope'}
-                  </h2>
-                </div>
-                <p className={`text-xs mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {language === 'gu' ? 'આ અઠવાડિયાનું તમારી રાશિનું ભાગ્યફળ જાણો' :
-                    language === 'hi' ? 'इस सप्ताह का अपनी राशि का भाग्यफल जानें' :
-                    'Know your zodiac fortune for this week'}
-                </p>
+                    <h2 className="font-[family-name:var(--font-cinzel)] text-base font-bold">
+                      {t("Weekly Horoscope")}
+                    </h2>
+                  </div>
+                  <p className={`text-xs mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {t("Know your zodiac fortune for this week")}
+                  </p>
                 <div className="flex items-center justify-between">
                   <div className="flex -space-x-1.5">
                     {RASHI_DATA.slice(6, 12).map((rashi) => (
@@ -200,15 +194,13 @@ export default function BlogIndexClient({ initialPosts }: BlogIndexClientProps) 
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-yellow-500/20' : 'bg-yellow-100'}`}>
                     <Calendar className="w-4 h-4 text-yellow-500" />
                   </div>
-                  <h2 className="font-[family-name:var(--font-cinzel)] text-base font-bold">
-                    {language === 'gu' ? 'હિન્દુ પંચાંગ' : language === 'hi' ? 'हिन्दू पंचांग' : 'Hindu Calendar'}
-                  </h2>
-                </div>
-                <p className={`text-xs mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {language === 'gu' ? 'તહેવારો, વ્રત, તિથિ અને મહત્વના દિવસો જાણો' :
-                    language === 'hi' ? 'त्योहार, व्रत, तिथि और महत्वपूर्ण दिन जानें' :
-                    'Know festivals, fasts, tithis and important days'}
-                </p>
+                    <h2 className="font-[family-name:var(--font-cinzel)] text-base font-bold">
+                      {t("Hindu Calendar")}
+                    </h2>
+                  </div>
+                  <p className={`text-xs mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {t("Know festivals, fasts, tithis and important days")}
+                  </p>
                 <div className="flex items-center justify-end">
                   <ArrowRight className="w-4 h-4 text-yellow-500" />
                 </div>
@@ -220,9 +212,9 @@ export default function BlogIndexClient({ initialPosts }: BlogIndexClientProps) 
             {posts.length > 0 && (
 
               <div className={`rounded-2xl border p-4 ${theme === 'dark' ? 'bg-[#12121a] border-[#ff6b35]/10' : 'bg-white border-[#ff6b35]/15 shadow-sm'}`}>
-                <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${theme === 'dark' ? 'text-[#ff6b35]' : 'text-[#cc4400]'}`}>
-                  {language === 'gu' ? 'તાજી પોસ્ટ' : language === 'hi' ? 'हाल की પોસ્ટ' : 'Recent Posts'}
-                </p>
+                  <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${theme === 'dark' ? 'text-[#ff6b35]' : 'text-[#cc4400]'}`}>
+                    {t("Recent Posts")}
+                  </p>
                 <div className="flex flex-col gap-3">
                   {posts.slice(0, 4).map((post) => (
                       <Link key={post.id} href={`/blog/${post.slug}`} className="flex items-center gap-3 group">
@@ -251,14 +243,14 @@ export default function BlogIndexClient({ initialPosts }: BlogIndexClientProps) 
             <div className="flex-1 min-w-0 lg:order-1">
             {posts.length === 0 ? (
 
-              <div className="text-center py-20">
-                <p className="text-xl text-gray-500">
-                  {language === 'gu' ? 'કોઈ બ્લોગ પોસ્ટ મળી નથી' : language === 'hi' ? 'कोई ब्लॉग पोस्ट नहीं मिली' : 'No blog posts found'}
-                </p>
-                <p className="text-gray-400 mt-2">
-                  {language === 'gu' ? 'જલ્દી જ નવા લેખો ઉમેરવામાં આવશે' : language === 'hi' ? 'जल्द ही नए लेख जोड़े जाएंगे' : 'New articles will be added soon'}
-                </p>
-              </div>
+                <div className="text-center py-20">
+                  <p className="text-xl text-gray-500">
+                    {t("No blog posts found")}
+                  </p>
+                  <p className="text-gray-400 mt-2">
+                    {t("New articles will be added soon")}
+                  </p>
+                </div>
             ) : (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}

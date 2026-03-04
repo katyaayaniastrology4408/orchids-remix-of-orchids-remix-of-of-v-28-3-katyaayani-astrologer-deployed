@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import X from "lucide-react/dist/esm/icons/x";
+import Sun from "lucide-react/dist/esm/icons/sun";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 import { RASHI_ICONS } from "@/components/RashiIcons";
@@ -73,7 +74,7 @@ gu: {
 
 type Rashi = { name: string; symbol: string; color: string; tip: string };
 
-    function RashiModal({ rashi, index, isDark, signBasis, onClose }: { rashi: Rashi; index: number; isDark: boolean; signBasis: 'sun' | 'moon'; onClose: () => void }) {
+    function RashiModal({ rashi, index, isDark, signBasis, language, onClose }: { rashi: Rashi; index: number; isDark: boolean; signBasis: 'sun' | 'moon'; language: string; onClose: () => void }) {
 
       const [mounted, setMounted] = useState(false);
       const Icon = RASHI_ICONS[index];
@@ -267,6 +268,7 @@ export default function RashifalSection() {
           index={selected}
           isDark={isDark}
           signBasis={signBasis}
+          language={language}
           onClose={() => setSelected(null)}
         />
       )}
