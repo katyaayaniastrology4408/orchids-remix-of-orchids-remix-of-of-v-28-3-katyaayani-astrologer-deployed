@@ -160,28 +160,29 @@ export default function ProfilePage() {
     }
   };
 
-  const getVedicSigns = (dob: string, tob?: string) => {
-    if (!dob) return null;
-    try {
-        const [year, month, day] = dob.split('-').map(Number);
-        let hours = 8, minutes = 0;
-        if (tob) {
-            const [h, m] = tob.split(':').map(Number);
-            hours = h; minutes = m;
-        }
-        
-        const localBirth = new Date(year, month - 1, day, hours, minutes);
-        const utcBirth = new Date(localBirth.getTime() - (5.5 * 60 * 60 * 1000));
-        
-        const panchang = calculatePanchang(utcBirth);
-        return {
-            sun: panchang.sunRashi,
-            moon: panchang.moonRashi
-        };
-    } catch (e) {
-        return null;
-    }
-  };
+    const getVedicSigns = (dob: string, tob?: string) => {
+      if (!dob) return null;
+      try {
+          const [year, month, day] = dob.split('-').map(Number);
+          let hours = 8, minutes = 0;
+          if (tob) {
+              const [h, m] = tob.split(':').map(Number);
+              hours = h; minutes = m;
+          }
+          
+          // Use Date.UTC to avoid local timezone issues
+          const utcTimestamp = Date.UTC(year, month - 1, day, hours, minutes) - (5.5 * 60 * 60 * 1000);
+          const utcBirth = new Date(utcTimestamp);
+          
+          const panchang = calculatePanchang(utcBirth);
+          return {
+              sun: panchang.sunRashi,
+              moon: panchang.moonRashi
+          };
+      } catch (e) {
+          return null;
+      }
+    };
 
   useEffect(() => {
     async function getProfile() {

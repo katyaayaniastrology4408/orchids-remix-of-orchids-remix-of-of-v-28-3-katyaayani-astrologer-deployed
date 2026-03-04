@@ -175,10 +175,10 @@ function toJulianDay(date: Date): number {
 // Lahiri Ayanamsha (more accurate polynomial)
 function getLahiriAyanamsha(jd: number): number {
   const T = (jd - 2451545.0) / 36525.0; // Julian centuries from J2000
-  // Lahiri ayanamsha at J2000 = 23°51'11" ≈ 23.8531°
-  // Precession rate ~50.29"/year; T is in centuries so multiply by 100 for years
+  // Lahiri ayanamsha at J2000 = 23° 51' 25.53" ≈ 23.85709167°
+  // Precession rate is approx 50.29" per year
   const years = T * 100;
-  return 23.8531 + (50.29 * years) / 3600;
+  return 23.85709167 + (50.290966 * years) / 3600;
 }
 
 function getSunLongitude(jd: number): number {

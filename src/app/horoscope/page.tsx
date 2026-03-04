@@ -49,8 +49,9 @@ export default function HoroscopePage() {
             hours = h; minutes = m;
         }
         
-        const localBirth = new Date(year, month - 1, day, hours, minutes);
-        const utcBirth = new Date(localBirth.getTime() - (5.5 * 60 * 60 * 1000));
+        // Use Date.UTC to avoid local timezone issues
+        const utcTimestamp = Date.UTC(year, month - 1, day, hours, minutes) - (5.5 * 60 * 60 * 1000);
+        const utcBirth = new Date(utcTimestamp);
         
         const panchang = calculatePanchang(utcBirth);
         return {

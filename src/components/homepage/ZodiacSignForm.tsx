@@ -30,9 +30,10 @@ export default function ZodiacSignForm() {
         const [year, month, day] = formData.dob.split('-').map(Number);
         const [hours, minutes] = formData.tob.split(':').map(Number);
         
-        // Assume IST (+5:30) for birth details as most users are in India
-        const localBirth = new Date(year, month - 1, day, hours, minutes);
-        const utcBirth = new Date(localBirth.getTime() - (5.5 * 60 * 60 * 1000));
+        // Assume IST (+5:30) for birth details as most users are in India.
+        // We use Date.UTC to get a fixed reference point, then subtract 5.5 hours to get the actual UTC time of the birth.
+        const utcTimestamp = Date.UTC(year, month - 1, day, hours, minutes) - (5.5 * 60 * 60 * 1000);
+        const utcBirth = new Date(utcTimestamp);
         
         const panchang = calculatePanchang(utcBirth);
         setResult(panchang);
