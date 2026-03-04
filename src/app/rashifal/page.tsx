@@ -81,12 +81,11 @@ function RashifalPageContent() {
     const initialTab = searchParams.get('tab') === 'weekly' ? 'weekly' : 'daily';
 
     const [viewType] = useState<'daily' | 'weekly'>(initialTab);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const [selectedWeekStart, setSelectedWeekStart] = useState(() => getMonday(new Date()).toISOString().split('T')[0]);
-    const [selectedRashi, setSelectedRashi] = useState<string | null>(null);
-    const [signBasis, setSignBasis] = useState<'sun' | 'moon'>('moon');
-    const [rashifalData, setRashifalData] = useState<RashifalData[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [selectedWeekStart, setSelectedWeekStart] = useState(() => getMonday(new Date()).toISOString().split('T')[0]);
+      const [selectedRashi, setSelectedRashi] = useState<string | null>(null);
+      const [rashifalData, setRashifalData] = useState<RashifalData[]>([]);
+      const [loading, setLoading] = useState(true);
 
 
   useEffect(() => {
@@ -207,24 +206,6 @@ function RashifalPageContent() {
             </p>
           </div>
 
-            {/* Basis Toggle */}
-            <div className="flex justify-center mb-8">
-              <div className="flex bg-[#ff6b35]/10 p-1.5 rounded-2xl border border-[#ff6b35]/20 backdrop-blur-md">
-                <button 
-                  onClick={() => setSignBasis('moon')}
-                  className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${signBasis === 'moon' ? 'bg-[#ff6b35] text-white shadow-lg' : 'text-[#ff6b35] hover:bg-[#ff6b35]/10'}`}
-                >
-                  {language === 'gu' ? 'ચંદ્ર રાશિ' : 'Moon Sign'}
-                </button>
-                <button 
-                  onClick={() => setSignBasis('sun')}
-                  className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${signBasis === 'sun' ? 'bg-[#ff6b35] text-white shadow-lg' : 'text-[#ff6b35] hover:bg-[#ff6b35]/10'}`}
-                >
-                  {language === 'gu' ? 'સૂર્ય રાશિ' : 'Sun Sign'}
-                </button>
-              </div>
-            </div>
-
             {/* Date / Week Selector */}
 
         <div className="flex items-center justify-center gap-4 mb-12">
@@ -320,7 +301,7 @@ function RashifalPageContent() {
                       {selectedRashiInfo && getRashiName(selectedRashiInfo)}
                     </h2>
                     <p className="text-[10px] uppercase tracking-[0.3em] font-black text-[#ff6b35] mt-2">
-                      {signBasis === 'sun' ? (language === 'gu' ? 'સૂર્ય રાશિ' : 'Sun Sign') : (language === 'gu' ? 'ચંદ્ર રાશિ' : 'Moon Sign')}
+                      {language === 'gu' ? 'દૈનિક રાશિફળ' : language === 'hi' ? 'दैनिक राशिफल' : 'Daily Prediction'}
                     </p>
                     {viewType === 'weekly' && (
 

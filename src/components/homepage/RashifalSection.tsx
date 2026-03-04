@@ -74,7 +74,7 @@ gu: {
 
 type Rashi = { name: string; symbol: string; color: string; tip: string };
 
-    function RashiModal({ rashi, index, isDark, signBasis, language, onClose }: { rashi: Rashi; index: number; isDark: boolean; signBasis: 'sun' | 'moon'; language: string; onClose: () => void }) {
+    function RashiModal({ rashi, index, isDark, language, onClose }: { rashi: Rashi; index: number; isDark: boolean; language: string; onClose: () => void }) {
 
       const [mounted, setMounted] = useState(false);
       const Icon = RASHI_ICONS[index];
@@ -117,9 +117,9 @@ type Rashi = { name: string; symbol: string; color: string; tip: string };
               />
 
               <div className="absolute top-8 left-10 flex items-center gap-2 px-3 py-1 rounded-full bg-[#ff6b35]/10 border border-[#ff6b35]/20">
-                {signBasis === 'sun' ? <Sun className="w-3 h-3 text-orange-500" /> : <Sparkles className="w-3 h-3 text-[#ff6b35]" />}
+                <Sparkles className="w-3 h-3 text-[#ff6b35]" />
                 <span className="text-[8px] font-black uppercase tracking-widest text-[#ff6b35]">
-                  {signBasis === 'sun' ? (language === 'gu' ? 'સૂર્ય રાશિ' : 'Sun Sign') : (language === 'gu' ? 'ચંદ્ર રાશિ' : 'Moon Sign')}
+                  {language === 'gu' ? 'રાશિફળ' : language === 'hi' ? 'राशिफल' : 'Horoscope'}
                 </span>
               </div>
 
@@ -178,10 +178,9 @@ export default function RashifalSection() {
   const content = rashiData[lang];
 
   const [selected, setSelected] = useState<number | null>(null);
-  const [signBasis, setSignBasis] = useState<'sun' | 'moon'>('moon');
 
   return (
-    <section className={`py-24 px-6 relative overflow-hidden ${isDark ? "bg-[#07040e]" : "bg-[#fffaf4]"}`}>
+    <section className={`py-24 px-6 relative overflow-hidden ${isDark ? "bg-[#07040e]" : "bg-[#fffaf4]"}`} data-no-translate>
       {/* Background Decorative Elements */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#ff6b35]/5 blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#ff6b35]/5 blur-[120px] rounded-full pointer-events-none translate-y-1/2 -translate-x-1/2" />
@@ -203,23 +202,6 @@ export default function RashifalSection() {
             {content.subtitle}
           </p>
 
-          {/* Basis Toggle */}
-          <div className="flex justify-center mb-12">
-            <div className="flex bg-[#ff6b35]/10 p-1.5 rounded-2xl border border-[#ff6b35]/20 backdrop-blur-md">
-              <button 
-                onClick={() => setSignBasis('moon')}
-                className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${signBasis === 'moon' ? 'bg-[#ff6b35] text-white shadow-lg' : 'text-[#ff6b35] hover:bg-[#ff6b35]/10'}`}
-              >
-                {language === 'gu' ? 'ચંદ્ર રાશિ (Moon Sign)' : 'Moon Sign'}
-              </button>
-              <button 
-                onClick={() => setSignBasis('sun')}
-                className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${signBasis === 'sun' ? 'bg-[#ff6b35] text-white shadow-lg' : 'text-[#ff6b35] hover:bg-[#ff6b35]/10'}`}
-              >
-                {language === 'gu' ? 'સૂર્ય રાશિ (Sun Sign)' : 'Sun Sign'}
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* 12 Rashi Grid — click opens popup */}
@@ -262,16 +244,15 @@ export default function RashifalSection() {
       </div>
 
       {/* Popup Modal */}
-      {selected !== null && (
-        <RashiModal
-          rashi={content.rashis[selected]}
-          index={selected}
-          isDark={isDark}
-          signBasis={signBasis}
-          language={language}
-          onClose={() => setSelected(null)}
-        />
-      )}
+        {selected !== null && (
+          <RashiModal
+            rashi={content.rashis[selected]}
+            index={selected}
+            isDark={isDark}
+            language={language}
+            onClose={() => setSelected(null)}
+          />
+        )}
     </section>
   );
 }

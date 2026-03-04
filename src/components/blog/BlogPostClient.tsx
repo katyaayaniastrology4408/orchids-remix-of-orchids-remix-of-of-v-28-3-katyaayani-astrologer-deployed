@@ -72,21 +72,51 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
   };
 
   const getPostTitle = (p: BlogPost) => {
-    if (currentLanguage === 'gu' && p.title_gujarati) return p.title_gujarati;
-    if (currentLanguage === 'hi' && p.title_hindi) return p.title_hindi;
-    return p.title;
+    let title = p.title;
+    if (currentLanguage === 'gu' && p.title_gujarati) title = p.title_gujarati;
+    else if (currentLanguage === 'hi' && p.title_hindi) title = p.title_hindi;
+    
+    if (title.includes(' / ')) {
+      const parts = title.split(' / ');
+      if (parts.length >= 3) {
+        if (currentLanguage === 'en') return parts[0];
+        if (currentLanguage === 'gu') return parts[1];
+        if (currentLanguage === 'hi') return parts[2];
+      }
+    }
+    return title;
   };
 
   const getPostExcerpt = (p: BlogPost) => {
-    if (currentLanguage === 'gu' && p.excerpt_gujarati) return p.excerpt_gujarati;
-    if (currentLanguage === 'hi' && p.excerpt_hindi) return p.excerpt_hindi;
-    return p.excerpt;
+    let excerpt = p.excerpt;
+    if (currentLanguage === 'gu' && p.excerpt_gujarati) excerpt = p.excerpt_gujarati;
+    else if (currentLanguage === 'hi' && p.excerpt_hindi) excerpt = p.excerpt_hindi;
+
+    if (excerpt && excerpt.includes(' / ')) {
+      const parts = excerpt.split(' / ');
+      if (parts.length >= 3) {
+        if (currentLanguage === 'en') return parts[0];
+        if (currentLanguage === 'gu') return parts[1];
+        if (currentLanguage === 'hi') return parts[2];
+      }
+    }
+    return excerpt;
   };
 
   const getPostContent = (p: BlogPost) => {
-    if (currentLanguage === 'gu' && p.content_gujarati) return p.content_gujarati;
-    if (currentLanguage === 'hi' && p.content_hindi) return p.content_hindi;
-    return p.content;
+    let content = p.content;
+    if (currentLanguage === 'gu' && p.content_gujarati) content = p.content_gujarati;
+    else if (currentLanguage === 'hi' && p.content_hindi) content = p.content_hindi;
+
+    if (content && content.includes(' / ')) {
+      const parts = content.split(' / ');
+      if (parts.length >= 3) {
+        if (currentLanguage === 'en') return parts[0];
+        if (currentLanguage === 'gu') return parts[1];
+        if (currentLanguage === 'hi') return parts[2];
+      }
+    }
+    return content;
   };
 
   const getShareUrl = () => typeof window !== 'undefined' ? window.location.href : '';
@@ -288,14 +318,14 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
 
             {/* RIGHT CONTENT — title + full article */}
             <div className="flex-1 min-w-0 order-2 lg:order-2">
-              <header className="mb-10">
-                <div className="flex items-center gap-2 text-[#ff6b35] font-bold text-sm uppercase tracking-widest mb-4">
-                  <span className="bg-[#ff6b35]/10 px-3 py-1 rounded-md">{post.category}</span>
-                </div>
-                
-                <h1 className="font-[family-name:var(--font-cinzel)] text-[32px] md:text-[40px] font-extrabold mb-6 leading-tight">
-                  {getPostTitle(post)}
-                </h1>
+                <header className="mb-10">
+                  <div className="flex items-center gap-2 text-[#ff6b35] font-bold text-sm uppercase tracking-widest mb-4">
+                    <span className="bg-[#ff6b35]/10 px-3 py-1 rounded-md">{post.category}</span>
+                  </div>
+                  
+                  <h1 className="font-[family-name:var(--font-cinzel)] text-[32px] md:text-[40px] font-extrabold mb-6 leading-tight" data-no-translate>
+                    {getPostTitle(post)}
+                  </h1>
 
                 <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground font-medium">
                   <div className="flex items-center gap-2">
@@ -319,12 +349,12 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
                 </div>
               </header>
 
-              <div className={`blog-content-wrapper ${theme === 'dark' ? 'blog-dark' : 'blog-light'}`}>
-                <div
-                  className={`premium-blog-content prose prose-lg max-w-none whitespace-pre-line ${theme === 'dark' ? 'prose-invert' : ''}`}
-                  dangerouslySetInnerHTML={{ __html: getPostContent(post) }}
-                />
-              </div>
+                <div className={`blog-content-wrapper ${theme === 'dark' ? 'blog-dark' : 'blog-light'}`} data-no-translate>
+                  <div
+                    className={`premium-blog-content prose prose-lg max-w-none whitespace-pre-line ${theme === 'dark' ? 'prose-invert' : ''}`}
+                    dangerouslySetInnerHTML={{ __html: getPostContent(post) }}
+                  />
+                </div>
 
               {/* Tags (Bottom) */}
               {post.tags && post.tags.length > 0 && (

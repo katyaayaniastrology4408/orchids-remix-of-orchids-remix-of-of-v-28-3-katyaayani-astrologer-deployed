@@ -176,46 +176,54 @@ export default function ZodiacSignForm() {
                 <div className="absolute top-0 right-0 w-48 h-48 bg-[#ff6b35]/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl animate-pulse" />
                 
                 <div className="relative z-10 space-y-10">
-                  {/* Sun Sign Section */}
+                  {/* Moon Sign Section - MORE PROMINENT */}
                   <div className="space-y-4">
                     <p className="text-[10px] uppercase tracking-[0.4em] font-black text-[#ff6b35] opacity-80">
-                      {language === 'gu' ? 'તમારી સૂર્ય રાશિ (Surya Rashi)' : language === 'hi' ? 'आपकी सूर्य राशि' : 'YOUR SUN SIGN (SURYA RASHI)'}
+                      {language === 'gu' ? 'તમારી સાચી ચંદ્ર રાશિ (Real Moon Sign)' : language === 'hi' ? 'आपकी असली चंद्र राशि' : 'YOUR REAL MOON SIGN (CHANDRA RASHI)'}
                     </p>
-                    <div className="flex items-center justify-center gap-6">
-                        {(() => {
-                            const idx = getRashiIndex(result.sunRashi.english);
-                            const Icon = RASHI_ICONS[idx >= 0 ? idx : 0];
-                            return <Icon color="#ff6b35" size={48} className="opacity-80" />;
-                        })()}
-                        <h3 className="text-5xl md:text-6xl font-[family-name:var(--font-cinzel)] font-black text-gradient-ancient">
-                          {getTranslatedValue(result.sunRashi)}
-                        </h3>
-                    </div>
-                  </div>
-
-                  {/* Divider */}
-                  <div className="w-24 h-px bg-[#ff6b35]/30 mx-auto" />
-
-                  {/* Moon Sign Section */}
-                  <div className="space-y-4">
-                    <p className="text-[10px] uppercase tracking-[0.4em] font-black text-[#ff6b35] opacity-80">
-                      {language === 'gu' ? 'તમારી ચંદ્ર રાશિ (Chandra Rashi)' : language === 'hi' ? 'आपकी चंद्र राशि' : 'YOUR MOON SIGN (CHANDRA RASHI)'}
-                    </p>
-                    <div className="flex items-center justify-center gap-6">
+                    <div className="flex flex-col items-center justify-center gap-4">
                         {(() => {
                             const idx = getRashiIndex(result.moonRashi.english);
                             const Icon = RASHI_ICONS[idx >= 0 ? idx : 0];
-                            return <Icon color="#ff6b35" size={48} className="opacity-80" />;
+                            return (
+                              <div className="w-24 h-24 rounded-[2rem] bg-[#ff6b35]/10 flex items-center justify-center shadow-lg border border-[#ff6b35]/20">
+                                <Icon color="#ff6b35" size={64} className="opacity-90" />
+                              </div>
+                            );
                         })()}
-                        <h3 className="text-5xl md:text-6xl font-[family-name:var(--font-cinzel)] font-black text-gradient-ancient">
+                        <h3 className="text-6xl md:text-7xl font-[family-name:var(--font-cinzel)] font-black text-gradient-ancient">
                           {getTranslatedValue(result.moonRashi)}
                         </h3>
                     </div>
-                    <p className="text-xs font-bold opacity-60 max-w-sm mx-auto">
+                    <p className="text-xs font-bold text-[#ff6b35] opacity-90 max-w-sm mx-auto">
                         {language === 'gu' 
                             ? 'નામ પાડવા અને સચોટ ભવિષ્ય માટે ચંદ્ર રાશિ સૌથી મહત્વની છે.' 
                             : 'Moon sign is the most important for naming and accurate predictions.'}
                     </p>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="w-full flex items-center gap-4">
+                    <div className="flex-1 h-px bg-[#ff6b35]/20" />
+                    <Sparkles className="w-4 h-4 text-[#ff6b35]/40" />
+                    <div className="flex-1 h-px bg-[#ff6b35]/20" />
+                  </div>
+
+                  {/* Sun Sign Section - LESS PROMINENT */}
+                  <div className="space-y-4 opacity-70 scale-95">
+                    <p className="text-[10px] uppercase tracking-[0.4em] font-black text-[#ff6b35]">
+                      {language === 'gu' ? 'તમારી સૂર્ય રાશિ (Surya Rashi)' : language === 'hi' ? 'आपकी सूर्य राशि' : 'YOUR SUN SIGN (SURYA RASHI)'}
+                    </p>
+                    <div className="flex items-center justify-center gap-4">
+                        {(() => {
+                            const idx = getRashiIndex(result.sunRashi.english);
+                            const Icon = RASHI_ICONS[idx >= 0 ? idx : 0];
+                            return <Icon color="#ff6b35" size={32} className="opacity-60" />;
+                        })()}
+                        <h3 className="text-3xl md:text-4xl font-[family-name:var(--font-cinzel)] font-black text-[#ff6b35]">
+                          {getTranslatedValue(result.sunRashi)}
+                        </h3>
+                    </div>
                   </div>
 
                   {/* WhatsApp CTA */}

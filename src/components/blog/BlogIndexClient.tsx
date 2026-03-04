@@ -16,7 +16,7 @@ import Footer from "@/components/homepage/Footer";
 import Image from "next/image";
 
 const RashifalSection = dynamic(() => import("@/components/homepage/RashifalSection"), { 
-  ssr: true,
+  ssr: false,
   loading: () => <div className="h-[650px] w-full bg-gray-100/5" />
 });
 
@@ -89,15 +89,36 @@ export default function BlogIndexClient({ initialPosts }: BlogIndexClientProps) 
   };
 
   const getPostTitle = (post: BlogPost) => {
-    if (currentLanguage === 'gu' && post.title_gujarati) return post.title_gujarati;
-    if (currentLanguage === 'hi' && post.title_hindi) return post.title_hindi;
-    return post.title;
+    let title = post.title;
+    if (currentLanguage === 'gu' && post.title_gujarati) title = post.title_gujarati;
+    else if (currentLanguage === 'hi' && post.title_hindi) title = post.title_hindi;
+    
+    // Fallback: If title contains " / ", it might be a combined string (EN / GU / HI)
+    if (title.includes(' / ')) {
+      const parts = title.split(' / ');
+      if (parts.length >= 3) {
+        if (currentLanguage === 'en') return parts[0];
+        if (currentLanguage === 'gu') return parts[1];
+        if (currentLanguage === 'hi') return parts[2];
+      }
+    }
+    return title;
   };
 
   const getPostExcerpt = (post: BlogPost) => {
-    if (currentLanguage === 'gu' && post.excerpt_gujarati) return post.excerpt_gujarati;
-    if (currentLanguage === 'hi' && post.excerpt_hindi) return post.excerpt_hindi;
-    return post.excerpt;
+    let excerpt = post.excerpt;
+    if (currentLanguage === 'gu' && post.excerpt_gujarati) excerpt = post.excerpt_gujarati;
+    else if (currentLanguage === 'hi' && post.excerpt_hindi) excerpt = post.excerpt_hindi;
+
+    if (excerpt && excerpt.includes(' / ')) {
+      const parts = excerpt.split(' / ');
+      if (parts.length >= 3) {
+        if (currentLanguage === 'en') return parts[0];
+        if (currentLanguage === 'gu') return parts[1];
+        if (currentLanguage === 'hi') return parts[2];
+      }
+    }
+    return excerpt;
   };
 
   return (
@@ -229,9 +250,9 @@ export default function BlogIndexClient({ initialPosts }: BlogIndexClientProps) 
                         ) : (
                         <div className={`w-14 h-14 rounded-xl flex-shrink-0 ${theme === 'dark' ? 'bg-[#1a1a2e]' : 'bg-orange-50'}`} />
                       )}
-                      <p className={`text-xs font-medium line-clamp-2 group-hover:text-[#ff6b35] transition-colors ${theme === 'dark' ? 'text-gray-300' : 'text-[#4a3f35]'}`}>
-                        {getPostTitle(post)}
-                      </p>
+                        <p className={`text-xs font-medium line-clamp-2 group-hover:text-[#ff6b35] transition-colors ${theme === 'dark' ? 'text-gray-300' : 'text-[#4a3f35]'}`} data-no-translate>
+                          {getPostTitle(post)}
+                        </p>
                     </Link>
                   ))}
                 </div>
@@ -277,16 +298,16 @@ export default function BlogIndexClient({ initialPosts }: BlogIndexClientProps) 
 
                       {/* Text */}
                       <div className="flex-1 flex flex-col justify-between min-w-0">
-                        <div>
-                          <h3 className={`font-[family-name:var(--font-cinzel)] font-bold text-xl leading-snug mb-2 group-hover:text-[#ff6b35] transition-colors ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#2d2318]'}`}>
-                            {getPostTitle(post)}
-                          </h3>
-                          {getPostExcerpt(post) && (
-                            <p className={`text-sm leading-relaxed mb-3 line-clamp-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                              {getPostExcerpt(post)}
-                            </p>
-                          )}
-                        </div>
+                          <div>
+                            <h3 className={`font-[family-name:var(--font-cinzel)] font-bold text-xl leading-snug mb-2 group-hover:text-[#ff6b35] transition-colors ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#2d2318]'}`} data-no-translate>
+                              {getPostTitle(post)}
+                            </h3>
+                            {getPostExcerpt(post) && (
+                              <p className={`text-sm leading-relaxed mb-3 line-clamp-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} data-no-translate>
+                                {getPostExcerpt(post)}
+                              </p>
+                            )}
+                          </div>
                         <div className={`flex items-center gap-4 text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
                           <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[#ff6b35]/10 text-[#ff6b35]">
                             {post.category}
