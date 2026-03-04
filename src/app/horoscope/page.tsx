@@ -12,6 +12,7 @@ import { useTranslation } from "@/components/GoogleTranslateWidget";
 import { supabase } from "@/lib/supabase";
 import Navbar from "@/components/homepage/Navbar";
 import Footer from "@/components/homepage/Footer";
+import { calculatePanchang } from "@/lib/panchang";
 
 export default function HoroscopePage() {
   const { user: authUser } = useAuth();
@@ -29,26 +30,31 @@ export default function HoroscopePage() {
   const { language, t } = useTranslation();
   const router = useRouter();
 
-  const getZodiacSign = (dob: string) => {
-    if (!dob) return null;
-    const date = new Date(dob);
-    if (isNaN(date.getTime())) return null;
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
+  const [signBasis, setSignBasis] = useState<'sun' | 'moon'>('moon');
 
-    if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return "aries";
-    if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return "taurus";
-    if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return "gemini";
-    if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return "cancer";
-    if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return "leo";
-    if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return "virgo";
-    if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return "libra";
-    if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return "scorpio";
-    if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return "sagittarius";
-    if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return "capricorn";
-    if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return "aquarius";
-    if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return "pisces";
-    return null;
+  const getVedicSigns = (dob: string, tob?: string) => {
+    if (!dob) return null;
+    try {
+        const [year, month, day] = dob.split('-').map(Number);
+        let hours = 8, minutes = 0;
+        if (tob) {
+            const [h, m] = tob.split(':').map(Number);
+            hours = h; minutes = m;
+        }
+        
+        const localBirth = new Date(year, month - 1, day, hours, minutes);
+        const utcBirth = new Date(localBirth.getTime() - (5.5 * 60 * 60 * 1000));
+        
+        const panchang = calculatePanchang(utcBirth);
+        return {
+            sun: panchang.sunRashi.english.split(' (')[0].toLowerCase(),
+            moon: panchang.moonRashi.english.split(' (')[0].toLowerCase(),
+            sunTranslated: panchang.sunRashi,
+            moonTranslated: panchang.moonRashi
+        };
+    } catch (e) {
+        return null;
+    }
   };
 
   useEffect(() => {
@@ -70,41 +76,52 @@ export default function HoroscopePage() {
     getData();
   }, [router, authUser]);
 
-  useEffect(() => {
-    async function fetchHoroscope() {
-      const dob = profile?.dob || authUser?.user_metadata?.dob;
-      const sign = getZodiacSign(dob);
-      if (!sign) return;
+    useEffect(() => {
+      async function fetchHoroscope() {
+        const dob = profile?.dob || authUser?.user_metadata?.dob;
+        const tob = profile?.tob || authUser?.user_metadata?.tob;
+        const signs = getVedicSigns(dob, tob);
+        if (!signs) return;
 
-      setIsFetching(true);
-      try {
-        const res = await fetch(`/api/horoscope?sign=${sign}&type=${viewType}`);
-        const data = await res.json();
-        if (data.success) {
-          setHoroscopeData(data.data);
+        const activeSign = signBasis === 'sun' ? signs.sun : signs.moon;
+  
+        setIsFetching(true);
+        try {
+          const res = await fetch(`/api/horoscope?sign=${activeSign}&type=${viewType}`);
+          const data = await res.json();
+          if (data.success) {
+            setHoroscopeData(data.data);
+          }
+        } catch (err) {
+          console.error("Failed to fetch horoscope:", err);
+        } finally {
+          setIsFetching(false);
         }
-      } catch (err) {
-        console.error("Failed to fetch horoscope:", err);
-      } finally {
-        setIsFetching(false);
       }
+  
+      if (!isLoading && (profile || authUser)) {
+        fetchHoroscope();
+      }
+    }, [isLoading, profile, authUser, viewType, signBasis]);
+  
+    if (isLoading) {
+      return (
+        <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-[#0a0a0f]' : 'bg-background'}`}>
+          <Loader2 className="w-12 h-12 animate-spin text-[#ff6b35]" />
+        </div>
+      );
     }
+  
+    const dobInput = profile?.dob || authUser?.user_metadata?.dob;
+    const tobInput = profile?.tob || authUser?.user_metadata?.tob;
+    const vedicSigns = getVedicSigns(dobInput, tobInput);
 
-    if (!isLoading && (profile || authUser)) {
-      fetchHoroscope();
-    }
-  }, [isLoading, profile, authUser, viewType]);
+    const getTranslatedSign = (item: { english: string; hindi: string; gujarati: string }) => {
+        if (language === 'gu') return item.gujarati;
+        if (language === 'hi') return item.hindi;
+        return item.english.split(' (')[0];
+    };
 
-  if (isLoading) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-[#0a0a0f]' : 'bg-background'}`}>
-        <Loader2 className="w-12 h-12 animate-spin text-[#ff6b35]" />
-      </div>
-    );
-  }
-
-  const dobInput = profile?.dob || authUser?.user_metadata?.dob;
-  const zodiacSign = getZodiacSign(dobInput);
 
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-[#0a0a0f] text-[#f5f0e8]' : 'bg-[#fdfbf7] text-[#4a3f35]'}`}>
@@ -157,18 +174,39 @@ export default function HoroscopePage() {
           key={viewType}
           className="space-y-8"
         >
-          <div className="text-center space-y-4">
-            <h1 className="font-[family-name:var(--font-cinzel)] text-5xl md:text-7xl font-bold text-gradient-ancient tracking-tight">
-              {viewType === 'daily' ? t("Your Daily Alignment") : t("Cosmic Forecast")}
-            </h1>
-            <div className="flex items-center justify-center gap-3 text-xl text-[#a0998c] capitalize font-medium">
-              <span className="bg-[#ff6b35]/10 px-4 py-1 rounded-full text-[#ff6b35] border border-[#ff6b35]/20">{zodiacSign}</span>
-              <span>•</span>
-              <span className="notranslate">{viewType === 'daily' ? new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) : horoscopeData?.month || new Date().getFullYear()}</span>
-            </div>
-          </div>
+            <div className="text-center space-y-6">
+              <h1 className="font-[family-name:var(--font-cinzel)] text-5xl md:text-7xl font-bold text-gradient-ancient tracking-tight">
+                {viewType === 'daily' ? t("Your Daily Alignment") : t("Cosmic Forecast")}
+              </h1>
+              
+              <div className="flex flex-col items-center gap-4">
+                <div className="flex bg-[#ff6b35]/10 p-1 rounded-xl border border-[#ff6b35]/20">
+                    <button 
+                        onClick={() => setSignBasis('moon')}
+                        className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${signBasis === 'moon' ? 'bg-[#ff6b35] text-white shadow-md' : 'text-[#ff6b35] hover:bg-[#ff6b35]/5'}`}
+                    >
+                        {language === 'gu' ? 'ચંદ્ર રાશિ' : 'Moon Sign'}
+                    </button>
+                    <button 
+                        onClick={() => setSignBasis('sun')}
+                        className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${signBasis === 'sun' ? 'bg-[#ff6b35] text-white shadow-md' : 'text-[#ff6b35] hover:bg-[#ff6b35]/5'}`}
+                    >
+                        {language === 'gu' ? 'સૂર્ય રાશિ' : 'Sun Sign'}
+                    </button>
+                </div>
 
-          {!zodiacSign ? (
+                <div className="flex items-center justify-center gap-3 text-xl text-[#a0998c] capitalize font-medium">
+                    <span className="bg-[#ff6b35]/10 px-4 py-1 rounded-full text-[#ff6b35] border border-[#ff6b35]/20">
+                        {vedicSigns ? getTranslatedSign(signBasis === 'sun' ? vedicSigns.sunTranslated : vedicSigns.moonTranslated) : "..."}
+                    </span>
+                    <span>•</span>
+                    <span className="notranslate">{viewType === 'daily' ? new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) : horoscopeData?.month || new Date().getFullYear()}</span>
+                </div>
+              </div>
+            </div>
+
+            {!vedicSigns ? (
+
             <Card className="p-12 text-center border-dashed border-2 border-[#ff6b35]/30 bg-[#ff6b35]/5 rounded-[2.5rem]">
               <p className="text-2xl mb-6 font-medium">{t("We need your birth date to calculate your horoscope.")}</p>
               <Button onClick={() => router.push('/profile')} size="lg" className="bg-[#ff6b35] hover:bg-[#ff8c5e] text-lg px-8 py-6 rounded-2xl shadow-xl shadow-[#ff6b35]/20">

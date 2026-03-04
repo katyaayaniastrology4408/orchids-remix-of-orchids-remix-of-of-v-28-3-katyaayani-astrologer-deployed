@@ -20,6 +20,7 @@ import Navbar from "@/components/homepage/Navbar";
 import Footer from "@/components/homepage/Footer";
 import { toast } from "sonner";
 import Script from "next/script";
+import { calculatePanchang } from "@/lib/panchang";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
@@ -159,26 +160,27 @@ export default function ProfilePage() {
     }
   };
 
-  const getZodiacSign = (dob: string) => {
+  const getVedicSigns = (dob: string, tob?: string) => {
     if (!dob) return null;
-    const date = new Date(dob);
-    if (isNaN(date.getTime())) return null;
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-
-    if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return "aries";
-    if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return "taurus";
-    if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return "gemini";
-    if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return "cancer";
-    if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return "leo";
-    if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return "virgo";
-    if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return "libra";
-    if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return "scorpio";
-    if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return "sagittarius";
-    if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return "capricorn";
-    if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return "aquarius";
-    if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return "pisces";
-    return null;
+    try {
+        const [year, month, day] = dob.split('-').map(Number);
+        let hours = 8, minutes = 0;
+        if (tob) {
+            const [h, m] = tob.split(':').map(Number);
+            hours = h; minutes = m;
+        }
+        
+        const localBirth = new Date(year, month - 1, day, hours, minutes);
+        const utcBirth = new Date(localBirth.getTime() - (5.5 * 60 * 60 * 1000));
+        
+        const panchang = calculatePanchang(utcBirth);
+        return {
+            sun: panchang.sunRashi,
+            moon: panchang.moonRashi
+        };
+    } catch (e) {
+        return null;
+    }
   };
 
   useEffect(() => {
@@ -286,9 +288,16 @@ export default function ProfilePage() {
   const profilePic = profile?.profile_pic || user?.user_metadata?.profile_pic || user?.user_metadata?.avatar_url || user?.user_metadata?.picture || 
     (profileGender?.toLowerCase() === 'female' ? defaultGirlPic : defaultBoyPic);
 
-  const birthDate = profile?.dob || user?.user_metadata?.dob || "Not specified";
-  const birthTime = profile?.tob || user?.user_metadata?.tob || "Not specified";
-  const zodiacSign = getZodiacSign(birthDate);
+    const birthDate = profile?.dob || user?.user_metadata?.dob || "Not specified";
+    const birthTime = profile?.tob || user?.user_metadata?.tob || "Not specified";
+    const vedicSigns = getVedicSigns(birthDate, birthTime);
+
+    const getTranslatedSign = (item: { english: string; hindi: string; gujarati: string }) => {
+        if (language === 'gu') return item.gujarati;
+        if (language === 'hi') return item.hindi;
+        return item.english.split(' (')[0];
+    };
+
 
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-[#0a0a0f] text-[#f5f0e8]' : 'bg-[#fdfbf7] text-[#4a3f35]'}`}>
@@ -606,10 +615,15 @@ export default function ProfilePage() {
                         <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Place")}</span>
                         <span className="font-bold text-sm sm:text-base capitalize">{profile?.pob || "Not specified"}</span>
                       </div>
-                      <div className="flex justify-between items-center py-2 sm:py-3">
-                        <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Sign")}</span>
-                        <Badge className="bg-indigo-500 text-white capitalize text-xs sm:text-sm">{t(zodiacSign || "Unknown")}</Badge>
-                      </div>
+                        <div className="flex justify-between items-center py-2 sm:py-3 border-b border-purple-500/5">
+                          <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Surya Sign")}</span>
+                          <Badge className="bg-rose-500 text-white capitalize text-xs sm:text-sm">{vedicSigns ? getTranslatedSign(vedicSigns.sun) : "Unknown"}</Badge>
+                        </div>
+                        <div className="flex justify-between items-center py-2 sm:py-3">
+                          <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest opacity-40">{t("Chandra Sign")}</span>
+                          <Badge className="bg-indigo-500 text-white capitalize text-xs sm:text-sm">{vedicSigns ? getTranslatedSign(vedicSigns.moon) : "Unknown"}</Badge>
+                        </div>
+
                   </CardContent>
                 </Card>
               </div>

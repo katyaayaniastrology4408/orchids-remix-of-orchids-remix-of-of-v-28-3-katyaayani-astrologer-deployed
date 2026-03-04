@@ -3,85 +3,40 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/components/GoogleTranslateWidget";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import { calculatePanchang, PanchangData } from "@/lib/panchang";
+import { RASHI_ICONS } from "@/components/RashiIcons";
 
 export default function ZodiacSignForm() {
   const { theme } = useTheme();
   const { language } = useTranslation();
   const [formData, setFormData] = useState({
     dob: "",
-    tob: "08:00 AM",
+    tob: "08:00",
     pob: "",
     email: ""
   });
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<PanchangData | null>(null);
   const [loading, setLoading] = useState(false);
-
-    const calculateZodiac = (dateStr: string) => {
-      if (!dateStr) return null;
-      const date = new Date(dateStr);
-      const day = date.getDate();
-      const month = date.getMonth() + 1;
-
-      // Vedic Sun Signs (Nirayana - Surya Rashi) - Approximate dates
-      const signs = [
-        { name: "Capricorn", start: [1, 14], end: [2, 12] },
-        { name: "Aquarius", start: [2, 13], end: [3, 13] },
-        { name: "Pisces", start: [3, 14], end: [4, 13] },
-        { name: "Aries", start: [4, 14], end: [5, 14] },
-        { name: "Taurus", start: [5, 15], end: [6, 14] },
-        { name: "Gemini", start: [6, 15], end: [7, 15] },
-        { name: "Cancer", start: [7, 16], end: [8, 16] },
-        { name: "Leo", start: [8, 17], end: [9, 16] },
-        { name: "Virgo", start: [9, 17], end: [10, 16] },
-        { name: "Libra", start: [10, 17], end: [11, 15] },
-        { name: "Scorpio", start: [11, 16], end: [12, 15] },
-        { name: "Sagittarius", start: [12, 16], end: [1, 13] }
-      ];
-
-      const sign = signs.find(s => {
-        const [sm, sd] = s.start;
-        const [em, ed] = s.end;
-        if (sm === 12 && em === 1) { // Sagittarius to Capricorn transition
-            return (month === 12 && day >= sd) || (month === 1 && day <= ed);
-        }
-        return (month === sm && day >= sd) || (month === em && day <= ed);
-      });
-
-      return sign ? sign.name : "Capricorn";
-    };
-
-
-  const getZodiacTranslation = (sign: string) => {
-    const translations: Record<string, { gu: string, hi: string }> = {
-      "Aries": { gu: "મેષ", hi: "मेष" },
-      "Taurus": { gu: "વૃષભ", hi: "वृषभ" },
-      "Gemini": { gu: "મિથુન", hi: "मिथुन" },
-      "Cancer": { gu: "કર્ક", hi: "કર્ક" },
-      "Leo": { gu: "સિંહ", hi: "सिंह" },
-      "Virgo": { gu: "કન્યા", hi: "कन्या" },
-      "Libra": { gu: "તુલા", hi: "તુલા" },
-      "Scorpio": { gu: "વૃશ્ચિક", hi: "वृश्चिक" },
-      "Sagittarius": { gu: "ધનુ", hi: "ધનુ" },
-      "Capricorn": { gu: "મકર", hi: "મકર" },
-      "Aquarius": { gu: "કુંભ", hi: "कुंभ" },
-      "Pisces": { gu: "મીન", hi: "मीन" }
-    };
-    if (language === 'gu') return translations[sign]?.gu || sign;
-    if (language === 'hi') return translations[sign]?.hi || sign;
-    return sign;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const sign = calculateZodiac(formData.dob);
-    setResult(sign);
     
     try {
+        const [year, month, day] = formData.dob.split('-').map(Number);
+        const [hours, minutes] = formData.tob.split(':').map(Number);
+        
+        // Assume IST (+5:30) for birth details as most users are in India
+        const localBirth = new Date(year, month - 1, day, hours, minutes);
+        const utcBirth = new Date(localBirth.getTime() - (5.5 * 60 * 60 * 1000));
+        
+        const panchang = calculatePanchang(utcBirth);
+        setResult(panchang);
+
       await fetch('/api/enquiry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -89,7 +44,7 @@ export default function ZodiacSignForm() {
           name: "Zodiac Checker User",
           email: formData.email,
           subject: "Know Your Zodiac Sign Lead",
-          message: `User checked zodiac sign.\nDOB: ${formData.dob}\nTOB: ${formData.tob}\nPOB: ${formData.pob}\nResult: ${sign}`
+          message: `User checked zodiac sign.\nDOB: ${formData.dob}\nTOB: ${formData.tob}\nPOB: ${formData.pob}\nSurya Rashi: ${panchang.sunRashi.english}\nChandra Rashi: ${panchang.moonRashi.english}`
         })
       });
     } catch (err) {
@@ -99,13 +54,24 @@ export default function ZodiacSignForm() {
     }
   };
 
+  const getTranslatedValue = (item: { english: string; hindi: string; gujarati: string }) => {
+    if (language === 'gu') return item.gujarati;
+    if (language === 'hi') return item.hindi;
+    // Remove (Mesh), (Vrishabh) etc for clean English display
+    return item.english.split(' (')[0];
+  };
+
+  const getRashiIndex = (englishName: string) => {
+    const signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
+    return signs.findIndex(s => englishName.includes(s));
+  };
+
   return (
     <section className={`py-24 px-6 relative overflow-hidden ${theme === 'dark' ? 'bg-[#0a0a0f]' : 'bg-[#fdfbf7]'}`}>
       {/* Astrological Background Elements */}
       <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none select-none overflow-hidden">
         <div className="absolute top-10 left-10 w-96 h-96 border border-[#ff6b35] rounded-full" />
         <div className="absolute top-20 left-20 w-72 h-72 border border-[#ff6b35] rounded-full" />
-        <div className="absolute top-40 left-40 w-32 h-32 border border-[#ff6b35] rounded-full" />
         <div className="absolute bottom-10 right-10 w-96 h-96 border border-[#ff6b35] rounded-full opacity-20" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-[#ff6b35] rounded-full animate-spin-slow" />
       </div>
@@ -124,10 +90,10 @@ export default function ZodiacSignForm() {
         </h2>
         <p className={`mb-12 text-lg leading-relaxed opacity-80 ${theme === 'dark' ? 'text-[#c4bdb3]' : 'text-[#5a4f44]'}`}>
           {language === 'gu' 
-            ? 'તમારી જન્મ તારીખ અને સમય દાખલ કરો અને તમારી રાશિ શોધો.' 
+            ? 'તમારી જન્મ તારીખ અને સમય દાખલ કરો અને તમારી સૂર્ય અને ચંદ્ર રાશિ શોધો.' 
             : language === 'hi' 
-            ? 'अपनी जन्म तिथि और समय दर्ज करें और अपनी राशि जानें।' 
-            : 'Enter your birth details to discover your zodiac sign.'}
+            ? 'अपनी जन्म तिथि और समय दर्ज करें और अपनी सूर्य और चंद्र राशि जानें।' 
+            : 'Enter your birth details to discover your Sun and Moon signs.'}
         </p>
 
           <Card className={`${theme === 'dark' ? 'bg-[#12121a]/80 backdrop-blur-md border-[#ff6b35]/20' : 'bg-[#fffdf9]/80 backdrop-blur-md border-[#ff6b35]/30'} p-8 md:p-12 rounded-[3rem] shadow-[0_25px_60px_rgba(255,107,53,0.15)] border-t-4 border-t-[#ff6b35] transition-all duration-500`}>
@@ -173,7 +139,7 @@ export default function ZodiacSignForm() {
 
               <div className="space-y-3">
                 <label className="block text-[11px] font-black uppercase tracking-[0.25em] text-[#ff6b35] ml-1">
-                  {language === 'gu' ? 'ઈમેઈલ આઈડી (જરૂરી)' : language === 'hi' ? 'ईमेल आईडी (आवश्यक)' : 'Email ID (Important)'}
+                  {language === 'gu' ? 'ઈમેઈલ આઈડી' : language === 'hi' ? 'ईमेल आईडी' : 'Email ID'}
                 </label>
                   <Input 
                     type="email"
@@ -205,49 +171,71 @@ export default function ZodiacSignForm() {
             </form>
 
             {result && (
-              <div className="mt-12 p-10 md:p-12 rounded-[3rem] bg-gradient-to-br from-[#ff6b35]/20 via-[#ff8c5e]/10 to-transparent border-2 border-[#ff6b35]/40 text-center animate-in fade-in zoom-in duration-1000 relative overflow-hidden shadow-inner">
+              <div className="mt-12 p-8 md:p-10 rounded-[3rem] bg-gradient-to-br from-[#ff6b35]/20 via-[#ff8c5e]/10 to-transparent border-2 border-[#ff6b35]/40 text-center animate-in fade-in zoom-in duration-1000 relative overflow-hidden shadow-inner">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-[#ff6b35]/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl animate-pulse" />
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#ff8c5e]/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl animate-pulse" />
                 
-                    <div className="relative z-10">
-                      <p className="text-xs uppercase tracking-[0.4em] font-black text-[#ff6b35] mb-6">
-                        {language === 'gu' ? 'તમારી સૂર્ય રાશિ (Surya Rashi) છે' : language === 'hi' ? 'आपकी सूर्य राशि है' : 'YOUR SUN SIGN (SURYA RASHI)'}
-                      </p>
-                      <h3 className="text-6xl md:text-8xl font-[family-name:var(--font-cinzel)] font-black text-gradient-ancient mb-8 drop-shadow-sm">
-                        {getZodiacTranslation(result)}
-                      </h3>
-                      
-                      <div className="max-w-md mx-auto space-y-8">
-                        <div className="p-7 rounded-[2.5rem] bg-white/20 backdrop-blur-xl border border-white/30 shadow-xl ring-1 ring-[#ff6b35]/20 transition-all hover:scale-[1.02] duration-300">
-                          <p className="text-[11px] uppercase tracking-[0.25em] font-black text-[#ff6b35] mb-3">
-                            {language === 'gu' ? 'નામ પાડવા માટે (ચંદ્ર રાશિ)' : 'FOR NAMING (CHANDRA RASHI)'}
-                          </p>
-                          <p className="text-base md:text-lg font-bold leading-relaxed opacity-90">
-                            {language === 'gu' 
-                                ? 'નામ પાડવા અને સચોટ ભવિષ્ય માટે જન્મની "ચંદ્ર રાશિ" (Janma Rashi) જાણવી અનિવાર્ય છે. સચોટ કુંડળી વિશ્લેષણ માટે અત્યારે જ સંપર્ક કરો.' 
-                                : 'For naming and accurate predictions, knowing your "Chandra Rashi" (Moon Sign) is essential. Contact now for precise Kundali analysis.'}
-                          </p>
-                        </div>
-    
-                        <div className="pt-8 border-t-2 border-[#ff6b35]/10">
-                          <p className="text-lg md:text-xl font-black text-[#ff6b35] mb-6 tracking-tight">
-                            {language === 'gu' 
-                                ? 'ચંદ્ર રાશિ અને કુંડળી માટે અત્યારે જ પૂછો.' 
-                                : 'Ask for Chandra Rashi & Kundali now.'}
-                          </p>
-                          <a 
-                            href={`https://wa.me/919824929588?text=${encodeURIComponent(`Namaste, I want to know my accurate Janma Rashi (Chandra Rashi) for naming/horoscope.\n\nDetails:\nDOB: ${formData.dob}\nTOB: ${formData.tob}\nPOB: ${formData.pob}`)}`}
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-4 bg-[#25D366] hover:bg-[#128C7E] text-white font-black px-10 py-5 rounded-3xl transition-all shadow-[0_20px_40px_rgba(37,211,102,0.4)] active:scale-95 group relative overflow-hidden"
-                          >
-                            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" className="w-7 h-7 invert relative z-10 animate-bounce-slow" />
-                            <span className="text-lg relative z-10 tracking-wider">{language === 'gu' ? 'વોટ્સએપ પર પૂછો' : 'ASK ON WHATSAPP'}</span>
-                          </a>
-                        </div>
-                      </div>
+                <div className="relative z-10 space-y-10">
+                  {/* Sun Sign Section */}
+                  <div className="space-y-4">
+                    <p className="text-[10px] uppercase tracking-[0.4em] font-black text-[#ff6b35] opacity-80">
+                      {language === 'gu' ? 'તમારી સૂર્ય રાશિ (Surya Rashi)' : language === 'hi' ? 'आपकी सूर्य राशि' : 'YOUR SUN SIGN (SURYA RASHI)'}
+                    </p>
+                    <div className="flex items-center justify-center gap-6">
+                        {(() => {
+                            const idx = getRashiIndex(result.sunRashi.english);
+                            const Icon = RASHI_ICONS[idx >= 0 ? idx : 0];
+                            return <Icon color="#ff6b35" size={48} className="opacity-80" />;
+                        })()}
+                        <h3 className="text-5xl md:text-6xl font-[family-name:var(--font-cinzel)] font-black text-gradient-ancient">
+                          {getTranslatedValue(result.sunRashi)}
+                        </h3>
                     </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="w-24 h-px bg-[#ff6b35]/30 mx-auto" />
+
+                  {/* Moon Sign Section */}
+                  <div className="space-y-4">
+                    <p className="text-[10px] uppercase tracking-[0.4em] font-black text-[#ff6b35] opacity-80">
+                      {language === 'gu' ? 'તમારી ચંદ્ર રાશિ (Chandra Rashi)' : language === 'hi' ? 'आपकी चंद्र राशि' : 'YOUR MOON SIGN (CHANDRA RASHI)'}
+                    </p>
+                    <div className="flex items-center justify-center gap-6">
+                        {(() => {
+                            const idx = getRashiIndex(result.moonRashi.english);
+                            const Icon = RASHI_ICONS[idx >= 0 ? idx : 0];
+                            return <Icon color="#ff6b35" size={48} className="opacity-80" />;
+                        })()}
+                        <h3 className="text-5xl md:text-6xl font-[family-name:var(--font-cinzel)] font-black text-gradient-ancient">
+                          {getTranslatedValue(result.moonRashi)}
+                        </h3>
+                    </div>
+                    <p className="text-xs font-bold opacity-60 max-w-sm mx-auto">
+                        {language === 'gu' 
+                            ? 'નામ પાડવા અને સચોટ ભવિષ્ય માટે ચંદ્ર રાશિ સૌથી મહત્વની છે.' 
+                            : 'Moon sign is the most important for naming and accurate predictions.'}
+                    </p>
+                  </div>
+
+                  {/* WhatsApp CTA */}
+                  <div className="pt-10 border-t border-[#ff6b35]/10">
+                    <p className="text-lg font-bold text-[#ff6b35] mb-6">
+                      {language === 'gu' 
+                          ? 'વધુ વિગતવાર કુંડળી વિશ્લેષણ માટે અત્યારે જ પૂછો.' 
+                          : 'Ask for detailed Kundali analysis now.'}
+                    </p>
+                    <a 
+                      href={`https://wa.me/919824929588?text=${encodeURIComponent(`Namaste, I checked my Rashi on your website.\n\nDetails:\nDOB: ${formData.dob}\nTOB: ${formData.tob}\nPOB: ${formData.pob}\nSurya Rashi: ${result.sunRashi.english}\nChandra Rashi: ${result.moonRashi.english}\n\nI want a detailed consultation.`)}`}
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-4 bg-[#25D366] hover:bg-[#128C7E] text-white font-black px-10 py-5 rounded-3xl transition-all shadow-[0_20px_40px_rgba(37,211,102,0.4)] active:scale-95 group relative overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" className="w-7 h-7 invert relative z-10 animate-bounce-slow" />
+                      <span className="text-lg relative z-10 tracking-wider">{language === 'gu' ? 'વોટ્સએપ પર પૂછો' : 'ASK ON WHATSAPP'}</span>
+                    </a>
+                  </div>
+                </div>
               </div>
             )}
 
