@@ -411,6 +411,7 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
                   {language === 'gu' ? 'વધુ બ્લોગ પોસ્ટ જુઓ' : language === 'hi' ? 'और ब्लॉग पोस्ट देखें' : 'View More Blog Posts'}
                 </Button>
               </Link>
+              </div>
             </div>
           </div>
         </motion.article>
