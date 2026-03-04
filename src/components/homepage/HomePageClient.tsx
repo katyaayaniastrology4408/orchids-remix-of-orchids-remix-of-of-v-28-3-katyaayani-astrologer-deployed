@@ -443,13 +443,14 @@ export default function HomePageClient({ initialLatestPosts, hasTodayPosts, actu
           >
             Sign In Now
           </Button>
-        </div>
+          </div>
         </section>
   
-        <RashifalSection />
         <ZodiacSignForm />
+        <RashifalSection />
   
         <section className={`py-24 px-6 ${theme === 'dark' ? 'bg-gradient-to-b from-[#0a0a0f] to-[#12121a]' : 'bg-gradient-to-b from-[#fdfbf7] to-[#f8f4ee]'}`}>
+
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <div className="flex justify-center gap-2 mb-6">
