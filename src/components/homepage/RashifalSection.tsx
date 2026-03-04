@@ -73,47 +73,55 @@ gu: {
 
 type Rashi = { name: string; symbol: string; color: string; tip: string };
 
-  function RashiModal({ rashi, index, isDark, onClose }: { rashi: Rashi; index: number; isDark: boolean; onClose: () => void }) {
+    function RashiModal({ rashi, index, isDark, signBasis, onClose }: { rashi: Rashi; index: number; isDark: boolean; signBasis: 'sun' | 'moon'; onClose: () => void }) {
 
-    const [mounted, setMounted] = useState(false);
-    const Icon = RASHI_ICONS[index];
-  
-    useEffect(() => {
-      setMounted(true);
-      document.body.style.overflow = "hidden";
-      return () => { document.body.style.overflow = ""; };
-    }, []);
-  
-    useEffect(() => {
-      const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-      window.addEventListener("keydown", onKey);
-      return () => window.removeEventListener("keydown", onKey);
-    }, [onClose]);
-  
-    if (!mounted) return null;
-  
-    return createPortal(
-      <div
-        className="fixed inset-0 flex items-center justify-center p-4"
-        style={{ zIndex: 99999 }}
-        onClick={onClose}
-      >
-        {/* Backdrop */}
-        <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
-  
-          {/* Modal box */}
-          <div
-            className={`relative w-full max-w-md rounded-[40px] shadow-2xl p-10 md:p-12 overflow-hidden ${
-              isDark ? "bg-[#0d0b1a] border border-white/10" : "bg-white border border-orange-100"
-            }`}
-            style={{ zIndex: 100000 }}
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Background Glow */}
-            <div 
-              className="absolute -top-20 -right-20 w-40 h-40 blur-[80px] opacity-20 pointer-events-none" 
-              style={{ backgroundColor: rashi.color }}
-            />
+      const [mounted, setMounted] = useState(false);
+      const Icon = RASHI_ICONS[index];
+    
+      useEffect(() => {
+        setMounted(true);
+        document.body.style.overflow = "hidden";
+        return () => { document.body.style.overflow = ""; };
+      }, []);
+    
+      useEffect(() => {
+        const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+      }, [onClose]);
+    
+      if (!mounted) return null;
+    
+      return createPortal(
+        <div
+          className="fixed inset-0 flex items-center justify-center p-4"
+          style={{ zIndex: 99999 }}
+          onClick={onClose}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
+    
+            {/* Modal box */}
+            <div
+              className={`relative w-full max-w-md rounded-[40px] shadow-2xl p-10 md:p-12 overflow-hidden ${
+                isDark ? "bg-[#0d0b1a] border border-white/10" : "bg-white border border-orange-100"
+              }`}
+              style={{ zIndex: 100000 }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Background Glow */}
+              <div 
+                className="absolute -top-20 -right-20 w-40 h-40 blur-[80px] opacity-20 pointer-events-none" 
+                style={{ backgroundColor: rashi.color }}
+              />
+
+              <div className="absolute top-8 left-10 flex items-center gap-2 px-3 py-1 rounded-full bg-[#ff6b35]/10 border border-[#ff6b35]/20">
+                {signBasis === 'sun' ? <Sun className="w-3 h-3 text-orange-500" /> : <Sparkles className="w-3 h-3 text-[#ff6b35]" />}
+                <span className="text-[8px] font-black uppercase tracking-widest text-[#ff6b35]">
+                  {signBasis === 'sun' ? (language === 'gu' ? 'સૂર્ય રાશિ' : 'Sun Sign') : (language === 'gu' ? 'ચંદ્ર રાશિ' : 'Moon Sign')}
+                </span>
+              </div>
+
 
             {/* Close */}
             <button
@@ -169,6 +177,7 @@ export default function RashifalSection() {
   const content = rashiData[lang];
 
   const [selected, setSelected] = useState<number | null>(null);
+  const [signBasis, setSignBasis] = useState<'sun' | 'moon'>('moon');
 
   return (
     <section className={`py-24 px-6 relative overflow-hidden ${isDark ? "bg-[#07040e]" : "bg-[#fffaf4]"}`}>
@@ -189,9 +198,27 @@ export default function RashifalSection() {
           <h2 className="font-[family-name:var(--font-cinzel)] text-3xl md:text-5xl font-bold text-gradient-ancient uppercase tracking-widest mb-4">
             {content.title}
           </h2>
-          <p className={`text-base md:text-lg max-w-2xl mx-auto opacity-70 ${isDark ? "text-white" : "text-black"}`}>
+          <p className={`text-base md:text-lg max-w-2xl mx-auto opacity-70 mb-10 ${isDark ? "text-white" : "text-black"}`}>
             {content.subtitle}
           </p>
+
+          {/* Basis Toggle */}
+          <div className="flex justify-center mb-12">
+            <div className="flex bg-[#ff6b35]/10 p-1.5 rounded-2xl border border-[#ff6b35]/20 backdrop-blur-md">
+              <button 
+                onClick={() => setSignBasis('moon')}
+                className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${signBasis === 'moon' ? 'bg-[#ff6b35] text-white shadow-lg' : 'text-[#ff6b35] hover:bg-[#ff6b35]/10'}`}
+              >
+                {language === 'gu' ? 'ચંદ્ર રાશિ (Moon Sign)' : 'Moon Sign'}
+              </button>
+              <button 
+                onClick={() => setSignBasis('sun')}
+                className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${signBasis === 'sun' ? 'bg-[#ff6b35] text-white shadow-lg' : 'text-[#ff6b35] hover:bg-[#ff6b35]/10'}`}
+              >
+                {language === 'gu' ? 'સૂર્ય રાશિ (Sun Sign)' : 'Sun Sign'}
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* 12 Rashi Grid — click opens popup */}
@@ -239,6 +266,7 @@ export default function RashifalSection() {
           rashi={content.rashis[selected]}
           index={selected}
           isDark={isDark}
+          signBasis={signBasis}
           onClose={() => setSelected(null)}
         />
       )}
