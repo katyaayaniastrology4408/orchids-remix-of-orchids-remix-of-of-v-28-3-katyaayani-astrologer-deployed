@@ -31,33 +31,39 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     // Add resizing parameters for Supabase if it's a Supabase URL
     // WhatsApp prefers smaller images for previews (under 300KB is safest)
-    let finalImageUrl = encodedImageUrl;
+    // We force JPG format as WhatsApp scraper often fails with WebP
+    let resizedImageUrl = encodedImageUrl;
     if (encodedImageUrl.includes('supabase.co/storage/v1/object/public')) {
-      // Convert object URL to render URL for resizing
       const renderUrl = encodedImageUrl.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
       const separator = renderUrl.includes('?') ? '&' : '?';
-      // Using a slightly smaller size for better compatibility while still being "large"
-      finalImageUrl = `${renderUrl}${separator}width=800&height=420&resize=contain`;
+      resizedImageUrl = `${renderUrl}${separator}width=1200&height=630&resize=contain&format=jpg`;
     }
 
     return {
+      metadataBase: new URL(appUrl),
       title: `${post.title} | Katyaayani Astrologer`,
       description: post.excerpt,
       alternates: {
-        canonical: `${appUrl}/blog/${slug}`,
+        canonical: `/blog/${slug}`,
       },
       openGraph: {
         title: post.title,
         description: post.excerpt,
-        url: `${appUrl}/blog/${slug}`,
+        url: `/blog/${slug}`,
         siteName: "Katyaayani Astrologer",
         images: [
           {
-            url: finalImageUrl,
-            width: 800,
-            height: 420,
+            url: resizedImageUrl, // Try resized first (1200x630 is standard)
+            width: 1200,
+            height: 630,
             alt: post.title,
           },
+          {
+            url: encodedImageUrl, // Fallback to raw
+            width: 1200,
+            height: 630,
+            alt: post.title,
+          }
         ],
         type: "article",
         publishedTime: post.published_at,
@@ -69,7 +75,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         card: "summary_large_image",
         title: post.title,
         description: post.excerpt,
-        images: [finalImageUrl],
+        images: [resizedImageUrl],
       },
     };
 }
