@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { sendEmail } from "@/lib/email.config";
-import { welcomeEmailTemplate, welcomeBackEmailTemplate } from "@/lib/email-templates";
+import { sendWelcomeBackEmail } from "@/lib/email";
 import { syncToSubscribers } from "@/lib/subscribers";
 
 const supabaseAdmin = createClient(
@@ -123,11 +122,10 @@ export async function GET(req: Request) {
 
     // Send welcome back email for existing users
     if (!isNew) {
-      sendEmail({
-        to: googleUser.email,
-        subject: "Welcome back to Katyaayani Astrologer ✨",
-        html: welcomeBackEmailTemplate(googleUser.name || "Seeker"),
-      }).catch(() => {});
+      sendWelcomeBackEmail({
+        email: googleUser.email,
+        name: googleUser.name || "Seeker",
+      }).catch((err) => console.error("Welcome back email error:", err));
     }
     // For new users, we will send the welcome email with credentials 
     // after they complete their profile in /complete-profile

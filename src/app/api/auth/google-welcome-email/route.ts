@@ -4,10 +4,10 @@ import { welcomeEmailTemplate } from "@/lib/email-templates";
 
 export async function POST(req: Request) {
   try {
-    const { email, name, password } = await req.json();
+    const { email, name } = await req.json();
 
-    if (!email || !password) {
-      return NextResponse.json({ success: false, error: "Missing fields" }, { status: 400 });
+    if (!email) {
+      return NextResponse.json({ success: false, error: "Email is required" }, { status: 400 });
     }
 
     const displayName = name || "Seeker";
