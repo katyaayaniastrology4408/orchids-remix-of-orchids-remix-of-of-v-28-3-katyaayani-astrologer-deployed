@@ -163,13 +163,23 @@ const VAARAS = [
 function toJulianDay(date: Date): number {
   const y = date.getUTCFullYear();
   const m = date.getUTCMonth() + 1;
-  const d = date.getUTCDate() + date.getUTCHours() / 24 + date.getUTCMinutes() / 1440;
+  const d = date.getUTCDate();
+  const h = date.getUTCHours();
+  const min = date.getUTCMinutes();
+  const s = date.getUTCSeconds();
   
-    const a = Math.floor((14 - m) / 12);
-    const y1 = y + 4800 - a;
-    const m1 = m + 12 * a - 3;
+  let year = y;
+  let month = m;
+  if (m <= 2) {
+    year -= 1;
+    month += 12;
+  }
   
-  return d + Math.floor((153 * m1 + 2) / 5) + 365 * y1 + Math.floor(y1 / 4) - Math.floor(y1 / 100) + Math.floor(y1 / 400) - 32045;
+  const A = Math.floor(year / 100);
+  const B = 2 - A + Math.floor(A / 4);
+  
+  const jd0h = Math.floor(365.25 * (year + 4716)) + Math.floor(30.6001 * (month + 1)) + d + B - 1524.5;
+  return jd0h + (h + min / 60 + s / 3600) / 24;
 }
 
 // Lahiri Ayanamsha (more accurate polynomial)
