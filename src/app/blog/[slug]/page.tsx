@@ -107,8 +107,10 @@ export default async function BlogPostPage({ params }: Props) {
     .neq("id", post.id)
     .limit(3);
 
-  // Increment view count
-  supabaseAdmin.rpc('increment_view_count', { post_id: post.id }).catch(() => {});
+  // Increment view count (fire and forget)
+  supabaseAdmin.rpc('increment_view_count', { post_id: post.id }).then(({ error }) => {
+    if (error) console.error('Error incrementing view count:', error);
+  });
 
   return <BlogPostClient post={post} relatedPosts={relatedPosts || []} />;
 }
