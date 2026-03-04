@@ -133,33 +133,34 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
           {language === 'gu' ? 'પાછા જાઓ' : language === 'hi' ? 'વાપસ जाएं' : 'Go Back'}
         </Button>
 
-          <motion.article
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col gap-10"
-          >
-            {/* Top Featured Image - Full Width */}
-            {post.featured_image && (
-              <div className="w-full mb-4">
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-black/5 dark:bg-white/5">
-                    <img
-                      src={post.featured_image}
-                      alt={getPostTitle(post)}
-                      className="w-full h-auto block mx-auto"
-                    />
-                  <div className="absolute top-6 left-6">
-                    <span className="bg-[#ff6b35] text-white text-sm font-bold px-4 py-1.5 rounded-full capitalize shadow-lg">
-                      {post.category}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
+            <motion.article
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col gap-10"
+            >
+              <div className="flex flex-col lg:flex-row gap-10">
+                {/* LEFT SIDEBAR — highlights */}
+                <aside className="w-full lg:w-[450px] lg:flex-shrink-0 order-1 lg:order-1">
+                  <div className="lg:sticky lg:top-28 flex flex-col gap-6">
 
-            <div className="flex flex-col lg:flex-row gap-10">
-              {/* LEFT SIDEBAR — highlights */}
-              <aside className="w-full lg:w-[320px] lg:flex-shrink-0 order-2 lg:order-1">
-                <div className="lg:sticky lg:top-28 flex flex-col gap-6">
+                {/* Featured Image inside sidebar */}
+                {post.featured_image && (
+                  <div className="w-full">
+                    <div className="relative rounded-2xl overflow-hidden shadow-xl bg-black/5 dark:bg-white/5 border border-[#ff6b35]/10">
+                        <img
+                          src={post.featured_image}
+                          alt={getPostTitle(post)}
+                          className="w-full h-auto block"
+                        />
+                      <div className="absolute top-4 left-4">
+                        <span className="bg-[#ff6b35] text-white text-[10px] font-bold px-3 py-1 rounded-full capitalize shadow-lg">
+                          {post.category}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
 
 
               {/* Highlights Card */}
@@ -297,8 +298,9 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
             </div>
           </aside>
 
-          {/* RIGHT CONTENT — title + full article */}
-          <div className="flex-1 min-w-0">
+            {/* RIGHT CONTENT — title + full article */}
+            <div className="flex-1 min-w-0 order-2 lg:order-2">
+
             <header className="mb-10">
               <div className="flex items-center gap-2 text-[#ff6b35] font-bold text-sm uppercase tracking-widest mb-4">
                 <span className="bg-[#ff6b35]/10 px-3 py-1 rounded-md">{post.category}</span>

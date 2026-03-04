@@ -17,17 +17,35 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!post) return { title: "Post Not Found" };
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.katyaayaniastrologer.com';
-  const imageUrl = post.featured_image.startsWith('http') 
-    ? post.featured_image 
-    : `${appUrl}${post.featured_image}`;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.katyaayaniastrologer.com';
+    let imageUrl = post.featured_image;
+    
+    // Ensure absolute URL
+    if (!imageUrl.startsWith('http')) {
+      imageUrl = `${appUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+    }
 
-    const separator = imageUrl.includes('?') ? '&' : '?';
-    const finalImageUrl = `${imageUrl}${separator}width=1200&height=630&resize=contain`;
+    // Encode URL to handle spaces/special characters
+    // Using encodeURI but also making sure we don't double encode if it's already encoded
+    const encodedImageUrl = imageUrl.includes('%') ? imageUrl : encodeURI(imageUrl);
+
+    // Add resizing parameters for Supabase if it's a Supabase URL
+    // WhatsApp prefers smaller images for previews (under 300KB is safest)
+    let finalImageUrl = encodedImageUrl;
+    if (encodedImageUrl.includes('supabase.co/storage/v1/object/public')) {
+      // Convert object URL to render URL for resizing
+      const renderUrl = encodedImageUrl.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
+      const separator = renderUrl.includes('?') ? '&' : '?';
+      // Using a slightly smaller size for better compatibility while still being "large"
+      finalImageUrl = `${renderUrl}${separator}width=800&height=420&resize=contain`;
+    }
 
     return {
       title: `${post.title} | Katyaayani Astrologer`,
       description: post.excerpt,
+      alternates: {
+        canonical: `${appUrl}/blog/${slug}`,
+      },
       openGraph: {
         title: post.title,
         description: post.excerpt,
@@ -36,8 +54,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         images: [
           {
             url: finalImageUrl,
-            width: 1200,
-            height: 630,
+            width: 800,
+            height: 420,
             alt: post.title,
           },
         ],

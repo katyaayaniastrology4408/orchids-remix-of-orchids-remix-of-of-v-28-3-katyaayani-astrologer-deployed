@@ -214,13 +214,13 @@ export default function BlogIndexClient({ initialPosts }: BlogIndexClientProps) 
                   {posts.slice(0, 4).map((post) => (
                       <Link key={post.id} href={`/blog/${post.slug}`} className="flex items-center gap-3 group">
                         {post.featured_image ? (
-                          <Image
-                            src={post.featured_image}
-                            alt={getPostTitle(post)}
-                            width={56}
-                            height={56}
-                            className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
-                          />
+                            <Image
+                              src={post.featured_image}
+                              alt={getPostTitle(post)}
+                              width={56}
+                              height={56}
+                              className="w-14 h-14 rounded-xl object-contain flex-shrink-0 bg-black/5 dark:bg-white/5"
+                            />
                         ) : (
                         <div className={`w-14 h-14 rounded-xl flex-shrink-0 ${theme === 'dark' ? 'bg-[#1a1a2e]' : 'bg-orange-50'}`} />
                       )}
