@@ -259,13 +259,11 @@ export default function BlogIndexClient({ initialPosts }: BlogIndexClientProps) 
 
                       {/* Thumbnail */}
                       {post.featured_image ? (
-                        <div className="sm:w-44 md:w-52 flex-shrink-0 rounded-xl overflow-hidden relative" style={{ minHeight: '120px' }}>
-                          <Image
+                        <div className="sm:w-44 md:w-52 flex-shrink-0 rounded-xl overflow-hidden relative bg-black/5 dark:bg-white/5" style={{ minHeight: '120px' }}>
+                          <img
                             src={post.featured_image}
                             alt={getPostTitle(post)}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                            sizes="(max-width: 768px) 100vw, 208px"
+                            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                           />
                         </div>
                       ) : (

@@ -133,33 +133,34 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
           {language === 'gu' ? 'પાછા જાઓ' : language === 'hi' ? 'વાપસ जाएं' : 'Go Back'}
         </Button>
 
-        <motion.article
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col lg:flex-row gap-10"
-        >
-          {/* LEFT SIDEBAR — image + highlights */}
-          <aside className="w-full lg:w-[380px] lg:flex-shrink-0">
-            <div className="lg:sticky lg:top-28 flex flex-col gap-6">
-
-                {/* Featured Image */}
-                {post.featured_image && (
-                  <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video">
-                    <Image
+          <motion.article
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col gap-10"
+          >
+            {/* Top Featured Image - Full Width */}
+            {post.featured_image && (
+              <div className="w-full mb-4">
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-black/5 dark:bg-white/5">
+                    <img
                       src={post.featured_image}
                       alt={getPostTitle(post)}
-                      fill
-                      priority
-                      className="object-cover"
-                      sizes="(max-width: 1024px) 100vw, 380px"
+                      className="w-full h-auto block mx-auto"
                     />
-                    <div className="absolute bottom-3 left-3">
-                      <span className="bg-[#ff6b35] text-white text-xs font-semibold px-3 py-1 rounded-full capitalize shadow">
-                        {post.category}
-                      </span>
-                    </div>
+                  <div className="absolute top-6 left-6">
+                    <span className="bg-[#ff6b35] text-white text-sm font-bold px-4 py-1.5 rounded-full capitalize shadow-lg">
+                      {post.category}
+                    </span>
                   </div>
-                )}
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col lg:flex-row gap-10">
+              {/* LEFT SIDEBAR — highlights */}
+              <aside className="w-full lg:w-[320px] lg:flex-shrink-0 order-2 lg:order-1">
+                <div className="lg:sticky lg:top-28 flex flex-col gap-6">
+
 
               {/* Highlights Card */}
               <div className={`rounded-2xl border p-5 flex flex-col gap-4 ${theme === 'dark' ? 'bg-[#12121a] border-[#ff6b35]/20' : 'bg-[#fffdf9] border-[#ff6b35]/20'}`}>
@@ -371,14 +372,12 @@ export default function BlogPostClient({ post, relatedPosts }: BlogPostClientPro
                       <div className={`h-full rounded-2xl overflow-hidden border transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1 ${
                         theme === 'dark' ? 'bg-[#12121a] border-white/5' : 'bg-white border-gray-100'
                       }`}>
-                          <div className="aspect-video relative overflow-hidden">
+                          <div className="relative overflow-hidden bg-black/5 dark:bg-white/5">
                             {rp.featured_image && (
-                              <Image
+                              <img
                                 src={rp.featured_image}
                                 alt={getPostTitle(rp)}
-                                fill
-                                className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                sizes="(max-width: 768px) 100vw, 33vw"
+                                className="w-full h-48 object-contain transition-transform duration-500 group-hover:scale-110"
                               />
                             )}
                           </div>

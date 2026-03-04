@@ -553,18 +553,16 @@ export default function HomePageClient({ initialLatestPosts, hasTodayPosts, actu
               {latestPosts.map((post) => (
                 <Link key={post.id} href={`/blog/${post.slug}`} className="no-underline group">
                   <Card className={`overflow-hidden h-full transition-all duration-300 group-hover:shadow-xl group-hover:shadow-[#ff6b35]/10 group-hover:-translate-y-1 ${theme === 'dark' ? 'bg-[#12121a] border-[#ff6b35]/20' : 'bg-[#fffdf9] border-[#ff6b35]/20'}`}>
-                    {post.featured_image && (
-                      <div className="relative h-48 overflow-hidden">
-                        <NextImage
-                          src={post.featured_image}
-                          alt={post.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                      </div>
-                    )}
+                      {post.featured_image && (
+                        <div className="relative h-48 overflow-hidden bg-black/5 dark:bg-white/5">
+                          <img
+                            src={post.featured_image}
+                            alt={post.title}
+                            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                        </div>
+                      )}
                       <CardContent className="p-5">
                         <div className="flex items-center justify-between mb-2">
                           <p className={`text-xs font-semibold uppercase tracking-wider ${theme === 'dark' ? 'text-[#ff8c5e]' : 'text-[#ff6b35]'}`}>
