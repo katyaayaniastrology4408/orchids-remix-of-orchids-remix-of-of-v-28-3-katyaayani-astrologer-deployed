@@ -210,55 +210,74 @@ export default function HomePageClient({ initialLatestPosts, hasTodayPosts, actu
 
       <div className="mt-20 relative z-40 shadow-sm shadow-[#ff6b35]/5">
         <ChandraGrahanBanner />
+      </div>
 
-        {/* New Blog Notification Banner (Auto-expires after 24h) */}
-        {newBlogBanner.show && newBlogBanner.post && (
-          <div 
-            id="new-blog-banner"
-            className={`w-full transition-all duration-300 border-b border-[#ff6b35]/20 ${
-              theme === 'dark' 
-                ? 'bg-gradient-to-r from-[#2a1a10] via-[#3a2215] to-[#2a1a10]' 
-                : 'bg-gradient-to-r from-[#fff9f0] via-[#fffcf8] to-[#fff9f0]'
-            }`}
-          >
-            <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-[#ff6b35]/20' : 'bg-[#ff6b35]/10'}`}>
-                  <Bell className="w-5 h-5 text-[#ff6b35] animate-pulse" />
+      {/* Floating New Blog Notification (Premium Glass Toast) */}
+      {newBlogBanner.show && newBlogBanner.post && (
+        <div 
+          id="new-blog-banner"
+          className="fixed bottom-8 right-8 z-[100] max-w-[360px] w-full animate-in slide-in-from-bottom-10 fade-in duration-700 ease-out p-1"
+        >
+          <div className={`relative overflow-hidden shadow-[0_20px_50px_rgba(255,107,53,0.15)] rounded-[2.5rem] transition-all duration-500 border-2 ${
+            theme === 'dark' 
+              ? 'bg-[#1a1a2e]/90 border-[#ff6b35]/40 backdrop-blur-xl' 
+              : 'bg-white/90 border-[#ff6b35]/30 backdrop-blur-xl'
+          }`}>
+            {/* Elegant Glow Effect */}
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#ff6b35]/10 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-[#ff8c5e]/10 rounded-full blur-3xl animate-pulse" />
+            
+            <div className="relative p-6">
+              <div className="flex items-start gap-5">
+                <div className={`flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg ${
+                  theme === 'dark' ? 'bg-[#ff6b35]/20 shadow-[#ff6b35]/10' : 'bg-[#ff6b35]/10 shadow-[#ff6b35]/5'
+                }`}>
+                  <Bell className="w-7 h-7 text-[#ff6b35] animate-bounce-slow" />
                 </div>
-                <div>
-                  <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest mb-1 ${
-                    theme === 'dark' ? 'bg-orange-900/40 text-orange-400' : 'bg-orange-50 text-orange-600'
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.25em] ${
+                      theme === 'dark' ? 'bg-[#ff6b35]/20 text-[#ff8c5e]' : 'bg-[#ff6b35]/10 text-[#ff6b35]'
+                    }`}>
+                      {language === 'gu' ? 'નવો લેખ' : language === 'hi' ? 'नया लेख' : 'NEW ARTICLE'}
+                    </span>
+                    <button 
+                      onClick={() => setNewBlogBanner({ show: false, post: null })}
+                      className={`p-2 rounded-xl transition-all hover:bg-[#ff6b35]/10 ${
+                        theme === 'dark' ? 'text-white/40 hover:text-[#ff6b35]' : 'text-black/40 hover:text-[#ff6b35]'
+                      }`}
+                      aria-label="Close notification"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  
+                  <h3 className={`text-[16px] font-extrabold leading-tight line-clamp-2 mb-5 font-[family-name:var(--font-cinzel)] ${
+                    theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'
                   }`}>
-                    {language === 'gu' ? 'નવો લેખ' : language === 'hi' ? 'नया लेख' : 'NEW ARTICLE'}
-                  </span>
-                  <h3 className={`text-sm font-bold line-clamp-1 ${theme === 'dark' ? 'text-[#f5f0e8]' : 'text-[#4a3f35]'}`}>
                     {newBlogBanner.post.title}
                   </h3>
+                  
+                  <Link 
+                    href={`/blog/${newBlogBanner.post.slug}`}
+                    className="group/btn relative flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-[#ff6b35] text-white text-[13px] font-black uppercase tracking-[0.15em] transition-all hover:bg-[#ff8c5e] active:scale-[0.97] shadow-[0_10px_25px_rgba(255,107,53,0.3)] overflow-hidden"
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                      {language === 'gu' ? 'હમણાં વાંચો' : language === 'hi' ? 'अभी पढ़ें' : 'Read Now'}
+                      <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
+                    </span>
+                    <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700 ease-in-out" />
+                  </Link>
                 </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <Link 
-                  href={`/blog/${newBlogBanner.post.slug}`}
-                  className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-xl bg-[#ff6b35] text-white hover:bg-[#ff8c5e] transition-colors whitespace-nowrap"
-                >
-                  {language === 'gu' ? 'વાંચો' : language === 'hi' ? 'पढ़ें' : 'Read Now'}
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-                <button 
-                  onClick={() => setNewBlogBanner({ show: false, post: null })}
-                  className={`p-2 rounded-lg hover:bg-black/5 transition-colors ${theme === 'dark' ? 'text-white/40 hover:text-white' : 'text-black/40 hover:text-black'}`}
-                >
-                  <X className="w-4 h-4" />
-                </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden py-24">
+
         <StarField />
         <div className={`absolute inset-0 ${
           theme === 'dark' 

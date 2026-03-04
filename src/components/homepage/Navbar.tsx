@@ -102,14 +102,19 @@ export default function Navbar({ hasNotification = false }: NavbarProps) {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-[#ff6b35] hover:bg-[#ff6b35]/10"
-                    onClick={() => {
-                      const banner = document.getElementById('new-blog-banner');
-                      if (banner) {
-                        banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      } else {
-                        window.location.href = '/blog';
-                      }
-                    }}
+                        onClick={() => {
+                          const banner = document.getElementById('new-blog-banner');
+                          if (banner) {
+                            banner.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                            banner.classList.add('scale-110', 'ring-8', 'ring-[#ff6b35]/20', 'rotate-2');
+                            setTimeout(() => {
+                              banner.classList.remove('scale-110', 'ring-8', 'ring-[#ff6b35]/20', 'rotate-2');
+                            }, 1500);
+                          } else {
+                            window.location.href = '/blog';
+                          }
+                        }}
+
                     title={t("New Notifications")}
                   >
                     <Bell className="w-5 h-5" />

@@ -130,121 +130,126 @@ export default function ZodiacSignForm() {
             : 'Enter your birth details to discover your zodiac sign.'}
         </p>
 
-        <Card className={`${theme === 'dark' ? 'bg-[#12121a]/80 backdrop-blur-md border-[#ff6b35]/20' : 'bg-[#fffdf9]/80 backdrop-blur-md border-[#ff6b35]/30'} p-8 md:p-10 rounded-[2.5rem] shadow-2xl shadow-[#ff6b35]/10 border-t-4 border-t-[#ff6b35]`}>
-          <form onSubmit={handleSubmit} className="space-y-8 text-left">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="block text-[10px] font-bold uppercase tracking-widest opacity-60 ml-1">
-                  {language === 'gu' ? 'જન્મ તારીખ' : language === 'hi' ? 'जन्म तिथि' : 'Date Of Birth'}
-                </label>
-                <Input 
-                  type="date" 
-                  required
-                  className={`bg-transparent border-[#ff6b35]/20 focus:border-[#ff6b35] rounded-2xl h-14 px-5 text-base font-medium focus:ring-1 focus:ring-[#ff6b35]/30 transition-all ${theme === 'dark' ? 'text-white' : 'text-black'}`}
-                  onChange={(e) => setFormData({...formData, dob: e.target.value})}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-[10px] font-bold uppercase tracking-widest opacity-60 ml-1">
-                  {language === 'gu' ? 'જન્મ સમય' : language === 'hi' ? 'जन्म समय' : 'Time Of Birth'}
-                </label>
-                <Input 
-                  type="time" 
-                  defaultValue="08:00"
-                  required
-                  className={`bg-transparent border-[#ff6b35]/20 focus:border-[#ff6b35] rounded-2xl h-14 px-5 text-base font-medium focus:ring-1 focus:ring-[#ff6b35]/30 transition-all ${theme === 'dark' ? 'text-white' : 'text-black'}`}
-                  onChange={(e) => setFormData({...formData, tob: e.target.value})}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-[10px] font-bold uppercase tracking-widest opacity-60 ml-1">
-                {language === 'gu' ? 'જન્મ સ્થળ' : language === 'hi' ? 'जन्म स्थान' : 'Place Of Birth'}
-              </label>
-              <Input 
-                placeholder={language === 'gu' ? 'શહેરનું નામ દાખલ કરો' : language === 'hi' ? 'शहर का नाम दर्ज करें' : 'Enter City Name'}
-                required
-                className={`bg-transparent border-[#ff6b35]/20 focus:border-[#ff6b35] rounded-2xl h-14 px-5 text-base font-medium focus:ring-1 focus:ring-[#ff6b35]/30 transition-all ${theme === 'dark' ? 'text-white' : 'text-black'}`}
-                onChange={(e) => setFormData({...formData, pob: e.target.value})}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-[#ff6b35] ml-1">
-                {language === 'gu' ? 'ઈમેઈલ આઈડી (જરૂરી)' : language === 'hi' ? 'ईमेल आईडी (आवश्यक)' : 'Email ID (Important)'}
-              </label>
-                <Input 
-                  type="email"
-                  required
-                  placeholder="example@mail.com"
-                  className={`bg-transparent border-[#ff6b35]/40 focus:border-[#ff6b35] rounded-2xl h-14 px-5 text-base font-medium focus:ring-1 focus:ring-[#ff6b35]/30 transition-all ${theme === 'dark' ? 'text-white' : 'text-black'}`}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                />
-              </div>
-
-            <Button 
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#ff6b35] hover:bg-[#ff8c5e] text-white font-bold py-7 rounded-[1.25rem] text-xl shadow-xl shadow-[#ff6b35]/30 active:scale-[0.98] transition-all"
-            >
-              {loading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Calculating...</span>
+          <Card className={`${theme === 'dark' ? 'bg-[#12121a]/80 backdrop-blur-md border-[#ff6b35]/20' : 'bg-[#fffdf9]/80 backdrop-blur-md border-[#ff6b35]/30'} p-8 md:p-12 rounded-[3rem] shadow-[0_25px_60px_rgba(255,107,53,0.15)] border-t-4 border-t-[#ff6b35] transition-all duration-500`}>
+            <form onSubmit={handleSubmit} className="space-y-10 text-left">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <label className="block text-[11px] font-black uppercase tracking-[0.25em] text-[#ff6b35] ml-1">
+                    {language === 'gu' ? 'જન્મ તારીખ' : language === 'hi' ? 'जन्म तिथि' : 'Date Of Birth'}
+                  </label>
+                  <Input 
+                    type="date" 
+                    required
+                    className={`bg-transparent border-[#ff6b35]/30 focus:border-[#ff6b35] rounded-2xl h-16 px-6 text-base font-bold focus:ring-2 focus:ring-[#ff6b35]/20 transition-all ${theme === 'dark' ? 'text-white' : 'text-black'}`}
+                    onChange={(e) => setFormData({...formData, dob: e.target.value})}
+                  />
                 </div>
-              ) : (
-                <>
-                  <Sparkles className="w-6 h-6 mr-2" />
-                  {language === 'gu' ? 'હમણાં જ ગણો' : language === 'hi' ? 'अभी गणना करें' : 'Calculate Now'}
-                </>
-              )}
-            </Button>
-          </form>
 
-          {result && (
-            <div className="mt-10 p-10 rounded-[2.5rem] bg-gradient-to-br from-[#ff6b35]/15 to-[#ff8c5e]/10 border-2 border-[#ff6b35]/30 text-center animate-in fade-in zoom-in duration-700 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#ff6b35]/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#ff8c5e]/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
-              
-                <div className="relative z-10">
-                  <p className="text-xs uppercase tracking-[0.3em] font-bold text-[#ff6b35] mb-4">
-                    {language === 'gu' ? 'તમારી સૂર્ય રાશિ (Sun Sign) છે' : language === 'hi' ? 'आपकी सूर्य राशि है' : 'Your Sun Sign is'}
-                  </p>
-                  <h3 className="text-5xl md:text-6xl font-[family-name:var(--font-cinzel)] font-bold text-gradient-ancient mb-6">
-                    {getZodiacTranslation(result)}
-                  </h3>
-                  
-                  <div className="max-w-md mx-auto space-y-6">
-                    <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
-                      <p className="text-sm md:text-base font-medium leading-relaxed">
-                        {language === 'gu' 
-                            ? 'ચોક્કસ જન્મ રાશિ (Moon Sign) અને સંપૂર્ણ કુંડળી વિશ્લેષણ માટે અમારો સંપર્ક કરો.' 
-                            : 'For accurate Janma Rashi (Moon Sign) and detailed Kundali analysis, please contact us.'}
-                      </p>
-                    </div>
+                <div className="space-y-3">
+                  <label className="block text-[11px] font-black uppercase tracking-[0.25em] text-[#ff6b35] ml-1">
+                    {language === 'gu' ? 'જન્મ સમય' : language === 'hi' ? 'जन्म समय' : 'Time Of Birth'}
+                  </label>
+                  <Input 
+                    type="time" 
+                    defaultValue="08:00"
+                    required
+                    className={`bg-transparent border-[#ff6b35]/30 focus:border-[#ff6b35] rounded-2xl h-16 px-6 text-base font-bold focus:ring-2 focus:ring-[#ff6b35]/20 transition-all ${theme === 'dark' ? 'text-white' : 'text-black'}`}
+                    onChange={(e) => setFormData({...formData, tob: e.target.value})}
+                  />
+                </div>
+              </div>
 
-                    <div className="pt-6 border-t border-[#ff6b35]/20">
-                      <p className="text-base font-bold text-[#ff6b35] mb-4">
-                        {language === 'gu' 
-                            ? 'કુંડળી અને મેચમેકિંગ માટે અત્યારે જ સંપર્ક કરો.' 
-                            : 'Contact now for Kundali & Matchmaking.'}
-                      </p>
-                      <a 
-                        href="https://wa.me/917383636404" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-[#25D366]/20 active:scale-95"
-                      >
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" className="w-5 h-5 invert" />
-                        {language === 'gu' ? 'વોટ્સએપ પર પૂછો' : 'Ask on WhatsApp'}
-                      </a>
-                    </div>
+              <div className="space-y-3">
+                <label className="block text-[11px] font-black uppercase tracking-[0.25em] text-[#ff6b35] ml-1">
+                  {language === 'gu' ? 'જન્મ સ્થળ' : language === 'hi' ? 'जन्म स्थान' : 'Place Of Birth'}
+                </label>
+                <Input 
+                  placeholder={language === 'gu' ? 'શહેરનું નામ દાખલ કરો' : language === 'hi' ? 'शहर का नाम दर्ज करें' : 'Enter City Name'}
+                  required
+                  className={`bg-transparent border-[#ff6b35]/30 focus:border-[#ff6b35] rounded-2xl h-16 px-6 text-base font-bold focus:ring-2 focus:ring-[#ff6b35]/20 transition-all ${theme === 'dark' ? 'text-white' : 'text-black'}`}
+                  onChange={(e) => setFormData({...formData, pob: e.target.value})}
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="block text-[11px] font-black uppercase tracking-[0.25em] text-[#ff6b35] ml-1">
+                  {language === 'gu' ? 'ઈમેઈલ આઈડી (જરૂરી)' : language === 'hi' ? 'ईमेल आईडी (आवश्यक)' : 'Email ID (Important)'}
+                </label>
+                  <Input 
+                    type="email"
+                    required
+                    placeholder="example@mail.com"
+                    className={`bg-transparent border-[#ff6b35]/40 focus:border-[#ff6b35] rounded-2xl h-16 px-6 text-base font-bold focus:ring-2 focus:ring-[#ff6b35]/20 transition-all ${theme === 'dark' ? 'text-white' : 'text-black'}`}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  />
+                </div>
+
+              <Button 
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#ff6b35] hover:bg-[#ff8c5e] text-white font-black py-8 rounded-[1.5rem] text-2xl shadow-[0_15px_30px_rgba(255,107,53,0.3)] active:scale-[0.98] transition-all group overflow-hidden relative"
+              >
+                <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out" />
+                {loading ? (
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>CALCULATING...</span>
                   </div>
-                </div>
-            </div>
-          )}
+                ) : (
+                  <div className="flex items-center justify-center gap-3 tracking-[0.1em]">
+                    <Sparkles className="w-7 h-7 animate-pulse" />
+                    {language === 'gu' ? 'હમણાં જ ગણો' : language === 'hi' ? 'अभी गणना करें' : 'CALCULATE NOW'}
+                  </div>
+                )}
+              </Button>
+            </form>
+
+            {result && (
+              <div className="mt-12 p-10 md:p-12 rounded-[3rem] bg-gradient-to-br from-[#ff6b35]/20 via-[#ff8c5e]/10 to-transparent border-2 border-[#ff6b35]/40 text-center animate-in fade-in zoom-in duration-1000 relative overflow-hidden shadow-inner">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-[#ff6b35]/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl animate-pulse" />
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#ff8c5e]/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl animate-pulse" />
+                
+                    <div className="relative z-10">
+                      <p className="text-xs uppercase tracking-[0.4em] font-black text-[#ff6b35] mb-6">
+                        {language === 'gu' ? 'તમારી સૂર્ય રાશિ (Surya Rashi) છે' : language === 'hi' ? 'आपकी सूर्य राशि है' : 'YOUR SUN SIGN (SURYA RASHI)'}
+                      </p>
+                      <h3 className="text-6xl md:text-8xl font-[family-name:var(--font-cinzel)] font-black text-gradient-ancient mb-8 drop-shadow-sm">
+                        {getZodiacTranslation(result)}
+                      </h3>
+                      
+                      <div className="max-w-md mx-auto space-y-8">
+                        <div className="p-7 rounded-[2.5rem] bg-white/20 backdrop-blur-xl border border-white/30 shadow-xl ring-1 ring-[#ff6b35]/20 transition-all hover:scale-[1.02] duration-300">
+                          <p className="text-[11px] uppercase tracking-[0.25em] font-black text-[#ff6b35] mb-3">
+                            {language === 'gu' ? 'નામ પાડવા માટે (ચંદ્ર રાશિ)' : 'FOR NAMING (CHANDRA RASHI)'}
+                          </p>
+                          <p className="text-base md:text-lg font-bold leading-relaxed opacity-90">
+                            {language === 'gu' 
+                                ? 'નામ પાડવા અને સચોટ ભવિષ્ય માટે જન્મની "ચંદ્ર રાશિ" (Janma Rashi) જાણવી અનિવાર્ય છે. સચોટ કુંડળી વિશ્લેષણ માટે અત્યારે જ સંપર્ક કરો.' 
+                                : 'For naming and accurate predictions, knowing your "Chandra Rashi" (Moon Sign) is essential. Contact now for precise Kundali analysis.'}
+                          </p>
+                        </div>
+    
+                        <div className="pt-8 border-t-2 border-[#ff6b35]/10">
+                          <p className="text-lg md:text-xl font-black text-[#ff6b35] mb-6 tracking-tight">
+                            {language === 'gu' 
+                                ? 'ચંદ્ર રાશિ અને કુંડળી માટે અત્યારે જ પૂછો.' 
+                                : 'Ask for Chandra Rashi & Kundali now.'}
+                          </p>
+                          <a 
+                            href={`https://wa.me/919824929588?text=${encodeURIComponent(`Namaste, I want to know my accurate Janma Rashi (Chandra Rashi) for naming/horoscope.\n\nDetails:\nDOB: ${formData.dob}\nTOB: ${formData.tob}\nPOB: ${formData.pob}`)}`}
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-4 bg-[#25D366] hover:bg-[#128C7E] text-white font-black px-10 py-5 rounded-3xl transition-all shadow-[0_20px_40px_rgba(37,211,102,0.4)] active:scale-95 group relative overflow-hidden"
+                          >
+                            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" className="w-7 h-7 invert relative z-10 animate-bounce-slow" />
+                            <span className="text-lg relative z-10 tracking-wider">{language === 'gu' ? 'વોટ્સએપ પર પૂછો' : 'ASK ON WHATSAPP'}</span>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+              </div>
+            )}
 
         </Card>
 
