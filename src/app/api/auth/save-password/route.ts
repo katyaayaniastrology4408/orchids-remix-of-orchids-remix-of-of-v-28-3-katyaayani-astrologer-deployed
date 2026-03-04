@@ -11,14 +11,7 @@ export async function POST(req: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Clear the existing cleartext password for security
-    const { error } = await supabaseAdmin
-      .from('profiles')
-      .update({ clear_password: null })
-      .eq('email', email);
-
-    if (error) throw error;
-
+    // clear_password cleanup is no longer needed as the column has been removed for security
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("Save password error:", error);

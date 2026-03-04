@@ -23,12 +23,11 @@ export async function POST(req: Request) {
         address: address || null,
         city: city || null,
         gender: gender || null,
-        dob: dob || null,
-        tob: tob || null,
-        pob: pob || null,
-        email_verified: true,
-        clear_password: null // Clear any existing cleartext password for security
-      }, { onConflict: 'id' });
+          dob: dob || null,
+          tob: tob || null,
+          pob: pob || null,
+          email_verified: true
+        }, { onConflict: 'id' });
 
     if (error) throw error;
 

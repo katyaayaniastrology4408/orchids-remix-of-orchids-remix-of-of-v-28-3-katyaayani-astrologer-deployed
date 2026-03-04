@@ -56,13 +56,12 @@ export async function POST(req: NextRequest) {
         throw resetError;
       }
 
-      // 3. Update hashed password in profiles (clear_password is removed for security)
+      // 3. Update hashed password in profiles
       const hashedPassword = await bcrypt.hash(newPassword, 10);
       await supabaseAdmin
         .from("profiles")
         .update({ 
-          password: hashedPassword,
-          clear_password: null // Clear any existing cleartext password
+          password: hashedPassword
         })
         .eq("id", userData.id);
 
