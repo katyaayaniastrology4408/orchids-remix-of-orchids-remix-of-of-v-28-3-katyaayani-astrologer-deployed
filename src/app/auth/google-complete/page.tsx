@@ -12,6 +12,7 @@ function GoogleCompleteInner() {
   useEffect(() => {
     const finish = async () => {
       const isNew = searchParams.get("isNew") === "true";
+      const target = searchParams.get("target"); // "home" or "complete-profile"
 
       // Wait a moment for magic link session to be set by Supabase
       await new Promise(r => setTimeout(r, 1000));
@@ -23,7 +24,18 @@ function GoogleCompleteInner() {
         return;
       }
 
-      // Check profile completeness
+      // If server already determined the target, use it directly
+      if (target === "home") {
+        router.replace("/");
+        return;
+      }
+
+      if (target === "complete-profile" || isNew) {
+        router.replace("/complete-profile");
+        return;
+      }
+
+      // Fallback: check profile completeness client-side
       const { data: profile } = await (supabase as any)
         .from("profiles")
         .select("dob, pob, phone, gender, address")

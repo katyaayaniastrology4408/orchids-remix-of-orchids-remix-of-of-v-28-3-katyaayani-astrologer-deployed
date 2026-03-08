@@ -80,17 +80,30 @@ export async function GET(req: Request) {
       return NextResponse.redirect(`${appUrl}/signin?error=${encodeURIComponent("Could not get email from Google")}`);
     }
 
-    // Find or create user in Supabase via admin API (uses pooler — no supabase.co)
+    // Check if email already exists in profiles table (existing user check)
+    const { data: existingProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("id, email, name, dob, pob, phone, gender, address")
+      .eq("email", googleUser.email)
+      .maybeSingle();
+
+    // Find or create user in Supabase Auth
     const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-    const existingUser = existingUsers?.users?.find(u => u.email === googleUser.email);
+    const existingAuthUser = existingUsers?.users?.find(u => u.email === googleUser.email);
 
     let supabaseUserId: string;
     let isNew = false;
 
-    if (existingUser) {
-      supabaseUserId = existingUser.id;
+    if (existingAuthUser) {
+      // Existing user — use their existing ID, do NOT create new account
+      supabaseUserId = existingAuthUser.id;
+      isNew = false;
+    } else if (existingProfile) {
+      // Profile exists in DB but no auth user — find by profile ID
+      supabaseUserId = existingProfile.id;
+      isNew = false;
     } else {
-      // Create new user
+      // Truly new user — create account
       const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
         email: googleUser.email,
         email_confirm: true,
@@ -108,14 +121,21 @@ export async function GET(req: Request) {
       isNew = true;
     }
 
-    // Upsert profile
-    await supabaseAdmin.from("profiles").upsert({
+    // Upsert profile — preserve existing data, only update name/avatar/email_verified if missing
+    const profileUpdate: Record<string, any> = {
       id: supabaseUserId,
       email: googleUser.email,
-      name: googleUser.name || googleUser.email.split("@")[0],
-      avatar_url: googleUser.picture || "",
       email_verified: true,
-    }, { onConflict: "id" });
+    };
+    // Only update name if not already set (don't overwrite user's manual edits)
+    if (!existingProfile?.name) {
+      profileUpdate.name = googleUser.name || googleUser.email.split("@")[0];
+    }
+    if (googleUser.picture) {
+      profileUpdate.avatar_url = googleUser.picture;
+    }
+
+    await supabaseAdmin.from("profiles").upsert(profileUpdate, { onConflict: "id" });
 
     // Sync to newsletter subscribers
     await syncToSubscribers(googleUser.email, googleUser.name || "", "google_signup", false).catch(() => {});
@@ -124,39 +144,38 @@ export async function GET(req: Request) {
     if (!isNew) {
       sendWelcomeBackEmail({
         email: googleUser.email,
-        name: googleUser.name || "Seeker",
+        name: existingProfile?.name || googleUser.name || "Seeker",
       }).catch((err) => console.error("Welcome back email error:", err));
     }
-    // For new users, we will send the welcome email with credentials 
-    // after they complete their profile in /complete-profile
+    // For new users, welcome email sent after completing profile in /complete-profile
+
+    // Check if existing user has complete profile — determine redirect target
+    const profileComplete = existingProfile?.dob && existingProfile?.pob && existingProfile?.phone && existingProfile?.gender && existingProfile?.address;
+    // isNew=false & profile complete → go to home; isNew=false & incomplete → complete-profile; isNew=true → complete-profile
+    const redirectTarget = (!isNew && profileComplete) ? "home" : "complete-profile";
 
     // Create a magic link session for the user so Supabase client picks up the session
     const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
       type: "magiclink",
       email: googleUser.email,
       options: {
-        redirectTo: `${appUrl}/auth/google-complete?uid=${supabaseUserId}&isNew=${isNew}`
+        redirectTo: `${appUrl}/auth/google-complete?uid=${supabaseUserId}&isNew=${isNew}&target=${redirectTarget}`
       }
     });
 
     if (sessionError || !sessionData?.properties?.hashed_token) {
       console.error("Session link error:", sessionError);
-      // Fallback: redirect to profile with user info in query
-      const response = NextResponse.redirect(`${appUrl}/auth/google-complete?uid=${supabaseUserId}&isNew=${isNew}`);
+      const response = NextResponse.redirect(`${appUrl}/auth/google-complete?uid=${supabaseUserId}&isNew=${isNew}&target=${redirectTarget}`);
       return response;
     }
 
     // Redirect to the magic link to establish session
     const actionLink = sessionData.properties.action_link;
     if (actionLink) {
-      // DO NOT rewrite the domain to appUrl here if it's a Supabase internal URL
-      // This was causing 404s because /auth/v1/verify doesn't exist in our Next.js app
-      // If the user is in India and supabase.co is blocked, they should use a custom domain or proxy
-      // But for now, we must redirect to the actual link provided by Supabase
       return NextResponse.redirect(actionLink);
     }
 
-    return NextResponse.redirect(`${appUrl}/auth/google-complete?uid=${supabaseUserId}&isNew=${isNew}`);
+    return NextResponse.redirect(`${appUrl}/auth/google-complete?uid=${supabaseUserId}&isNew=${isNew}&target=${redirectTarget}`);
 
   } catch (err: any) {
     console.error("Google OAuth callback error:", err);
