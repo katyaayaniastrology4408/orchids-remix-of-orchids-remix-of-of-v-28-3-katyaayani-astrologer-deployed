@@ -711,9 +711,11 @@ export default function ProfilePage() {
                                             data-uropay-api-key="8F7R1DGSMX1EYI5LEVLFL8NLZQM8EKAE" 
                                             data-uropay-button-id="XRAY456627" 
                                             data-uropay-environment="LIVE" 
-                                            data-uropay-amount="851"
+                                            data-uropay-amount="501"
+                                            data-uropay-success-redirect-url="https://www.katyaayaniastrologer.com/payment-success"
+                                            data-uropay-failure-redirect-url="https://www.katyaayaniastrologer.com/payment-failed"
                                           >
-                                            {language === 'gu' ? '₹851 ચૂકવો' : language === 'hi' ? '₹851 भुगतान करें' : 'Pay ₹851'}
+                                            {language === 'gu' ? '₹501 ચૂકવો' : language === 'hi' ? '₹501 भुगतान करें' : 'Pay ₹501'}
                                           </a>
                                         ) : booking.service_type === 'home' && booking.amount <= 1101 ? (
                                           <a 
@@ -723,6 +725,8 @@ export default function ProfilePage() {
                                             data-uropay-button-id="ALPHA279545" 
                                             data-uropay-environment="LIVE" 
                                             data-uropay-amount="1101"
+                                            data-uropay-success-redirect-url="https://www.katyaayaniastrologer.com/payment-success"
+                                            data-uropay-failure-redirect-url="https://www.katyaayaniastrologer.com/payment-failed"
                                           >
                                             {language === 'gu' ? '₹1101 ચૂકવો' : language === 'hi' ? '₹1101 भुगतान करें' : 'Pay ₹1101'}
                                           </a>
@@ -734,6 +738,8 @@ export default function ProfilePage() {
                                             data-uropay-button-id="ALPHA413457" 
                                             data-uropay-environment="LIVE" 
                                             data-uropay-amount="2101"
+                                            data-uropay-success-redirect-url="https://www.katyaayaniastrologer.com/payment-success"
+                                            data-uropay-failure-redirect-url="https://www.katyaayaniastrologer.com/payment-failed"
                                           >
                                             {language === 'gu' ? '₹2101 ચૂકવો' : language === 'hi' ? '₹2101 भुगतान करें' : 'Pay ₹2101'}
                                           </a>

@@ -62,8 +62,8 @@ const DEFAULT_CONSULTATION_TYPES = [
     title: { en: "Online Consultation", hi: "ऑनलाइन परामर्श", gu: "ઓનલાઈન પરામર્શ" },
     description: { en: "Connect with us from anywhere in the world via video call", hi: "वीडियो कॉल के माध्यम से दुनिया में कहीं से भी हमसे जुड़ें", gu: "વીડિયો કોલ દ્વારા વિશ્વના કોઈપણ સ્થળેથી અમારી સાથે જોડાઓ" },
     availability: { en: "Available everywhere", hi: "सभी जगह उपलब्ध", gu: "બધે ઉપલબ્ધ" },
-    price: 85100,
-    priceDisplay: "₹ 851",
+    price: 50100,
+    priceDisplay: "₹ 501",
     duration: { en: "45 minutes", hi: "45 मिनट", gu: "45 મિનિટ" },
     locationRestricted: false,
   }
@@ -923,41 +923,50 @@ const fetchBookingDetails = async (bid: string) => {
                       <div className="w-full">
                           {selectedType === 'online' ? (
                             <div className="flex justify-center">
-                              <a 
-                                href="#" 
-                                className="uropay-btn w-full inline-flex items-center justify-center bg-[#ff6b35] hover:bg-[#ff8c5e] text-white h-16 rounded-2xl text-xl font-bold shadow-xl shadow-[#ff6b35]/30 transition-all active:scale-95" 
-                                data-uropay-api-key="8F7R1DGSMX1EYI5LEVLFL8NLZQM8EKAE" 
-                                data-uropay-button-id="XRAY456627" 
-                                data-uropay-environment="LIVE" 
-                                data-uropay-amount="851"
+                              <a
+                                href="#"
+                                className="uropay-btn w-full inline-flex items-center justify-center bg-[#ff6b35] hover:bg-[#ff8c5e] text-white h-16 rounded-2xl text-xl font-bold shadow-xl shadow-[#ff6b35]/30 transition-all active:scale-95"
+                                data-uropay-api-key="8F7R1DGSMX1EYI5LEVLFL8NLZQM8EKAE"
+                                data-uropay-button-id="XRAY456627"
+                                data-uropay-environment="LIVE"
+                                data-uropay-amount="501"
+                                data-uropay-callback-url="/api/payments/callback"
+                                data-uropay-success-url="/payment-success"
+                                data-uropay-failure-url="/payment-failed"
                               >
-                                {language === 'gu' ? '₹851 માટે હમણાં ખરીદો' : language === 'hi' ? '₹851 کے لیے अभी खरीदें' : 'Buy Now for ₹851'}
+                                {language === 'gu' ? '₹501 માટે હમણાં ખરીદો' : language === 'hi' ? '₹501 के लिए अभी खरीदें' : 'Buy Now for ₹501'}
                               </a>
                             </div>
                             ) : selectedType === 'home-within' ? (
                               <div className="flex justify-center">
-                                <a 
-                                  href="#" 
-                                  className="uropay-btn w-full inline-flex items-center justify-center bg-[#ff6b35] hover:bg-[#ff8c5e] text-white h-16 rounded-2xl text-xl font-bold shadow-xl shadow-[#ff6b35]/30 transition-all active:scale-95" 
-                                  data-uropay-api-key="8F7R1DGSMX1EYI5LEVLFL8NLZQM8EKAE" 
-                                  data-uropay-button-id="ALPHA279545" 
-                                  data-uropay-environment="LIVE" 
+                                <a
+                                  href="#"
+                                  className="uropay-btn w-full inline-flex items-center justify-center bg-[#ff6b35] hover:bg-[#ff8c5e] text-white h-16 rounded-2xl text-xl font-bold shadow-xl shadow-[#ff6b35]/30 transition-all active:scale-95"
+                                  data-uropay-api-key="8F7R1DGSMX1EYI5LEVLFL8NLZQM8EKAE"
+                                  data-uropay-button-id="ALPHA279545"
+                                  data-uropay-environment="LIVE"
                                   data-uropay-amount="1101"
+                                  data-uropay-callback-url="/api/payments/callback"
+                                  data-uropay-success-url="/payment-success"
+                                  data-uropay-failure-url="/payment-failed"
                                 >
                                   {language === 'gu' ? '₹1101 માટે હમણાં ખરીદો' : language === 'hi' ? '₹1101 के लिए अभी खरीदें' : 'Buy Now for ₹1101'}
                                 </a>
                               </div>
                             ) : selectedType === 'home-outside' ? (
                               <div className="flex justify-center">
-                                <a 
-                                  href="#" 
-                                  className="uropay-btn w-full inline-flex items-center justify-center bg-[#ff6b35] hover:bg-[#ff8c5e] text-white h-16 rounded-2xl text-xl font-bold shadow-xl shadow-[#ff6b35]/30 transition-all active:scale-95" 
-                                  data-uropay-api-key="8F7R1DGSMX1EYI5LEVLFL8NLZQM8EKAE" 
-                                  data-uropay-button-id="ALPHA413457" 
-                                  data-uropay-environment="LIVE" 
+                                <a
+                                  href="#"
+                                  className="uropay-btn w-full inline-flex items-center justify-center bg-[#ff6b35] hover:bg-[#ff8c5e] text-white h-16 rounded-2xl text-xl font-bold shadow-xl shadow-[#ff6b35]/30 transition-all active:scale-95"
+                                  data-uropay-api-key="8F7R1DGSMX1EYI5LEVLFL8NLZQM8EKAE"
+                                  data-uropay-button-id="ALPHA413457"
+                                  data-uropay-environment="LIVE"
                                   data-uropay-amount="2101"
+                                  data-uropay-callback-url="/api/payments/callback"
+                                  data-uropay-success-url="/payment-success"
+                                  data-uropay-failure-url="/payment-failed"
                                 >
-                                  {language === 'gu' ? '₹2101 માટે હમણાં ખરીદો' : language === 'hi' ? '₹2101 के लिए अभी खरीदें' : 'Buy Now for ₹2101'}
+                                  {language === 'gu' ? '₹2101 માટે હમણાં ખરીદો' : language === 'hi' ? '₹2101 के लिए अभी खरીदें' : 'Buy Now for ₹2101'}
                                 </a>
                               </div>
                             ) : (

@@ -305,7 +305,7 @@ export default function InvoicePanel({ isDark, setSuccess, setError }: Props) {
                     const priceMap: Record<string, string> = {
                       "Home Consultation (Outside 6.5km)": "2101",
                       "Home Consultation (Within 6.5km)": "1101",
-                      "Office Consultation": "851",
+                      "Office Consultation": "501",
                     };
                     setForm(p => ({ ...p, service_type: val, amount: priceMap[val] || p.amount }));
                   }} className={`w-full h-10 px-3 rounded-xl border text-sm ${isDark ? "bg-[#0a0a0f] border-white/10 text-white" : "bg-white border-gray-200"}`}>

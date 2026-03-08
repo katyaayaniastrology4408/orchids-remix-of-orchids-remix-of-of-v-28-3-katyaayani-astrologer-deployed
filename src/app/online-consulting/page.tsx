@@ -288,7 +288,7 @@ useEffect(() => {
               </Link>
             </div>
             <p className={`text-sm mt-6 ${theme === 'dark' ? 'text-[#a0998c]' : 'text-[#75695e]'}`}>
-              {language === 'gu' ? '₹851 / 45 મિનિટ' : language === 'hi' ? '₹851 / 45 मिनट' : '₹851 / 45 minutes'}
+              {language === 'gu' ? '₹501 / 45 મિનિટ' : language === 'hi' ? '₹501 / 45 मिनट' : '₹501 / 45 minutes'}
             </p>
           </motion.div>
         </section>
@@ -358,7 +358,7 @@ useEffect(() => {
                   className="bg-[#ff6b35] hover:bg-[#ff8c5e] text-white font-bold text-lg px-8 py-6 rounded-2xl shadow-lg shadow-[#ff6b35]/25"
                 >
                   <Video className="w-5 h-5 mr-2" />
-                  {language === 'gu' ? 'હવે બુક કરો - ₹851' : language === 'hi' ? 'अभी बुक करें - ₹851' : 'Book Now - ₹851'}
+                  {language === 'gu' ? 'હવે બુક કરો - ₹501' : language === 'hi' ? 'अभी बुक करें - ₹501' : 'Book Now - ₹501'}
                 </Button>
               </Link>
               <a 
